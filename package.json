@@ -1,0 +1,30 @@
+{
+  "name": "rubra-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "./node_modules/.bin/nuxt build",
+    "dev": "./node_modules/.bin/nuxt dev --host",
+    "generate": "./node_modules/.bin/nuxt generate",
+    "preview": "./node_modules/.bin/nuxt preview",
+    "postinstall": "./node_modules/.bin/nuxt prepare"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.4.2",
+    "@nuxt/devtools": "latest",
+    "@types/lodash-es": "^4.17.12",
+    "eslint": "^8.55.0",
+    "lodash-es": "^4.17.21",
+    "nuxt": "^3.8.2",
+    "sass": "^1.69.5",
+    "vue": "^3.3.10",
+    "vue-router": "^4.2.5"
+  },
+  "dependencies": {
+    "@heroicons/vue": "^2.0.18",
+    "@nuxt/ui": "^2.11.0",
+    "@nuxtjs/color-mode": "^3.3.2",
+    "dotenv": "^16.3.1",
+    "openai": "^4.20.1"
+  }
+}
