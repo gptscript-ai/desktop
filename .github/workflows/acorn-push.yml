@@ -1,0 +1,24 @@
+name: Acorn on Push
+on:
+  push:
+    branches:
+      - main
+      - prod
+
+jobs:
+  publish:
+    runs-on: buildjet-4vcpu-ubuntu-2004
+    steps:
+      - uses: actions/checkout@v3
+      - uses: acorn-io/actions-setup@v1
+      - uses: acorn-io/actions-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        run: |
+          VERSION=${{ github.ref_name }}}-$( cut -c 1-7 <<< '${{ github.sha }}')
+          export VERSION
+
+          acorn build --push -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} .

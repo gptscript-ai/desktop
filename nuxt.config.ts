@@ -5,11 +5,12 @@ dotenv.config()
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   components: true,
+  ssr: false,
 
   runtimeConfig: {
-    api: process.env.RUBRA_API || 'https://api.openai.com/v1',
-    apiModel: process.env.RUBRA_MODEL || 'gpt-4-1106-preview',
-    apiKey: process.env.RUBRA_API_KEY || '',
+    api: process.env.NUXT_API || 'https://api.openai.com/v1',
+    apiModel: process.env.NUXT_MODEL || 'gpt-4-1106-preview',
+    apiKey: process.env.NUXT_API_KEY || '',
   },
 
   devtools: { enabled: true },

@@ -16,7 +16,7 @@ async function send(e: ChatEvent) {
       }
     })
 
-    navigateTo({name: 't-thread', params: {thread: thread.id}})
+    window.location.href = `/t/${thread.id}`
   } catch (err) {
 
   } finally {

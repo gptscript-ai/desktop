@@ -11,7 +11,8 @@
     "lint": "./node_modules/.bin/eslint --max-warnings 0 .",
     "lint:fix": "./node_modules/.bin/eslint --fix .",
     "postinstall": "./node_modules/.bin/nuxt prepare",
-    "preview": "./node_modules/.bin/nuxt preview"
+    "preview": "./node_modules/.bin/nuxt preview",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "dayjs": "^1.11.10",
