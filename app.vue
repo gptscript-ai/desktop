@@ -1,13 +1,13 @@
 <template>
   <div class="root bg-rubra-100 dark:bg-rubra-950">
     <nav class="bg-rubra-200 dark:bg-rubra-900">
-      <LeftNav/>
+      <LeftNav />
     </nav>
     <aside class="bg-rubra-200 dark:bg-rubra-900">
-      <ThemeToggle/>
+      <ThemeToggle />
     </aside>
     <main>
-      <NuxtPage/>
+      <NuxtPage />
     </main>
   </div>
 </template>
@@ -41,6 +41,7 @@
     MAIN {
       grid-area: main;
       overflow: auto;
+      position: relative;
     }
   }
 </style>

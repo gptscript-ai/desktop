@@ -1,14 +1,14 @@
-import { useApi } from '@/server/utils/api'
 import type { Assistant } from 'openai/resources/beta/assistants'
+import { useApi } from '@/server/utils/api'
 
 export default defineEventHandler(async (event) => {
   const api = useApi()
-  let assistants: Assistant[] = []
+  const assistants: Assistant[] = []
 
-  let res = await api.beta.assistants.list({limit: 100})
+  let res = await api.beta.assistants.list({ limit: 100 })
   assistants.push(...res.data)
 
-  while ( res.hasNextPage() ) {
+  while (res.hasNextPage()) {
     res = await res.getNextPage()
     assistants.push(...res.data)
   }
