@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 import { UserIcon } from '@heroicons/vue/24/solid'
 import { useMessages } from '@/stores/steve';
+import { MESSAGE } from '@/config/schemas';
 
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
@@ -49,26 +50,23 @@ function scroll() {
 
 async function send(ev: ChatEvent) {
   try {
-    // messages.push({
-    //   created_at: dayjs().valueOf()/1000,
-    //   id: 'pending',
-    //   role: 'user',
-    //   content: <MessageContentText[]>[{
-    //     text: {value: ev.message},
-    //     type: 'text'
-    //   }]
-    // })
-
-    // scroll()
-
-    const res = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}/send`, {
-      method: 'post',
-      body: {
-        message: ev.message
+    const msg = await messages.create({
+      type: MESSAGE,
+      metadata: {
+        namespace: 'acorn',
+        generateName: 'ui-'
       },
+      spec: {
+        input: {
+          content: [{
+            text: ev.message
+          }]
+        }
+      }
     })
 
-    // replaceWith(messages, ...res.messages)
+    await msg.save()
+
     scroll()
   }
   catch (e) {
