@@ -15,8 +15,7 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "dayjs": "^1.11.10",
-    "openai": "^4.20.1"
+    "dayjs": "^1.11.10"
   },
   "devDependencies": {
     "@antfu/eslint-config": "2.4.5",
@@ -24,11 +23,15 @@
     "@nuxt/devtools": "latest",
     "@nuxt/ui": "2.11.1",
     "@nuxtjs/color-mode": "^3.3.2",
+    "@pinia/nuxt": "^0.5.1",
     "@types/lodash-es": "^4.17.12",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "dotenv": "^16.3.1",
     "eslint": "^8.55.0",
+    "http-proxy-middleware": "^2.0.6",
     "lodash-es": "^4.17.21",
     "nuxt": "^3.8.2",
+    "pico-emitter": "^1.2.1",
     "sass": "^1.69.5",
     "typescript": "^5.3.3",
     "vue": "3.3.11",

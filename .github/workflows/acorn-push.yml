@@ -21,4 +21,4 @@ jobs:
           VERSION=${{ github.ref_name }}}-$( cut -c 1-7 <<< '${{ github.sha }}')
           export VERSION
 
-          acorn build --push -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} .
+          acorn build -p linux/amd64 -p linux/arm64 --push -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} .

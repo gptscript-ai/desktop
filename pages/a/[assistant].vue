@@ -1,24 +1,53 @@
 <script setup lang="ts">
+import { MESSAGE, THREAD } from '@/config/schemas';
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const assistantId = fromArray(route.params.assistant)
 
-const assistant = await $fetch(`/v1/assistants/${encodeURIComponent(assistantId)}`)
+const assistants = useAssistants()
+const messages = useMessages()
+const threads = useThreads()
+const assistant = await assistants.find(assistantId)
 
 async function send(e: ChatEvent) {
   try {
-    const thread = await $fetch('/v1/threads', {
-      method: 'post',
-      body: {
-        assistantId: assistant.id,
-        message: e.message
+    const msg = await messages.create({
+      type: MESSAGE,
+      metadata: {
+        namespace: 'acorn',
+        generateName: 'ui-'
+      },
+      spec: {
+        input: {
+          content: [{
+            text: e.message
+          }]
+        }
       }
     })
 
-    window.location.href = `/t/${thread.id}`
-  } catch (err) {
+    await msg.save()
 
+    const thread = await threads.create({
+      type: THREAD,
+      metadata: {
+        namespace: 'acorn',
+        generateName: 'ui-'
+      },
+      spec: {
+        assistantName: assistantId,
+        startMessageName: msg.metadata.name
+      }
+    })
+
+    await thread.save()
+
+
+    navigateTo({name: 't-thread', params: {thread: thread.id}})
+  } catch (err) {
+    console.error(err)
+    debugger
   } finally {
     e.cb()
   }
@@ -27,9 +56,9 @@ async function send(e: ChatEvent) {
 
 <template>
   <div>
-    <h1>{{assistant.name}}</h1>
-    <h2>{{assistant.description}}</h2>
-    <div>{{assistant.instructions}}</div>
+    <h1>{{assistant.spec.name}}</h1>
+    <h2>{{assistant.spec.description}}</h2>
+    <div>{{assistant.spec.instructions}}</div>
 
     <chat-input @message="send"/>
   </div>

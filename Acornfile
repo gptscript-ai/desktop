@@ -2,14 +2,11 @@ args: {
   // Number of replicas
   replicas: 1
 
-  // OpenAI API Endpoint
-  api: "https://api.openai.com/v1"
+  // API Endpoint
+  api: "https://localhost:8080/v1"
 
-  // Bearer token for OpenAI API
+  // Bearer token for API
   apiKey: ""
-
-  // Model
-  apiModel: "gpt-4-1106-preview"
 }
 
 services: default: {
@@ -23,9 +20,8 @@ containers: ui: {
   build: context: "."
 
   env: {
-    NUXT_API: args.api
+    NUXT_PUBLIC_API: args.api
     NUXT_API_KEY: args.apiKey
-    NUXT_MODEL: args.apiModel
   }
 
   ports: publish: "80/http"

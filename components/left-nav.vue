@@ -1,22 +1,44 @@
 <script lang="ts" setup>
-const { data: threads, refresh: refreshThreads } = await useFetch('/v1/threads')
-const { data: assistants, refresh: refreshAssistants } = await useFetch('/v1/assistants')
+
+import { useAssistants, useThreads } from '@/stores/steve'
+
+const router = useRouter()
+const assistants = await useAssistants().findAll()
+const threads = useThreads()
+const allThreads = await threads.findAll()
 
 const assistantLinks = computed(() => {
-  return assistants.value!.sort((a, b) => a.name?.toLocaleLowerCase().localeCompare(b.name?.toLocaleLowerCase())).map(x => { return {
-    label: x.name,
+  return assistants.map(x => { return {
+    label: x.spec.name,
     icon: 'i-heroicons-academic-cap',
-    to: `/a/${x.id}`
+    to: `/a/${encodeURIComponent(x.id)}`
   }})
 })
 
 const threadLinks = computed(() => {
-  return threads.value!.sort((a, b) => a.created_at - b.created_at).map((x) => { return {
-    label: x.id.split('_')[1].substring(0,8),
+  return allThreads.map((x) => { return {
+    label: x.metadata.name,
     icon: 'i-heroicons-chat-bubble-left',
-    to: `/t/${x.id}`
+    to: `/t/${encodeURIComponent(x.id)}`,
+    id: x.id
   }})
 })
+
+async function remove(e: MouseEvent, id: any) {
+  e.stopPropagation();
+  e.preventDefault();
+  debugger
+
+  const thread = threads.byId(id)
+
+  if ( thread ) {
+    await thread.remove()
+    
+    if ( router.currentRoute.name === 't-thread' && router.currentRoute.params.thread === id ) {
+      navigateTo('/')
+    }
+  }
+}
 </script>
 
 <template>
@@ -27,7 +49,17 @@ const threadLinks = computed(() => {
     <h4 class="mt-5">
       Threads
     </h4>
-    <UVerticalNavigation :links="threadLinks" />
+    <UVerticalNavigation :links="threadLinks">
+      <template #badge="{ link }">
+        <UButton
+          class="absolute right-2"
+          icon="i-heroicons-trash"
+          aria-label="Delete"
+          @click="e => remove(e, link.id)"
+          size="xs"
+        />
+      </template>
+    </UVerticalNavigation>
   </div>
 </template>
 

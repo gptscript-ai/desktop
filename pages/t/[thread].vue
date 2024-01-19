@@ -1,25 +1,44 @@
 <script setup lang="ts">
-import dayjs from 'dayjs';
-import type { MessageContentText, ThreadMessage } from 'openai/resources/beta/threads';
+// import dayjs from 'dayjs';
 import { useRoute } from 'vue-router'
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 import { UserIcon } from '@heroicons/vue/24/solid'
+import { useMessages } from '@/stores/steve';
 
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
-const messages: ThreadMessage[] = reactive([])
 const container = ref<HTMLDivElement>()
 
-const { thread, messages: initialMessages } = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}`)
-
-messages.push(...initialMessages)
+const thread = await useThreads().find(threadId)
+const messages = useMessages()
 
 onMounted(() => {
   scroll()
 })
 
 const arrangedMessages = computed(() => {
-  return messages.sort((a, b) => a.created_at - b.created_at)
+  const out: DecoratedMessage[] = []
+
+  function byName(name: string) {
+    return messages.byId(thread.metadata.namespace + '/' + name)
+  }
+
+  let msg: DecoratedMessage|undefined
+
+  if ( thread.spec?.startMessageName ) {
+    msg = byName(thread.spec?.startMessageName)
+  }
+
+  while ( msg ) {
+    out.push(msg)
+    if ( msg.status?.nextMessageName ) {
+      msg = byName(msg.status.nextMessageName)
+    } else {
+      msg = undefined
+    }
+  }
+
+  return out
 })
 
 function scroll() {
@@ -30,17 +49,17 @@ function scroll() {
 
 async function send(ev: ChatEvent) {
   try {
-    messages.push({
-      created_at: dayjs().valueOf()/1000,
-      id: 'pending',
-      role: 'user',
-      content: <MessageContentText[]>[{
-        text: {value: ev.message},
-        type: 'text'
-      }]
-    })
+    // messages.push({
+    //   created_at: dayjs().valueOf()/1000,
+    //   id: 'pending',
+    //   role: 'user',
+    //   content: <MessageContentText[]>[{
+    //     text: {value: ev.message},
+    //     type: 'text'
+    //   }]
+    // })
 
-    scroll()
+    // scroll()
 
     const res = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}/send`, {
       method: 'post',
@@ -49,7 +68,7 @@ async function send(ev: ChatEvent) {
       },
     })
 
-    replaceWith(messages, ...res.messages)
+    // replaceWith(messages, ...res.messages)
     scroll()
   }
   catch (e) {
@@ -58,16 +77,30 @@ async function send(ev: ChatEvent) {
     ev.cb()
   }
 }
+
+function textToHtml(text: string) {
+  try {
+    const res = JSON.parse(text)
+
+    return nlToBr(JSON.stringify(res, null, 2))
+  } catch (e) {
+    return escapeHtml(text)
+  }
+}
 </script>
 
 <template>
   <div>
     <div class="messages" ref="container">
-      <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.role]">
+      <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.status.message.role]">
         <div class="content">
-          <template v-for="(c, idx) of m.content" :key="idx">
-            <template v-if="c.type === 'text'">
-              {{c.text.value}}
+          <template v-for="(c, idx) of m.status.message.content" :key="idx">
+            <span v-if="c.text" v-html="textToHtml(c.text)"/>
+            <template v-else-if="c.image">
+              <img :src="`data:${c.image.contentType};base64,${c.image.base64}`"/>
+            </template>
+            <template v-else-if="c.toolCall?.['function']">
+              <pre><code class="break-words">{{c.toolCall['function'].name}}(<span v-html="textToHtml(c.toolCall['function'].arguments)"></span>)</code></pre>
             </template>
             <template v-else>
               {{c}}
@@ -75,9 +108,9 @@ async function send(ev: ChatEvent) {
           </template>
         </div>
         <div class="date">
-          <UserIcon v-if="m.role === 'user'" class="icon"/>
+          <UserIcon v-if="m.status.message.role === 'user'" class="icon"/>
           <SparklesIcon v-else class="icon"/>
-          <RelativeDate v-model="m.created_at"/>
+          <RelativeDate v-model="(m.metadata.creationTimestamp as string)"/>
         </div>
       </div>
     </div>
@@ -118,7 +151,7 @@ async function send(ev: ChatEvent) {
       border: 1px solid #0c0eff;
     }
 
-    &.assistant {
+    &.assistant, &.tool {
       grid-column: 2/ span 2;
       background-color: rgba(128, 128, 128, 0.1);
       border: 1px solid rgba(128, 128, 128, 0.2);

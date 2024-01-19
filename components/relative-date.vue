@@ -2,13 +2,17 @@
 import dayjs from 'dayjs'
 
 interface Props {
-  modelValue: number
+  modelValue: number|string
 }
 
 const { modelValue } = defineProps<Props>()
 
 const parsed = computed(() => {
-  return dayjs(modelValue * 1000).local()
+  if ( typeof modelValue === 'number' ) {
+    return dayjs(modelValue * 1000).local()
+  } else {
+    return dayjs(modelValue).local()
+  }
 })
 
 const long = computed(() => {
