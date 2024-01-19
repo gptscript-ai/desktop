@@ -46,7 +46,7 @@ function createProxy(api: string, strip = 0) {
       proxyReq.setHeader('x-api-host', req.headers.host || '')
       proxyReq.setHeader('x-forwarded-proto', 'https')
 
-      console.info(`[${ req.headers.reqid }] Proxy onProxyReq`, proxyReq.path, JSON.stringify(proxyReq.getHeaders()))
+      // console.info(`[${ req.headers.reqid }] Proxy onProxyReq`, proxyReq.path, JSON.stringify(proxyReq.getHeaders()))
     },
 
     onProxyReqWs(proxyReq, req) {
@@ -69,7 +69,7 @@ function createProxy(api: string, strip = 0) {
       proxyReq.setHeader('x-api-host', req.headers.host || '')
       proxyReq.setHeader('x-forwarded-proto', 'https')
 
-      console.info(`[${ req.headers.reqid }] Proxy onProxyReqWs`, proxyReq.path, JSON.stringify(proxyReq.getHeaders()))
+      // console.info(`[${ req.headers.reqid }] Proxy onProxyReqWs`, proxyReq.path, JSON.stringify(proxyReq.getHeaders()))
     },
 
     onProxyRes(proxyRes, req, res) {
@@ -77,7 +77,7 @@ function createProxy(api: string, strip = 0) {
         proxyRes.headers['X-Frame-Options'] = 'ALLOWALL'
       }
 
-      console.info(`[${ res.getHeader('reqid') }] Proxy onProxyRes`, res.statusCode, JSON.stringify(proxyRes.headers))
+      // console.info(`[${ res.getHeader('reqid') }] Proxy onProxyRes`, res.statusCode, JSON.stringify(proxyRes.headers))
     },
 
     onError(err, req, res) {
