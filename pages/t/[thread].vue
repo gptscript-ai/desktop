@@ -13,6 +13,11 @@ const container = ref<HTMLDivElement>()
 const thread = await useThreads().find(threadId)
 const messages = useMessages()
 
+interface ThreadedMessage {
+  msg: DecoratedMessage
+  depth: number
+}
+
 onMounted(() => {
   scroll()
 })
@@ -39,7 +44,27 @@ const arrangedMessages = computed(() => {
     }
   }
 
-  return out
+  return out.map(msg => {
+    let depth = 0
+    let cur = msg
+
+    while ( cur?.spec.parentMessageName ) {
+      depth++
+      cur = messages.byId(cur.metadata.namespace + '/' + cur.spec.parentMessageName)
+    }
+
+    return <ThreadedMessage>{msg, depth}
+  })
+})
+
+const lastMessage = computed(() => {
+  const msgs = arrangedMessages.value
+
+  for ( let i = msgs.length - 1 ; i >= 0 ; i-- ) {
+    if ( msgs[i].msg.status.message.role === 'assistant' ) {
+      return msgs[i].msg
+    }
+  }
 })
 
 function scroll() {
@@ -49,6 +74,13 @@ function scroll() {
 }
 
 async function send(ev: ChatEvent) {
+  const parent = lastMessage.value
+
+  if (!parent ) {
+    ev.cb()
+    return
+  }
+
   try {
     const msg = await messages.create({
       type: MESSAGE,
@@ -57,6 +89,7 @@ async function send(ev: ChatEvent) {
         generateName: 'ui-'
       },
       spec: {
+        parentMessageName: parent.metadata.name,
         input: {
           content: [{
             text: ev.message
@@ -76,29 +109,38 @@ async function send(ev: ChatEvent) {
   }
 }
 
-function textToHtml(text: string) {
-  try {
-    const res = JSON.parse(text)
+function isJson(text: string) {
+  if ( !text.match(/\s*{/) ) {
+    return false
+  }
 
-    return nlToBr(JSON.stringify(res, null, 2))
+  try {
+    JSON.parse(text)
+    return true
   } catch (e) {
-    return escapeHtml(text)
+    return false
   }
 }
+
+function toJsonText(text: string) {
+  return escapeHtml(JSON.stringify(JSON.parse(text), null, 2))
+}
+
 </script>
 
 <template>
   <div>
     <div class="messages" ref="container">
-      <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.status.message.role]">
+      <div v-for="m in arrangedMessages" :key="m.msg.id" :class="['message', m.msg.status.message.role]" :style="`margin-left: ${m.depth+1}rem`">
         <div class="content">
-          <template v-for="(c, idx) of m.status.message.content" :key="idx">
-            <span v-if="c.text" v-html="textToHtml(c.text)"/>
+          <template v-for="(c, idx) of m.msg.status.message.content" :key="idx">
+            <code v-if="c.text && isJson(c.text)"><pre v-html="toJsonText(c.text)"/></code>
+            <span v-else-if="c.text">{{c.text}}</span>
             <template v-else-if="c.image">
               <img :src="`data:${c.image.contentType};base64,${c.image.base64}`"/>
             </template>
             <template v-else-if="c.toolCall?.['function']">
-              <pre><code class="break-words">{{c.toolCall['function'].name}}(<span v-html="textToHtml(c.toolCall['function'].arguments)"></span>)</code></pre>
+              <pre><code class="break-words">{{c.toolCall['function'].name}}(<span v-html="toJsonText(c.toolCall['function'].arguments)"/>)</code></pre>
             </template>
             <template v-else>
               {{c}}
@@ -106,9 +148,10 @@ function textToHtml(text: string) {
           </template>
         </div>
         <div class="date">
-          <UserIcon v-if="m.status.message.role === 'user'" class="icon"/>
+          <UserIcon v-if="m.msg.status.message.role === 'user'" class="icon"/>
           <SparklesIcon v-else class="icon"/>
-          <RelativeDate v-model="(m.metadata.creationTimestamp as string)"/>
+          <RelativeDate v-model="(m.msg.metadata.creationTimestamp as string)"/>
+          ({{m.depth}})
         </div>
       </div>
     </div>
@@ -119,22 +162,18 @@ function textToHtml(text: string) {
 
 <style lang="scss" scoped>
   .messages {
-      display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
-
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       max-height: calc(100vh - 130px);
       overflow: auto;
-
-      padding-top: 20px;
   }
 
   .message {
     padding: 1rem;
     margin: 1rem;
+    margin-bottom: 40px;
     border-radius: 1rem;
     position: relative;
 
@@ -143,14 +182,11 @@ function textToHtml(text: string) {
     }
 
     &.user {
-      grid-column: 1/ span 2;
-
       background-color: #5676ff;
       border: 1px solid #0c0eff;
     }
 
     &.assistant, &.tool {
-      grid-column: 2/ span 2;
       background-color: rgba(128, 128, 128, 0.1);
       border: 1px solid rgba(128, 128, 128, 0.2);
     }
@@ -159,7 +195,7 @@ function textToHtml(text: string) {
       font-size: 10px;
       position: absolute;
       left: 0;
-      top: -20px;
+      bottom: -20px;
       line-height: 16px;
     }
 

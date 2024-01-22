@@ -33,7 +33,7 @@ async function remove(e: MouseEvent, id: any) {
 
   if ( thread ) {
     await thread.remove()
-    
+
     if ( router.currentRoute.name === 't-thread' && router.currentRoute.params.thread === id ) {
       navigateTo('/')
     }
@@ -52,7 +52,7 @@ async function remove(e: MouseEvent, id: any) {
     <UVerticalNavigation :links="threadLinks">
       <template #badge="{ link }">
         <UButton
-          class="absolute right-2"
+          class="absolute right-2 delete-btn"
           icon="i-heroicons-trash"
           aria-label="Delete"
           @click="e => remove(e, link.id)"
@@ -73,5 +73,13 @@ async function remove(e: MouseEvent, id: any) {
   }
   .active {
     background-color: red;
+  }
+
+  .delete-btn {
+    display: none;
+  }
+
+  :deep(A:hover .delete-btn) {
+    display: initial;
   }
 </style>
