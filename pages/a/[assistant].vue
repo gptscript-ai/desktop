@@ -15,7 +15,7 @@ async function send(e: ChatEvent) {
     const msg = await messages.create({
       type: MESSAGE,
       metadata: {
-        namespace: 'acorn',
+        namespace: assistant.metadata.namespace,
         generateName: 'ui-'
       },
       spec: {
@@ -32,11 +32,11 @@ async function send(e: ChatEvent) {
     const thread = await threads.create({
       type: THREAD,
       metadata: {
-        namespace: 'acorn',
+        namespace: msg.metadata.namespace,
         generateName: 'ui-'
       },
       spec: {
-        assistantName: assistantId,
+        assistantName: assistant.metadata.name!,
         startMessageName: msg.metadata.name
       }
     })

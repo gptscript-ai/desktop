@@ -16,12 +16,22 @@ const assistantLinks = computed(() => {
 })
 
 const threadLinks = computed(() => {
-  return allThreads.map((x) => { return {
-    label: x.metadata.name,
-    icon: 'i-heroicons-chat-bubble-left',
-    to: `/t/${encodeURIComponent(x.id)}`,
-    id: x.id
-  }})
+  return allThreads.map((x) => {
+    let depth = 0
+    let cur = x.spec.parentThreadName
+    while ( cur ) {
+      depth++
+      cur = threads.byId(x.metadata.namespace+'/'+cur)?.spec.parentThreadName
+    }
+
+    return {
+      label: x.metadata.name,
+      icon: 'i-heroicons-chat-bubble-left',
+      to: `/t/${encodeURIComponent(x.id)}`,
+      id: x.id,
+      depth 
+    }
+  })
 })
 
 async function remove(e: MouseEvent, id: any) {
@@ -50,6 +60,9 @@ async function remove(e: MouseEvent, id: any) {
       Threads
     </h4>
     <UVerticalNavigation :links="threadLinks">
+      <template #avatar="{link}">
+        <div :style="`margin-left: ${link.depth}rem`">&nbsp;</div>
+      </template>
       <template #badge="{ link }">
         <UButton
           class="absolute right-2 delete-btn"

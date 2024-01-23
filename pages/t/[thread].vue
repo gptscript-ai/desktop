@@ -85,7 +85,7 @@ async function send(ev: ChatEvent) {
     const msg = await messages.create({
       type: MESSAGE,
       metadata: {
-        namespace: 'acorn',
+        namespace: parent.metadata.namespace,
         generateName: 'ui-'
       },
       spec: {
