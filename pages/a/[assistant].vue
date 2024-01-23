@@ -58,7 +58,13 @@ async function send(e: ChatEvent) {
   <div>
     <h1>{{assistant.spec.name}}</h1>
     <h2>{{assistant.spec.description}}</h2>
-    <div>{{assistant.spec.instructions}}</div>
+
+    <h3 v-if="assistant.spec?.tools?.length">Available Tools:</h3>
+    <div class="border m-2" v-for="(t, idx) in assistant.spec.tools" :key="idx">
+        <code>
+          {{t['function'].name}}({{t['function'].parameters.type}})
+        </code>
+    </div>
 
     <chat-input @message="send"/>
   </div>

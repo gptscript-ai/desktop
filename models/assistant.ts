@@ -1,6 +1,19 @@
 import type { IResource } from '@/composables/steve/types'
 
 declare global {
+  interface IParameter {
+    type: string
+    properties: object
+  }
+
+  interface ITool {
+    'function': {
+      description: string
+      name: string,
+      parameters: IParameter
+    }
+    type: string
+  }
   interface IAssistant extends IResource {
     spec: {
       cache: boolean
@@ -11,7 +24,7 @@ declare global {
       model: string
       name: string
       parameters: object
-      tools: object[]
+      tools: ITool[]
       vision: boolean
     }
 
