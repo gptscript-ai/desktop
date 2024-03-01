@@ -17,6 +17,7 @@ export function useApi() {
   const client = new OpenAI({
     apiKey: cfg.apiKey,
     baseURL: cfg.api || 'https://api.openai.com/v1',
+    organization: cfg.organization,
   })
 
   return client
@@ -24,16 +25,21 @@ export function useApi() {
 
 export async function listMessages(threadId: string) {
   const api = useApi()
-  const thread = await api.beta.threads.retrieve(threadId)
-
   const messages: ThreadMessage[] = []
+
+  console.debug('Listing messages for', threadId)
   let res = await api.beta.threads.messages.list(threadId)
+  console.debug('Got', res.data.length, 'messages')
+
   messages.push(...res.data)
-  while (res.hasNextPage()) {
+  while (res.hasNextPage() && res.body!.has_more) {
+    console.debug('Depaginating…')
     res = await res.getNextPage()
+    console.debug('Got', res.data.length, 'messages')
     messages.push(...res.data)
   }
 
+  console.debug('Returning', messages.length, 'messages')
   return messages
 }
 

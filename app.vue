@@ -3,7 +3,7 @@
     <nav class="bg-rubra-200 dark:bg-rubra-900">
       <LeftNav />
     </nav>
-    <aside class="bg-rubra-200 dark:bg-rubra-900">
+    <aside class="bg-rubra-200 dark:bg-rubra-900 text-right px-2">
       <ThemeToggle />
     </aside>
     <main>

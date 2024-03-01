@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     api: process.env.NUXT_API || 'https://api.openai.com/v1',
     apiModel: process.env.NUXT_MODEL || 'gpt-4-1106-preview',
     apiKey: process.env.NUXT_API_KEY || '',
+    organization: process.env.NUXT_ORGANIZATION || null,
   },
 
   devtools: { enabled: true },
@@ -24,7 +25,9 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '@pinia/nuxt',
     '@nuxt/ui',
+    '@nuxtjs/tailwindcss'
   ],
 
   vite: {

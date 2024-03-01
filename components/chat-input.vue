@@ -41,10 +41,9 @@ function keypress(e: KeyboardEvent) {
 <template>
   <div class="input">
     <UTextarea v-if="waiting" placeholder="Thinking… Please wait a surprisingly long time"/>
-    <UTextarea v-else placeholder="Say something…" v-model="message" @keypress="keypress" />
-    <!-- <UButton :disabled="waiting || !message" @click="send">
-      Send
-    </UButton> -->
+    <UTextarea v-else placeholder="Say something…" v-model="message" @keypress="keypress" autofocus class="inside-btn">
+      <UButton :disabled="waiting || !message" @click="send" class="send" icon="i-heroicons-arrow-uturn-right"/>
+    </UTextarea>
   </div>
 </template>
 
@@ -55,6 +54,18 @@ function keypress(e: KeyboardEvent) {
   left: 0;
   right: 0;
   padding: 2rem;
+}
+.inside-btn {
+  position: relative;
 
+  :deep(TEXTAREA) {
+    padding-right: 64px;
+  }
+
+  .send {
+    position: absolute;
+    top: calc(50% - 16px);
+    right: 25px;
+  }
 }
 </style>
