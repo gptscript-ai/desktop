@@ -64,7 +64,7 @@ interface ThreadLink {
 }
 
 const threadLinks = computed(() => {
- const sorted = (allThreads || []).sort((a, b) => a.created_at - b.created_at)
+ const sorted = (allThreads || []).sort((a, b) => b.created_at - a.created_at)
 
  const out: Record<string,ThreadLink[]> = {}
 
@@ -109,7 +109,7 @@ async function removeThread(e: MouseEvent, id: any) {
 
     <UDivider class="my-5" />
 
-    <div v-for="(group, k) in threadLinks" :key="k">
+    <div v-for="(group, k) in threadLinks" :key="k" class="mb-5">
       <h5>{{k}}</h5>
       <UVerticalNavigation :links="group">
         <template #badge="{ link }">
