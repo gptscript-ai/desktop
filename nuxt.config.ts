@@ -9,9 +9,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     api: process.env.NUXT_API || 'https://api.openai.com/v1',
-    apiModel: process.env.NUXT_MODEL || 'gpt-4-1106-preview',
     apiKey: process.env.NUXT_API_KEY || '',
-    organization: process.env.NUXT_ORGANIZATION || null,
+    organization: process.env.NUXT_ORGANIZATION || '',
   },
 
   devtools: { enabled: true },
