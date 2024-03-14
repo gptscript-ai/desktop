@@ -15,7 +15,9 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
+    "@types/markdown-it": "^13.0.7",
     "dayjs": "^1.11.10",
+    "markdown-it": "^14.0.0",
     "openai": "^4.28.4"
   },
   "devDependencies": {

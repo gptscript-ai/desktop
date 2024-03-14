@@ -7,6 +7,8 @@ import type { Assistant } from 'openai/resources/beta/assistants';
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 import { UserIcon } from '@heroicons/vue/24/solid'
 
+import MarkdownIt from 'markdown-it'
+
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
 const messages: ThreadMessage[] = reactive([])
@@ -89,6 +91,11 @@ async function remove() {
   await $fetch(`/v1/threads/${encodeURIComponent(threadId)}`, {method: 'DELETE'})
   navigateTo('/')
 }
+
+function markdownToHtml(markdownText: string) {
+  const md = new MarkdownIt();
+  return md.render(markdownText);
+};
 </script>
 
 <template>
@@ -111,12 +118,12 @@ async function remove() {
       <div class="messages" ref="messagesRef">
         <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.role]">
           <div class="content">
-            <template v-for="(c, idx) of m.content" :key="idx">
-              <template v-if="c.type === 'text'">
-                {{c.text.value}}
-              </template>
+            <template v-for="(c, idx) in m.content" :key="idx">
+              <!-- Check if the content is of type 'text' and render it as Markdown -->
+              <div v-if="c.type === 'text'" v-html="markdownToHtml(c.text.value)"></div>
+              <!-- Fallback for other types -->
               <template v-else>
-                {{c}}
+                {{ c }}
               </template>
             </template>
           </div>
