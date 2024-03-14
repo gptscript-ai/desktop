@@ -65,3 +65,22 @@ export async function waitForRun(threadId: string, assistantId: string) {
 
   return run
 }
+
+function resolve(from: string, to: string) {
+  const res = new URL(to, new URL(from, 'resolve://'));
+  if (res.protocol === 'resolve:') {
+    const { pathname, search, hash } = res;
+    return pathname + search + hash;
+  }
+  return res.toString();
+}
+
+export async function apiFetch(to: string, method='GET', body?: any) {
+  const api = (useRuntimeConfig().api || '').replace(/\/+$/,'').replace(/^\/v1(\/rubra)?(\/x)?/ig,'')
+  const url = resolve(api, to)
+  let res = await fetch(url, {method, body})
+
+  const json = await res.json()
+
+  return json
+}

@@ -12,9 +12,9 @@ import MarkdownIt from 'markdown-it'
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
 const messages: ThreadMessage[] = reactive([])
-const messagesRef = ref<HTMLDivElement>()
 const thread = ref<Thread>()
 const assistants = useAssistants()
+const upper = ref<HTMLDivElement>()
 
 const {data, pending } = useFetch(`/v1/threads/${encodeURIComponent(threadId)}`)
 
@@ -46,13 +46,18 @@ const arrangedMessages = computed(() => {
 
 function scroll() {
   nextTick(() => {
-    messagesRef.value?.scrollBy({top: 100000})
+    const div = upper.value
+    if ( !div ) {
+      return
+    }
+
+    div.scrollBy({top: Number.MAX_SAFE_INTEGER})
   })
 }
 
 async function send(ev: ChatEvent) {
   try {
-    messages.push({
+    messages.unshift({
       assistant_id: '',
       content: <MessageContentText[]>[{
         text: {value: ev.message},
@@ -101,7 +106,7 @@ function markdownToHtml(markdownText: string) {
 <template>
   <div v-if="pending" class="my-10 text-center">Loading…</div>
   <div v-else>
-    <div class="upper">
+    <div class="upper" ref="upper">
       <header class="px-5 py-2">
         <h1 class="text-2xl">{{assistant?.name}}
           <div class="float-right">
@@ -115,7 +120,7 @@ function markdownToHtml(markdownText: string) {
         </h1>
         <UDivider class="mt-2"/>
       </header>
-      <div class="messages" ref="messagesRef">
+      <div class="messages">
         <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.role]">
           <div class="content">
             <template v-for="(c, idx) in m.content" :key="idx">

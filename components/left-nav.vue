@@ -28,8 +28,13 @@ const moreLinks = computed(() => {
     {
       label: 'Files',
       icon: 'i-heroicons-document-text',
-      to: '/f',
-    }
+      to: '/files',
+    },
+    // {
+    //   label: 'Tools',
+    //   icon: 'i-heroicons-wrench',
+    //   to: '/tools',
+    // },
   ]
 })
 
