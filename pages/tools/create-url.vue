@@ -23,7 +23,7 @@
 
   window.state = state
 
-  const toolOptions = ['code_interpreter','retrieval','function']
+  const toolOptions = ['code_interpreter','retrieval','internet_search', 'site_browsing']
 
 async function go(e: FormSubmitEvent<Schema>) {
   const res = await tools.create(state as ToolObject)

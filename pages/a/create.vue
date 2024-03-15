@@ -34,9 +34,10 @@
 
   const toolOptions = computed(() => {
     const out = [
-      {label: 'Code Interpreter', value: 'code_interpreter', builtin: true},
-      {label: 'Function', value: 'function', builtin: true},
-      {label: 'Retrieval', value: 'retrieval', builtin: true},
+      {index: 0, label: 'Internet Search (good for broad searches)', value: 'internet_search', builtin: true, gptscript: true},
+      {index: 1, label: 'Website Browsing (good for intranet sites)', value: 'site_browsing', builtin: true, gptscript: true},
+      {index: 2, label: 'Retrieval', value: 'retrieval', builtin: true, gptscript: false},
+      {index: 3, label: 'Code Interpreter', value: 'code_interpreter', builtin: true, gptscript: false},
     ]
 
     for ( const t of allTools ) {
@@ -54,6 +55,10 @@
 
       if ( b.builtin && !a.builtin ) {
         return 1
+      }
+      
+      if ( b.builtin && a.builtin ) {
+        return a.builtin.index - b.builtin.index
       }
 
       return a.label.localeCompare(b.label)
@@ -74,7 +79,7 @@
 
     for ( const t of body.tools ) {
       const entry = toolOptions.value.find(x =>x.value === t)
-      if ( entry && entry.builtin ) {
+      if ( entry && entry.builtin && !entry.gptscript) {
         builtinTools.push(t)
       } else {
         gptScriptTools.push(t)
