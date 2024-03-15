@@ -78,9 +78,24 @@ function resolve(from: string, to: string) {
 export async function apiFetch(to: string, method='GET', body?: any) {
   const api = (useRuntimeConfig().api || '').replace(/\/+$/,'').replace(/^\/v1(\/rubra)?(\/x)?/ig,'')
   const url = resolve(api, to)
-  let res = await fetch(url, {method, body})
+  const headers: Record<string,string> = {
+    'Accept': 'application/json'
+  }
 
-  const json = await res.json()
+  if ( body ) {
+    headers['Content-Type'] = 'application/json'
+    body = JSON.stringify(body)
+  }
 
-  return json
+  let res = await fetch(url, {method, body, headers})
+
+  const txt = await res.text()
+
+  try {
+    const json = JSON.parse(txt)
+    return json
+  } catch (e) {
+    console.error('JSON parse error', e)
+    return txt
+  }
 }

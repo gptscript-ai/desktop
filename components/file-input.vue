@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   const uploader = ref<HTMLInputElement>()
 
-  const emit = defineEmits(['error','files'])
+  const emit = defineEmits(['error','file'])
 
   function show() {
     if ( !uploader.value ) {
@@ -23,8 +23,9 @@
       const asyncFileContents = files.map(getFileContents);
       const fileContents = await Promise.all(asyncFileContents);
 
-      emit('files', fileContents)
-
+      for (const f of fileContents) {
+        emit('file', f)
+      }
     } catch (error) {
       emit('error', error);
     }
@@ -64,7 +65,7 @@
         @click="show"
         size="sm"
         class="mr-4"
-      />
+      >Upload</UButton>
     </slot>
 
     <input

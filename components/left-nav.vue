@@ -30,11 +30,11 @@ const moreLinks = computed(() => {
       icon: 'i-heroicons-document-text',
       to: '/files',
     },
-    // {
-    //   label: 'Tools',
-    //   icon: 'i-heroicons-wrench',
-    //   to: '/tools',
-    // },
+    {
+      label: 'Tools',
+      icon: 'i-heroicons-wrench',
+      to: '/tools',
+    },
   ]
 })
 

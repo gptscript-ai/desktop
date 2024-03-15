@@ -35,6 +35,15 @@ export const useFiles = defineStore('files', {
       return this.list as FileObject[]
     },
 
+    async upload(name: string, value: string) {
+      const res = await $fetch('/v1/files', {
+        method: 'POST',
+        body: {name, value}
+      })
+
+      this.list.push(res)
+    },
+
     async remove(id: string) {
       await $fetch(`/v1/files/${encodeURIComponent(id)}`)
 

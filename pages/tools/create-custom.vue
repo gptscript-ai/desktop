@@ -5,7 +5,6 @@
   const schema = object({
     name: string().required(),
     description: string().optional(),
-    url: string().optional(),
     contents: string().optional(),
     subtool: string().optional(),
   })
@@ -15,7 +14,6 @@
   const state = reactive({
     name: '',
     description: '',
-    url: '',
     contents: '',
     subtool: ''
   })
@@ -25,6 +23,7 @@
   const toolOptions = ['code_interpreter','retrieval','function']
 
   async function go(e: FormSubmitEvent<Schema>) {
+
     // const res = await assistants.create(state)
     // navigateTo({name: 'a-assistant', params: { assistant: res.id }})
   }
@@ -44,11 +43,11 @@
         <UTextarea v-model="state.description" autoresize />
       </UFormGroup>
 
-      <UFormGroup label="Instructions">
-        <UTextarea v-model="state.url" autoresize />
+      <UFormGroup label="Contents">
+        <UTextarea v-model="state.contents" autoresize />
       </UFormGroup>
 
-      <UButton type="submit">Create</UButton>
+      <UButton type="submit" @click="go">Create</UButton>
     </UForm>
   </div>
 </template>

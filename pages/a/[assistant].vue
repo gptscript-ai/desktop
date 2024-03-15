@@ -42,12 +42,6 @@ async function remove() {
     <h2>{{assistant.description}}</h2>
     <div>{{assistant.instructions}}</div>
 
-    <UAccordion :items="[{label: 'Show Raw', content: ''}]" class="mt-5">
-      <template #item>
-        <code><pre>{{JSON.stringify(assistant, null, 2)}}</pre></code>
-      </template>
-    </UAccordion>
-
     <chat-input @message="send"/>
   </div>
 </template>

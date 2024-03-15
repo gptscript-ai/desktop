@@ -9,6 +9,22 @@
     {key: 'actions'}
   ]
 
+  const addOptions = [[
+    {
+      label: 'From a URL',
+      click: () => {
+        navigateTo({name: 'tools-create-url'})
+      }
+    },
+    {
+      label: 'Custom',
+      disabled: true,
+      click: () => {
+        navigateTo({name: 'tools-create-custom'})
+      }
+    },
+  ]]
+
   async function remove(id: string) {
     await tools.remove(id)
   }
@@ -20,13 +36,14 @@
       Tools
 
       <div class="float-right">
-        <UButton
-          icon="i-heroicons-plus"
-          aria-label="Add"
-          to="/tools/create"
-          size="sm"
-          class="mr-4"
-        >Add</UButton>
+        <UDropdown :items="addOptions" :popper="{ placement: 'bottom-start' }">
+          <UButton
+            icon="i-heroicons-plus"
+            aria-label="Add"
+            size="sm"
+            class="mr-4"
+          >Add</UButton>
+        </UDropdown>
       </div>
     </h1>
     <UDivider class="my-2"/>

@@ -26,13 +26,65 @@
 
   window.state = state
 
-  const toolOptions = ['code_interpreter','retrieval','function']
   const assistants = useAssistants()
   const allFiles = await useFiles().findAll()
   const allModels = await useModels().findAll()
+  const allTools = await useTools().findAll()
+
+
+  const toolOptions = computed(() => {
+    const out = [
+      {label: 'Code Interpreter', value: 'code_interpreter', builtin: true},
+      {label: 'Function', value: 'function', builtin: true},
+      {label: 'Retrieval', value: 'retrieval', builtin: true},
+    ]
+
+    for ( const t of allTools ) {
+      out.push({
+        label: t.name || t.id,
+        value: t.id,
+        builtin: false
+      })
+    }
+
+    out.sort((a, b) => {
+      if ( a.builtin && !b.builtin ) {
+        return -1
+      }
+
+      if ( b.builtin && !a.builtin ) {
+        return 1
+      }
+
+      return a.label.localeCompare(b.label)
+    })
+
+    return out
+  })
+
+  const modelOptions = computed(() => {
+    return allModels.sort((a, b) => a.id.localeCompare(b.id))
+  })
 
   async function go(e: FormSubmitEvent<Schema>) {
-    const res = await assistants.create(state)
+    const body: any = {...state}
+
+    const builtinTools: string[] = []
+    const gptScriptTools: string[] = []
+
+    for ( const t of body.tools ) {
+      const entry = toolOptions.value.find(x =>x.value === t)
+      if ( entry && entry.builtin ) {
+        builtinTools.push(t)
+      } else {
+        gptScriptTools.push(t)
+      }
+    }
+
+    body.tools = builtinTools || []
+    body.gptscript_tools = gptScriptTools || []
+
+    const res = await assistants.create(body)
     navigateTo({name: 'a-assistant', params: { assistant: res.id }})
   }
 </script>
@@ -56,9 +108,9 @@
       </UFormGroup>
 
       <UFormGroup label="Tools">
-        <USelectMenu v-model="state.tools" :options="toolOptions" multiple placeholder="Select Tools">
+        <USelectMenu v-model="state.tools" :options="toolOptions" value-attribute="value" multiple placeholder="Select Tools">
           <template #label>
-            <span v-if="state.tools.length" class="truncate">{{ state.tools.join(', ') }}</span>
+            <span v-if="state.tools.length" class="truncate">{{ state.tools.map(x => toolOptions.find(y => y.value === x)?.label).join(', ') }}</span>
             <span v-else>No Tools</span>
           </template>
         </USelectMenu>
@@ -83,7 +135,7 @@
       <UFormGroup label="Model">
         <USelectMenu
           v-model="state.model"
-          :options="allModels"
+          :options="modelOptions"
           placeholder="Select Model"
           option-attribute="id"
           value-attribute="id"

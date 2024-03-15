@@ -35,8 +35,16 @@ export const useTools = defineStore('tools', {
       return this.list as ToolObject[]
     },
 
+    async create(body: ToolObject) {
+      const res = await $fetch('/v1/tools', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+
+      this.list.push(res)
+    },
     async remove(id: string) {
-      await $fetch(`/v1/tools/${encodeURIComponent(id)}`)
+      await $fetch(`/v1/tools/${encodeURIComponent(id)}`, {method: 'DELETE'})
 
       const existing = this.byId(id)
       if ( existing ){

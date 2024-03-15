@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { FileContent } from 'openai/resources/files.mjs';
+
   const files = useFiles()
   const allFiles = await files.findAll()
 
@@ -24,14 +26,8 @@
     await files.remove(id)
   }
 
-  function upload(files: object[]) {
-    // @TODO reading whole files into JS, then send as JSON and parsing and all that is bad, mmkay
-    for ( const f of files ) {
-      $fetch('/v1/files', {
-        method: 'POST',
-        body: f
-      })
-    }
+  function upload(f: {name: string, value: string}) {
+    return files.upload(f.name, f.value)
   }
 </script>
 
@@ -41,7 +37,7 @@
       Files
 
       <div class="float-right">
-        <FileInput @files="upload" />
+        <FileInput @file="upload" />
       </div>
     </h1>
     <UDivider class="my-2"/>
