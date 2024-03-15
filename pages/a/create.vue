@@ -58,7 +58,7 @@
       }
       
       if ( b.builtin && a.builtin ) {
-        return a.builtin.index - b.builtin.index
+        return a.index - b.index
       }
 
       return a.label.localeCompare(b.label)
