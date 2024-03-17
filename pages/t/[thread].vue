@@ -2,12 +2,6 @@
 import dayjs from 'dayjs';
 import { useRoute } from 'vue-router'
 import type { MessageContentText, ThreadMessage, Thread } from 'openai/resources/beta/threads';
-import type { Assistant } from 'openai/resources/beta/assistants';
-
-import { SparklesIcon } from '@heroicons/vue/24/outline'
-import { UserIcon } from '@heroicons/vue/24/solid'
-
-import MarkdownIt from 'markdown-it'
 
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
@@ -15,11 +9,12 @@ const messages: ThreadMessage[] = reactive([])
 const thread = ref<Thread>()
 const assistants = useAssistants()
 const upper = ref<HTMLDivElement>()
+const waiting = ref(false)
 
 const {data, pending } = useFetch(`/v1/threads/${encodeURIComponent(threadId)}`)
 
 const assistant = computed(() => {
-  const assistantId = (thread.value.metadata as any)?.assistantId || ''
+  const assistantId = (thread.value?.metadata as any)?.assistantId || ''
 
   return assistants.byId(assistantId)
 })
@@ -57,6 +52,8 @@ function scroll() {
 
 async function send(ev: ChatEvent) {
   try {
+    waiting.value = true
+
     messages.unshift({
       assistant_id: '',
       content: <MessageContentText[]>[{
@@ -82,13 +79,20 @@ async function send(ev: ChatEvent) {
       },
     })
 
+    waiting.value = false
     replaceWith(messages, ...res.messages)
     scroll()
   }
   catch (e) {
+    useToast().add({
+      timeout: 0,
+      title: 'Error',
+      description: `${e}`
+    })
   }
   finally {
     ev.cb()
+    waiting.value = false
   }
 }
 
@@ -97,10 +101,6 @@ async function remove() {
   navigateTo('/')
 }
 
-function markdownToHtml(markdownText: string) {
-  const md = new MarkdownIt();
-  return md.render(markdownText);
-};
 </script>
 
 <template>
@@ -108,7 +108,7 @@ function markdownToHtml(markdownText: string) {
   <div v-else>
     <div class="upper" ref="upper">
       <header class="px-5 py-2">
-        <h1 class="text-2xl">{{assistant?.name}}
+        <h1 class="text-2xl">{{assistant?.name || '?'}}: {{threadId.split('_')[1].substring(0,8)}}
           <div class="float-right">
             <UButton
               icon="i-heroicons-trash"
@@ -120,34 +120,7 @@ function markdownToHtml(markdownText: string) {
         </h1>
         <UDivider class="mt-2"/>
       </header>
-      <div class="messages">
-        <div v-for="m in arrangedMessages" :key="m.id" :class="['message', m.role]">
-          <div class="content">
-            <template v-for="(c, idx) in m.content" :key="idx">
-              <!-- Check if the content is of type 'text' and render it as Markdown -->
-              <div v-if="c.type === 'text'" v-html="markdownToHtml(c.text.value)"></div>
-              <!-- Fallback for other types -->
-              <template v-else>
-                {{ c }}
-              </template>
-            </template>
-          </div>
-          <div class="date">
-            <UTooltip>
-              <template #text>
-                <RelativeDate v-model="m.created_at"/>
-              </template>
-
-              <template v-if="m.role === 'user'">
-                <UserIcon class="icon"/> You
-              </template>
-              <template v-else>
-                <SparklesIcon class="icon"/> Rubra
-              </template>
-            </UTooltip>
-          </div>
-        </div>
-      </div>
+      <Messages :assistant="assistant" :waiting="waiting" v-model="arrangedMessages"/>
     </div>
 
     <chat-input @message="send"/>
@@ -162,54 +135,5 @@ function markdownToHtml(markdownText: string) {
     right: 0;
     bottom: 130px;
     overflow: auto;
-  }
-  .messages {
-      display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
-      padding-top: 20px;
-  }
-
-  .message {
-    padding: 1rem;
-    margin: 1rem;
-    border-radius: 1rem;
-    position: relative;
-
-    .content {
-      word-wrap: break-word;
-      word-break: break-all;
-    }
-
-    &.user .content {
-      color: white;
-    }
-
-    &.user {
-      grid-column: 1/ span 2;
-
-      background-color: #5676ff;
-      border: 1px solid #0c0eff;
-    }
-
-    &.assistant {
-      grid-column: 2/ span 2;
-      background-color: rgba(128, 128, 128, 0.1);
-      border: 1px solid rgba(128, 128, 128, 0.2);
-    }
-
-    .date {
-      position: absolute;
-      left: 0;
-      top: -20px;
-      line-height: 16px;
-    }
-
-    .icon {
-      height: 16px;
-      display: inline-block;
-      position: relative;
-      top: -2px;
-      margin-right: 5px;
-    }
   }
 </style>

@@ -1,5 +1,5 @@
 import type { ThreadCreateParams } from 'openai/resources/beta/threads'
-import { emulateThreads, useApi, waitForRun } from '@/server/utils/api'
+import { useApi, waitForRun } from '@/server/utils/api'
 
 interface CreateInput {
   assistantId: string
@@ -22,18 +22,6 @@ export default defineEventHandler(async (event) => {
 
   if ( json.message ) {
     await waitForRun(thread.id, json.assistantId)
-  }
-
-  if (emulateThreads()) {
-    const cookies = parseCookies(event)
-    const ids = (cookies.RUBRA_THREADS || '').split(',').filter(x => !!x)
-
-    ids.push(thread.id)
-
-    setCookie(event, 'RUBRA_THREADS', ids.join(','), {
-      maxAge: 86400 * 365,
-      path: '/',
-    })
   }
 
   return thread

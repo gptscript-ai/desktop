@@ -3,12 +3,6 @@ import { Thread } from 'openai/resources/beta/threads'
 import type { ThreadMessage } from 'openai/resources/beta/threads/messages'
 import { usleep } from '@/utils/promise'
 
-export function emulateThreads() {
-  // const cfg = useRuntimeConfig()
-  return true;
-  // return !!cfg.api || cfg.api.includes('api.opanai.com')
-}
-
 export function useApi() {
   const cfg = useRuntimeConfig()
 
@@ -90,12 +84,26 @@ export async function apiFetch(to: string, method='GET', body?: any) {
   let res = await fetch(url, {method, body, headers})
 
   const txt = await res.text()
+  let out: any
 
   try {
-    const json = JSON.parse(txt)
-    return json
+    out = JSON.parse(txt)
   } catch (e) {
-    console.error('JSON parse error', e)
-    return txt
+    out = {type: 'error', message: txt}
   }
+
+  Object.defineProperty(out, '_status', {enumerable: false, configurable: true, value: res.status})
+  return out
+}
+
+export async function apiList<T>(to: string) {
+  let res = await apiFetch(to)
+  const data: T[] = res.data
+
+  while ( res.object === 'list' && res.has_more ) {
+    res = await apiFetch(to + '?after=' + res.last_id)
+    data.push(...res.data)
+  }
+
+  return data
 }

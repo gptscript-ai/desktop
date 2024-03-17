@@ -1,6 +1,15 @@
 <script lang="ts" setup>
   const uploader = ref<HTMLInputElement>()
 
+  interface Props {
+    icon?: boolean
+    size?: string
+    variant?: string
+    waiting?: boolean
+  }
+
+  const { icon=true, size="sm", variant="solid", waiting=false } = defineProps<Props>()
+
   const emit = defineEmits(['error','file'])
 
   function show() {
@@ -57,15 +66,20 @@
 </script>
 
 <template>
-  <div>
+  <span>
     <slot name="default" :show="show">
       <UButton
-        icon="i-heroicons-arrow-up-tray"
+        :icon="icon ? 'i-heroicons-arrow-up-tray' : ''"
         aria-label="Upload"
         @click="show"
-        size="sm"
-        class="mr-4"
-      >Upload</UButton>
+        :size="size"
+        :variant="variant"
+        :loading="waiting"
+        :disabled="waiting"
+      >
+        <template v-if="waiting">Uploading…</template>
+        <template v-else>Upload</template>
+      </UButton>
     </slot>
 
     <input
@@ -74,5 +88,5 @@
       class="hidden"
       @change="(e) => fileChange(e as any)"
     />
-  </div>
+  </span>
 </template>

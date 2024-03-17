@@ -41,7 +41,7 @@ export const useThreads = defineStore('threads', {
     },
 
     async remove(id: string) {
-      await $fetch(`/v1/threads/${encodeURIComponent(id)}`, {method: 'POST'})
+      await $fetch(`/v1/threads/${encodeURIComponent(id)}`, {method: 'DELETE'})
 
       const existing = this.byId(id)
       if ( existing ){

@@ -17,11 +17,39 @@ const assistantLinks = computed(() => {
     return aa.localeCompare(bb)
   }).map(x => { return {
     label: x.name,
-    icon: 'i-heroicons-academic-cap',
+    icon: 'i-heroicons-sparkles',
     to: `/a/${x.id}`,
     id: x.id
   }})
 })
+
+const assistantOptions = [[
+  {
+    label: 'Edit',
+    icon: 'i-heroicons-pencil',
+    click: (a) => {
+      debugger
+    }
+  },
+  {
+    label: 'Remove',
+    icon: 'i-heroicons-trash',
+    click: (a) => {
+      debugger
+    }
+  },
+]]
+
+async function removeAssistant(e: MouseEvent, id: any) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  await assistants.remove(id);
+
+  if ( router.currentRoute.value.name === 'a-assistant' || router.currentRoute.value.name.startsWith('a-assistant-') ) {
+    navigateTo('/')
+  }
+}
 
 const moreLinks = computed(() => {
   return [
@@ -106,22 +134,33 @@ async function removeThread(e: MouseEvent, id: any) {
 <template>
   <div class="mt-2">
     <h4 class="h-8 leading-8">Assistants <UButton size="xs" class="float-right mr-2 align-middle" :to="{name: 'a-create'}" icon="i-heroicons-plus"/></h4>
-    <UVerticalNavigation :links="assistantLinks"/>
+    <UVerticalNavigation :links="assistantLinks">
+      <!-- <template #badge="{ link }">
+        <UDropdown :items="assistantOptions" :popper="{ placement: 'bottom-start' }">
+          <UButton
+            class="absolute right-2 action-btn"
+            icon="i-heroicons-ellipsis-vertical"
+            aria-label="Menu"
+            size="xs"
+          />
+        </UDropdown>
+      </template> -->
+    </UVerticalNavigation>
 
-    <UDivider class="my-5" />
+    <UDivider class="my-2" />
 
     <UVerticalNavigation :links="moreLinks"/>
 
-    <UDivider class="my-5" />
+    <UDivider class="my-2" />
 
     <div v-for="(group, k) in threadLinks" :key="k" class="mb-5">
       <h5>{{k}}</h5>
       <UVerticalNavigation :links="group">
         <template #badge="{ link }">
           <UButton
-            class="absolute right-2 delete-btn"
+            class="absolute right-2 action-btn"
             icon="i-heroicons-trash"
-            aria-label="Delete"
+            aria-label="action"
             @click="e => removeThread(e, link.id)"
             size="xs"
           />
@@ -132,26 +171,27 @@ async function removeThread(e: MouseEvent, id: any) {
 </template>
 
 <style lang="scss" scoped>
-  H4 {
-    padding-left: 1rem;
-  }
+H4 {
+  padding-left: 1rem;
+}
 
-  H5 {
-    padding-left: 1rem;
-    font-size: 75%;
-  }
+H5 {
+  padding-left: 1rem;
+  font-size: 75%;
+}
 
-  LI {
-    display: block;
-  }
-  .active {
-    background-color: red;
-  }
-.delete-btn {
+LI {
+  display: block;
+}
+.active {
+  background-color: red;
+}
+
+.action-btn {
   display: none;
 }
 
-:deep(A:hover .delete-btn) {
+:deep(A:hover .action-btn) {
   display: initial;
 }
 </style>

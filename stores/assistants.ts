@@ -58,6 +58,26 @@ export const useAssistants = defineStore('assistants', {
       return out
     },
 
+    async update(id: string, body: Partial<Assistant>) {
+      const neu = await $fetch(`/v1/assistants/${encodeURIComponent(id)}`, {
+        method: 'put',
+        body
+      })
+
+      const existing = this.byId(id)
+
+      if ( existing ) {
+        Object.apply(existing, neu as any)
+
+        return existing
+      } else {
+        const out = reactive(neu)
+        this.list.push(out)
+
+        return out
+      }
+    },
+
     async remove(id: string) {
       await $fetch(`/v1/assistants/${encodeURIComponent(id)}`)
 

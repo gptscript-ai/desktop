@@ -40,7 +40,7 @@ function keypress(e: KeyboardEvent) {
 
 <template>
   <div class="input">
-    <UTextarea v-if="waiting" placeholder="Thinking… Please wait a surprisingly long time"/>
+    <UTextarea v-if="waiting" placeholder="Thinking…"/>
     <UTextarea v-else placeholder="Say something…" v-model="message" @keypress="keypress" autofocus class="inside-btn">
       <UButton :disabled="waiting || !message" @click="send" class="send" icon="i-heroicons-arrow-uturn-right"/>
     </UTextarea>

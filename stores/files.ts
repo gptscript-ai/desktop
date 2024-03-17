@@ -42,6 +42,8 @@ export const useFiles = defineStore('files', {
       })
 
       this.list.push(res)
+
+      return res
     },
 
     async remove(id: string) {

@@ -1,4 +1,4 @@
-# Rubra UI
+# GPTStack UI
 
 ```bash
 yarn

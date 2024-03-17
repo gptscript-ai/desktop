@@ -7,7 +7,7 @@ import type { FileContent } from 'openai/resources/files.mjs';
   const columns = [
     {key: 'filename', label: 'Name', sortable: true},
     {key: 'bytes', label: 'Size', sortable: true},
-    {key: 'status', label: 'Status', sortable: true},
+    // {key: 'status', label: 'Status', sortable: true},
     {key: 'actions'}
   ]
 
@@ -51,9 +51,9 @@ import type { FileContent } from 'openai/resources/files.mjs';
         {{formatBytes(row.bytes) }}
       </template>
 
-      <template #status-data="{ row }">
+      <!-- <template #status-data="{ row }">
         <span style="text-transform: capitalize">{{row.status}}</span>
-      </template>
+      </template> -->
     </UTable>
   </div>
 </template>
