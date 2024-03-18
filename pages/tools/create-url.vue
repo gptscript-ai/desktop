@@ -4,6 +4,7 @@
   import type ToolObject from '@/config/types'
 
   const tools = useTools()
+  const saving = ref(false)
 
   const schema = object({
     name: string().required(),
@@ -23,11 +24,21 @@
 
   window.state = state
 
-  const toolOptions = ['code_interpreter','retrieval','internet_search', 'site_browsing']
-
 async function go(e: FormSubmitEvent<Schema>) {
-  const res = await tools.create(state as ToolObject)
-  navigateTo({name: 'tools'})
+  saving.value = true
+
+  try {
+    await tools.create(state as ToolObject)
+    navigateTo({name: 'tools'})
+  } catch (e) {
+    useToast().add({
+      timeout: 0,
+      title: 'Error Saving Tool',
+      description: `${e}`
+    })
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -53,7 +64,10 @@ async function go(e: FormSubmitEvent<Schema>) {
         <UInput v-model="state.subtool"/>
       </UFormGroup>
 
-      <UButton type="submit" @click.prevent="go">Create</UButton>
+      <UButton :loading="saving" type="submit">
+        <template v-if="saving">Creating…</template>
+        <template v-else>Create</template>
+      </UButton>
     </UForm>
   </div>
 </template>

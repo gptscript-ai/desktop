@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { useThreads } from '@/stores/threads';
 import { type ThreadMessage, type MessageContentText } from 'openai/resources/beta/threads/index.mjs';
 import dayjs from 'dayjs';
+import { renderMarkdown } from '@/utils/markdown';
 
 const route = useRoute()
 const assistantId = fromArray(route.params.assistant)
@@ -67,7 +68,7 @@ async function edit() {
       </div>
     </h1>
     <UDivider class="mt-2"/>
-    <h2 v-if="assistant.description">{{assistant.description}}</h2>
+    <h2 v-if="assistant.description" class="text-gray-500" v-html="renderMarkdown(assistant.description)" />
 
     <Messages v-if="waiting" :waiting="true" v-model="fakeMessages" :assistant="assistant" />
 

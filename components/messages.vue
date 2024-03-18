@@ -75,10 +75,10 @@
     border-radius: 1rem;
     position: relative;
 
-    .content {
-      word-wrap: break-word;
-      word-break: break-all;
-    }
+    // .content {
+      // word-wrap: break-word;
+      // word-break: break-all;
+    // }
 
     &.user .content {
       color: white;

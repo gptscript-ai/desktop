@@ -8,4 +8,11 @@ declare global {
     contents?: string
     subtool?: string
   }
+
+  interface NavOption {
+    label: string
+    icon?: string
+    to: string
+    actions?: object[]
+  }
 }

@@ -36,6 +36,7 @@
       Tools
 
       <div class="float-right">
+        <UButton variant="link" to="https://tools.gptscript.ai/" target="_blank" rel="noopener nofollow noreferrer" class="relative bottom-1">Find more tools</UButton>
         <UDropdown :items="addOptions" :popper="{ placement: 'bottom-start' }">
           <UButton
             icon="i-heroicons-plus"

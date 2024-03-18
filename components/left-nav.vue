@@ -2,6 +2,7 @@
 import { useAssistants } from '@/stores/assistants';
 import { useThreads } from '@/stores/threads';
 import dayjs from 'dayjs';
+import type { RouteLocationRaw } from 'vue-router';
 
 const router = useRouter();
 const assistants = useAssistants()
@@ -18,50 +19,43 @@ const assistantLinks = computed(() => {
   }).map(x => { return {
     label: x.name,
     icon: 'i-heroicons-sparkles',
-    to: `/a/${x.id}`,
+    to: {name: 'a-assistant', params: { assistant: x.id}},
     id: x.id
   }})
 })
 
-const assistantOptions = [[
+const assistantActions = [[
   {
     label: 'Edit',
     icon: 'i-heroicons-pencil',
-    click: (a) => {
-      debugger
+    click: (_, link: object) => {
+      navigateTo({name: 'a-assistant-edit', params: { assistant: link.id }})
     }
   },
   {
     label: 'Remove',
     icon: 'i-heroicons-trash',
-    click: (a) => {
-      debugger
+    click: async (_: Event, link: object) => {
+      await assistants.remove(link.id);
+
+      if ( router.currentRoute.value.name === 'a-assistant' || router.currentRoute.value.name.startsWith('a-assistant-') ) {
+        navigateTo('/')
+      }
     }
   },
 ]]
-
-async function removeAssistant(e: MouseEvent, id: any) {
-  e.stopPropagation();
-  e.preventDefault();
-
-  await assistants.remove(id);
-
-  if ( router.currentRoute.value.name === 'a-assistant' || router.currentRoute.value.name.startsWith('a-assistant-') ) {
-    navigateTo('/')
-  }
-}
 
 const moreLinks = computed(() => {
   return [
     {
       label: 'Files',
       icon: 'i-heroicons-document-text',
-      to: '/files',
+      to: {name: 'files'}
     },
     {
       label: 'Tools',
       icon: 'i-heroicons-wrench',
-      to: '/tools',
+      to: {name: 'tools'}
     },
   ]
 })
@@ -93,7 +87,7 @@ interface ThreadLink {
   group: string
   label: string
   icon: string
-  to: string
+  to: RouteLocationRaw
 }
 
 const threadLinks = computed(() => {
@@ -112,60 +106,42 @@ const threadLinks = computed(() => {
     group,
     label: x.id.split('_')[1].substring(0,8),
     icon: 'i-heroicons-chat-bubble-left',
-    to: `/t/${x.id}`,
+    to: {name: 't-thread', params: {thread: x.id}},
   })
  }
 
  return out
 })
 
-async function removeThread(e: MouseEvent, id: any) {
-  e.stopPropagation();
-  e.preventDefault();
+const threadActions = [[
+  {
+    label: 'Remove',
+    icon: 'i-heroicons-trash',
+    click: async (_: Event, link: object) => {
+      await threads.remove(link.id);
 
-  await threads.remove(id);
-
-  if ( router.currentRoute.value.name === 't-thread' && router.currentRoute.value.params.thread === id ) {
-    navigateTo('/')
-  }
-}
+      if ( router.currentRoute.value.name === 't-thread' && router.currentRoute.value.params.thread === link.id ) {
+        navigateTo('/')
+      }
+    }
+  },
+]]
 </script>
 
 <template>
   <div class="mt-2">
     <h4 class="h-8 leading-8">Assistants <UButton size="xs" class="float-right mr-2 align-middle" :to="{name: 'a-create'}" icon="i-heroicons-plus"/></h4>
-    <UVerticalNavigation :links="assistantLinks">
-      <!-- <template #badge="{ link }">
-        <UDropdown :items="assistantOptions" :popper="{ placement: 'bottom-start' }">
-          <UButton
-            class="absolute right-2 action-btn"
-            icon="i-heroicons-ellipsis-vertical"
-            aria-label="Menu"
-            size="xs"
-          />
-        </UDropdown>
-      </template> -->
-    </UVerticalNavigation>
+    <NavList :links="assistantLinks" :actions="assistantActions" class="mr-2.5"/>
 
     <UDivider class="my-2" />
 
-    <UVerticalNavigation :links="moreLinks"/>
+    <NavList :links="moreLinks" class="mr-2.5"/>
 
     <UDivider class="my-2" />
 
     <div v-for="(group, k) in threadLinks" :key="k" class="mb-5">
       <h5>{{k}}</h5>
-      <UVerticalNavigation :links="group">
-        <template #badge="{ link }">
-          <UButton
-            class="absolute right-2 action-btn"
-            icon="i-heroicons-trash"
-            aria-label="action"
-            @click="e => removeThread(e, link.id)"
-            size="xs"
-          />
-        </template>
-      </UVerticalNavigation>
+      <NavList :links="group" :actions="threadActions" class="mr-2.5"/>
     </div>
   </div>
 </template>
@@ -183,15 +159,8 @@ H5 {
 LI {
   display: block;
 }
+
 .active {
   background-color: red;
-}
-
-.action-btn {
-  display: none;
-}
-
-:deep(A:hover .action-btn) {
-  display: initial;
 }
 </style>
