@@ -1,4 +1,10 @@
 <script setup lang="ts">
+interface Props {
+  previous?: string[]
+}
+
+const { previous = [] } = defineProps<Props>()
+
 const emit = defineEmits<{
   (e: 'message', value: ChatEvent): void
 }>()
@@ -33,12 +39,25 @@ function keypress(e: KeyboardEvent) {
     send()
   }
 }
+
+function keyup(e: KeyboardEvent) {
+  const idx = previous.indexOf(message.value || '')
+
+  if (e.code === 'ArrowUp' && !message.value)
+    message.value = previous[previous.length - 1]
+  else if (e.code === 'ArrowUp' && idx > 0)
+    message.value = previous[idx - 1]
+  else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 === previous.length)
+    message.value = ''
+  else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 < previous.length)
+    message.value = previous[idx + 1]
+}
 </script>
 
 <template>
   <div class="input">
-    <UTextarea v-if="waiting" placeholder="Thinking…" />
-    <UTextarea v-else v-model="message" placeholder="Say something…" autofocus class="inside-btn" @keypress="keypress">
+    <UTextarea v-if="waiting" disabled placeholder="Thinking…" />
+    <UTextarea v-else v-model="message" placeholder="Say something…" autofocus class="inside-btn" @keyup="keyup" @keypress="keypress">
       <UButton :disabled="waiting || !message" class="send" icon="i-heroicons-arrow-uturn-right" @click="send" />
     </UTextarea>
   </div>

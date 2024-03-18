@@ -39,6 +39,10 @@ const arrangedMessages = computed(() => {
   return messages.slice().reverse()
 })
 
+const previousMessages = computed(() => {
+  return messages.filter(x => x.role === 'user').map(x => x.content?.[0]?.text?.value || '').filter(x => !!x)
+})
+
 function scroll() {
   nextTick(() => {
     const div = upper.value
@@ -136,7 +140,7 @@ async function remove() {
       <Messages :assistant="assistant" :waiting="waiting" v-model="arrangedMessages"/>
     </div>
 
-    <chat-input @message="send"/>
+    <ChatInput @message="send" :previous="previousMessages"/>
   </div>
 </template>
 
