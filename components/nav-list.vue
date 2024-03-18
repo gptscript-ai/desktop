@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { NavAction, NavItem, NavOption } from '@/config/types'
+
 const { links, actions } = defineProps<Props>()
 
 const router = useRouter()
@@ -66,19 +68,19 @@ function isActive(item: NavItem) {
   <nav>
     <ul class="mx-1" :class="[hasIcons && 'with-icons', actions?.length && 'with-actions']">
       <li
-        v-for="(item, idx) in links"
+        v-for="(link, idx) in links"
         :key="idx"
         class="nav-row relative grid items-center w-full focus:outline-none focus-visible:outline-none dark:focus-visible:outline-none focus-visible:before:ring-inset focus-visible:before:ring-1 focus-visible:before:ring-primary-500 dark:focus-visible:before:ring-primary-400 before:inset-px before:rounded-md disabled:cursor-not-allowed disabled:opacity-75 focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 rounded-md font-medium text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 before:bg-gray-100 dark:before:bg-gray-800 dark:hover:text-white dark:hover:bg-gray-800/50 data-[active=true]:text-gray-900 data-[active=true]:dark:text-white data-[active=true]:bg-gray-100 data-[active=true]:dark:bg-gray-800"
         :class="[open[idx] && 'open']"
-        :data-active="isActive(item)"
-        @click.prevent="e => clicked(e, item, idx)"
+        :data-active="isActive(link)"
+        @click.prevent="e => clicked(e, link, idx)"
       >
         <div v-if="hasIcons" class="icon text-center">
-          <UIcon v-if="item.icon" :name="item.icon" size="lg" />
+          <UIcon v-if="link.icon" :name="link.icon" size="lg" />
         </div>
         <div class="label relative">
-          <nuxt-link :to="item.to" class="py-1.5 block">
-            {{ item.label }}
+          <nuxt-link :to="link.to" class="py-1.5 block">
+            {{ link.label }}
           </nuxt-link>
         </div>
         <div v-if="actionOptions[idx]?.length" class="actions">

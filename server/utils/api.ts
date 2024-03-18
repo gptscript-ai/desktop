@@ -99,10 +99,14 @@ export async function apiFetch(to: string, method = 'GET', body?: any) {
 
 export async function apiList<T>(to: string) {
   let res = await apiFetch(to)
+
+  setResponseStatus(res._status)
+
   const data: T[] = res.data
 
   while (res.object === 'list' && res.has_more) {
     res = await apiFetch(`${to}?after=${res.last_id}`)
+    setResponseStatus(res._status)
     data.push(...res.data)
   }
 

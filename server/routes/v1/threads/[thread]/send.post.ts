@@ -22,11 +22,11 @@ export default defineEventHandler(async (event) => {
   const run = await waitForRun(threadId, assistantId)
   console.debug('Ran', run)
 
-  if ( run.status === 'failed' ) {
+  if (run.status === 'failed') {
     // setResponseStatus(event, 500)
 
     return {
-      run
+      run,
     }
   }
 

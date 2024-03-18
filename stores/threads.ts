@@ -1,5 +1,5 @@
-import type { Thread } from 'openai/resources/beta/threads'
 import { defineStore } from 'pinia'
+import type { Thread } from 'openai/resources/beta/index.mjs'
 import { removeObject } from '@/utils/array'
 
 export const useThreads = defineStore('threads', {
@@ -30,7 +30,7 @@ export const useThreads = defineStore('threads', {
 
     async findAll(force = false) {
       if (!this.haveAll || force) {
-        const data = (await $fetch(`/v1/threads`)).map((x: any) => reactive(x)) as Thread[]
+        const data = (await $fetch(`/v1/threads`) || []).map((x: any) => reactive(x)) as Thread[]
 
         replaceWith(this.list, ...data)
       }
@@ -48,7 +48,7 @@ export const useThreads = defineStore('threads', {
     },
 
     async create(assistantId: string, message: string) {
-      const {run, thread} = await $fetch('/v1/threads', {
+      const { run, thread } = await $fetch('/v1/threads', {
         method: 'post',
         body: {
           assistantId,
@@ -59,7 +59,7 @@ export const useThreads = defineStore('threads', {
       const out = reactive(thread)
       this.list.push(out)
 
-      return {run, thread: out}
+      return { run, thread: out }
     },
   },
 })
