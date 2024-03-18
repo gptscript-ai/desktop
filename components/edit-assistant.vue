@@ -196,13 +196,13 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div>
           <UFormGroup label="Tools">
-            <template #hint>
+            <!-- <template #hint>
               <UButton
                 size="2xs"
                 variant="link"
                 disabled
               >Create</UButton>
-            </template>
+            </template> -->
 
             <USelectMenu v-model="state.tools" :options="toolOptions" value-attribute="value" multiple placeholder="Select Tools">
               <template #label>
