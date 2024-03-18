@@ -75,10 +75,15 @@
     border-radius: 1rem;
     position: relative;
 
-    // .content {
+    .content {
       // word-wrap: break-word;
       // word-break: break-all;
-    // }
+
+      :deep(A) {
+        color: #5676ff;
+        text-decoration: underline;
+      }
+    }
 
     &.user .content {
       color: white;

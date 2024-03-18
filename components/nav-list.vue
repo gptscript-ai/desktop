@@ -13,17 +13,19 @@
   })
 
   function actionOptionsFor(idx: number) {
-    return (actions || []).map( y => y.map((x: NavAction) => {
-      return {
-        ...x,
-        click: function(e: Event) {
-          e.stopPropagation()
-          e.preventDefault()
-          x.click(e, links[idx], idx)
-          open[idx] = false
+    return computed(() => {
+      return (actions || []).map( y => y.map((x: NavAction) => {
+        return {
+          ...x,
+          click: function(e: Event) {
+            e.stopPropagation()
+            e.preventDefault()
+            x.click(e, links[idx], idx)
+            open[idx] = false
+          }
         }
-      }
-    }))
+      }))
+    })
   }
 
   const actionOptions = computed(() => {
@@ -52,6 +54,11 @@
 
   function isActive(item: NavItem) {
     const active = router.resolve(router.currentRoute)
+
+    if ( active.href === '/' ) {
+      return false
+    }
+
     const cur = router.resolve(item.to)
 
     return cur.href.startsWith(active.href)
