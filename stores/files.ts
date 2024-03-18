@@ -13,19 +13,18 @@ export const useFiles = defineStore('files', {
 
   actions: {
     byId(id: string) {
-      return (this.list as FileObject[]).find(x => x.id === id )
+      return (this.list as FileObject[]).find(x => x.id === id)
     },
 
     async find(id: string) {
-      const all = await this.findAll()
+      await this.findAll()
       const existing = this.byId(id)
-      if ( existing ) {
+      if (existing)
         return existing
-      }
     },
 
-    async findAll(force=false) {
-      if ( !this.haveAll || force ) {
+    async findAll(force = false) {
+      if (!this.haveAll || force) {
         const data = (await $fetch(`/v1/files`)).map((x: any) => reactive(x)) as FileObject[]
 
         replaceWith(this.list, ...data)
@@ -38,7 +37,7 @@ export const useFiles = defineStore('files', {
     async upload(name: string, value: string) {
       const res = await $fetch('/v1/files', {
         method: 'POST',
-        body: {name, value}
+        body: { name, value },
       })
 
       this.list.push(res)
@@ -50,9 +49,8 @@ export const useFiles = defineStore('files', {
       await $fetch(`/v1/files/${encodeURIComponent(id)}`)
 
       const existing = this.byId(id)
-      if ( existing ){
+      if (existing)
         removeObject(this.list, existing)
-      }
     },
   },
 })

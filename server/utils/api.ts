@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { Thread } from 'openai/resources/beta/threads'
+import type { Thread } from 'openai/resources/beta/threads'
 import type { ThreadMessage } from 'openai/resources/beta/threads/messages'
 import { usleep } from '@/utils/promise'
 
@@ -39,7 +39,7 @@ export async function listMessages(threadId: string) {
 }
 
 export function assistantFor(thread: Thread) {
-  const assistantId = ((thread.metadata || {}) as Record<string,string>).assistantId
+  const assistantId = ((thread.metadata || {}) as Record<string, string>).assistantId
 
   return assistantId
 }
@@ -61,38 +61,39 @@ export async function waitForRun(threadId: string, assistantId: string) {
 }
 
 function resolve(from: string, to: string) {
-  const res = new URL(to, new URL(from, 'resolve://'));
+  const res = new URL(to, new URL(from, 'resolve://'))
   if (res.protocol === 'resolve:') {
-    const { pathname, search, hash } = res;
-    return pathname + search + hash;
+    const { pathname, search, hash } = res
+    return pathname + search + hash
   }
-  return res.toString();
+  return res.toString()
 }
 
-export async function apiFetch(to: string, method='GET', body?: any) {
-  const api = (useRuntimeConfig().api || '').replace(/\/+$/,'').replace(/^\/v1(\/rubra)?(\/x)?/ig,'')
+export async function apiFetch(to: string, method = 'GET', body?: any) {
+  const api = (useRuntimeConfig().api || '').replace(/\/+$/, '').replace(/^\/v1(\/rubra)?(\/x)?/ig, '')
   const url = resolve(api, to)
-  const headers: Record<string,string> = {
-    'Accept': 'application/json'
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
   }
 
-  if ( body ) {
+  if (body) {
     headers['Content-Type'] = 'application/json'
     body = JSON.stringify(body)
   }
 
-  let res = await fetch(url, {method, body, headers})
+  const res = await fetch(url, { method, body, headers })
 
   const txt = await res.text()
   let out: any
 
   try {
     out = JSON.parse(txt)
-  } catch (e) {
-    out = {type: 'error', message: txt}
+  }
+  catch (e) {
+    out = { type: 'error', message: txt }
   }
 
-  Object.defineProperty(out, '_status', {enumerable: false, configurable: true, value: res.status})
+  Object.defineProperty(out, '_status', { enumerable: false, configurable: true, value: res.status })
   return out
 }
 
@@ -100,8 +101,8 @@ export async function apiList<T>(to: string) {
   let res = await apiFetch(to)
   const data: T[] = res.data
 
-  while ( res.object === 'list' && res.has_more ) {
-    res = await apiFetch(to + '?after=' + res.last_id)
+  while (res.object === 'list' && res.has_more) {
+    res = await apiFetch(`${to}?after=${res.last_id}`)
     data.push(...res.data)
   }
 

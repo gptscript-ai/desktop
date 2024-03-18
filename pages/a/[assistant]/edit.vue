@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-  const route = useRoute()
-  const assistantId = fromArray(route.params.assistant)
+const route = useRoute()
+const assistantId = fromArray(route.params.assistant)
 </script>
 
 <template>

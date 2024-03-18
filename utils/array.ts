@@ -9,9 +9,8 @@ export function replaceWith<T>(ary: T[], ...objs: T[]) {
 export function removeObject<T>(ary: T[], obj: T): T[] {
   const idx = ary.indexOf(obj)
 
-  if (idx >= 0) {
+  if (idx >= 0)
     ary.splice(idx, 1)
-  }
 
   return ary
 }

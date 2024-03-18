@@ -13,19 +13,18 @@ export const useTools = defineStore('tools', {
 
   actions: {
     byId(id: string) {
-      return (this.list as ToolObject[]).find(x => x.id === id )
+      return (this.list as ToolObject[]).find(x => x.id === id)
     },
 
     async find(id: string) {
-      const all = await this.findAll()
+      await this.findAll()
       const existing = this.byId(id)
-      if ( existing ) {
+      if (existing)
         return existing
-      }
     },
 
-    async findAll(force=false) {
-      if ( !this.haveAll || force ) {
+    async findAll(force = false) {
+      if (!this.haveAll || force) {
         const data = (await $fetch(`/v1/tools`)).map((x: any) => reactive(x)) as ToolObject[]
 
         replaceWith(this.list, ...data)
@@ -44,12 +43,11 @@ export const useTools = defineStore('tools', {
       this.list.push(res)
     },
     async remove(id: string) {
-      await $fetch(`/v1/tools/${encodeURIComponent(id)}`, {method: 'DELETE'})
+      await $fetch(`/v1/tools/${encodeURIComponent(id)}`, { method: 'DELETE' })
 
       const existing = this.byId(id)
-      if ( existing ){
+      if (existing)
         removeObject(this.list, existing)
-      }
     },
   },
 })

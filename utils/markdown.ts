@@ -50,12 +50,13 @@ hljs.registerLanguage('yaml', yaml)
 
 export const md = markdownIt({
   linkify: true,
-  breaks:  true,
+  breaks: true,
   highlight(str: string, lang: string) {
-    if ( lang && hljs.getLanguage(lang) ) {
+    if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(str, { language: lang }).value
-      } catch (_) {
+      }
+      catch (_) {
       }
     }
 
@@ -66,7 +67,7 @@ export const md = markdownIt({
 md.use(linkAttributes, {
   attrs: {
     target: '_blank',
-    rel:    'noopener noreferrer nofollow',
+    rel: 'noopener noreferrer nofollow',
   },
 })
 

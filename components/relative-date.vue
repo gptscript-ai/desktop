@@ -18,20 +18,18 @@ const long = computed(() => {
 
 const short = computed(() => {
   const v = parsed.value
-  if ( v.isToday() ) {
+  if (v.isToday())
     return v.format('h:mm:ss A')
-  } else {
+  else
     return long.value
-  }
 })
-
 </script>
 
 <template>
   <span v-if="long === short">
-    {{long}}
+    {{ long }}
   </span>
   <UTooltip v-else :text="long">
-    {{short}}
+    {{ short }}
   </UTooltip>
 </template>

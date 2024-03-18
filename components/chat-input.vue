@@ -1,16 +1,14 @@
 <script setup lang="ts">
-
-declare global {
-  interface ChatEvent {
-    message: string,
-    cb: () => void
-  }
-}
-
-// eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
   (e: 'message', value: ChatEvent): void
 }>()
+
+declare global {
+  interface ChatEvent {
+    message: string
+    cb: () => void
+  }
+}
 
 const waiting = ref(false)
 const message = ref('')
@@ -20,17 +18,16 @@ async function send() {
     message: message.value,
     cb: () => {
       waiting.value = false
-    }
+    },
   }
 
   waiting.value = true
   message.value = ''
-  console.log('Send', ev)
   emit('message', ev)
 }
 
 function keypress(e: KeyboardEvent) {
-  if ( e.code === 'Enter' && !e.shiftKey ) {
+  if (e.code === 'Enter' && !e.shiftKey) {
     e.preventDefault()
     e.stopPropagation()
     send()
@@ -40,9 +37,9 @@ function keypress(e: KeyboardEvent) {
 
 <template>
   <div class="input">
-    <UTextarea v-if="waiting" placeholder="Thinking…"/>
-    <UTextarea v-else placeholder="Say something…" v-model="message" @keypress="keypress" autofocus class="inside-btn">
-      <UButton :disabled="waiting || !message" @click="send" class="send" icon="i-heroicons-arrow-uturn-right"/>
+    <UTextarea v-if="waiting" placeholder="Thinking…" />
+    <UTextarea v-else v-model="message" placeholder="Say something…" autofocus class="inside-btn" @keypress="keypress">
+      <UButton :disabled="waiting || !message" class="send" icon="i-heroicons-arrow-uturn-right" @click="send" />
     </UTextarea>
   </div>
 </template>

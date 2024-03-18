@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   assistants.push(...res.data)
 
-  while ( res.hasNextPage() && res.body!.has_more ) {
+  while (res.hasNextPage() && res.body!.has_more) {
     console.debug('Depaginating…')
     res = await res.getNextPage()
     console.debug('Got', res?.data?.length || 0, 'assistants')

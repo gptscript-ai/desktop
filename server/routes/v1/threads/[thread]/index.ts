@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   console.debug('Got', res?.data?.length || 0, 'messages for ', threadId)
 
   messages.push(...res.data)
-  while (res.hasNextPage() && res.body!.has_more ) {
+  while (res.hasNextPage() && res.body!.has_more) {
     console.debug('Depaginating…')
     res = await res.getNextPage()
     console.debug('Got', res?.data?.length || 0, 'more messages for ', threadId)

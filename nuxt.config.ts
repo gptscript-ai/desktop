@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+import process from 'node:process'
 
 dotenv.config()
 
@@ -26,7 +27,7 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@nuxt/ui',
-    '@nuxtjs/tailwindcss'
+    '@nuxtjs/tailwindcss',
   ],
 
   vite: {

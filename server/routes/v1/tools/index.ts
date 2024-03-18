@@ -1,11 +1,11 @@
-import { ToolObject } from '@/config/types'
+import type { ToolObject } from '@/config/types'
 import { apiFetch } from '~/server/utils/api'
 
 export default defineEventHandler(async (event) => {
   const tools: ToolObject[] = []
 
   console.debug('Listing tools')
-  let res = await apiFetch('/v1/rubra/x/tools')
+  const res = await apiFetch('/v1/rubra/x/tools')
   console.debug('Res', res)
   console.debug('Got', res?.data?.length || 0, 'tools')
 
@@ -15,4 +15,3 @@ export default defineEventHandler(async (event) => {
 
   return tools
 })
-

@@ -15,7 +15,6 @@ watch(router.currentRoute, () => {
   root.value?.classList.remove('open')
 })
 
-
 function toggle() {
   root.value?.classList.toggle('open')
 }
@@ -25,18 +24,18 @@ function toggle() {
   <div ref="root" class="root bg-rubra-100 dark:bg-rubra-950">
     <header class="flex bg-rubra-200 dark:bg-rubra-900 py-1 pl-4 pr-2.5">
       <div class="flex-initial">
-        <nuxt-link :to="{name: 'index'}">
-          <img src="~/assets/logo.svg" class="h-10 my-1"/>
+        <nuxt-link :to="{ name: 'index' }">
+          <img src="~/assets/logo.svg" class="h-10 my-1">
         </nuxt-link>
       </div>
       <div class="flex-initial">
-        <nuxt-link :to="{name: 'index'}">
-          <img src="~/assets/logotype.svg" class="dark:invert" style="height: 30px; margin: 12px 0 8px 5px;"/>
+        <nuxt-link :to="{ name: 'index' }">
+          <img src="~/assets/logotype.svg" class="dark:invert" style="height: 30px; margin: 12px 0 8px 5px;">
         </nuxt-link>
       </div>
-      <div class="flex-grow"/>
+      <div class="flex-grow" />
       <div class="toggle flex-initial p-2">
-        <UButton icon="i-heroicons-bars-3" @click="toggle"/>
+        <UButton icon="i-heroicons-bars-3" @click="toggle" />
       </div>
     </header>
     <nav class="bg-rubra-200 dark:bg-rubra-900">

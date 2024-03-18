@@ -1,68 +1,65 @@
 <script lang="ts" setup>
-  const router = useRouter()
+const { links, actions } = defineProps<Props>()
 
-  interface Props {
-    links: NavOption[]
-    actions?: NavAction[]
-  }
+const router = useRouter()
+const open = reactive<boolean[]>([])
 
-  const { links, actions } = defineProps<Props>()
+interface Props {
+  links: NavOption[]
+  actions?: NavAction[]
+}
 
-  const hasIcons = computed(() => {
-    return !!links.find(x => !!x.icon)
+const hasIcons = computed(() => {
+  return !!links.find(x => !!x.icon)
+})
+
+function actionOptionsFor(idx: number) {
+  return computed(() => {
+    return (actions || []).map(y => y.map((x: NavAction) => {
+      return {
+        ...x,
+        click(e: Event) {
+          e.stopPropagation()
+          e.preventDefault()
+          x.click(e, links[idx], idx)
+          open[idx] = false
+        },
+      }
+    }))
   })
+}
 
-  function actionOptionsFor(idx: number) {
-    return computed(() => {
-      return (actions || []).map( y => y.map((x: NavAction) => {
-        return {
-          ...x,
-          click: function(e: Event) {
-            e.stopPropagation()
-            e.preventDefault()
-            x.click(e, links[idx], idx)
-            open[idx] = false
-          }
-        }
-      }))
-    })
+const actionOptions = computed(() => {
+  const out = []
+
+  for (let i = 0; i < links.length; i++)
+    out[i] = actionOptionsFor(i).value
+
+  return out
+})
+
+function clicked(e: MouseEvent, item: NavItem, _idx: number) {
+  const isActions = !!(e.target as HTMLElement)?.closest('.actions')
+
+  if (isActions) {
+    e.preventDefault()
+    e.stopPropagation()
+    return
   }
 
-  const actionOptions = computed(() => {
-    const out = []
+  navigateTo(item.to)
+}
 
-    for ( let i = 0 ; i < links.length ; i++ ) {
-      out[i] = actionOptionsFor(i).value
-    }
+function isActive(item: NavItem) {
+  const active = router.resolve(router.currentRoute)
 
-    return out
-  })
+  if (active.href === '/')
+    return false
 
-  const open = reactive<boolean[]>([])
+  const cur = router.resolve(item.to)
 
-  function clicked(e: MouseEvent, item: NavItem, _idx: number) {
-    const isActions = !!(e.target as HTMLElement)?.closest('.actions')
-
-    if ( isActions ) {
-      e.preventDefault()
-      e.stopPropagation()
-      return
-    }
-
-    navigateTo(item.to)
-  }
-
-  function isActive(item: NavItem) {
-    const active = router.resolve(router.currentRoute)
-
-    if ( active.href === '/' ) {
-      return false
-    }
-
-    const cur = router.resolve(item.to)
-
-    return cur.href.startsWith(active.href)
-  }
+  return cur.href.startsWith(active.href)
+}
 </script>
 
 <template>
@@ -76,18 +73,18 @@
         :data-active="isActive(item)"
         @click.prevent="e => clicked(e, item, idx)"
       >
-        <div class="icon text-center" v-if="hasIcons">
+        <div v-if="hasIcons" class="icon text-center">
           <UIcon v-if="item.icon" :name="item.icon" size="lg" />
         </div>
         <div class="label relative">
           <nuxt-link :to="item.to" class="py-1.5 block">
-            {{item.label}}
+            {{ item.label }}
           </nuxt-link>
         </div>
         <div v-if="actionOptions[idx].length" class="actions">
           <UDropdown
-            :items="actionOptions[idx]"
             v-model:open="open[idx]"
+            :items="actionOptions[idx]"
             :popper="{ offsetDistance: 0, placement: 'bottom-end' }"
           >
             <UButton
@@ -102,7 +99,6 @@
               <UIcon :name="item.icon" class="flex-shrink-0 h-4 w-4 text-gray-400 dark:text-gray-500 ms-auto" />
             </template>
           </UDropdown>
-
         </div>
       </li>
     </ul>

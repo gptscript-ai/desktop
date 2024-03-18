@@ -1,5 +1,5 @@
+import type { Model } from 'openai/resources/models'
 import { useApi } from '@/server/utils/api'
-import { Model } from 'openai/resources/models'
 
 export default defineEventHandler(async (event) => {
   const api = useApi()
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   models.push(...res.data)
 
-  while ( res.hasNextPage() && res.body!.has_more ) {
+  while (res.hasNextPage() && res.body!.has_more) {
     console.debug('Depaginating…')
     res = await res.getNextPage()
     console.debug('Got', res?.data?.length || 0, 'models')
@@ -22,4 +22,3 @@ export default defineEventHandler(async (event) => {
 
   return models
 })
-

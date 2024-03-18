@@ -1,29 +1,29 @@
 <script setup lang="ts">
-  import { SparklesIcon } from '@heroicons/vue/24/outline'
-  import { UserIcon } from '@heroicons/vue/24/solid'
-  import { renderMarkdown } from '@/utils/markdown';
-  import type { ThreadMessage } from 'openai/resources/beta/threads';
-  import type { Assistant } from 'openai/resources/beta/index.mjs';
+import { SparklesIcon } from '@heroicons/vue/24/outline'
+import { UserIcon } from '@heroicons/vue/24/solid'
+import type { ThreadMessage } from 'openai/resources/beta/threads'
+import type { Assistant } from 'openai/resources/beta/index.mjs'
+import { renderMarkdown } from '@/utils/markdown'
 
-  interface Props {
-    assistant?: Assistant
-    modelValue: ThreadMessage[]
-    waiting?: boolean
-  }
+interface Props {
+  assistant?: Assistant
+  modelValue: ThreadMessage[]
+  waiting?: boolean
+}
 
-  const { assistant, modelValue, waiting=false } = defineProps<Props>()
+const { assistant, modelValue, waiting = false } = defineProps<Props>()
 
-  const assistantName = computed(() => {
-    return assistant?.name || 'GPTStack'
-  })
+const assistantName = computed(() => {
+  return assistant?.name || 'GPTStack'
+})
 </script>
 
 <template>
   <div class="messages">
-    <div v-for="m in modelValue" :key="m.id" :class="['message', m.role]">
+    <div v-for="m in modelValue" :key="m.id" class="message" :class="[m.role]">
       <div class="content">
         <template v-for="(c, idx) in m.content" :key="idx">
-          <div v-if="c.type === 'text'" v-html="renderMarkdown(c.text.value)"></div>
+          <div v-if="c.type === 'text'" v-html="renderMarkdown(c.text.value)" />
           <template v-else>
             {{ c }}
           </template>
@@ -32,30 +32,30 @@
       <div class="date">
         <UTooltip>
           <template #text>
-            <RelativeDate v-model="m.created_at"/>
+            <RelativeDate v-model="m.created_at" />
           </template>
 
           <template v-if="m.role === 'user'">
-            <UserIcon class="icon"/> You
+            <UserIcon class="icon" /> You
           </template>
           <template v-else>
-            <SparklesIcon class="icon"/> {{assistantName}}
+            <SparklesIcon class="icon" /> {{ assistantName }}
           </template>
         </UTooltip>
       </div>
     </div>
     <div v-if="waiting" class="message assistant waiting">
       <div class="content">
-        <div class="dot"/>
-        <div class="dot"/>
-        <div class="dot"/>
+        <div class="dot" />
+        <div class="dot" />
+        <div class="dot" />
       </div>
       <div class="date">
         <UTooltip>
           <template #text>
             Soon…
           </template>
-          <SparklesIcon class="icon"/> {{assistantName}}
+          <SparklesIcon class="icon" /> {{ assistantName }}
         </UTooltip>
       </div>
     </div>
