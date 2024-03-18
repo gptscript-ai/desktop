@@ -1,6 +1,7 @@
 import markdownIt from 'markdown-it'
 import anchorLinks from 'markdown-it-anchor'
 import linkAttributes from 'markdown-it-link-attributes'
+import footnotes from 'markdown-it-footnote'
 
 import hljs from 'highlight.js/lib/core'
 
@@ -72,6 +73,7 @@ md.use(linkAttributes, {
 })
 
 md.use(anchorLinks)
+md.use(footnotes)
 
 export function renderMarkdown(markdown: string) {
   return md.render(markdown)
