@@ -32,7 +32,7 @@
     const out = []
 
     for ( let i = 0 ; i < links.length ; i++ ) {
-      out[i] = actionOptionsFor(i)
+      out[i] = actionOptionsFor(i).value
     }
 
     return out
