@@ -11,7 +11,16 @@ const assistants = useAssistants()
 const upper = ref<HTMLDivElement>()
 const waiting = ref(false)
 
-const {data, pending } = useFetch(`/v1/threads/${encodeURIComponent(threadId)}`)
+try {
+  const data = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}`)
+
+  if ( data ) {
+    thread.value = data.thread
+    messages.length = 0
+    messages.push(...(data.messages || []))
+  }
+} catch (e) {
+}
 
 const assistant = computed(() => {
   const assistantId = (thread.value?.metadata as any)?.assistantId || ''
@@ -19,18 +28,17 @@ const assistant = computed(() => {
   return assistants.byId(assistantId)
 })
 
-watch(() => data.value, async (neu) => {
-  if  (!neu ) {
-    return
+onMounted(() => {
+  if ( !thread.value ) {
+    useToast().add({
+      timeout: 0,
+      title: 'Error',
+      description: `Unable to load thread: ${threadId}`
+    })
+
+    return navigateTo('/')
   }
 
-  thread.value = neu.thread
-  messages.length = 0
-  messages.push(...(neu.messages || []))
-  scroll()
-})
-
-onMounted(() => {
   scroll()
 })
 
@@ -121,8 +129,7 @@ async function remove() {
 </script>
 
 <template>
-  <div v-if="pending" class="my-10 text-center">Loading…</div>
-  <div v-else>
+  <div>
     <div class="upper" ref="upper">
       <header class="px-5 py-2">
         <h1 class="text-2xl">{{assistant?.name || '?'}}: {{threadId.split('_')[1].substring(0,8)}}
