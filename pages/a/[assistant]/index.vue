@@ -34,7 +34,16 @@ async function send(e: ChatEvent) {
 
     waiting.value = true
 
-    const thread = await threads.create(assistant.id, e.message)
+    const {thread, run} = await threads.create(assistant.id, e.message)
+
+    if ( run.last_error ) {
+      useToast().add({
+        timeout: 0,
+        title: 'Error Sending',
+        description: `${run.last_error.message}`
+      })
+    }
+
     navigateTo({name: 't-thread', params: {thread: thread.id}})
   } catch (e) {
     useToast().add({

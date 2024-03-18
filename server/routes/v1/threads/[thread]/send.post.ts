@@ -22,6 +22,14 @@ export default defineEventHandler(async (event) => {
   const run = await waitForRun(threadId, assistantId)
   console.debug('Ran', run)
 
+  if ( run.status === 'failed' ) {
+    // setResponseStatus(event, 500)
+
+    return {
+      run
+    }
+  }
+
   console.debug('Listing Messages for', threadId)
   const messages = await listMessages(threadId)
   console.debug('Got', messages.length, 'messages')

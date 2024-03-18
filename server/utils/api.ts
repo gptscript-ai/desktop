@@ -54,7 +54,7 @@ export async function waitForRun(threadId: string, assistantId: string) {
   while (!finalized.includes(run.status)) {
     await usleep(500)
     run = await api.beta.threads.runs.retrieve(threadId, run.id)
-    console.log(run.id, run.status)
+    console.debug(run.id, run.status)
   }
 
   return run

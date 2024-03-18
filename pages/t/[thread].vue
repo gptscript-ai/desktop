@@ -79,14 +79,27 @@ async function send(ev: ChatEvent) {
       },
     })
 
+    if ( res.run.last_error ) {
+      useToast().add({
+        timeout: 0,
+        title: 'Error Sending',
+        description: `${res.run.last_error.message}`
+      })
+    }
+
+
     waiting.value = false
-    replaceWith(messages, ...res.messages)
+
+    if ( res.messages ) {
+      replaceWith(messages, ...res.messages)
+    }
+
     scroll()
   }
   catch (e) {
     useToast().add({
       timeout: 0,
-      title: 'Error',
+      title: 'Error Sending',
       description: `${e}`
     })
   }

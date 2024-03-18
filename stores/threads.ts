@@ -48,7 +48,7 @@ export const useThreads = defineStore('threads', {
     },
 
     async create(assistantId: string, message: string) {
-      const thread = await $fetch('/v1/threads', {
+      const {run, thread} = await $fetch('/v1/threads', {
         method: 'post',
         body: {
           assistantId,
@@ -59,7 +59,7 @@ export const useThreads = defineStore('threads', {
       const out = reactive(thread)
       this.list.push(out)
 
-      return out
+      return {run, thread: out}
     },
   },
 })

@@ -81,7 +81,7 @@ function isActive(item: NavItem) {
             {{ item.label }}
           </nuxt-link>
         </div>
-        <div v-if="actionOptions[idx].length" class="actions">
+        <div v-if="actionOptions[idx]?.length" class="actions">
           <UDropdown
             v-model:open="open[idx]"
             :items="actionOptions[idx]"

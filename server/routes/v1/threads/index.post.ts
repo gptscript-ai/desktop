@@ -11,16 +11,20 @@ export default defineEventHandler(async (event) => {
   const json = await readBody(event) as CreateInput
   const messages: ThreadCreateParams.Message[] = []
 
-  if (json.message)
+  if (json.message) {
     messages.push({ content: json.message, role: 'user' })
+  }
 
   const thread = await api.beta.threads.create({
     messages,
     metadata: { assistantId: json.assistantId },
   })
 
-  if (json.message)
-    await waitForRun(thread.id, json.assistantId)
+  if (json.message) {
+    const run = await waitForRun(thread.id, json.assistantId)
 
-  return thread
+    return {run, thread}
+  }
+
+  return {thread}
 })
