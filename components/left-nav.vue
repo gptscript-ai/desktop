@@ -101,6 +101,8 @@ const threadLinks = computed(() => {
 
     if (assistant)
       label = `${assistant.name} ${label}`
+    else
+      label = `(${x.id.replace(/^thread_/, '').substring(0, 4)}) ${label}`
 
     if (!out[group])
       out[group] = []
@@ -129,6 +131,26 @@ const threadActions = [[
     },
   },
 ]]
+
+const showConfirm = ref(false)
+let confirmTimer: NodeJS.Timeout
+function confirmHistory() {
+  showConfirm.value = true
+  confirmTimer = setTimeout(() => {
+    showConfirm.value = false
+  }, 5000)
+}
+function clearHistory() {
+  clearTimeout(confirmTimer)
+  showConfirm.value = false
+
+  eachLimit(allThreads, 4, async (t) => {
+    await threads.remove(t.id)
+  })
+
+  if (useRoute().name.startsWith('t-'))
+    navigateTo('/')
+}
 </script>
 
 <template>
@@ -154,6 +176,13 @@ const threadActions = [[
       <h5>{{ k }}</h5>
       <NavList :links="group" :actions="threadActions" class="mr-2.5" />
     </div>
+
+    <UButton v-if="allThreads.length && !showConfirm" variant="link" color="red" icon="i-heroicons-fire" @click="confirmHistory">
+      Clear chat history
+    </UButton>
+    <UButton v-else-if="showConfirm" variant="link" color="red" icon="i-heroicons-fire" @click="clearHistory">
+      Are you sure?
+    </UButton>
   </div>
 </template>
 
