@@ -95,7 +95,7 @@ const threadLinks = computed(() => {
 
   for (const x of sorted) {
     const group = groupFor(x.created_at)
-    const assistantId = (x.metadata as any).assistantId || ''
+    const assistantId = (x.metadata as any || {}).assistantId || ''
     let label = dayjs(x.created_at * 1000).local().format('h:mma').replace(/m$/, '')
     const assistant = assistants.byId(assistantId)
 
