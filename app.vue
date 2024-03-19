@@ -41,7 +41,7 @@ function toggle() {
         <UButton icon="i-heroicons-bars-3" @click="toggle" />
       </div>
     </header>
-    <nav class="bg-teal-100 dark:bg-teal-900">
+    <nav class="bg-gray-100 dark:bg-gray-900">
       <LeftNav />
     </nav>
     <main>
