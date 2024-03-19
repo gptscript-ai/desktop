@@ -14,3 +14,15 @@ export function removeObject<T>(ary: T[], obj: T): T[] {
 
   return ary
 }
+
+export function removeAt<T>(ary: T[], idx: number, len = 1): T[] {
+  if (idx < 0)
+    throw new Error('Index too low')
+
+  if (idx + len > ary.length)
+    throw new Error('Index + length too high')
+
+  ary.splice(idx, len)
+
+  return ary
+}

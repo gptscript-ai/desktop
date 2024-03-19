@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   ssr: false,
 
   runtimeConfig: {
-    api: process.env.NUXT_API || 'https://api.openai.com/v1',
+    api: process.env.NUXT_API || 'http://localhost:8080/v1',
     apiKey: process.env.NUXT_API_KEY || '',
     organization: process.env.NUXT_ORGANIZATION || '',
   },

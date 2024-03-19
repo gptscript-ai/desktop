@@ -20,7 +20,7 @@ const assistantName = computed(() => {
 
 <template>
   <div class="messages">
-    <div v-for="m in modelValue" :key="m.id" class="message" :class="[m.role]">
+    <div v-for="m in modelValue" :key="m.id" class="message shadow-md" :class="[m.role]">
       <div class="content">
         <template v-for="(c, idx) in m.content" :key="idx">
           <div v-if="c.type === 'text'" v-html="renderMarkdown(c.text.value)" />
@@ -92,14 +92,14 @@ const assistantName = computed(() => {
     &.user {
       grid-column: 1/ span 2;
 
-      background-color: #5676ff;
-      border: 1px solid #0c0eff;
+      background-color: rgba(#2563eb,0.8);
+      border: 1px solid rgba(#2563eb,0.2);
     }
 
     &.assistant {
       grid-column: 2/ span 2;
-      background-color: rgba(128, 128, 128, 0.1);
-      border: 1px solid rgba(128, 128, 128, 0.2);
+      background-color: rgba(#aaa, 0.1);
+      border: 1px solid rgba(#aaa, 0.2);
     }
 
     .date {
@@ -150,4 +150,42 @@ const assistantName = computed(() => {
     .dot:nth-child(2) { animation-delay:0.2s; }
     .dot:nth-child(3) { animation-delay:0.4s; }
   }
+</style>
+
+<style lang="scss">
+.footnotes-sep {
+  margin: 0.5rem 0;
+}
+
+.footnote-ref A {
+  text-decoration: none !important;
+}
+
+.footnotes-list {
+  .footnote-item {
+    font-size: 85%;
+
+    .footnote-backref {
+      display: none;
+    }
+
+    &:hover .footnote-backref {
+      display: initial;
+    }
+
+    SPAN {
+      margin-right: 5px;
+    }
+
+    P {
+      display: inline-block;
+    }
+  }
+}
+
+.footnote-ref A, .footnote-item {
+  &:target {
+    background-color: rgba(yellow, 0.5);
+  }
+}
 </style>

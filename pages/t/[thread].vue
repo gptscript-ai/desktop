@@ -48,7 +48,7 @@ const arrangedMessages = computed(() => {
 })
 
 const previousMessages = computed(() => {
-  return messages.filter(x => x.role === 'user').map(x => x.content?.[0]?.text?.value || '').filter(x => !!x)
+  return arrangedMessages.value.filter(x => x.role === 'user').map(x => x.content?.[0]?.text?.value || '').filter(x => !!x)
 })
 
 function scroll() {

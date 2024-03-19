@@ -11,7 +11,7 @@ const allAssistants = await assistants.findAll()
 const allThreads = await threads.findAll()
 
 const assistantLinks = computed(() => {
-  return allAssistants.sort((a, b) => {
+  return allAssistants.slice().sort((a, b) => {
     const aa = a.name?.toLocaleLowerCase() || ''
     const bb = b.name?.toLocaleLowerCase() || ''
 
@@ -89,19 +89,26 @@ interface ThreadLink {
 }
 
 const threadLinks = computed(() => {
-  const sorted = (allThreads || []).sort((a, b) => b.created_at - a.created_at)
+  const sorted = (allThreads || []).slice().sort((a, b) => b.created_at - a.created_at)
 
   const out: Record<string, ThreadLink[]> = {}
 
   for (const x of sorted) {
     const group = groupFor(x.created_at)
+    const assistantId = (x.metadata as any).assistantId || ''
+    let label = dayjs(x.created_at * 1000).local().format('h:mma').replace(/m$/, '')
+    const assistant = assistants.byId(assistantId)
+
+    if (assistant)
+      label = `${assistant.name} ${label}`
+
     if (!out[group])
       out[group] = []
 
     out[group].push({
       id: x.id,
       group,
-      label: x.id.split('_')[1].substring(0, 8),
+      label,
       icon: 'i-heroicons-chat-bubble-left',
       to: { name: 't-thread', params: { thread: x.id } },
     })
@@ -127,7 +134,13 @@ const threadActions = [[
 <template>
   <div class="mt-2">
     <h4 class="h-8 leading-8">
-      Assistants <UButton size="xs" class="float-right mr-2 align-middle" :to="{ name: 'a-create' }" icon="i-heroicons-plus" />
+      Assistants
+      <UButton
+        size="xs"
+        class="float-right mr-2 align-middle"
+        :to="{ name: 'a-create' }"
+        icon="i-heroicons-plus"
+      />
     </h4>
     <NavList :links="assistantLinks" :actions="assistantActions" class="mr-2.5" />
 

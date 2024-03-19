@@ -3,6 +3,22 @@ import { FlatCompat } from '@eslint/eslintrc'
 
 const compat = new FlatCompat()
 
+const keySpacing = [
+  'warn',
+  {
+    align: {
+      beforeColon: false,
+      afterColon: true,
+      on: 'value',
+      mode: 'minimum',
+    },
+    multiLine: {
+      beforeColon: false,
+      afterColon: true,
+    },
+  },
+]
+
 export default antfu({
   ...compat.config({
     env: {
@@ -13,20 +29,21 @@ export default antfu({
     },
     rules: {
       'n/prefer-global/process': 'off',
-      '@stylistic/ts/brace-style': 'off',
-      '@stylistic/js/key-spacing': 'off',
-      '@stylistic/js/space-in-parens': 'off',
-      '@stylistic/js/template-curly-spacing': 'off',
+      '@stylistic/space-in-parens': 'off',
+      '@stylistic/space-infix-ops': 'warn',
       '@typescript-eslint/brace-style': ['warn', '1tbs'],
       '@typescript-eslint/consistent-type-definitions': 'off',
       'array-bracket-spacing': 'warn',
       'arrow-parens': 'warn',
       'arrow-spacing': ['warn', { before: true, after: true }],
       'block-spacing': ['warn', 'always'],
-      'brace-style': 'off',
+
+      '@stylistic/brace-style': ['warn', '1tbs', { allowSingleLine: false }],
+      'brace-style': ['warn', '1tbs', { allowSingleLine: false }],
+
       'comma-dangle': ['warn', 'only-multiline'],
       'comma-spacing': 'warn',
-      'curly': ['warn', 'all'],
+      'curly': ['error', 'all'],
       'func-call-spacing': ['warn', 'never'],
       'implicit-arrow-linebreak': 'warn',
       'keyword-spacing': 'warn',
@@ -57,21 +74,12 @@ export default antfu({
       'space-infix-ops': 'warn',
       'spaced-comment': 'warn',
       'switch-colon-spacing': 'warn',
+      '@stylistic/template-curly-spacing': ['warn', 'always'],
       'template-curly-spacing': ['warn', 'always'],
       'yield-star-spacing': ['warn', 'both'],
 
-      'key-spacing': ['warn', {
-        align: {
-          beforeColon: false,
-          afterColon: true,
-          on: 'value',
-          mode: 'minimum',
-        },
-        multiLine: {
-          beforeColon: false,
-          afterColon: true,
-        },
-      }],
+      '@stylistic/key-spacing': keySpacing,
+      'key-spacing': keySpacing,
 
       'object-curly-newline': ['warn', {
         ObjectExpression: {

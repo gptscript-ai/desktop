@@ -73,6 +73,7 @@ async function getFileContents(file: File) {
         :variant="variant"
         :loading="waiting"
         :disabled="waiting"
+        v-bind="$attrs"
         @click="show"
       >
         <template v-if="waiting">Uploading…</template>

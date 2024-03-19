@@ -21,8 +21,8 @@ function toggle() {
 </script>
 
 <template>
-  <div ref="root" class="root bg-rubra-100 dark:bg-rubra-950">
-    <header class="flex bg-rubra-200 dark:bg-rubra-900 py-1 pl-4 pr-2.5">
+  <div ref="root" class="root bg-gray-50 dark:bg-gray-950">
+    <header class="flex bg-purple-700 dark:bg-purple-950 text-white py-1 pl-4 pr-2.5">
       <div class="flex-initial">
         <nuxt-link :to="{ name: 'index' }">
           <img src="~/assets/logo.svg" class="h-10 my-1">
@@ -30,20 +30,20 @@ function toggle() {
       </div>
       <div class="flex-initial">
         <nuxt-link :to="{ name: 'index' }">
-          <img src="~/assets/logotype.svg" class="dark:invert" style="height: 30px; margin: 12px 0 8px 5px;">
+          <img src="~/assets/logotype.svg" class="invert" style="height: 30px; margin: 12px 0 8px 5px;">
         </nuxt-link>
       </div>
       <div class="flex-grow" />
+      <div class="flex-initial p-2">
+        <ThemeToggle />
+      </div>
       <div class="toggle flex-initial p-2">
         <UButton icon="i-heroicons-bars-3" @click="toggle" />
       </div>
     </header>
-    <nav class="bg-rubra-200 dark:bg-rubra-900">
+    <nav class="bg-purple-100 dark:bg-purple-900">
       <LeftNav />
     </nav>
-    <aside class="bg-rubra-200 dark:bg-rubra-900 text-right px-2">
-      <ThemeToggle />
-    </aside>
     <main>
       <NuxtPage />
     </main>
@@ -54,15 +54,13 @@ function toggle() {
 <style lang="scss" scoped>
   .root {
     --nav-width: 270px;
-    --aside-height: 50px;
-    --heder-height: 50px;
+    --header-height: 60px;
 
     display: grid;
-    grid-template-areas: "header main"
-                         "nav main"
-                         "aside main";
+    grid-template-areas: "header header"
+                         "nav main";
     grid-template-columns: var(--nav-width) 1fr;
-    grid-template-rows: var(--header-height) 1fr var(--aside-height);
+    grid-template-rows: var(--header-height) 1fr;
     position: absolute;
     top: 0;
     left: 0;
@@ -76,11 +74,6 @@ function toggle() {
     NAV {
       grid-area: nav;
       overflow: auto;
-    }
-
-    ASIDE {
-      grid-area: aside;
-      line-height: var(--aside-height);
     }
 
     MAIN {
@@ -102,9 +95,6 @@ function toggle() {
   // Mobile
   @media all and (max-width: 767px)  {
     .root {
-      grid-template-areas: "header header"
-                         "nav main"
-                         "aside main";
       grid-template-columns: 0 100%;
       transition: grid-template-columns 250ms;
 

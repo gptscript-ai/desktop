@@ -15,27 +15,27 @@ const hasIcons = computed(() => {
   return !!links.find(x => !!x.icon)
 })
 
-function actionOptionsFor(idx: number) {
-  return computed(() => {
-    return (actions || []).map(y => y.map((x: NavAction) => {
-      return {
-        ...x,
-        click(e: Event) {
-          e.stopPropagation()
-          e.preventDefault()
-          x.click(e, links[idx], idx)
-          open[idx] = false
-        },
-      }
-    }))
-  })
+function actionOptionsFor(link: NavOption) {
+  return (actions || []).map(y => y.map((x: NavAction) => {
+    const idx = links.findIndex(x => x === link)
+
+    return {
+      ...x,
+      click(e: Event) {
+        e.stopPropagation()
+        e.preventDefault()
+        x.click(e, link, idx)
+        open[idx] = false
+      },
+    }
+  }))
 }
 
 const actionOptions = computed(() => {
   const out = []
 
   for (let i = 0; i < links.length; i++)
-    out[i] = actionOptionsFor(i).value
+    out[i] = actionOptionsFor(i)
 
   return out
 })
@@ -70,7 +70,7 @@ function isActive(item: NavItem) {
       <li
         v-for="(link, idx) in links"
         :key="idx"
-        class="nav-row relative grid items-center w-full focus:outline-none focus-visible:outline-none dark:focus-visible:outline-none focus-visible:before:ring-inset focus-visible:before:ring-1 focus-visible:before:ring-primary-500 dark:focus-visible:before:ring-primary-400 before:inset-px before:rounded-md disabled:cursor-not-allowed disabled:opacity-75 focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 rounded-md font-medium text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 before:bg-gray-100 dark:before:bg-gray-800 dark:hover:text-white dark:hover:bg-gray-800/50 data-[active=true]:text-gray-900 data-[active=true]:dark:text-white data-[active=true]:bg-gray-100 data-[active=true]:dark:bg-gray-800"
+        class="nav-row relative grid items-center w-full focus:outline-none focus-visible:outline-none dark:focus-visible:outline-none focus-visible:before:ring-inset focus-visible:before:ring-1 focus-visible:before:ring-primary-500 dark:focus-visible:before:ring-primary-400 before:inset-px before:rounded-md disabled:cursor-not-allowed disabled:opacity-75 focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 rounded-md font-medium text-sm text-gray-500 dark:text-gray-300 hover:text-gray-900 before:bg-gray-100 dark:before:bg-gray-800 dark:hover:text-white dark:hover:bg-gray-800/50 data-[active=true]:text-gray-900 data-[active=true]:dark:text-white data-[active=true]:bg-purple-200 data-[active=true]:dark:bg-gray-800 data-[active=true]:font-bold"
         :class="[open[idx] && 'open']"
         :data-active="isActive(link)"
         @click.prevent="e => clicked(e, link, idx)"
@@ -83,10 +83,10 @@ function isActive(item: NavItem) {
             {{ link.label }}
           </nuxt-link>
         </div>
-        <div v-if="actionOptions[idx]?.length" class="actions">
+        <div v-if="actions?.length" class="actions">
           <UDropdown
             v-model:open="open[idx]"
-            :items="actionOptions[idx]"
+            :items="actionOptionsFor(link)"
             :popper="{ offsetDistance: 0, placement: 'bottom-end' }"
           >
             <UButton

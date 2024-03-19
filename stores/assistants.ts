@@ -13,7 +13,7 @@ export const useAssistants = defineStore('assistants', {
   getters: {},
 
   actions: {
-    byId(id: string) {
+    byId(id: string): Assistant {
       return (this.list as Assistant[]).find(x => x.id === id)
     },
 
