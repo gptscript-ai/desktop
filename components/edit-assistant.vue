@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { type InferType, array, object, string } from 'yup'
 import type { FormSubmitEvent } from '#ui/types'
+import { getFileContents } from '@/utils/file'
 
 interface Props {
   id?: string
@@ -164,15 +165,26 @@ function fileError(e: string) {
 }
 
 function onError(event: any) {
-  debugger
   const element = document.getElementById(event.errors[0].id)
   element?.focus()
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+async function onDrop(files: File[]) {
+  const promises = []
+  for (const f of files) {
+    const value = await getFileContents(f)
+    promises.push(upload(value))
+  }
+
+  const all = Promise.all(promises)
 }
 </script>
 
 <template>
   <div class="p-5">
+    <FileDrop @files-dropped="onDrop" />
+
     <h1 class="text-2xl">
       {{ id ? 'Edit' : 'Create' }} Assistant
     </h1>
