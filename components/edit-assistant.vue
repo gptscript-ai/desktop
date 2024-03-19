@@ -24,16 +24,20 @@ let state = reactive({
 })
 
 if (id)
-  state = JSON.parse(JSON.stringify(useAssistants().byId(id)))
+  state = reactive(JSON.parse(JSON.stringify(useAssistants().byId(id))))
 
 if (!state.description)
   state.description = ''
 
 if (!state.tools)
-  state.tools = []
+  state.tools = reactive([])
+
+state.tools = state.tools.map(x => (typeof x === 'object' ? x.type : x)).filter(x => x !== 'retrieval')
+state.tools.push(...(state.gptscript_tools || []))
+delete state.gptscript_tools
 
 if (!state.file_ids)
-  state.file_ids = []
+  state.file_ids = reactive([])
 
 const schema = object({
   name: string().required(),

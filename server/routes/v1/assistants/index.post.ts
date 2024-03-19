@@ -1,7 +1,4 @@
-import { useApi } from '@/server/utils/api'
-
 export default defineEventHandler(async (event) => {
-  const api = useApi()
   const json = await readBody(event)
 
   json.tools = (json.tools || []).map((x) => { return { type: x } }) as any
