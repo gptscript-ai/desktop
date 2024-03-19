@@ -80,7 +80,6 @@ const assistantName = computed(() => {
       // word-break: break-all;
 
       :deep(A) {
-        color: #5676ff;
         text-decoration: underline;
       }
     }
@@ -100,6 +99,10 @@ const assistantName = computed(() => {
       grid-column: 2/ span 2;
       background-color: rgba(#aaa, 0.1);
       border: 1px solid rgba(#aaa, 0.2);
+
+      :deep(A) {
+        color: #5676ff;
+      }
     }
 
     .date {

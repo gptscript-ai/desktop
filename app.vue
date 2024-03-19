@@ -22,7 +22,7 @@ function toggle() {
 
 <template>
   <div ref="root" class="root bg-gray-50 dark:bg-gray-950">
-    <header class="flex bg-purple-700 dark:bg-purple-950 text-white py-1 pl-4 pr-2.5">
+    <header class="flex bg-teal-700 dark:bg-teal-950 text-white py-1 pl-4 pr-2.5">
       <div class="flex-initial">
         <nuxt-link :to="{ name: 'index' }">
           <img src="~/assets/logo.svg" class="h-10 my-1">
@@ -41,7 +41,7 @@ function toggle() {
         <UButton icon="i-heroicons-bars-3" @click="toggle" />
       </div>
     </header>
-    <nav class="bg-purple-100 dark:bg-purple-900">
+    <nav class="bg-teal-100 dark:bg-teal-900">
       <LeftNav />
     </nav>
     <main>
@@ -107,5 +107,38 @@ function toggle() {
       .left-nav { opacity: 1; }
       MAIN { opacity: 0; }
     }
+  }
+</style>
+
+<style lang="scss">
+  :root {
+    --scrollbar-width: 8px;
+    --scrollbar-thumb: #10b981;
+  }
+
+  BODY {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-width) !important;
+    height: var(--scrollbar-width) !important;
+  }
+
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-width) !important;
+    height: var(--scrollbar-width) !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb) !important;
+    border-radius: var(--scrollbar-width);
+    border: 1px solid transparent;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
 </style>

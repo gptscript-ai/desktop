@@ -78,7 +78,10 @@ export const useAssistants = defineStore('assistants', {
     },
 
     async remove(id: string) {
-      await $fetch(`/v1/assistants/${encodeURIComponent(id)}`)
+      try {
+        await $fetch(`/v1/assistants/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      }
+      catch (e) {}
 
       const existing = this.byId(id)
       if (existing)
