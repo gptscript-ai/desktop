@@ -35,7 +35,7 @@ export const useAssistants = defineStore('assistants', {
 
     async findAll(force = false) {
       if (!this.haveAll || force) {
-        const data = (await $fetch(`/v1/assistants`)).map((x: any) => reactive(x)) as Assistant[]
+        const data = (await $fetch(`/v1/assistants`) || []).map((x: any) => reactive(x)) as Assistant[]
 
         replaceWith(this.list, ...data)
       }

@@ -1,7 +1,6 @@
 import markdownIt from 'markdown-it'
 import anchorLinks from 'markdown-it-anchor'
 import linkAttributes from 'markdown-it-link-attributes'
-import footnotes from 'markdown-it-footnote'
 
 import hljs from 'highlight.js/lib/core'
 
@@ -26,6 +25,8 @@ import typescript from 'highlight.js/lib/languages/typescript'
 import wasm from 'highlight.js/lib/languages/wasm'
 import xml from 'highlight.js/lib/languages/xml'
 import yaml from 'highlight.js/lib/languages/yaml'
+
+import footnotes from './markdown-it-footnote'
 import { randomStr } from '@/utils/string'
 
 hljs.registerLanguage('c', c)
@@ -75,29 +76,6 @@ md.use(linkAttributes, {
 
 md.use(anchorLinks)
 md.use(footnotes)
-
-md.renderer.rules.footnote_caption = function (tokens, idx /* , options, env, slf */) {
-  let n = Number(tokens[idx].meta.id + 1).toString()
-  if (tokens[idx].meta.subId > 0)
-    n += `:${tokens[idx].meta.subId}`
-  return `${n}`
-}
-md.renderer.rules.footnote_open = function (tokens, idx, options, env, slf) {
-  let id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf)
-
-  if (tokens[idx].meta.subId > 0)
-    id += `:${tokens[idx].meta.subId}`
-  return `<li id="fn${id}" class="footnote-item"><span>${tokens[idx].meta.label}.</span>`
-}
-
-md.renderer.rules.footnote_anchor = function (tokens, idx, options, env, slf) {
-  let id = slf.rules.footnote_anchor_name(tokens, idx, options, env, slf)
-
-  if (tokens[idx].meta.subId > 0)
-    id += `:${tokens[idx].meta.subId}`
-
-  return ` <a href="#fnref${id}" class="footnote-backref"><i class="i-heroicons-arrow-uturn-up"></i></a>`
-}
 
 export function renderMarkdown(markdown: string) {
   return md.render(markdown, { docId: randomStr() })
