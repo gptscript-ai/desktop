@@ -1,7 +1,11 @@
 {
-  "name": "ui",
+  "name": "@gptscript-ai/ui",
+  "description": "GPTStack UI",
   "type": "module",
+  "repository": "https://github.com/gptscript-ai/ui",
   "private": true,
+  "license": "Apache-2.0",
+  "version": "0.0.0",
   "scripts": {
     "build": "./node_modules/.bin/nuxt build",
     "clean": "./scripts/clean",
