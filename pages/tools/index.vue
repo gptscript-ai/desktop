@@ -54,6 +54,11 @@ async function remove(id: string) {
     <UDivider class="my-2" />
 
     <UTable :rows="allTools" :columns="columns">
+      <template #location-data="{ row }">
+        <a :href="row.url" target="_blank" rel="noopener noreferrer nofollow">
+          {{ (row.url || '').replace(/^https?:\/\//ig, '').replace(/\.gpt$/i, '') }}
+        </a>
+      </template>
       <template #actions-data="{ row }">
         <UButton icon="i-heroicons-trash" class="float-right" @click="remove(row.id)" />
       </template>

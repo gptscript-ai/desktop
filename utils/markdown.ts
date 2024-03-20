@@ -77,5 +77,5 @@ md.use(anchorLinks)
 md.use(footnotes)
 
 export function renderMarkdown(markdown: string) {
-  return md.render(markdown, { docId: randomStr() })
+  return `<div class="markdown">${  md.render(markdown, { docId: randomStr() })  }</div>`
 }

@@ -28,7 +28,7 @@ export default antfu({
     'newline-per-chained-call':      ['error', { ignoreChainWithDepth: 4 }],
     'no-caller':                     'error',
     'no-cond-assign':                ['error', 'except-parens'],
-    'no-console':                    ['error', { allow: ['debug', 'info', 'error', 'error'] }],
+    'no-console':                    ['error', { allow: ['debug', 'info', 'error'] }],
     'no-debugger':                   'error',
     'no-eq-null':                    'error',
     'no-eval':                       'error',

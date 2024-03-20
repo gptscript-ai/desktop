@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import '@/assets/markdown.scss'
+
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 import { UserIcon } from '@heroicons/vue/24/solid'
 import type { ThreadMessage } from 'openai/resources/beta/threads'
@@ -153,42 +155,4 @@ const assistantName = computed(() => {
     .dot:nth-child(2) { animation-delay:0.2s; }
     .dot:nth-child(3) { animation-delay:0.4s; }
   }
-</style>
-
-<style lang="scss">
-.footnotes-sep {
-  margin: 0.5rem 0;
-}
-
-.footnote-ref A {
-  text-decoration: none !important;
-}
-
-.footnotes-list {
-  .footnote-item {
-    font-size: 85%;
-
-    .footnote-backref {
-      display: none;
-    }
-
-    &:hover .footnote-backref {
-      display: initial;
-    }
-
-    SPAN {
-      margin-right: 5px;
-    }
-
-    P {
-      display: inline-block;
-    }
-  }
-}
-
-.footnote-ref A, .footnote-item {
-  &:target {
-    background-color: rgba(yellow, 0.5);
-  }
-}
 </style>

@@ -1,5 +1,4 @@
 import crypto from 'node:crypto'
-import process from 'node:process'
 import isArray from 'lodash-es/isArray'
 
 const alpha = 'abcdefghijklmnopqrstuvwxyz'
@@ -39,7 +38,8 @@ export function random32s(count: number): number[] {
   const out = []
   let i: number
 
-  if (process.server || typeof window === 'undefined') {
+  // eslint-disable-next-line node/prefer-global/process
+  if (process?.server || typeof window === 'undefined') {
     for (i = 0; i < count; i++) {
       out[i] = crypto.randomBytes(4).readUInt32BE(0)
     }
