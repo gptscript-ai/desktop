@@ -1,5 +1,5 @@
 interface FileResult {
-  name: string
+  name : string
   value: string | ArrayBuffer | null
 }
 

@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useFiles = defineStore('files', {
   state: () => {
     return {
-      list: [] as FileObject[],
+      list:    [] as FileObject[],
       haveAll: false,
     }
   },
@@ -13,14 +13,16 @@ export const useFiles = defineStore('files', {
 
   actions: {
     byId(id: string) {
-      return (this.list as FileObject[]).find(x => x.id === id)
+      return (this.list as FileObject[]).find((x) => x.id === id)
     },
 
     async find(id: string) {
       await this.findAll()
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         return existing
+      }
     },
 
     async findAll(force = false) {
@@ -31,13 +33,14 @@ export const useFiles = defineStore('files', {
       }
 
       this.haveAll = true
+
       return this.list as FileObject[]
     },
 
     async upload(name: string, value: string) {
       const res = await $fetch('/v1/files', {
         method: 'POST',
-        body: { name, value },
+        body:   { name, value },
       })
 
       this.list.push(res)
@@ -46,11 +49,13 @@ export const useFiles = defineStore('files', {
     },
 
     async remove(id: string) {
-      await $fetch(`/v1/files/${encodeURIComponent(id)}`)
+      await $fetch(`/v1/files/${ encodeURIComponent(id) }`)
 
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         removeObject(this.list, existing)
+      }
     },
   },
 })

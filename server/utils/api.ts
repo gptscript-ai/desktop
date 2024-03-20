@@ -6,12 +6,13 @@ import { usleep } from '@/utils/promise'
 export function useApi() {
   const cfg = useRuntimeConfig()
 
-  if (!cfg.apiKey)
+  if (!cfg.apiKey) {
     throw new Error('API Key not set')
+  }
 
   const client = new OpenAI({
-    apiKey: cfg.apiKey,
-    baseURL: cfg.api || 'https://api.openai.com/v1',
+    apiKey:       cfg.apiKey,
+    baseURL:      cfg.api || 'https://api.openai.com/v1',
     organization: cfg.organization,
   })
 
@@ -24,6 +25,7 @@ export async function listMessages(threadId: string) {
 
   console.debug('Listing messages for', threadId)
   let res = await api.beta.threads.messages.list(threadId)
+
   console.debug('Got', res.data.length, 'messages')
 
   messages.push(...res.data)
@@ -35,6 +37,7 @@ export async function listMessages(threadId: string) {
   }
 
   console.debug('Returning', messages.length, 'messages')
+
   return messages
 }
 
@@ -45,11 +48,10 @@ export function assistantFor(thread: Thread) {
 }
 
 const finalized = ['cancelled', 'failed', 'completed', 'expired']
+
 export async function waitForRun(threadId: string, assistantId: string) {
   const api = useApi()
-  let run = await api.beta.threads.runs.create(threadId, {
-    assistant_id: assistantId,
-  })
+  let run = await api.beta.threads.runs.create(threadId, { assistant_id: assistantId })
 
   while (!finalized.includes(run.status)) {
     await usleep(500)
@@ -62,19 +64,20 @@ export async function waitForRun(threadId: string, assistantId: string) {
 
 function resolve(from: string, to: string) {
   const res = new URL(to, new URL(from, 'resolve://'))
+
   if (res.protocol === 'resolve:') {
     const { pathname, search, hash } = res
+
     return pathname + search + hash
   }
+
   return res.toString()
 }
 
 export async function apiFetch(to: string, method = 'GET', body?: any) {
   const api = (useRuntimeConfig().api || '').replace(/\/+$/, '').replace(/^\/v1(\/rubra)?(\/x)?/ig, '')
   const url = resolve(api, to)
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-  }
+  const headers: Record<string, string> = { Accept: 'application/json' }
 
   if (body) {
     headers['Content-Type'] = 'application/json'
@@ -88,12 +91,12 @@ export async function apiFetch(to: string, method = 'GET', body?: any) {
 
   try {
     out = JSON.parse(txt)
-  }
-  catch (e) {
+  } catch (e) {
     out = { type: 'error', message: txt }
   }
 
   Object.defineProperty(out, '_status', { enumerable: false, configurable: true, value: res.status })
+
   return out
 }
 
@@ -105,7 +108,7 @@ export async function apiList<T>(to: string) {
   const data: T[] = res.data
 
   while (res.object === 'list' && res.has_more) {
-    res = await apiFetch(`${to}?after=${res.last_id}`)
+    res = await apiFetch(`${ to }?after=${ res.last_id }`)
     setResponseStatus(res._status)
     data.push(...res.data)
   }

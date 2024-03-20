@@ -1,7 +1,7 @@
 import type { ToolObject } from '@/config/types'
 import { apiFetch } from '~/server/utils/api'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   const tools: ToolObject[] = []
 
   console.debug('Listing tools')

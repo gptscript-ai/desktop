@@ -15,39 +15,43 @@ const allModels = await useModels().findAll()
 const allTools = await useTools().findAll()
 
 let state = reactive({
-  name: '',
-  model: allModels.find(x => x.id === 'gpt-4') ? 'gpt-4' : allModels[0]?.id || '',
-  description: '',
+  name:         '',
+  model:        allModels.find((x) => x.id === 'gpt-4') ? 'gpt-4' : allModels[0]?.id || '',
+  description:  '',
   instructions: '',
-  tools: [] as string[],
-  file_ids: [] as string[],
-  metadata: {} as Record<string, string>,
+  tools:        [] as string[],
+  file_ids:     [] as string[],
+  metadata:     {} as Record<string, string>,
 })
 
-if (id)
+if (id) {
   state = reactive(JSON.parse(JSON.stringify(useAssistants().byId(id))))
+}
 
-if (!state.description)
+if (!state.description) {
   state.description = ''
+}
 
-if (!state.tools)
+if (!state.tools) {
   state.tools = reactive([])
+}
 
-state.tools = state.tools.map(x => (typeof x === 'object' ? x.type : x)).filter(x => x !== 'retrieval')
+state.tools = state.tools.map((x) => (typeof x === 'object' ? x.type : x)).filter((x) => x !== 'retrieval')
 state.tools.push(...(state.gptscript_tools || []))
 delete state.gptscript_tools
 
-if (!state.file_ids)
+if (!state.file_ids) {
   state.file_ids = reactive([])
+}
 
 const schema = object({
-  name: string().required(),
-  model: string().required(),
-  description: string().optional(),
+  name:         string().required(),
+  model:        string().required(),
+  description:  string().optional(),
   instructions: string().optional(),
-  tools: array(string()).optional(),
-  file_ids: array(string()).optional(),
-  metadata: object(),
+  tools:        array(string()).optional(),
+  file_ids:     array(string()).optional(),
+  metadata:     object(),
 })
 
   type Schema = InferType<typeof schema>
@@ -59,46 +63,64 @@ window.form = form
 window.state = state
 
 interface ToolOption {
-  label: string
-  value: string
-  index?: number
-  builtin?: boolean
+  label     : string
+  value     : string
+  index?    : number
+  builtin?  : boolean
   gptscript?: boolean
 }
 
 const toolOptions = computed(() => {
   const out: ToolOption[] = [
-    { index: 0, label: 'Internet Search (good for broad searches)', value: 'internet_search', builtin: true, gptscript: true },
-    { index: 1, label: 'Website Browsing (good for intranet sites)', value: 'site_browsing', builtin: true, gptscript: true },
-    { index: 2, label: 'Code Interpreter', value: 'code_interpreter', builtin: true, gptscript: false },
+    {
+      index:     0,
+      label:     'Internet Search (good for broad searches)',
+      value:     'internet_search',
+      builtin:   true,
+      gptscript: true,
+    },
+    {
+      index:     1,
+      label:     'Website Browsing (good for intranet sites)',
+      value:     'site_browsing',
+      builtin:   true,
+      gptscript: true,
+    },
+    {
+      index:     2,
+      label:     'Code Interpreter',
+      value:     'code_interpreter',
+      builtin:   true,
+      gptscript: false,
+    },
   ]
 
   for (const t of allTools) {
     out.push({
-      label: t.name || t.id,
-      value: t.id,
+      label:   t.name || t.id,
+      value:   t.id,
       builtin: false,
     })
   }
 
   out.sort((a, b) => {
-    if (a.builtin !== b.builtin)
+    if (a.builtin !== b.builtin) {
       return +(b.builtin || false) - +(a.builtin || false)
-    else if (a.index && b.index)
+    } else if (a.index && b.index) {
       return (a.index || 0) - (b.index || 0)
-
-    else
+    } else {
       return a.label.localeCompare(b.label)
+    }
   })
 
   return out
 })
 
 const modelOptions = computed(() => {
-  return allModels.sort((a, b) => a.id.localeCompare(b.id))
+  return allModels.slice().sort((a, b) => a.id.localeCompare(b.id))
 })
 
-async function go(e: FormSubmitEvent<Schema>) {
+async function go(_e: FormSubmitEvent<Schema>) {
   const body: any = { ...state }
 
   saving.value = true
@@ -107,11 +129,13 @@ async function go(e: FormSubmitEvent<Schema>) {
   const gptScriptTools: string[] = []
 
   for (const t of body.tools) {
-    const entry = toolOptions.value.find(x => x.value === t)
-    if (entry && entry.builtin && !entry.gptscript)
+    const entry = toolOptions.value.find((x) => x.value === t)
+
+    if (entry && entry.builtin && !entry.gptscript) {
       builtinTools.push(t)
-    else
+    } else {
       gptScriptTools.push(t)
+    }
   }
 
   body.tools = builtinTools || []
@@ -120,21 +144,20 @@ async function go(e: FormSubmitEvent<Schema>) {
   try {
     let res: any
 
-    if (id)
+    if (id) {
       res = await assistants.update(id, body)
-    else
+    } else {
       res = await assistants.create(body)
+    }
 
     navigateTo({ name: 'a-assistant', params: { assistant: res.id } })
-  }
-  catch (e) {
+  } catch (e) {
     useToast().add({
-      timeout: 0,
-      title: 'Error Saving Assistant',
-      description: `${e}`,
+      timeout:     0,
+      title:       'Error Saving Assistant',
+      description: `${ e }`,
     })
-  }
-  finally {
+  } finally {
     saving.value = false
   }
 }
@@ -142,42 +165,44 @@ async function go(e: FormSubmitEvent<Schema>) {
 const files = useFiles()
 const uploadWaiting = ref(false)
 
-async function upload(f: { name: string, value: string }) {
+async function upload(f: FileResult) {
   uploadWaiting.value = true
   try {
     const file = await files.upload(f.name, f.value)
+
     state.file_ids.push(file.id)
-  }
-  catch (e) {
-    fileError(`${e}`)
-  }
-  finally {
+  } catch (e) {
+    fileError(`${ e }`)
+  } finally {
     uploadWaiting.value = false
   }
 }
 
 function fileError(e: string) {
   useToast().add({
-    timeout: 0,
-    title: 'Error Uploading',
+    timeout:     0,
+    title:       'Error Uploading',
     description: e,
   })
 }
 
 function onError(event: any) {
   const element = document.getElementById(event.errors[0].id)
+
   element?.focus()
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
 async function onDrop(files: File[]) {
   const promises = []
+
   for (const f of files) {
     const value = await getFileContents(f)
+
     promises.push(upload(value))
   }
 
-  const all = Promise.all(promises)
+  Promise.all(promises)
 }
 </script>
 

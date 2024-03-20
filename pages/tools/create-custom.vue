@@ -3,26 +3,24 @@ import { type InferType, object, string } from 'yup'
 import type { FormSubmitEvent } from '#ui/types'
 
 const schema = object({
-  name: string().required(),
+  name:        string().required(),
   description: string().optional(),
-  contents: string().optional(),
-  subtool: string().optional(),
+  contents:    string().optional(),
+  subtool:     string().optional(),
 })
 
   type Schema = InferType<typeof schema>
 
 const state = reactive({
-  name: '',
+  name:        '',
   description: '',
-  contents: '',
-  subtool: '',
+  contents:    '',
+  subtool:     '',
 })
 
 window.state = state
 
-const toolOptions = ['code_interpreter', 'retrieval', 'internet_search', 'site_browsing']
-
-async function go(e: FormSubmitEvent<Schema>) {
+async function go(_e: FormSubmitEvent<Schema>) {
 
   // const res = await assistants.create(state)
   // navigateTo({name: 'a-assistant', params: { assistant: res.id }})

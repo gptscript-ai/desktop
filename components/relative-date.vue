@@ -13,15 +13,18 @@ const parsed = computed(() => {
 
 const long = computed(() => {
   const v = parsed.value
+
   return v.format('ddd MMM D, YYYY h:mm:ss A')
 })
 
 const short = computed(() => {
   const v = parsed.value
-  if (v.isToday())
+
+  if (v.isToday()) {
     return v.format('h:mm:ss A')
-  else
+  } else {
     return long.value
+  }
 })
 </script>
 

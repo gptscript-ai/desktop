@@ -8,7 +8,7 @@ import { renderMarkdown } from '@/utils/markdown'
 interface Props {
   assistant?: Assistant
   modelValue: ThreadMessage[]
-  waiting?: boolean
+  waiting?  : boolean
 }
 
 const { assistant, modelValue, waiting = false } = defineProps<Props>()

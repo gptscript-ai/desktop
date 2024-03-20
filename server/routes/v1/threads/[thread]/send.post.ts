@@ -15,23 +15,23 @@ export default defineEventHandler(async (event) => {
   console.debug('Sending message to', threadId)
   await api.beta.threads.messages.create(threadId, {
     content: json.message,
-    role: 'user',
+    role:    'user',
   })
 
   console.debug('Running', threadId)
   const run = await waitForRun(threadId, assistantId)
+
   console.debug('Ran', run)
 
   if (run.status === 'failed') {
     // setResponseStatus(event, 500)
 
-    return {
-      run,
-    }
+    return { run }
   }
 
   console.debug('Listing Messages for', threadId)
   const messages = await listMessages(threadId)
+
   console.debug('Got', messages.length, 'messages')
 
   return {

@@ -10,14 +10,16 @@ const columns = [
 ]
 
 const suffixes = ['B', 'KB', 'MB', 'GB']
+
 function formatBytes(n = 0) {
   let idx = 0
+
   while (n > 1000 && idx < suffixes.length) {
     idx++
     n /= 1000
   }
 
-  return `${Math.ceil(n)} ${suffixes[idx]}`
+  return `${ Math.ceil(n) } ${ suffixes[idx] }`
 }
 
 async function remove(id: string) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
-import type { MessageContentText, ThreadMessage, Thread } from 'openai/resources/beta/threads';
+import type { MessageContentText, Thread, ThreadMessage } from 'openai/resources/beta/threads'
 
 const route = useRoute()
 const threadId = fromArray(route.params.thread)
@@ -12,9 +12,9 @@ const upper = ref<HTMLDivElement>()
 const waiting = ref(false)
 
 try {
-  const data = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}`)
+  const data = await $fetch(`/v1/threads/${ encodeURIComponent(threadId) }`)
 
-  if ( data ) {
+  if (data) {
     thread.value = data.thread
     messages.length = 0
     messages.push(...(data.messages || []))
@@ -31,11 +31,11 @@ const assistant = computed(() => {
 useHead({ title: threadName(thread.value, assistant.value) })
 
 onMounted(() => {
-  if ( !thread.value ) {
+  if (!thread.value) {
     useToast().add({
-      timeout: 0,
-      title: 'Error',
-      description: `Unable to load thread: ${threadId}`
+      timeout:     0,
+      title:       'Error',
+      description: `Unable to load thread: ${ threadId }`,
     })
 
     return navigateTo('/')
@@ -50,17 +50,18 @@ const arrangedMessages = computed(() => {
 })
 
 const previousMessages = computed(() => {
-  return arrangedMessages.value.filter(x => x.role === 'user').map(x => x.content?.[0]?.text?.value || '').filter(x => !!x)
+  return arrangedMessages.value.filter((x) => x.role === 'user').map((x) => x.content?.[0]?.text?.value || '').filter((x) => !!x)
 })
 
 function scroll() {
   nextTick(() => {
     const div = upper.value
-    if ( !div ) {
+
+    if (!div) {
       return
     }
 
-    div.scrollBy({top: Number.MAX_SAFE_INTEGER})
+    div.scrollBy({ top: Number.MAX_SAFE_INTEGER })
   })
 }
 
@@ -70,86 +71,81 @@ async function send(ev: ChatEvent) {
 
     messages.unshift({
       assistant_id: '',
-      content: <MessageContentText[]>[{
-        text: {value: ev.message},
-        type: 'text'
-      }],
-      created_at: dayjs().valueOf()/1000,
-      file_ids: [],
-      id: 'pending',
-      metadata: {},
-      object: 'thread.message',
-      role: 'user',
-      run_id: '',
-      thread_id: `${thread?.id}`,
+      content:      [{
+        text: { value: ev.message },
+        type: 'text',
+      }] as MessageContentText[],
+      created_at: dayjs().valueOf() / 1000,
+      file_ids:   [],
+      id:         'pending',
+      metadata:   {},
+      object:     'thread.message',
+      role:       'user',
+      run_id:     '',
+      thread_id:  `${ thread.value?.id }`,
     })
 
     scroll()
 
-    const res = await $fetch(`/v1/threads/${encodeURIComponent(threadId)}/send`, {
+    const res = await $fetch(`/v1/threads/${ encodeURIComponent(threadId) }/send`, {
       method: 'post',
-      body: {
-        message: ev.message
-      },
+      body:   { message: ev.message },
     })
 
-    if ( res.run.last_error ) {
+    if (res.run.last_error) {
       useToast().add({
-        timeout: 0,
-        title: 'Error Sending',
-        description: `${res.run.last_error.message}`
+        timeout:     0,
+        title:       'Error Sending',
+        description: `${ res.run.last_error.message }`,
       })
     }
 
-
     waiting.value = false
 
-    if ( res.messages ) {
+    if (res.messages) {
       replaceWith(messages, ...res.messages)
     }
 
     scroll()
-  }
-  catch (e) {
+  } catch (e) {
     useToast().add({
-      timeout: 0,
-      title: 'Error Sending',
-      description: `${e}`
+      timeout:     0,
+      title:       'Error Sending',
+      description: `${ e }`,
     })
-  }
-  finally {
+  } finally {
     ev.cb()
     waiting.value = false
   }
 }
 
 async function remove() {
-  await $fetch(`/v1/threads/${encodeURIComponent(threadId)}`, {method: 'DELETE'})
+  await $fetch(`/v1/threads/${ encodeURIComponent(threadId) }`, { method: 'DELETE' })
   navigateTo('/')
 }
-
 </script>
 
 <template>
   <div>
-    <div class="upper" ref="upper">
+    <div ref="upper" class="upper">
       <header class="px-5 py-2">
-        <h1 class="text-2xl">{{assistant?.name || '?'}}: {{threadId.split('_')[1].substring(0,8)}}
+        <h1 class="text-2xl">
+          {{ assistant?.name || '?' }}: {{ threadId.split('_')[1].substring(0, 8) }}
           <div class="float-right">
             <UButton
               icon="i-heroicons-trash"
               aria-label="Delete"
-              @click="remove"
               size="xs"
+              @click="remove"
             />
           </div>
         </h1>
-        <UDivider class="mt-2"/>
+        <UDivider class="mt-2" />
       </header>
-      <Messages :assistant="assistant" :waiting="waiting" v-model="arrangedMessages"/>
+      <Messages v-model="arrangedMessages" :assistant="assistant" :waiting="waiting" />
     </div>
 
-    <ChatInput @message="send" :previous="previousMessages"/>
+    <ChatInput :previous="previousMessages" @message="send" />
   </div>
 </template>
 

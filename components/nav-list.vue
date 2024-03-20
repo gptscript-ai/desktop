@@ -7,17 +7,17 @@ const router = useRouter()
 const open = reactive<boolean[]>([])
 
 interface Props {
-  links: NavOption[]
+  links   : NavOption[]
   actions?: NavAction[]
 }
 
 const hasIcons = computed(() => {
-  return !!links.find(x => !!x.icon)
+  return !!links.find((x) => !!x.icon)
 })
 
 function actionOptionsFor(link: NavOption) {
-  return (actions || []).map(y => y.map((x: NavAction) => {
-    const idx = links.findIndex(x => x === link)
+  return (actions || []).map((y) => y.map((x: NavAction) => {
+    const idx = links.findIndex((x) => x === link)
 
     return {
       ...x,
@@ -31,21 +31,13 @@ function actionOptionsFor(link: NavOption) {
   }))
 }
 
-const actionOptions = computed(() => {
-  const out = []
-
-  for (let i = 0; i < links.length; i++)
-    out[i] = actionOptionsFor(i)
-
-  return out
-})
-
 function clicked(e: MouseEvent, item: NavItem, _idx: number) {
   const isActions = !!(e.target as HTMLElement)?.closest('.actions')
 
   if (isActions) {
     e.preventDefault()
     e.stopPropagation()
+
     return
   }
 
@@ -55,8 +47,9 @@ function clicked(e: MouseEvent, item: NavItem, _idx: number) {
 function isActive(item: NavItem) {
   const active = router.resolve(router.currentRoute)
 
-  if (active.href === '/')
+  if (active.href === '/') {
     return false
+  }
 
   const cur = router.resolve(item.to)
 

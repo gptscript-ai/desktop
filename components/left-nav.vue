@@ -19,9 +19,9 @@ const assistantLinks = computed(() => {
   }).map((x) => {
     return {
       label: x.name,
-      icon: 'i-heroicons-sparkles',
-      to: { name: 'a-assistant', params: { assistant: x.id } },
-      id: x.id,
+      icon:  'i-heroicons-sparkles',
+      to:    { name: 'a-assistant', params: { assistant: x.id } },
+      id:    x.id,
     }
   })
 })
@@ -29,19 +29,20 @@ const assistantLinks = computed(() => {
 const assistantActions = [[
   {
     label: 'Edit',
-    icon: 'i-heroicons-pencil',
+    icon:  'i-heroicons-pencil',
     click: (_, link: object) => {
       navigateTo({ name: 'a-assistant-edit', params: { assistant: link.id } })
     },
   },
   {
     label: 'Remove',
-    icon: 'i-heroicons-trash',
+    icon:  'i-heroicons-trash',
     click: async (_: Event, link: object) => {
       await assistants.remove(link.id)
 
-      if (router.currentRoute.value.name === 'a-assistant' || router.currentRoute.value.name.startsWith('a-assistant-'))
+      if (router.currentRoute.value.name === 'a-assistant' || router.currentRoute.value.name.startsWith('a-assistant-')) {
         navigateTo('/')
+      }
     },
   },
 ]]
@@ -50,13 +51,13 @@ const moreLinks = computed(() => {
   return [
     {
       label: 'Files',
-      icon: 'i-heroicons-document-text',
-      to: { name: 'files' },
+      icon:  'i-heroicons-document-text',
+      to:    { name: 'files' },
     },
     {
       label: 'Tools',
-      icon: 'i-heroicons-wrench',
-      to: { name: 'tools' },
+      icon:  'i-heroicons-wrench',
+      to:    { name: 'tools' },
     },
   ]
 })
@@ -68,24 +69,27 @@ function groupFor(ts: number) {
   const yesterday = midnight.subtract(1, 'day')
   const last7 = midnight.subtract(7, 'day')
 
-  if (t.isAfter(midnight))
+  if (t.isAfter(midnight)) {
     return 'Today'
+  }
 
-  if (t.isAfter(yesterday))
+  if (t.isAfter(yesterday)) {
     return 'Yesterday'
+  }
 
-  if (t.isAfter(last7))
+  if (t.isAfter(last7)) {
     return 'Last 7 Days'
+  }
 
   return 'Older'
 }
 
 interface ThreadLink {
-  id: string
+  id   : string
   group: string
   label: string
-  icon: string
-  to: RouteLocationRaw
+  icon : string
+  to   : RouteLocationRaw
 }
 
 const threadLinks = computed(() => {
@@ -99,15 +103,16 @@ const threadLinks = computed(() => {
     const assistant = assistants.byId(assistantId)
     const label = threadName(x, assistant)
 
-    if (!out[group])
+    if (!out[group]) {
       out[group] = []
+    }
 
     out[group].push({
-      id: x.id,
+      id:   x.id,
       group,
       label,
       icon: 'i-heroicons-chat-bubble-left',
-      to: { name: 't-thread', params: { thread: x.id } },
+      to:   { name: 't-thread', params: { thread: x.id } },
     })
   }
 
@@ -117,24 +122,27 @@ const threadLinks = computed(() => {
 const threadActions = [[
   {
     label: 'Remove',
-    icon: 'i-heroicons-trash',
+    icon:  'i-heroicons-trash',
     click: async (_: Event, link: object) => {
       await threads.remove(link.id)
 
-      if (router.currentRoute.value.name === 't-thread' && router.currentRoute.value.params.thread === link.id)
+      if (router.currentRoute.value.name === 't-thread' && router.currentRoute.value.params.thread === link.id) {
         navigateTo('/')
+      }
     },
   },
 ]]
 
 const showConfirm = ref(false)
 let confirmTimer: NodeJS.Timeout
+
 function confirmHistory() {
   showConfirm.value = true
   confirmTimer = setTimeout(() => {
     showConfirm.value = false
   }, 5000)
 }
+
 function clearHistory() {
   clearTimeout(confirmTimer)
   showConfirm.value = false
@@ -143,8 +151,9 @@ function clearHistory() {
     await threads.remove(t.id)
   })
 
-  if (useRoute().name.startsWith('t-'))
+  if (useRoute().name.startsWith('t-')) {
     navigateTo('/')
+  }
 }
 </script>
 

@@ -20,18 +20,18 @@ async function send(e: ChatEvent) {
     clear(fakeMessages)
     fakeMessages.push({
       assistant_id: '',
-      content: [{
+      content:      [{
         text: { value: e.message },
         type: 'text',
       }] as MessageContentText[],
       created_at: dayjs().valueOf() / 1000,
-      file_ids: [],
-      id: 'pending',
-      metadata: {},
-      object: 'thread.message',
-      role: 'user',
-      run_id: '',
-      thread_id: '',
+      file_ids:   [],
+      id:         'pending',
+      metadata:   {},
+      object:     'thread.message',
+      role:       'user',
+      run_id:     '',
+      thread_id:  '',
     })
 
     waiting.value = true
@@ -40,22 +40,20 @@ async function send(e: ChatEvent) {
 
     if (run?.last_error) {
       useToast().add({
-        timeout: 0,
-        title: 'Error Sending',
-        description: `${run.last_error.message}`,
+        timeout:     0,
+        title:       'Error Sending',
+        description: `${ run.last_error.message }`,
       })
     }
 
     navigateTo({ name: 't-thread', params: { thread: thread.id } })
-  }
-  catch (e) {
+  } catch (e) {
     useToast().add({
-      timeout: 0,
-      title: 'Error',
-      description: `${e}`,
+      timeout:     0,
+      title:       'Error',
+      description: `${ e }`,
     })
-  }
-  finally {
+  } finally {
     waiting.value = false
     e.cb()
   }

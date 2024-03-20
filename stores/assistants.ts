@@ -5,7 +5,7 @@ import { removeObject } from '@/utils/array'
 export const useAssistants = defineStore('assistants', {
   state: () => {
     return {
-      list: [] as Assistant[],
+      list:    [] as Assistant[],
       haveAll: false,
     }
   },
@@ -14,22 +14,26 @@ export const useAssistants = defineStore('assistants', {
 
   actions: {
     byId(id: string): Assistant {
-      return (this.list as Assistant[]).find(x => x.id === id)
+      return (this.list as Assistant[]).find((x) => x.id === id)
     },
 
     async find(id: string): Assistant {
       let existing = this.byId(id)
-      if (existing)
-        return existing
 
-      const data = reactive<Assistant>(await $fetch(`/v1/assistants/${encodeURIComponent(id)}`))
+      if (existing) {
+        return existing
+      }
+
+      const data = reactive<Assistant>(await $fetch(`/v1/assistants/${ encodeURIComponent(id) }`))
 
       // It might have showed up since making the call, and not worth being totally correct for now…
       existing = this.byId(id)
-      if (existing)
+      if (existing) {
         return existing
+      }
 
       this.list.push(data)
+
       return data
     },
 
@@ -41,6 +45,7 @@ export const useAssistants = defineStore('assistants', {
       }
 
       this.haveAll = true
+
       return this.list as Assistant[]
     },
 
@@ -51,13 +56,14 @@ export const useAssistants = defineStore('assistants', {
       })
 
       const out = reactive(neu)
+
       this.list.push(out)
 
       return out
     },
 
     async update(id: string, body: Partial<Assistant>) {
-      const neu = await $fetch(`/v1/assistants/${encodeURIComponent(id)}`, {
+      const neu = await $fetch(`/v1/assistants/${ encodeURIComponent(id) }`, {
         method: 'put',
         body,
       })
@@ -68,9 +74,9 @@ export const useAssistants = defineStore('assistants', {
         Object.apply(existing, neu as any)
 
         return existing
-      }
-      else {
+      } else {
         const out = reactive(neu)
+
         this.list.push(out)
 
         return out
@@ -79,13 +85,14 @@ export const useAssistants = defineStore('assistants', {
 
     async remove(id: string) {
       try {
-        await $fetch(`/v1/assistants/${encodeURIComponent(id)}`, { method: 'DELETE' })
-      }
-      catch (e) {}
+        await $fetch(`/v1/assistants/${ encodeURIComponent(id) }`, { method: 'DELETE' })
+      } catch (e) {}
 
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         removeObject(this.list, existing)
+      }
     },
   },
 })

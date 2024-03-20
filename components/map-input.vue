@@ -4,14 +4,14 @@ import isArray from 'lodash-es/isArray.js'
 import { splitLimit } from '@/utils/string'
 
 interface Props {
-  modelValue: Record<string, string> | string[]
-  keyLabel?: string
-  valueLabel?: string
-  addLabel?: string
+  modelValue    : Record<string, string> | string[]
+  keyLabel?     : string
+  valueLabel?   : string
+  addLabel?     : string
   addInitialRow?: boolean
   showSeparator?: boolean
-  as?: 'map' | 'array'
-  separator?: string
+  as?           : 'map' | 'array'
+  separator?    : string
 }
 
 const {
@@ -25,12 +25,13 @@ const {
   separator = '=',
 } = defineProps<Props>()
 
+// eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, string> | string[]): void
 }>()
 
 interface Entry {
-  key: string
+  key  : string
   value: string
 }
 
@@ -39,34 +40,37 @@ const rows = reactive<Entry[]>([])
 if (isArray(initialValue)) {
   for (const kv of initialValue || []) {
     const [key, value] = splitLimit(kv, separator, 2)
+
     rows.push({ key, value })
   }
-}
-else {
-  for (const k in initialValue || {})
+} else {
+  for (const k in initialValue || {}) {
     rows.push({ key: k, value: initialValue[k] })
+  }
 }
 
-if (addInitialRow && !rows.length)
+if (addInitialRow && !rows.length) {
   rows.push({ key: '', value: '' })
+}
 
 watchEffect(() => {
   if (as === 'map') {
     const out: Record<string, string> = {}
 
     for (const row of rows) {
-      if (!isEmpty(row.key) && !isEmpty(row.value))
+      if (!isEmpty(row.key) && !isEmpty(row.value)) {
         out[row.key] = row.value
+      }
     }
 
     emit('update:modelValue', out)
-  }
-  else {
+  } else {
     const out: string[] = []
 
     for (const row of rows) {
-      if (!isEmpty(row.key) && !isEmpty(row.value))
-        out.push(`${row.key}${separator}${row.value}`)
+      if (!isEmpty(row.key) && !isEmpty(row.value)) {
+        out.push(`${ row.key }${ separator }${ row.value }`)
+      }
     }
 
     emit('update:modelValue', out)
@@ -84,8 +88,9 @@ function remove(idx: number) {
 function onPaste(idx: number, e: ClipboardEvent) {
   const val = e.clipboardData?.getData('text') || ''
 
-  if (!val.includes(separator))
+  if (!val.includes(separator)) {
     return
+  }
 
   e.preventDefault()
   e.stopPropagation()
@@ -96,6 +101,7 @@ function onPaste(idx: number, e: ClipboardEvent) {
 
   for (const line of lines) {
     const [key, value] = splitLimit(line, separator, 2)
+
     rows.push({ key, value })
   }
 

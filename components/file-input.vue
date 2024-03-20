@@ -1,30 +1,38 @@
 <script lang="ts" setup>
 import { getFileContents } from '@/utils/file'
 
-const { icon = true, size = 'sm', variant = 'solid', waiting = false } = defineProps<Props>()
+const {
+  icon = true,
+  size = 'sm',
+  variant = 'solid',
+  waiting = false,
+} = defineProps<Props>()
 
 const emit = defineEmits(['error', 'file'])
 
 const uploader = ref<HTMLInputElement>()
 
 interface Props {
-  icon?: boolean
-  size?: string
+  icon?   : boolean
+  size?   : string
   variant?: string
   waiting?: boolean
 }
 
 function show() {
-  if (!uploader.value)
+  if (!uploader.value) {
     return
+  }
 
   uploader.value.click()
 }
 
 async function fileChange(event: InputEvent) {
   const input = event.target as HTMLInputElement
-  if (!input)
+
+  if (!input) {
     return
+  }
 
   const files = Array.from(input.files || [])
 
@@ -32,10 +40,10 @@ async function fileChange(event: InputEvent) {
     const asyncFileContents = files.map(getFileContents)
     const fileContents = await Promise.all(asyncFileContents)
 
-    for (const f of fileContents)
+    for (const f of fileContents) {
       emit('file', f)
-  }
-  catch (error) {
+    }
+  } catch (error) {
     emit('error', error)
   }
 }

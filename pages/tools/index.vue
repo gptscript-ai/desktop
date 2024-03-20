@@ -17,9 +17,9 @@ const addOptions = [[
     },
   },
   {
-    label: 'Custom',
+    label:    'Custom',
     disabled: true,
-    click: () => {
+    click:    () => {
       navigateTo({ name: 'tools-create-custom' })
     },
   },

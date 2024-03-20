@@ -7,35 +7,33 @@ const tools = useTools()
 const saving = ref(false)
 
 const schema = object({
-  url: string().required(),
-  subtool: string().optional(),
+  url:      string().required(),
+  subtool:  string().optional(),
   env_vars: array(string()).optional(),
 })
 
   type Schema = InferType<typeof schema>
 
 const state = reactive<ToolObject>({
-  url: '',
+  url:      '',
   env_vars: [] as string[],
 })
 
 window.state = state
 
-async function go(e: FormSubmitEvent<Schema>) {
+async function go(_e: FormSubmitEvent<Schema>) {
   saving.value = true
 
   try {
     await tools.create(state as ToolObject)
     navigateTo({ name: 'tools' })
-  }
-  catch (e) {
+  } catch (e) {
     useToast().add({
-      timeout: 0,
-      title: 'Error Saving Tool',
-      description: `${e}`,
+      timeout:     0,
+      title:       'Error Saving Tool',
+      description: `${ e }`,
     })
-  }
-  finally {
+  } finally {
     saving.value = false
   }
 }

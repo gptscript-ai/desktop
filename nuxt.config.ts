@@ -6,21 +6,21 @@ dotenv.config()
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   components: true,
-  ssr: false,
+  ssr:        false,
 
   runtimeConfig: {
-    api: process.env.NUXT_API || 'http://localhost:8080/v1',
-    apiKey: process.env.NUXT_API_KEY || '',
+    api:          process.env.NUXT_API || 'http://localhost:8080/v1',
+    apiKey:       process.env.NUXT_API_KEY || '',
     organization: process.env.NUXT_ORGANIZATION || '',
   },
 
   devtools: { enabled: true },
 
   devServer: {
-    port: 3100,
+    port:  3100,
     https: {
       cert: 'server/tls/localhost.crt',
-      key: 'server/tls/localhost.key',
+      key:  'server/tls/localhost.key',
     },
   },
 
@@ -32,22 +32,14 @@ export default defineNuxtConfig({
 
   vite: {
     build: {
-      manifest: true,
-      ssrManifest: true,
-      sourcemap: true,
-      rollupOptions: {
-        output: {
-          sourcemap: true,
-        },
-      },
+      manifest:      true,
+      ssrManifest:   true,
+      sourcemap:     true,
+      rollupOptions: { output: { sourcemap: true } },
     },
 
-    css: {
-      devSourcemap: true,
-    },
+    css: { devSourcemap: true },
   },
 
-  colorMode: {
-    classSuffix: '',
-  },
+  colorMode: { classSuffix: '' },
 })

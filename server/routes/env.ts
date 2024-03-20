@@ -1,4 +1,6 @@
-export default defineEventHandler(async (event) => {
+import process from 'node:process'
+
+export default defineEventHandler(async (_event) => {
   const cfg = useRuntimeConfig()
 
   return {

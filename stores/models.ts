@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useModels = defineStore('models', {
   state: () => {
     return {
-      list: [] as Model[],
+      list:    [] as Model[],
       haveAll: false,
     }
   },
@@ -13,14 +13,16 @@ export const useModels = defineStore('models', {
 
   actions: {
     byId(id: string) {
-      return (this.list as Model[]).find(x => x.id === id)
+      return (this.list as Model[]).find((x) => x.id === id)
     },
 
     async find(id: string) {
       await this.findAll()
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         return existing
+      }
     },
 
     async findAll(force = false) {
@@ -31,6 +33,7 @@ export const useModels = defineStore('models', {
       }
 
       this.haveAll = true
+
       return this.list as Model[]
     },
   },

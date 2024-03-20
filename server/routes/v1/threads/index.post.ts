@@ -3,7 +3,7 @@ import { useApi, waitForRun } from '@/server/utils/api'
 
 interface CreateInput {
   assistantId: string
-  message?: string
+  message?   : string
 }
 
 export default defineEventHandler(async (event) => {
@@ -11,8 +11,9 @@ export default defineEventHandler(async (event) => {
   const json = await readBody(event) as CreateInput
   const messages: ThreadCreateParams.Message[] = []
 
-  if (json.message)
+  if (json.message) {
     messages.push({ content: json.message, role: 'user' })
+  }
 
   const thread = await api.beta.threads.create({
     messages,

@@ -4,11 +4,11 @@ import type { Config } from 'tailwindcss'
 
 export default <Partial<Config>> {
   darkMode: 'class',
-  theme: {
+  theme:    {
     extend: {
       colors: {
         rubra: {
-          50: '#f6f6f6',
+          50:  '#f6f6f6',
           100: '#e7e7e7',
           200: '#d1d1d1',
           300: '#b0b0b0',

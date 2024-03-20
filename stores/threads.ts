@@ -5,7 +5,7 @@ import { removeObject } from '@/utils/array'
 export const useThreads = defineStore('threads', {
   state: () => {
     return {
-      list: [] as Thread[],
+      list:    [] as Thread[],
       haveAll: false,
     }
   },
@@ -14,17 +14,20 @@ export const useThreads = defineStore('threads', {
 
   actions: {
     byId(id: string) {
-      return (this.list as Thread[]).find(x => x.id === id)
+      return (this.list as Thread[]).find((x) => x.id === id)
     },
 
     async find(id: string) {
       const existing = this.byId(id)
-      if (existing)
-        return existing
 
-      const data = reactive<Thread>(await $fetch(`/v1/threads/${encodeURIComponent(id)}`))
+      if (existing) {
+        return existing
+      }
+
+      const data = reactive<Thread>(await $fetch(`/v1/threads/${ encodeURIComponent(id) }`))
 
       this.list.push(data)
+
       return data
     },
 
@@ -36,27 +39,31 @@ export const useThreads = defineStore('threads', {
       }
 
       this.haveAll = true
+
       return this.list as Thread[]
     },
 
     async remove(id: string) {
-      await $fetch(`/v1/threads/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      await $fetch(`/v1/threads/${ encodeURIComponent(id) }`, { method: 'DELETE' })
 
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         removeObject(this.list, existing)
+      }
     },
 
     async create(assistantId: string, message: string) {
       const { run, thread } = await $fetch('/v1/threads', {
         method: 'post',
-        body: {
+        body:   {
           assistantId,
           message,
         },
       })
 
       const out = reactive(thread)
+
       this.list.push(out)
 
       return { run, thread: out }

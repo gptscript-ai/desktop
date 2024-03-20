@@ -8,12 +8,12 @@ http://creativecommons.org/publicdomain/zero/1.0/legalcode
 */
 
 interface IQueue<T> {
-  size: () => number
-  isEmpty: () => boolean
-  enqueue: (item: T) => void
-  dequeue: () => T | undefined
-  peek: () => T | undefined
-  clear: () => void
+  size   : ()=> number
+  isEmpty: ()=> boolean
+  enqueue: (item: T)=> void
+  dequeue: ()=> T | undefined
+  peek   : ()=> T | undefined
+  clear  : ()=> void
 }
 
 export default class Queue<T> implements IQueue<T> {
@@ -34,8 +34,9 @@ export default class Queue<T> implements IQueue<T> {
 
   dequeue(): T | undefined {
     // if the queue is empty, return immediately
-    if (this.q.length === 0)
+    if (this.q.length === 0) {
       return undefined
+    }
 
     // store the item at the front of the queue
     const item = this.q[this.offset]

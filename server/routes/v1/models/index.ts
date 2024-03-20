@@ -1,12 +1,13 @@
 import type { Model } from 'openai/resources/models'
 import { useApi } from '@/server/utils/api'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   const api = useApi()
   const models: Model[] = []
 
   console.debug('Listing models')
   let res = await api.models.list()
+
   console.debug('Got', res?.data?.length || 0, 'models')
 
   models.push(...res.data)

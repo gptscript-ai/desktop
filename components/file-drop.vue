@@ -10,8 +10,9 @@ function enter(e: DragEvent) {
 }
 
 function leave(e: DragEvent) {
-  if (e.target === last.value)
+  if (e.target === last.value) {
     active.value = false
+  }
 }
 
 function over(e: DragEvent) {

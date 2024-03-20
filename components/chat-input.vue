@@ -5,6 +5,7 @@ interface Props {
 
 const { previous = [] } = defineProps<Props>()
 
+// eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
   (e: 'message', value: ChatEvent): void
 }>()
@@ -12,7 +13,7 @@ const emit = defineEmits<{
 declare global {
   interface ChatEvent {
     message: string
-    cb: () => void
+    cb     : () => void
   }
 }
 
@@ -22,7 +23,7 @@ const message = ref('')
 async function send() {
   const ev: ChatEvent = {
     message: message.value,
-    cb: () => {
+    cb:      () => {
       waiting.value = false
     },
   }
@@ -43,14 +44,15 @@ function keypress(e: KeyboardEvent) {
 function keyup(e: KeyboardEvent) {
   const idx = previous.indexOf(message.value || '')
 
-  if (e.code === 'ArrowUp' && !message.value)
+  if (e.code === 'ArrowUp' && !message.value) {
     message.value = previous[previous.length - 1]
-  else if (e.code === 'ArrowUp' && idx > 0)
+  } else if (e.code === 'ArrowUp' && idx > 0) {
     message.value = previous[idx - 1]
-  else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 === previous.length)
+  } else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 === previous.length) {
     message.value = ''
-  else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 < previous.length)
+  } else if (e.code === 'ArrowDown' && idx >= 0 && idx + 1 < previous.length) {
     message.value = previous[idx + 1]
+  }
 }
 </script>
 

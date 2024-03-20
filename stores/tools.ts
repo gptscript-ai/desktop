@@ -4,7 +4,7 @@ import type { ToolObject } from '@/config/types'
 export const useTools = defineStore('tools', {
   state: () => {
     return {
-      list: [] as ToolObject[],
+      list:    [] as ToolObject[],
       haveAll: false,
     }
   },
@@ -13,14 +13,16 @@ export const useTools = defineStore('tools', {
 
   actions: {
     byId(id: string) {
-      return (this.list as ToolObject[]).find(x => x.id === id)
+      return (this.list as ToolObject[]).find((x) => x.id === id)
     },
 
     async find(id: string) {
       await this.findAll()
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         return existing
+      }
     },
 
     async findAll(force = false) {
@@ -31,23 +33,26 @@ export const useTools = defineStore('tools', {
       }
 
       this.haveAll = true
+
       return this.list as ToolObject[]
     },
 
     async create(body: ToolObject) {
       const res = await $fetch('/v1/tools', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body:   JSON.stringify(body),
       })
 
       this.list.push(res)
     },
     async remove(id: string) {
-      await $fetch(`/v1/tools/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      await $fetch(`/v1/tools/${ encodeURIComponent(id) }`, { method: 'DELETE' })
 
       const existing = this.byId(id)
-      if (existing)
+
+      if (existing) {
         removeObject(this.list, existing)
+      }
     },
   },
 })

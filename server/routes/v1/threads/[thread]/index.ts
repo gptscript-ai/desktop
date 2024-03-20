@@ -6,11 +6,14 @@ export default defineEventHandler(async (event) => {
 
   console.debug('Retrieving thread', threadId)
   const thread = await api.beta.threads.retrieve(threadId)
+
   console.debug('Got thread', threadId)
 
   const messages: ThreadMessage[] = []
+
   console.debug('Listing messages for', threadId)
   let res = await api.beta.threads.messages.list(threadId)
+
   console.debug('Got', res?.data?.length || 0, 'messages for ', threadId)
 
   messages.push(...res.data)

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 useHead({
   title: 'GPTStack',
-  meta: [
+  meta:  [
     { charset: 'utf-8' },
     { name: 'apple-mobile-web-app-capable', content: 'yes' },
     { name: 'format-detection', content: 'telephone=no' },
