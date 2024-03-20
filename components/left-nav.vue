@@ -96,13 +96,8 @@ const threadLinks = computed(() => {
   for (const x of sorted) {
     const group = groupFor(x.created_at)
     const assistantId = (x.metadata as any || {}).assistantId || ''
-    let label = dayjs(x.created_at * 1000).local().format('h:mma').replace(/m$/, '')
     const assistant = assistants.byId(assistantId)
-
-    if (assistant)
-      label = `${assistant.name} ${label}`
-    else
-      label = `(${x.id.replace(/^thread_/, '').substring(0, 4)}) ${label}`
+    const label = threadName(x, assistant)
 
     if (!out[group])
       out[group] = []

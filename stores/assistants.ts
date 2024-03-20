@@ -17,7 +17,7 @@ export const useAssistants = defineStore('assistants', {
       return (this.list as Assistant[]).find(x => x.id === id)
     },
 
-    async find(id: string) {
+    async find(id: string): Assistant {
       let existing = this.byId(id)
       if (existing)
         return existing

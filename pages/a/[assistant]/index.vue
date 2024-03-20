@@ -13,6 +13,8 @@ const threads = useThreads()
 const fakeMessages = reactive<ThreadMessage[]>([])
 const waiting = ref(false)
 
+useHead({ title: assistant.name })
+
 async function send(e: ChatEvent) {
   try {
     clear(fakeMessages)

@@ -28,6 +28,8 @@ const assistant = computed(() => {
   return assistants.byId(assistantId)
 })
 
+useHead({ title: threadName(thread.value, assistant.value) })
+
 onMounted(() => {
   if ( !thread.value ) {
     useToast().add({
