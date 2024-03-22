@@ -91,14 +91,14 @@ const assistantName = computed(() => {
     }
 
     &.user {
-      grid-column: 1/ span 2;
+      grid-column: 2/ span 2;
 
       background-color: rgba(#2563eb,0.8);
       border: 1px solid rgba(#2563eb,0.2);
     }
 
     &.assistant {
-      grid-column: 2/ span 2;
+      grid-column: 1/ span 2;
       background-color: rgba(#aaa, 0.1);
       border: 1px solid rgba(#aaa, 0.2);
 

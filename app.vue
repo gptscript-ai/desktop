@@ -26,7 +26,7 @@ function toggle() {
     <header class="flex bg-teal-700 dark:bg-teal-950 text-white py-1 pl-4 pr-2.5">
       <div class="flex-initial">
         <nuxt-link :to="{ name: 'index' }">
-          <img src="~/assets/logo.svg" class="h-10 my-1">
+          <img src="~/assets/logo.svg" class="h-10 my-2">
         </nuxt-link>
       </div>
       <div class="flex-initial">
