@@ -26,7 +26,7 @@
     "@antfu/eslint-config": "2.8.3",
     "@heroicons/vue": "^2.1.1",
     "@nuxt/devtools": "1.0.8",
-    "@nuxt/ui": "2.14.3",
+    "@nuxt/ui": "2.14.2",
     "@nuxtjs/color-mode": "^3.3.2",
     "@pinia/nuxt": "^0.5.1",
     "@types/lodash-es": "^4.17.12",
