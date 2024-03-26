@@ -39,7 +39,7 @@ export function random32s(count: number): number[] {
   let i: number
 
   // eslint-disable-next-line node/prefer-global/process
-  if (process?.server || typeof window === 'undefined') {
+  if ((typeof process !== 'undefined' && process.server) || typeof window === 'undefined') {
     for (i = 0; i < count; i++) {
       out[i] = crypto.randomBytes(4).readUInt32BE(0)
     }
