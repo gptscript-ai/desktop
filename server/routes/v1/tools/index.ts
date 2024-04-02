@@ -5,7 +5,7 @@ export default defineEventHandler(async (_event) => {
   const tools: ToolObject[] = []
 
   console.debug('Listing tools')
-  const res = await apiFetch('/v1/rubra/x/tools')
+  const res = await apiFetch('/v1/x-tools')
 
   setResponseStatus(res._status)
 
