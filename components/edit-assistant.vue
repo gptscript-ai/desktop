@@ -36,9 +36,7 @@ if (!state.tools) {
   state.tools = reactive([])
 }
 
-state.tools = state.tools.map((x) => (typeof x === 'object' ? x.type : x)).filter((x) => x !== 'retrieval')
-state.tools.push(...(state.gptscript_tools || []))
-delete state.gptscript_tools
+state.tools = state.tools.map((x) => (typeof x === 'object' ? x['x-tool'] || x.type : x)).filter((x) => x !== 'retrieval')
 
 if (!state.file_ids) {
   state.file_ids = reactive([])
@@ -64,10 +62,9 @@ window.state = state
 
 interface ToolOption {
   label     : string
-  value     : string
+  type      : string
+  name      : string
   index?    : number
-  builtin?  : boolean
-  gptscript?: boolean
 }
 
 const toolOptions = computed(() => {
@@ -75,38 +72,33 @@ const toolOptions = computed(() => {
     {
       index:     0,
       label:     'Internet Search (good for broad searches)',
-      value:     'internet_search',
-      builtin:   true,
-      gptscript: true,
+      type:      'gptscript',
+      name:     'internet_search',
     },
     {
       index:     1,
       label:     'Website Browsing (good for intranet sites)',
-      value:     'site_browsing',
-      builtin:   true,
-      gptscript: true,
+      type:      'gptscript',
+      name:      'site_browsing',
     },
     {
       index:     2,
       label:     'Code Interpreter',
-      value:     'code_interpreter',
-      builtin:   true,
-      gptscript: false,
+      type:      'code_interpreter',
+      name:      'code_interpreter',
     },
   ]
 
   for (const t of allTools) {
     out.push({
       label:   t.name || t.id,
-      value:   t.id,
-      builtin: false,
+      name:    t.id,
+      type:    'gptscript',
     })
   }
 
   out.sort((a, b) => {
-    if (a.builtin !== b.builtin) {
-      return +(b.builtin || false) - +(a.builtin || false)
-    } else if (a.index && b.index) {
+    if (a.index && b.index) {
       return (a.index || 0) - (b.index || 0)
     } else {
       return a.label.localeCompare(b.label)
@@ -125,21 +117,21 @@ async function go(_e: FormSubmitEvent<Schema>) {
 
   saving.value = true
 
-  const builtinTools: string[] = []
-  const gptScriptTools: string[] = []
+  const tools: object[] = []
 
   for (const t of body.tools) {
-    const entry = toolOptions.value.find((x) => x.value === t)
+    const entry = toolOptions.value.find((x) => x.name === t)
 
-    if (entry && entry.builtin && !entry.gptscript) {
-      builtinTools.push(t)
-    } else {
-      gptScriptTools.push(t)
+    if (entry) {
+      if (entry.type === 'gptscript') {
+        tools.push({ 'x-tool': entry.name, 'type': entry.type })
+      } else {
+        tools.push({ type: entry.type })
+      }
     }
   }
 
-  body.tools = builtinTools || []
-  body.gptscript_tools = gptScriptTools || []
+  body.tools = tools || []
 
   try {
     let res: any
@@ -249,9 +241,9 @@ async function onDrop(files: File[]) {
               >Create</UButton>
             </template> -->
 
-            <USelectMenu v-model="state.tools" :options="toolOptions" value-attribute="value" multiple placeholder="Select Tools">
+            <USelectMenu v-model="state.tools" :options="toolOptions" value-attribute="name" multiple placeholder="Select Tools">
               <template #label>
-                <span v-if="state.tools.length" class="truncate">{{ state.tools.map(x => toolOptions.find(y => y.value === x)?.label).join(', ') }}</span>
+                <span v-if="state.tools.length" class="truncate">{{ state.tools.map(x => toolOptions.find(y => y.name === x)?.label).join(', ') }}</span>
                 <span v-else>No Tools</span>
               </template>
             </USelectMenu>
