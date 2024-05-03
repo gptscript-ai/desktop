@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useRef } from 'react';
+import React, { use, useCallback, useRef } from 'react';
 import ScriptNav from './components/scriptNav';
 import CustomTool from './components/customTool';
 import Chat from './components/chatTool';
@@ -37,12 +37,21 @@ const fetchGraph = async (file: string | null) => {
 
 const AddNodeOnEdgeDrop = () => {
     const file = useSearchParams().get('file');
-    const fetchedGraph = fetchGraph(file);
     const reactFlowWrapper = useRef(null);
     const connectingNodeId = useRef(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { screenToFlowPosition } = useReactFlow();
+
+    useEffect(() => {
+        if (file === "new") {
+            fetch(`http://localhost:3000/api/file`, {method: 'POST'})
+                .then((response) => response.json())
+                .then((data: any) => {
+                    window.location.href = `/build?file=${data.file.replace('.gpt', '')}`;
+                });
+        }
+    }, []);
 
     let id = 1;
     const getId = (): string => {
@@ -53,7 +62,7 @@ const AddNodeOnEdgeDrop = () => {
     };
 
     useEffect(() => {
-        fetchedGraph.then((graph) => {
+        fetchGraph(file).then((graph) => {
             setEdges(graph.edges);
             setNodes(graph.nodes);
         });
