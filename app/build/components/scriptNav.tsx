@@ -27,7 +27,9 @@ export default function App() {
                 onAction={(key) => { window.location.href = `/build?file=${key}`;}}
             >
                 <DropdownSection title="Actions" showDivider>
-                    <DropdownItem startContent={<VscNewFile />} key="new">New</DropdownItem>
+                    <DropdownItem startContent={<VscNewFile />} key="new">
+                        New script
+                    </DropdownItem>
                 </DropdownSection>
                 <DropdownSection title="Scripts">  
                     {files.map((file) => (

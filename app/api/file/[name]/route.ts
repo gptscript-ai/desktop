@@ -30,11 +30,6 @@ export async function GET(
     }
 }
 
-type UpdateBody = {
-    positions: Positions;
-    script: Block[];
-}
-
 export async function PUT(
     req: Request,
     { params }: { params: { slug: string } }
