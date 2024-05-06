@@ -71,7 +71,7 @@ const nodeify = async (script: Block[]) => {
                 id: name,
                 position: positions[name] ? positions[name] : { x: 0, y: 0 },
                 data: block,
-                type: block.name ? 'customTool': 'chat',
+                type: 'customTool',
             })
             
             if (!block.tools || !block.tools.length) continue;
