@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo } from "react";
 import { FaCog, FaWrench, FaRunning} from "react-icons/fa";
 import { VscGrabber } from "react-icons/vsc";
 import { IoIosChatboxes } from "react-icons/io";
@@ -15,15 +15,26 @@ import {
     CardBody,
     CardFooter,
     Switch,
-    Divider,
+    Chip,
+    Select,
+    SelectItem,
+    Tooltip,
 } from "@nextui-org/react";;
-import type { Tool } from '@gptscript-ai/gptscript';
+import type { Tool } from "@gptscript-ai/gptscript";
+import ArgsTable from "./argsTable";
 import ChatWindow from "./chatWindow";
-import { Handle, Position } from 'reactflow';
+import { Handle, Position } from "reactflow";
 
 interface CustomToolProps {
     data: Tool;
     isConnectable: boolean;
+    infoPanel?: any;
+}
+
+const toolTypes = {
+    "Custom": "A custom tool where you can define the behavior",
+    "External": "An external tool that brings predefined behavior",
+    "Context": "A tool that provides context to the script",
 }
 
 export default memo(({ data, isConnectable }: CustomToolProps) => {
@@ -44,67 +55,87 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
             data.instructions = prompt;
             data.description = description;
             data.chat = isChat;
-            console.log('newNodeData')
-            window.dispatchEvent(new Event('newNodeData'));
+            window.dispatchEvent(new Event("newNodeData"));
         }
     }, [name, description, temperature, prompt, isChat]);
+
 
     return (<>
         <Handle
             type="target"
             position={Position.Left}
-            style={{ background: '#555', width: '10px', height: '10px', zIndex: 999 }}
-            onConnect={(params) => console.log('handle onConnect', params)}
+            style={{ background: "#555", width: "10px", height: "10px", zIndex: 999 }}
+            onConnect={(params) => console.log("handle onConnect", params)}
             isConnectable={isConnectable}
         />
         <Handle
             type="source"
             position={Position.Right}
-            style={{ background: '#555', width: '10px', height: '10px', zIndex: 999 }}
-            onConnect={(params) => console.log('handle onConnect', params)}
+            style={{ background: "#555", width: "10px", height: "10px", zIndex: 999 }}
+            onConnect={(params) => console.log("handle onConnect", params)}
             isConnectable={isConnectable}
         />
         <Card className="w-80 p-4">
             <VscGrabber className="w-full"/>
-            <CardHeader className="">
+            <CardHeader>
                 <div className="absolute top-1 right-4">
-                    <Popover placement="right" showArrow={true} backdrop="blur">
+                    <Popover placement="right" showArrow={true} backdrop="opaque">
                         <PopoverTrigger>
                             <Button radius="full" variant="light" startContent={<FaCog />} isIconOnly/>
                         </PopoverTrigger>
                         <PopoverContent>
-                            <div className="flex flex-col space-y-6 m-6 w-[300px]">
-                                <div>
-                                    <p className="text-small text-default-500">Chat</p>
-                                    <Switch
-                                        isSelected={isChat} 
-                                        onValueChange={setIsChat}
-                                        thumbIcon={({ isSelected, className }) =>
-                                            isSelected ? (
-                                            <IoIosChatboxes className={className} />
-                                            ) : (
-                                            <FaWrench className={className} />
-                                            )
-                                        }
-                                    />
+                            <div className="flex flex-col space-y-6 p-6 w-[500px] max-h-[700px] overflow-y-scroll">
+                                <div className="flex space-x-4">
+                                    <Select label="Choose a tool type">
+                                        {Object.keys(toolTypes).map((toolType) => (
+                                            <SelectItem key={toolType} value={toolType}>
+                                                {toolType}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <Tooltip 
+                                        color="primary" 
+                                        closeDelay={0} 
+                                        content="Toggle the ability to chat with this tool"
+                                        showArrow={true}
+                                    >
+                                        <div className="h-full my-auto">
+                                            <Switch
+                                                size="lg"
+                                                isSelected={isChat} 
+                                                onValueChange={setIsChat}
+                                                thumbIcon={({ isSelected, className }) =>
+                                                    isSelected ? (
+                                                    <IoIosChatboxes className={className} />
+                                                    ) : (
+                                                    <FaWrench className={className} />
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </Tooltip>
                                 </div>
                             
                                 <Textarea
+                                    fullWidth
                                     label="Description"
-                                    placeholder='Describe your tool for the chat bot...'
+                                    placeholder="Describe your tool..."
                                     defaultValue={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
                                 <Textarea
+                                    fullWidth
                                     label="Prompt"
-                                    placeholder='Tell the tool what do to...'
+                                    placeholder="Tell the tool what do to..."
                                     defaultValue={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
                                     classNames={{
-                                        base: "max-w-xs",
                                         input: "min-h-[20vh]",
                                     }}
                                 />
+
+                                <ArgsTable args={data.arguments?.properties} />
+
                                 <Slider 
                                     label="Creativity" 
                                     step={0.01} 
@@ -122,14 +153,20 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
             <CardBody>
                 <Input
                     label="Name"
-                    placeholder='Give your tool a name...'
+                    placeholder="Give your tool a name..."
                     defaultValue={name}
                     onChange={(e) => setName(e.target.value)}
                 />
+                <div className="mt-4 flex flex-wrap">
+                    { data.arguments && data.arguments.properties && Object.keys(data.arguments.properties).map((arg) => {
+                        if (!data.arguments.properties) return null;
+                        return <Chip variant="flat" color="primary" className="mt-2 mr-2" key={arg}>{arg}</Chip>
+                    })}
+                </div>
             </CardBody>
             <CardFooter>
                 {isChat ?
-                 <ChatWindow /> :
+                 <ChatWindow name={name} /> :
                  <Button startContent={<FaRunning />}color="secondary" className="w-full">Run</Button>
                 }
             </CardFooter>
