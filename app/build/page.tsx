@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
+import { 
+    Card,
+    CardHeader,
+    CardBody,
+    CardFooter,
+ } from '@nextui-org/react';
 import ScriptNav from './components/scriptNav';
 import CustomTool from './components/tool';
 import { useSearchParams } from 'next/navigation';
@@ -212,10 +218,18 @@ const AddNodeOnEdgeDrop = () => {
                 maxZoom={0.9}
                 nodeOrigin={[0.0, 0.5]}
                 fitView
+                
             >
                 <Panel position="top-left">
                     <ScriptNav />
                 </Panel>
+                {/* <Panel position="top-right">
+                    {infoPanel && (
+                        <Card className="w-[400px]" style={{ height: 'calc(100vh - 100px)' }}>
+                            {infoPanel}
+                        </Card>
+                    )}            
+                </Panel> */}
                 <Background />
             </ReactFlow>
         </div>
