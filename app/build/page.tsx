@@ -1,12 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { 
-    Card,
-    CardHeader,
-    CardBody,
-    CardFooter,
- } from '@nextui-org/react';
+import React, { useCallback, useRef, useEffect} from 'react';
 import ScriptNav from './components/scriptNav';
 import CustomTool from './components/tool';
 import { useSearchParams } from 'next/navigation';
@@ -23,6 +17,7 @@ import ReactFlow, {
     type Node as RFNode,
     type Edge as RFEdge,
     Panel,
+    Controls
 } from 'reactflow';
 
 const nodeTypes = {
@@ -215,7 +210,6 @@ const AddNodeOnEdgeDrop = () => {
                 onConnectEnd={onConnectEnd}
                 onNodeDragStop={onNodeDragStop}
                 onEdgesDelete={onEdgesDelete}
-                maxZoom={0.9}
                 nodeOrigin={[0.0, 0.5]}
                 fitView
                 
@@ -230,6 +224,7 @@ const AddNodeOnEdgeDrop = () => {
                         </Card>
                     )}            
                 </Panel> */}
+                <Controls />
                 <Background />
             </ReactFlow>
         </div>
