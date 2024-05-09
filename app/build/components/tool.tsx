@@ -1,9 +1,9 @@
 import { useState, useEffect, memo } from "react";
-import { FaCog, FaWrench, FaRunning} from "react-icons/fa";
+import { FaCog, FaWrench } from "react-icons/fa";
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { VscGrabber } from "react-icons/vsc";
 import { IoIosChatboxes } from "react-icons/io";
 import {
-    Input,
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -42,6 +42,7 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
     const [temperature, setTemperature] = useState(data.temperature || 0);
     const [prompt, setPrompt] = useState(data.instructions);
     const [isChat, setIsChat] = useState(data.chat);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
         if (name !== data.name ||
@@ -58,7 +59,6 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
         }
     }, [name, description, temperature, prompt, isChat]);
 
-
     return (<>
         <Handle
             type="target"
@@ -74,13 +74,13 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
             onConnect={(params) => console.log("handle onConnect", params)}
             isConnectable={isConnectable}
         />
-        <Card className="w-80 p-4">
-            <VscGrabber className="w-full"/>
+        <Card className="w-[400px] p-4">
+            <VscGrabber className="w-full" />
             <CardHeader>
                 <div className="absolute top-1 right-4">
                     <Popover placement="right" showArrow={true} backdrop="opaque">
                         <PopoverTrigger>
-                            <Button radius="full" variant="light" startContent={<FaCog />} isIconOnly/>
+                            <Button radius="full" variant="light" startContent={<FaCog />} isIconOnly />
                         </PopoverTrigger>
                         <PopoverContent>
                             <div className="flex flex-col space-y-6 p-6 w-[500px] max-h-[700px] overflow-y-scroll">
@@ -92,29 +92,29 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
                                             </SelectItem>
                                         ))}
                                     </Select>
-                                    <Tooltip 
-                                        color="primary" 
-                                        closeDelay={0} 
+                                    <Tooltip
+                                        color="primary"
+                                        closeDelay={0}
                                         content="Toggle the ability to chat with this tool"
                                         showArrow={true}
                                     >
                                         <div className="h-full my-auto">
                                             <Switch
                                                 size="lg"
-                                                isSelected={isChat} 
+                                                isSelected={isChat}
                                                 onValueChange={setIsChat}
                                                 thumbIcon={({ isSelected, className }) =>
                                                     isSelected ? (
-                                                    <IoIosChatboxes className={className} />
+                                                        <IoIosChatboxes className={className} />
                                                     ) : (
-                                                    <FaWrench className={className} />
+                                                        <FaWrench className={className} />
                                                     )
                                                 }
                                             />
                                         </div>
                                     </Tooltip>
                                 </div>
-                            
+
                                 <Textarea
                                     fullWidth
                                     label="Description"
@@ -122,24 +122,14 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
                                     defaultValue={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
-                                <Textarea
-                                    fullWidth
-                                    label="Prompt"
-                                    placeholder="Tell the tool what do to..."
-                                    defaultValue={prompt}
-                                    onChange={(e) => setPrompt(e.target.value)}
-                                    classNames={{
-                                        input: "min-h-[20vh]",
-                                    }}
-                                />
 
                                 <ArgsTable args={data.arguments?.properties} />
 
-                                <Slider 
-                                    label="Creativity" 
-                                    step={0.01} 
-                                    maxValue={1} 
-                                    minValue={0} 
+                                <Slider
+                                    label="Creativity"
+                                    step={0.01}
+                                    maxValue={1}
+                                    minValue={0}
                                     defaultValue={temperature}
                                     className="max-w-md"
                                     onChange={(e) => setTemperature(e as number)}
@@ -150,21 +140,46 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
                 </div>
             </CardHeader>
             <CardBody>
-                <Input
-                    label="Name"
-                    placeholder="Give your tool a name..."
-                    defaultValue={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-                <div className="mt-4 flex flex-wrap">
-                    { data.arguments && data.arguments.properties && Object.keys(data.arguments.properties).map((arg) => {
-                        if (!data.arguments.properties) return null;
-                        return <Chip variant="flat" color="primary" className="mt-2 mr-2" key={arg}>{arg}</Chip>
-                    })}
+                <div className="nodrag nowheel cursor-auto">
+                    <input
+                        className="nodrag nowheel cursor-text text-2xl font-bold mb-4 mx-1 w-full dark:bg-zinc-900"
+                        defaultValue={name}
+                        placeholder="Give your tool a name..."
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <Textarea
+                        className="nodrag nowheel cursor-text h-full w-full overflow-y-scroll resize-none"
+                        placeholder="Tell the tool what do to..."
+                        variant="flat"
+                        defaultValue={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                    />
                 </div>
+                { data.arguments && data.arguments.properties &&
+                    <div className="mt-4 flex flex-wrap">
+                        {Object.keys(data.arguments.properties).map((arg) => {
+                            if (!data.arguments.properties) return null;
+                            return (
+                                <Chip
+                                    variant="flat"
+                                    color="primary"
+                                    className="mt-2 mr-2"
+                                    key={arg}
+                                >
+                                    {arg}
+                                </Chip>
+                            );
+                        })}
+                    </div>
+                }
             </CardBody>
             <CardFooter>
-                <RunModal name={name} file={'new-file-0.gpt'} chat={isChat} args={data.arguments?.properties}/>
+                <RunModal
+                    name={name}
+                    file={"new-file-0.gpt"}
+                    chat={isChat}
+                    args={data.arguments?.properties}
+                />
             </CardFooter>
         </Card>
     </>);

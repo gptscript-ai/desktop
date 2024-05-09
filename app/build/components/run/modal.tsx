@@ -28,6 +28,7 @@ export default function RunModal({ name, file, chat, args }: RunModalProps) {
             backdrop="blur"
             isOpen={isOpen}
             onOpenChange={onOpenChange}
+            size="2xl"
         >
             { chat ? <Chat name={name} file={file}/> : <Run name={name} file={file} args={args}/> }
         </Modal>

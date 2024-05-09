@@ -44,7 +44,7 @@ export default function Chat({ name, file, args }: RunProps) {
     }
 
     return (
-        <ModalContent className="h-[80vh]">
+        <ModalContent className="h-[70vh]">
             <ModalHeader className="flex flex-col gap-1">
                 <h2 className={subtitle()}>
                     You're about to run <span className="capitalize font-bold text-primary">{name}</span>!
