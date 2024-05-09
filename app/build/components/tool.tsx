@@ -22,13 +22,12 @@ import {
 } from "@nextui-org/react";;
 import type { Tool } from "@gptscript-ai/gptscript";
 import ArgsTable from "./argsTable";
-import ChatWindow from "./chatWindow";
+import RunModal from "./run/modal";
 import { Handle, Position } from "reactflow";
 
 interface CustomToolProps {
     data: Tool;
     isConnectable: boolean;
-    infoPanel?: any;
 }
 
 const toolTypes = {
@@ -165,10 +164,7 @@ export default memo(({ data, isConnectable }: CustomToolProps) => {
                 </div>
             </CardBody>
             <CardFooter>
-                {isChat ?
-                 <ChatWindow name={name} /> :
-                 <Button startContent={<FaRunning />}color="secondary" className="w-full">Run</Button>
-                }
+                <RunModal name={name} file={'new-file-0.gpt'} chat={isChat} args={data.arguments?.properties}/>
             </CardFooter>
         </Card>
     </>);
