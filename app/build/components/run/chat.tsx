@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ModalContent, ModalHeader, ModalBody, ModalFooter, Input} from "@nextui-org/react";
+import { IoMdSend } from "react-icons/io";
+import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
 import { subtitle } from "@/components/primitives";
 import { io, Socket } from "socket.io-client";
 
@@ -85,14 +86,28 @@ export default function Chat({ name, file }: ChatBoxProps) {
                     ))}
                 </div>
             </ModalBody>
+
             <ModalFooter>
-                <Input
+                <input
+                    id="chatInput"
+                    className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
                     placeholder="Ask the chat bot something..."
                     onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
                         if (event.key === "Enter") {
                             handleMessageSent({ type: MessageType.User, message: event.currentTarget.value });
                             event.currentTarget.value = "";
                         }
+                    }}
+                />
+                <Button
+                    startContent={<IoMdSend/>}
+                    isIconOnly radius="full"
+                    className="ml-2 my-auto text-lg"
+                    color="primary"
+                    onPress={() => {
+                        const input = document.querySelector("#chatInput") as HTMLInputElement;
+                        handleMessageSent({ type: MessageType.User, message: input.value });
+                        input.value = "";
                     }}
                 />
             </ModalFooter>

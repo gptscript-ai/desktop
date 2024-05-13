@@ -34,7 +34,7 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, socket) => {
-	const opts = {input: argsToInput(args)};
+	const opts = {input: JSON.stringify(args || {})};
 	if (tool) opts.subTool = tool;
     let exec = run(path.join('gptscripts', file), opts);
 
@@ -61,14 +61,4 @@ const streamExecFileWithEvents = async (file, tool, args, socket) => {
 	} catch (e) {
 		console.error(e);
 	}
-    console.log(exec.state)
-}
-
-const argsToInput = (args) => {
-	let input = '';
-	for (const key in args) {
-		input += `--${key} ${args[key]} `;
-	}
-	console.log(input);
-	return input;
 }

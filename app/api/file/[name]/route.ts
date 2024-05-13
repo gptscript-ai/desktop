@@ -50,7 +50,7 @@ export async function PUT(
     }
 }
 
-type Positions = {
+export type Positions = {
     [key: string]: XYPosition;
 }
 
