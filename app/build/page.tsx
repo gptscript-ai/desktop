@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useEffect} from 'react';
 import ScriptNav from './components/scriptNav';
 import CustomTool from './components/tool';
+import ToolBar from './components/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
 import type { Tool } from '@gptscript-ai/gptscript';
@@ -36,7 +37,7 @@ const fetchGraph = async (file: string | null) => {
 const AddNodeOnEdgeDrop = () => {
     const file = useSearchParams().get('file');
     const reactFlowWrapper = useRef(null);
-    const connectingNodeId = useRef(null);
+    const connectingNode = useRef({id:'',handleId:''});
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { screenToFlowPosition } = useReactFlow();
@@ -91,7 +92,7 @@ const AddNodeOnEdgeDrop = () => {
     const onConnect = useCallback(
         (params: any) => {
             params.animated = true;
-            connectingNodeId.current = null;
+            connectingNode.current = {id:'', handleId:''};
 
             const sourceNode = nodes.find((node) => node.id === params.source)?.data as Tool;
             const targetNode = nodes.find((node) => node.id === params.target)?.data as Tool;
@@ -141,8 +142,8 @@ const AddNodeOnEdgeDrop = () => {
     }, [nodes]);
 
     // When a connection is started we want to store the id of the node that is being connected
-    const onConnectStart = useCallback((_: any, { nodeId }: any) => {
-        connectingNodeId.current = nodeId;
+    const onConnectStart = useCallback((_: any, { nodeId, handleId }: any) => {
+        connectingNode.current = {id: nodeId, handleId};
     }, []);
 
     // When a connection is ended we want to check if the target of the connection is a node or the pane
@@ -150,37 +151,50 @@ const AddNodeOnEdgeDrop = () => {
     // If the target is a node we want to connect the source tool node to the target tool node.
     const onConnectEnd = useCallback(
         (event: any) => {
-            if (!connectingNodeId.current) return;
-
+            if (!connectingNode.current.id) return;
             const targetIsPane = event.target.classList.contains('react-flow__pane');
+            if (!targetIsPane) return;
 
-            if (targetIsPane) {
-                const sourceNode = nodes.find((node) => node.id === connectingNodeId.current);
-                const id = `new-tool-${getId()}`;
-                const newNode = {
-                    id,
-                    type: 'customTool',
-                    position: screenToFlowPosition({x: event.clientX, y: event.clientY,}),
-                    data: { name: id, type: 'tool'},
-                    origin: [0.0, 0.0],
-                };
+            // Build the new tool node
+            const sourceNode = nodes.find((node) => node.id === connectingNode.current.id);
+            const id = `new-tool-${getId()}`;
+            const newNode = {
+                id,
+                type: 'customTool',
+                position: screenToFlowPosition({x: event.clientX, y: event.clientY,}),
+                data: { name: id, type: 'tool'},
+                origin: [0.0, 0.0],
+            };
 
-                setNodes((nds) => {
-                    const newNodes = nds.concat(newNode);
-                    newNodes.forEach((node) => {
-                        if (node.id === connectingNodeId.current) {
-                            if (!(sourceNode?.data as Tool)?.tools) (sourceNode?.data as Tool).tools = [];
-                            if (!(sourceNode?.data as Tool)?.tools?.includes(newNode.id)) {
-                                (sourceNode?.data as Tool).tools.push(newNode.id);
-                            }
-                            node.data = sourceNode?.data;
+            setNodes((nds) => {
+                const newNodes = nds.concat(newNode);
+                
+                // Update the source node with the new tool
+                newNodes.forEach((node) => {
+                    if (node.id === connectingNode.current.id) {
+                        if (!(sourceNode?.data as Tool)?.tools) (sourceNode?.data as Tool).tools = [];
+                        if (!(sourceNode?.data as Tool)?.tools?.includes(newNode.id)) {
+                            (sourceNode?.data as Tool).tools.push(newNode.id);
                         }
-                    });
-                    updateScript(newNodes);
-                    return newNodes;
+                        node.data = sourceNode?.data;
+                    }
                 });
-                setEdges((eds) => (eds as any).concat({ id: newNode.id, source: connectingNodeId.current, target: newNode.id, animated: true }));
-            }
+
+                // Update the script with the new nodes
+                updateScript(newNodes);
+                return newNodes;
+            });
+
+            setEdges((eds) => [
+                ...eds,
+                {
+                    id: newNode.id,
+                    source: connectingNode.current.id,
+                    target: newNode.id,
+                    animated: true,
+                    sourceHandleId: connectingNode.current.handleId,
+                },
+            ]);
         },
         [screenToFlowPosition, nodes]
     );
@@ -217,14 +231,9 @@ const AddNodeOnEdgeDrop = () => {
                 <Panel position="top-left">
                     <ScriptNav />
                 </Panel>
-                {/* <Panel position="top-right">
-                    {infoPanel && (
-                        <Card className="w-[400px]" style={{ height: 'calc(100vh - 100px)' }}>
-                            {infoPanel}
-                        </Card>
-                    )}            
-                </Panel> */}
-                <Controls />
+                <Panel position="bottom-left">
+                    <ToolBar />
+                </Panel>
                 <Background />
             </ReactFlow>
         </div>
