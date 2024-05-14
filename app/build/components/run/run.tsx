@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
+import React, { useState, useEffect, useContext } from "react";
 import { subtitle } from "@/components/primitives";
 import { io, Socket } from "socket.io-client";
-import type { Property } from "@gptscript-ai/gptscript";
+import type { Property, Frame } from "@gptscript-ai/gptscript";
 import { FaBackward } from "react-icons/fa";
+import { BuildContext } from "@/app/build/page";
+import { IoCloseSharp } from "react-icons/io5";
+import {
+    Card,
+    CardHeader,
+    CardBody,
+    CardFooter,
+    Button,
+    Divider,
+} from "@nextui-org/react";
 
 interface RunProps {
     name: string;
@@ -17,10 +26,15 @@ export default function Chat({ name, file, args }: RunProps) {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
+    const {setChatPanel, setLogs } = useContext(BuildContext);
 
     useEffect(() => {
         const socket = io();
-        socket.on('connect', () => setConnected(true))
+        socket.on('connect', () => {
+            setLogs([])
+            setConnected(true)
+        })
+        socket.on('event', (data: Frame) => setLogs((prevLogs) => [...prevLogs, data]))
         socket.on('scriptMessage', data => setMessages((prevMessages) => [...prevMessages, data]));
         socket.on('disconnect', () => { setConnected(false) });
         setSocket(socket);
@@ -44,13 +58,24 @@ export default function Chat({ name, file, args }: RunProps) {
     }
 
     return (
-        <ModalContent className="h-[70vh]">
-            <ModalHeader className="flex flex-col gap-1">
-                <h2 className={subtitle()}>
-                    You're about to run <span className="capitalize font-bold text-primary">{name}</span>!
-                </h2>
-            </ModalHeader>
-            <ModalBody className="overflow-y-scroll shadow">
+        <Card className="h-full">
+            <CardHeader className="flex flex-col gap-1 px-4 py-2">
+                <div className="w-full flex justify-between">
+                    <h1 className={subtitle()}>
+                        You're about to run <span className="capitalize font-bold text-primary">{name}</span>
+                    </h1>
+                    <Button
+                        radius="full"
+                        isIconOnly
+                        color="primary"
+                        onPress={(_) => setChatPanel(<></>)}
+                    >
+                        <IoCloseSharp />
+                    </Button>
+                </div>
+            </CardHeader>
+            <Divider />
+            <CardBody className="overflow-y-scroll shadow px-6 pb-6">
                 {showForm ? (
                     <form>
                         {Object.entries(args || {}).map(([argName, arg]) => (
@@ -78,8 +103,8 @@ export default function Chat({ name, file, args }: RunProps) {
                         ))}
                     </div>
                 )}
-            </ModalBody>
-            <ModalFooter>
+            </CardBody>
+            <CardFooter>
                 {showForm ? (
                     <Button 
                         className="w-full"
@@ -98,7 +123,7 @@ export default function Chat({ name, file, args }: RunProps) {
                         Back
                     </Button>
                 }
-            </ModalFooter>
-        </ModalContent>
+            </CardFooter>
+        </Card>
     );
 }

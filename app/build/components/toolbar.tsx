@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Tabs, Tab, Card, CardBody, Button } from "@nextui-org/react";
 import { IoTerminalOutline, IoFolderOpenOutline } from "react-icons/io5";
 import { GoArrowUpRight, GoArrowDownLeft, GoDash } from "react-icons/go";
 import { GoTerminal } from "react-icons/go";
-
 import Logs from "./toolbar/logs";
+import { BuildContext } from "@/app/build/page";
 
 export default function Toolbar() {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const [large, setLarge] = useState(false);
 
     const handleToggleCollapse = () => {
@@ -31,7 +31,11 @@ export default function Toolbar() {
     );
 
     const expanded = (
-        <Card className={large ? "w-[70vw] h-[92vh]" : "w-[50vw] h-[25vh]"}>
+        <Card 
+            className={large ? "w-[70vw]" : "w-[50vw]"}
+            style = {{height: large ? `calc(92vh - 64px)` : `25vh`}}
+            
+        >
             <CardBody>
                 <Button
                     onPress={handleToggleCollapse}
@@ -64,16 +68,7 @@ export default function Toolbar() {
                             </div>
                         }
                     >
-                        <Logs logs={[
-                            { id: 1, message: "Hello, World!", timestamp: "2021-09-01T00:00:00Z" },
-                            { id: 2, message: "Goodbye, World!", timestamp: "2021-09-01T00:00:01Z" },
-                            { id: 3, message: "Hello, Again!", timestamp: "2021-09-01T00:00:02Z" },
-                            { id: 4, message: "Goodbye, Again!", timestamp: "2021-09-01T00:00:03Z"},
-                            { id: 5, message: "Hello, World!", timestamp: "2021-09-01T00:00:00Z" },
-                            { id: 6, message: "Goodbye, World!", timestamp: "2021-09-01T00:00:01Z" },
-                            { id: 7, message: "Hello, Again!", timestamp: "2021-09-01T00:00:02Z" },
-                            { id: 8, message: "Goodbye, Again!", timestamp: "2021-09-01T00:00:03Z"},
-                        ]}/>
+                        <Logs />
                     </Tab>
                     <Tab
                         key="workspace"
