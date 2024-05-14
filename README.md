@@ -1,51 +1,32 @@
-# Next.js & NextUI Template
+# chat-builder 
+This provides a visual way to run and build your GPTScripts. It does this through a node based GUI library called React Flow.
 
-This is a template for creating applications using Next.js 14 (app directory) and NextUI (v2).
+## Running
+To run locally you have to do a few things while features are unreleased.
 
-## Technologies Used
-
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [NextUI v2](https://nextui.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
-
-## How to Use
-
-### Use the template with create-next-app
-
-To create a new project based on this template using `create-next-app`, run the following command:
+1. Setup `node-gptscript`.
 
 ```bash
-npx create-next-app -e https://github.com/nextui-org/next-app-template
-```
-
-### Install dependencies
-
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
-
-```bash
+git clone https://github.com/gptscript-ai/node-gptscript/
+cd node-gptscript
 npm install
+yarn link
 ```
 
-### Run the development server
+2. Setup `chat-builder`.
 
 ```bash
-npm run dev
+git clone https://github.com/gptscript-ai/chat-builder
+echo "GPTSCRIPT_BIN=/usr/local/bin/gptscript
+SCRIPTS_PATH=gptscripts" > .env.local
+yarn link node-gptscript
+yarn install
 ```
 
-### Setup pnpm (optional)
-
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+3. Run `chat-builder`.
 
 ```bash
-public-hoist-pattern[]=*@nextui-org/*
+yarn start
 ```
 
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
-
-## License
-
-Licensed under the [MIT license](https://github.com/nextui-org/next-app-template/blob/main/LICENSE).
+4. Open `http://localhost:3000` in your browser.
