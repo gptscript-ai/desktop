@@ -1,6 +1,8 @@
 # chat-builder 
 This provides a visual way to run and build your GPTScripts. It does this through a node based GUI library called React Flow.
 
+![Chat Image](assets/chat.png)
+
 ## Running
 To run locally you have to do a few things while features are unreleased.
 
