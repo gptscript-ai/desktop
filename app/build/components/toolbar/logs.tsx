@@ -1,24 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { BuildContext } from '@/app/build/page';
+import { RunEventType } from '@gptscript-ai/gptscript';
 
-interface Log {
-    id: number;
-    message: string;
-    timestamp: string;
-}
+const Logs = () => {
+    const { logs } = useContext(BuildContext);
 
-interface LogsProps {
-    logs: Log[];
-}
-
-const Logs: React.FC<LogsProps> = ({ logs }) => {
     return (
-        <div className="max-h-full overflow-y-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white">
+        <div className="max-h-full overflow-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white">
             <ul>
-                {logs.map((log) => (
-                    <li key={log.id}>
-                        <span>{log.timestamp}: </span>
-                        <span>{log.message}</span>
-                    </li>
+                {logs.map((log, i) => (
+                    <li key={i}>{JSON.stringify(log)}</li>
                 ))}
             </ul>
         </div>

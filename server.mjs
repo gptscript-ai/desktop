@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import { run, RunEventType, RunState } from '@gptscript-ai/gptscript';
+import { Client, RunEventType, RunState } from '@gptscript-ai/gptscript';
 import path from 'path';
 
 const dev = process.env.NODE_ENV !== "production";
@@ -15,11 +15,12 @@ app.prepare().then(() => {
 	const httpServer = createServer(handler);
 
 	const io = new Server(httpServer);
+	const gptscript = new Client()
 
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");
 		socket.on("run", async (file, tool, args) => {
-			setImmediate(() => streamExecFileWithEvents(file, tool, args, socket));
+			setImmediate(() => streamExecFileWithEvents(file, tool, args, socket, gptscript));
 		});
 	});
 
@@ -33,13 +34,15 @@ app.prepare().then(() => {
 		});
 });
 
-const streamExecFileWithEvents = async (file, tool, args, socket) => {
+const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
 	const opts = {input: JSON.stringify(args || {})};
 	if (tool) opts.subTool = tool;
-    let exec = run(path.join('gptscripts', file), opts);
+
+	console.log('Running', file, opts, args)
+    let exec = gptscript.run(path.join('gptscripts', file), opts);
 
     exec.on(RunEventType.Event, data => {
-        socket.emit('event:', data);
+        socket.emit('event', data);
     });
 
 	try {
@@ -48,6 +51,9 @@ const streamExecFileWithEvents = async (file, tool, args, socket) => {
 
 		socket.on('userMessage', async (message) => {
 			exec = exec.nextChat(message);
+			exec.on(RunEventType.Event, data => {
+				socket.emit('event', data);
+			});
 			socket.emit('scriptMessage', await exec.text());
 		});
 

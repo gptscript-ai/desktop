@@ -1,10 +1,8 @@
-import { useState, useEffect, memo, createContext } from "react";
-import { FaCog } from "react-icons/fa";
+import { useState, useEffect, memo, createContext, useContext } from "react";
+import { FaCog, FaRunning } from "react-icons/fa";
 import { VscGrabber } from "react-icons/vsc";
+import { IoIosChatboxes } from "react-icons/io";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
     Textarea,
     Button,
     Card,
@@ -12,26 +10,20 @@ import {
     CardBody,
     CardFooter,
     Chip,
-    Select,
-    SelectItem,
     Tooltip,
 } from "@nextui-org/react";;
 import { Handle, Position } from "reactflow";
 import type { Tool } from "@gptscript-ai/gptscript";
-import RunModal from "./run/modal";
 import CustomConfig from "./toolConfigs/custom";
 import ExternalConfig from "./toolConfigs/external";
 import ContextConfig from "./toolConfigs/context";
+import { BuildContext } from "../page"
+import Run from "./run/run";
+import Chat from "./run/chat";
 
 interface CustomToolProps {
     data: Tool;
     isConnectable: boolean;
-}
-
-const toolTypes = {
-    "Custom": "A custom tool where you can define the behavior",
-    "External": "An external tool that brings predefined behavior",
-    "Context": "A tool that provides context to the script",
 }
 
 type Context = {
@@ -59,10 +51,9 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const [prompt, setPrompt] = useState(data.instructions);
     const [isChat, setIsChat] = useState(data.chat);
     const [toolType, setToolType] = useState("Custom");
+    const { setChatPanel, setConfigPanel, file } = useContext(BuildContext);
 
     useEffect(() => {
-        console.log(data.description)
-
         const hasChanged = (
             description !== data.description || 
             temperature !== data.temperature || 
@@ -99,6 +90,28 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
         temperature,
         setTemperature,
     }
+
+    const onConfigClick = () => setConfigPanel(
+        <ToolContext.Provider value={context}>
+            <Card className="w-[45vw] xl:w-[35vw] 2xl:w-[25vw] h-[45vh] overflow-y-scroll">
+                { toolType === "Custom" && <CustomConfig /> }
+                { toolType === "External" && <ExternalConfig /> }
+                { toolType === "Context" && <ContextConfig data={data}/> }
+            </Card>
+        </ToolContext.Provider>
+    )
+
+    // TODO - switch this to use the tool context. also need to address if isChat is changes
+    const onRunClick = () => setChatPanel(
+        <ToolContext.Provider value={context}>
+            <Card className="w-[45vw] xl:w-[35vw] 2xl:w-[25vw] h-[45vh] overflow-y-scroll">
+                { isChat ? 
+                    <Chat name={name} file={file}/> :
+                    <Run name={name} file={file} args={data.arguments?.properties}/>
+                }
+            </Card>
+        </ToolContext.Provider>
+    )
 
     return (<>
         <Handle
@@ -154,40 +167,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             <Card className="w-[400px] p-4">         
                 <VscGrabber className="w-full" />
                 <CardHeader>
-                    <div className="absolute top-2 left-4">
-                        <Popover placement="right" showArrow={true} backdrop="opaque">
-                            <PopoverTrigger>
-                                <Button radius="full" variant="light" startContent={<FaCog />} isIconOnly />
-                            </PopoverTrigger>
-                            <PopoverContent>
-                                <div className="w-[500px] max-h-[700px] overflow-y-scroll p-6">
-                                    <div className="mb-6">
-                                        <Tooltip 
-                                            color="warning"
-                                            closeDelay={0}
-                                            content="Changing the tool type will reset this tool's configuration."
-                                            showArrow={true}
-                                        >
-                                            <Select 
-                                                label="Choose a tool type"
-                                                defaultSelectedKeys={['Custom']}
-                                                onChange={(e) => {setToolType(e.target.value)}}
-                                            >
-                                                {Object.keys(toolTypes).map((toolType) => (
-                                                    <SelectItem key={toolType} value={toolType}>
-                                                        {toolType}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                        </Tooltip>
-                                    </div>
-                                    { toolType === "Custom" && <CustomConfig /> }
-                                    { toolType === "External" && <ExternalConfig /> }
-                                    { toolType === "Context" && <ContextConfig data={data}/> }
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
+                    <Button className="absolute top-2 left-4" radius="full" variant="light" startContent={<FaCog />} isIconOnly onPress={onConfigClick}/>
                 </CardHeader>
                 <CardBody>
                     <div className="nodrag nowheel cursor-auto">
@@ -224,12 +204,14 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                     }
                 </CardBody>
                 <CardFooter>
-                    <RunModal
-                        name={name}
-                        file={"new-file-0.gpt"}
-                        chat={isChat}
-                        args={data.arguments?.properties}
-                    />
+                    <Button 
+                        className="w-full" 
+                        onPress={onRunClick} 
+                        color={isChat ? 'primary' : 'secondary'}
+                        startContent={isChat ? <IoIosChatboxes /> : <FaRunning />}
+                    >
+                        { isChat ? 'Chat' : 'Run' }
+                    </Button>
                 </CardFooter>
             </Card>
         </ToolContext.Provider>

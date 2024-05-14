@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { IoMdSend } from "react-icons/io";
-import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
 import { subtitle } from "@/components/primitives";
 import { io, Socket } from "socket.io-client";
+import { IoCloseSharp } from "react-icons/io5";
+import { BuildContext } from "@/app/build/page";
+import type { Frame } from "@gptscript-ai/gptscript";
+import { 
+    Card,
+    CardHeader,
+    CardBody,
+    CardFooter,
+    Button,
+    Divider,
+} from "@nextui-org/react";
 
 enum MessageType {
     User,
@@ -14,7 +24,6 @@ type Message = {
     message: string;
 };
 
-
 interface ChatBoxProps {
     name: string;
     file: string;
@@ -24,12 +33,14 @@ export default function Chat({ name, file }: ChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [connected, setConnected] = useState(false);
     const [socket, setSocket] = useState<Socket | null>(null);
+    const {setChatPanel, setLogs } = useContext(BuildContext);
 
     useEffect(() => {
         const socket = io();
 
         socket.on('connect', () => {
             setConnected(true);
+            setLogs([]);
             socket.emit('run', file, name);
         })
 
@@ -43,6 +54,7 @@ export default function Chat({ name, file }: ChatBoxProps) {
             ]);
         });
 
+        socket.on('event', (data: Frame) => setLogs((prevLogs) => [...prevLogs, data]));
         socket.on('disconnect', () => { setConnected(false) });
 
         setSocket(socket);
@@ -61,13 +73,24 @@ export default function Chat({ name, file }: ChatBoxProps) {
     };
 
     return (
-        <ModalContent className="h-[60vh]">
-            <ModalHeader className="flex flex-col gap-1">
-                <h2 className={subtitle()}>
-                    You're chatting with <span className="capitalize font-bold text-primary">{name}</span>!
-                </h2>
-            </ModalHeader>
-            <ModalBody className="overflow-y-scroll shadow">
+        <Card className="h-full">
+             <CardHeader className="flex flex-col gap-1 py-2 px-4">
+                <div className="w-full flex justify-between">
+                    <h1 className={subtitle()}>
+                    You're chatting with <span className="capitalize font-bold text-primary">{name}</span>
+                    </h1>
+                    <Button
+                        radius="full"
+                        isIconOnly
+                        color="primary"
+                        onPress={(_) => setChatPanel(<></>)}
+                    >
+                        <IoCloseSharp />
+                    </Button>
+                </div>
+            </CardHeader>
+            <Divider />
+            <CardBody className="overflow-y-scroll shadow px-6 pt-6">
                 <div>
                     {messages.map((message, index) => (
                         message.type === MessageType.User ? (
@@ -85,9 +108,9 @@ export default function Chat({ name, file }: ChatBoxProps) {
                         )
                     ))}
                 </div>
-            </ModalBody>
+            </CardBody>
 
-            <ModalFooter>
+            <CardFooter>
                 <input
                     id="chatInput"
                     className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
@@ -110,7 +133,7 @@ export default function Chat({ name, file }: ChatBoxProps) {
                         input.value = "";
                     }}
                 />
-            </ModalFooter>
-        </ModalContent>
+            </CardFooter>
+        </Card>
     );
 }

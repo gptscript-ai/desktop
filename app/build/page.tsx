@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useCallback, useRef, useEffect} from 'react';
+import React, { useCallback, useRef, useEffect, createContext, useState } from 'react';
 import ScriptNav from './components/scriptNav';
 import CustomTool from './components/tool';
 import ToolBar from './components/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
-import type { Tool } from '@gptscript-ai/gptscript';
+import type { Tool, Frame } from '@gptscript-ai/gptscript';
 import { debounce } from 'lodash';
 import ReactFlow, {
     useNodesState,
@@ -34,12 +34,31 @@ const fetchGraph = async (file: string | null) => {
     return { nodes, edges };
 };
 
+type Context = {
+    nodes: RFNode[];
+    edges: RFEdge[];
+    setNodes: React.Dispatch<React.SetStateAction<RFNode[]>>;
+    setEdges: React.Dispatch<React.SetStateAction<RFEdge[]>>;
+    ConfigPanel: React.JSX.Element;
+    setConfigPanel: React.Dispatch<React.SetStateAction<React.JSX.Element>>;
+    ChatPanel: React.JSX.Element;
+    setChatPanel: React.Dispatch<React.SetStateAction<React.JSX.Element>>;
+    file: string;
+    logs: Frame[];
+    setLogs: React.Dispatch<React.SetStateAction<Frame[]>>;
+}
+
+export const BuildContext = createContext({} as Context);
+
 const AddNodeOnEdgeDrop = () => {
     const file = useSearchParams().get('file');
     const reactFlowWrapper = useRef(null);
     const connectingNode = useRef({id:'',handleId:''});
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [configPanel, setConfigPanel] = useState(<></>)
+    const [chatPanel, setChatPanel] = useState(<></>);
+    const [logs, setLogs] = useState<Frame[]>([]);
     const { screenToFlowPosition } = useReactFlow();
 
     // Call a debounced post to update the script with the new nodes every second.
@@ -73,9 +92,10 @@ const AddNodeOnEdgeDrop = () => {
     // Call the updateScript function when the user changes a node's data
     useEffect(() => {
         const handleEvent = (_: Event) => updateScript(nodes);
+        window.removeEventListener('newNodeData', handleEvent)
         window.addEventListener('newNodeData', handleEvent);
         return () => window.removeEventListener('newNodeData', handleEvent);
-    }, [nodes]);
+    }, [updateScript, nodes]);
 
     // Generate a unique id for a new node based on the existing nodes
     const getId = (): string => {
@@ -210,33 +230,56 @@ const AddNodeOnEdgeDrop = () => {
         updateScript(newNodes);
     }, [nodes]);
 
+
+    const context = {
+        nodes: nodes,
+        edges: edges,
+        setNodes: setNodes,
+        setEdges: setEdges,
+        ConfigPanel: configPanel,
+        setConfigPanel: setConfigPanel,
+        ChatPanel: chatPanel,
+        setChatPanel: setChatPanel,
+        file: `${file}.gpt` || '',
+        logs: logs,
+        setLogs: setLogs,
+    };
+
     return (
-        <div className="w-full h-full" ref={reactFlowWrapper}>
-            <ReactFlow
-                nodeTypes={nodeTypes}
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onNodesDelete={onNodeDelete}
-                onConnect={onConnect}
-                onConnectStart={onConnectStart}
-                onConnectEnd={onConnectEnd}
-                onNodeDragStop={onNodeDragStop}
-                onEdgesDelete={onEdgesDelete}
-                nodeOrigin={[0.0, 0.5]}
-                fitView
-                
-            >
-                <Panel position="top-left">
-                    <ScriptNav />
-                </Panel>
-                <Panel position="bottom-left">
-                    <ToolBar />
-                </Panel>
-                <Background />
-            </ReactFlow>
-        </div>
+        <BuildContext.Provider value={context}>
+            <div className="w-full h-full" ref={reactFlowWrapper}>
+                <ReactFlow
+                    nodeTypes={nodeTypes}
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onNodesDelete={onNodeDelete}
+                    onConnect={onConnect}
+                    onConnectStart={onConnectStart}
+                    onConnectEnd={onConnectEnd}
+                    onNodeDragStop={onNodeDragStop}
+                    onEdgesDelete={onEdgesDelete}
+                    nodeOrigin={[0.0, 0.5]}
+                    fitView
+                    
+                >
+                    <Panel position="top-left">
+                        <ScriptNav />
+                    </Panel>
+                    <Panel position="bottom-left" className="max-w-3/4 max-h-3/4">
+                        <ToolBar />
+                    </Panel>
+                    <Panel position="top-right">
+                        {configPanel}
+                    </Panel>
+                    <Panel position="bottom-right">
+                        {chatPanel}
+                    </Panel>
+                    <Background />
+                </ReactFlow>
+            </div>
+        </BuildContext.Provider>
     );
 };
 
