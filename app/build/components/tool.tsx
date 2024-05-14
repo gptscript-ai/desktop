@@ -58,7 +58,8 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             description !== data.description || 
             temperature !== data.temperature || 
             prompt !== data.instructions || 
-            isChat !== data.chat
+            isChat !== data.chat ||
+            name !== data.name
         );
 
         if (hasChanged) {
@@ -66,6 +67,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             data.chat = isChat;
             data.description = description;
             data.temperature = temperature;
+            data.name = name;
             window.dispatchEvent(new Event("newNodeData"));
         }
 
