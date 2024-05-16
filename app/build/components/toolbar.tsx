@@ -32,7 +32,7 @@ export default function Toolbar() {
 
     const expanded = (
         <Card 
-            className={large ? "w-[70vw]" : "w-[50vw]"}
+            className={large ? "w-[50vw] lg:w-[55vw] xl:w-[60vw] 2xl:w-[65vw]" : "w-[50vw]"}
             style = {{height: large ? `calc(92vh - 64px)` : `25vh`}}
             
         >
@@ -60,7 +60,7 @@ export default function Toolbar() {
                 <Tabs size="lg" color="primary" aria-label="Options">
                     <Tab
                         key="logs"
-                        className="overflow-y-scroll"
+                        className="overflow-y-scroll h-full"
                         title={
                             <div className="flex items-center space-x-2">
                                 <IoTerminalOutline />
@@ -72,6 +72,7 @@ export default function Toolbar() {
                     </Tab>
                     <Tab
                         key="workspace"
+                        className="overflow-y-scroll h-full"
                         title={
                             <div className="flex items-center space-x-2">
                                 <IoFolderOpenOutline />

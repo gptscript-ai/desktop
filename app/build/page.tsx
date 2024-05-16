@@ -18,7 +18,6 @@ import ReactFlow, {
     type Node as RFNode,
     type Edge as RFEdge,
     Panel,
-    Controls
 } from 'reactflow';
 
 const nodeTypes = {
@@ -46,6 +45,7 @@ type Context = {
     file: string;
     logs: Frame[];
     setLogs: React.Dispatch<React.SetStateAction<Frame[]>>;
+    getId: () => string;
 }
 
 export const BuildContext = createContext({} as Context);
@@ -90,6 +90,7 @@ const AddNodeOnEdgeDrop = () => {
     }, []);
 
     // Call the updateScript function when the user changes a node's data
+    // TODO: This gets triggered every time the node changes so we should adjust that.
     useEffect(() => {
         const handleEvent = (_: Event) => updateScript(nodes);
         window.removeEventListener('newNodeData', handleEvent)
@@ -243,6 +244,7 @@ const AddNodeOnEdgeDrop = () => {
         file: `${file}.gpt` || '',
         logs: logs,
         setLogs: setLogs,
+        getId: getId,
     };
 
     return (

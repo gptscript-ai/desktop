@@ -17,10 +17,10 @@ import {
 interface RunProps {
     name: string;
     file: string;
-    args: Record<string, Property> | undefined;
+    params: Record<string, Property> | undefined;
 }
 
-export default function Chat({ name, file, args }: RunProps) {
+export default function Chat({ name, file, params }: RunProps) {
     const [messages, setMessages] = useState<String[]>([]);
     const [connected, setConnected] = useState(false);
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -78,7 +78,7 @@ export default function Chat({ name, file, args }: RunProps) {
             <CardBody className="overflow-y-scroll shadow px-6 pb-6">
                 {showForm ? (
                     <form>
-                        {Object.entries(args || {}).map(([argName, arg]) => (
+                        {Object.entries(params || {}).map(([argName, arg]) => (
                             <div key={argName} className="mb-4">
                                 <label htmlFor={argName} className="block font-medium mb-1">{argName}</label>
                                 <input

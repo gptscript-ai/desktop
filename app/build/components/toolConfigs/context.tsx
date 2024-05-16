@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ArgsTable from "../argsTable";
+import ArgsTable from "../paramTable";
 import type { Tool } from "@gptscript-ai/gptscript";
 
 
@@ -23,7 +23,7 @@ const Context: React.FC<ContextProps> = ({ data }) => {
 
     return (
         <div className="flex flex-col space-y-6">
-            <ArgsTable args={data.arguments?.properties} />
+            <ArgsTable />
         </div>
     );
 };

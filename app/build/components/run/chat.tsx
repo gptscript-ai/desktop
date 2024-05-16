@@ -64,6 +64,13 @@ export default function Chat({ name, file }: ChatBoxProps) {
             socket.disconnect()
         };
     }, []);
+
+    useEffect(() => {
+        const messagesContainer = document.getElementById("message");
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }, [messages]);
     
 
     const handleMessageSent = (message: Message) => {
@@ -77,7 +84,7 @@ export default function Chat({ name, file }: ChatBoxProps) {
              <CardHeader className="flex flex-col gap-1 py-2 px-4">
                 <div className="w-full flex justify-between">
                     <h1 className={subtitle()}>
-                    You're chatting with <span className="capitalize font-bold text-primary">{name}</span>
+                        You're chatting with <span className="capitalize font-bold text-primary">{name}</span>
                     </h1>
                     <Button
                         radius="full"
@@ -90,7 +97,7 @@ export default function Chat({ name, file }: ChatBoxProps) {
                 </div>
             </CardHeader>
             <Divider />
-            <CardBody className="overflow-y-scroll shadow px-6 pt-6">
+            <CardBody id="message" className="overflow-y-scroll shadow px-6 pt-6">
                 <div>
                     {messages.map((message, index) => (
                         message.type === MessageType.User ? (

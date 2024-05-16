@@ -31,6 +31,7 @@
 		"eslint": "8.48.0",
 		"eslint-config-next": "14.2.1",
 		"framer-motion": "^11.1.1",
+		"gptscript": "gptscript-ai/gptscript",
 		"intl-messageformat": "^10.5.0",
 		"lodash": "^4.17.21",
 		"next": "14.2.1",
