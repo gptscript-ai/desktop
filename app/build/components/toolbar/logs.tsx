@@ -3,7 +3,6 @@ import { BuildContext } from '@/app/build/page';
 import { RunEventType } from '@gptscript-ai/gptscript';
 import { Button, Tooltip } from '@nextui-org/react';
 import { RiArrowDownSLine, RiCloseLine} from 'react-icons/ri';
-import Tool from '../tool';
 
 const Logs = () => {
     const { logs } = useContext(BuildContext);
@@ -42,6 +41,7 @@ const Logs = () => {
                 {logs.length === 0 && <li>{'> Start a tool to view logs...'}</li>}
                 {logs.map((log, i) => (
                     <li key={i}>
+                        {log.type === RunEventType.CallChat && <li>{'> Chat started...'}</li>}
                         {`> ${JSON.stringify(log)}`}
                         <br />
                         <br />
