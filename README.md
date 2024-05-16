@@ -28,7 +28,7 @@ yarn install
 3. Run `chat-builder`.
 
 ```bash
-yarn start
+yarn dev
 ```
 
 4. Open `http://localhost:3000` in your browser.
