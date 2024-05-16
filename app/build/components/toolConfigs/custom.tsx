@@ -4,15 +4,17 @@ import { IoIosChatboxes } from "react-icons/io";
 import {
     Textarea,
     Slider,
+    Input,
     Switch,
-    Tooltip,
     Card,
     CardHeader,
     CardBody,
     Button,
     Divider,
+    Accordion,
+    AccordionItem,
 } from "@nextui-org/react";;
-import ArgsTable from "../argsTable";
+import ArgsTable from "../paramTable";
 import { ToolContext } from "../tool";
 import { subtitle } from "@/components/primitives";
 import { BuildContext } from "@/app/build/page";
@@ -40,16 +42,11 @@ const Custom = () => {
             </CardHeader>
             <Divider />
             <CardBody className="flex flex-col space-y-6 p-6 h-full overflow-y-scroll">
-                <div className="flex space-x-4">
-                    <Tooltip
-                        color="primary"
-                        closeDelay={0}
-                        content="Toggle the ability to chat with this tool"
-                    >
-                        <div>
+                <Accordion variant="splitted" defaultExpandedKeys={["basic","parameters"]} selectionMode="multiple">
+                    <AccordionItem key="basic" aria-label="Basic" title="Basic" subtitle="Define core behavior">
+                        <div className="px-2 flex flex-col space-y-6 mb-6">
                             <Switch
                                 className="h-full"
-                                size="lg"
                                 isSelected={isChat}
                                 onValueChange={setIsChat}
                                 thumbIcon={({ isSelected, className }) =>
@@ -59,29 +56,36 @@ const Custom = () => {
                                         <FaWrench className={className} />
                                     )
                                 }
+                            >
+                                Toggle Chat
+                            </Switch>
+
+                            <Textarea
+                                fullWidth
+                                label="Description"
+                                placeholder="Describe your tool..."
+                                defaultValue={description}
+                                onChange={(e) => setDescription(e.target.value)}
                             />
                         </div>
-                    </Tooltip>
-                </div>
-
-                <Textarea
-                    fullWidth
-                    label="Description"
-                    placeholder="Describe your tool..."
-                    defaultValue={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-
-                <ArgsTable args={data.arguments?.properties} />
-
-                <Slider
-                    label="Creativity"
-                    step={0.01}
-                    maxValue={1}
-                    minValue={0}
-                    defaultValue={temperature}
-                    onChange={(e) => setTemperature(e as number)}
-                />
+                    </AccordionItem>
+                    <AccordionItem key="advanced" aria-label="Advanced" title="Advanced" subtitle="Tweak advanced configuration for this tool">
+                        <div className="px-2 flex flex-col space-y-6 mb-6">
+                            <Switch>JSON Response</Switch>
+                            <Switch>Internal Prompt</Switch>
+                            <Input label="Model name"/>
+                            <Input label="Max tokens"/>
+                            <Slider
+                                label="Creativity"
+                                step={0.01}
+                                maxValue={1}
+                                minValue={0}
+                                defaultValue={temperature}
+                                onChange={(e) => setTemperature(e as number)}
+                            />
+                        </div>
+                    </AccordionItem>
+                </Accordion>
             </CardBody>
         </Card>
     );

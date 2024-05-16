@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, createContext, useContext } from "react";
+import { useState, useEffect, memo, createContext, useContext, useCallback } from "react";
 import { FaCog, FaRunning } from "react-icons/fa";
 import { VscGrabber } from "react-icons/vsc";
 import { IoIosChatboxes } from "react-icons/io";
@@ -9,17 +9,22 @@ import {
     CardHeader,
     CardBody,
     CardFooter,
-    Chip,
+    Badge,
     Tooltip,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
 } from "@nextui-org/react";;
 import { Handle, Position } from "reactflow";
-import type { Tool } from "@gptscript-ai/gptscript";
+import type { Tool, Property } from "@gptscript-ai/gptscript";
 import CustomConfig from "./toolConfigs/custom";
 import ExternalConfig from "./toolConfigs/external";
 import ContextConfig from "./toolConfigs/context";
 import { BuildContext } from "../page"
 import Run from "./run/run";
 import Chat from "./run/chat";
+import ParamsTable from "./paramTable";
+import { debounce } from 'lodash';
 
 interface CustomToolProps {
     data: Tool;
@@ -40,6 +45,8 @@ type Context = {
     setDescription: (description: string) => void;
     temperature: number;
     setTemperature: (temperature: number) => void;
+    params: Record<string, Property> | undefined;
+    setParams: (params: Record<string, Property> | undefined) => void;
 }
 
 export const ToolContext = createContext({} as Context);
@@ -50,16 +57,27 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const [name, setName] = useState(data.name);
     const [prompt, setPrompt] = useState(data.instructions);
     const [isChat, setIsChat] = useState(data.chat);
+    const [params, setParams ] = useState<Record<string, Property> | undefined>(data.arguments?.properties);
     const [toolType, setToolType] = useState("Custom");
-    const { setChatPanel, setConfigPanel, file } = useContext(BuildContext);
+    const { setChatPanel, setConfigPanel, file, getId } = useContext(BuildContext);
+
+    const updateName = useCallback(debounce(async (previous: string, incoming: string) => {
+        data.name = incoming;
+        await fetch(`http://localhost:3000/api/file/${file.replace('.gpt','')}/${previous}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+    }, 1000),[data]);
 
     useEffect(() => {
+        console.log('yo')
         const hasChanged = (
             description !== data.description || 
             temperature !== data.temperature || 
             prompt !== data.instructions || 
             isChat !== data.chat ||
-            name !== data.name
+            JSON.stringify(params) !== JSON.stringify(data.arguments?.properties)
         );
 
         if (hasChanged) {
@@ -67,15 +85,21 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             data.chat = isChat;
             data.description = description;
             data.temperature = temperature;
-            data.name = name;
+            if (data.arguments) {
+                data.arguments.properties = params;
+            }
             window.dispatchEvent(new Event("newNodeData"));
         }
 
         if (data.name !== name){
-            window.dispatchEvent(new Event("nodeNameChange"));
+            let incoming = name
+            if (!incoming) {
+                incoming = `new-tool-${getId()}`
+            }
+            updateName(data.name, incoming);
         }
 
-    }, [name, prompt, isChat, data, description, temperature]);
+    }, [name, prompt, isChat, data, description, temperature, params]);
 
     const context = {
         data,
@@ -91,11 +115,13 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
         setDescription,
         temperature,
         setTemperature,
+        params,
+        setParams
     }
 
     const onConfigClick = () => setConfigPanel(
         <ToolContext.Provider value={context}>
-            <Card className="w-[45vw] xl:w-[35vw] 2xl:w-[25vw] h-[45vh] overflow-y-scroll">
+            <Card className="w-[45vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[43vh] overflow-y-scroll">
                 { toolType === "Custom" && <CustomConfig /> }
                 { toolType === "External" && <ExternalConfig /> }
                 { toolType === "Context" && <ContextConfig data={data}/> }
@@ -106,10 +132,10 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     // TODO - switch this to use the tool context. also need to address if isChat is changes
     const onRunClick = () => setChatPanel(
         <ToolContext.Provider value={context}>
-            <Card className="w-[45vw] xl:w-[35vw] 2xl:w-[25vw] h-[45vh] overflow-y-scroll">
+            <Card className="w-[45vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[43vh] overflow-y-scroll">
                 { isChat ? 
                     <Chat name={name} file={file}/> :
-                    <Run name={name} file={file} args={data.arguments?.properties}/>
+                    <Run name={name} file={file} params={params}/>
                 }
             </Card>
         </ToolContext.Provider>
@@ -174,6 +200,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                 <CardBody>
                     <div className="nodrag nowheel cursor-auto">
                         <input
+                            id= "name"
                             className="nodrag nowheel cursor-text text-2xl font-bold mb-4 mx-1 w-full dark:bg-zinc-900"
                             defaultValue={name}
                             placeholder="Give your tool a name..."
@@ -187,23 +214,18 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                     </div>
-                    { data.arguments && data.arguments.properties &&
-                        <div className="mt-4 flex flex-wrap">
-                            {Object.keys(data.arguments.properties).map((arg) => {
-                                if (!data.arguments.properties) return null;
-                                return (
-                                    <Chip
-                                        variant="flat"
-                                        color="primary"
-                                        className="mt-2 mr-2"
-                                        key={arg}
-                                    >
-                                        {arg}
-                                    </Chip>
-                                );
-                            })}
-                        </div>
-                    }
+                    { params && Object.keys(params).length > 0 && (
+                        <Badge color="primary" className="mt-6 right-1" content={Object.keys(params).length}>
+                            <Popover placement="bottom" showArrow>
+                                <PopoverTrigger>
+                                    <Button variant="bordered" className="w-full mt-6">Parameters</Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-4">
+                                    <ParamsTable />
+                                </PopoverContent>
+                            </Popover>
+                        </Badge>
+                    )}
                 </CardBody>
                 <CardFooter>
                     <Button 
