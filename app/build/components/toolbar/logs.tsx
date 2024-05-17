@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { BuildContext } from '@/app/build/page';
-import { RunEventType } from '@gptscript-ai/gptscript';
 import { Button, Tooltip } from '@nextui-org/react';
 import { RiArrowDownSLine, RiCloseLine} from 'react-icons/ri';
 
