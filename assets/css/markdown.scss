@@ -1,0 +1,58 @@
+.prose {
+  max-width: initial;
+}
+
+.markdown {
+  H1:last-child,
+  H2:last-child,
+  H3:last-child,
+  H4:last-child,
+  H5:last-child,
+  H6:last-child {
+    margin-bottom: 0;
+  }
+
+  P {
+    margin: 0;
+  }
+
+  P:not(:first-of-type) {
+    margin-top: 0.5rem;
+  }
+
+  .footnotes-sep {
+    margin: 0.5rem 0;
+  }
+
+  .footnote-ref A {
+    text-decoration: none !important;
+  }
+
+  .footnotes-list {
+    .footnote-item {
+      font-size: 85%;
+
+      .footnote-backref {
+        display: none;
+      }
+
+      &:hover .footnote-backref {
+        display: initial;
+      }
+
+      SPAN {
+        margin-right: 5px;
+      }
+
+      P {
+        display: inline-block;
+      }
+    }
+  }
+
+  .footnote-ref A, .footnote-item {
+    &:target {
+      background-color: rgba(yellow, 0.5);
+    }
+  }
+}
