@@ -12,6 +12,7 @@ import {
     CardFooter,
     Button,
     Divider,
+    Input,
 } from "@nextui-org/react";
 
 interface RunProps {
@@ -61,7 +62,8 @@ export default function Chat({ name, file, params }: RunProps) {
             <CardHeader className="flex flex-col gap-1 px-4 py-2">
                 <div className="w-full flex justify-between">
                     <h1 className={subtitle()}>
-                        You're about to run <span className="capitalize font-bold text-primary">{name}</span>
+                        { showForm ? "You're about to run " : "You're running "}
+                        <span className="capitalize font-bold text-primary">{name}</span>
                     </h1>
                     <Button
                         radius="full"
@@ -78,17 +80,17 @@ export default function Chat({ name, file, params }: RunProps) {
                 {showForm ? (
                     <form>
                         {Object.entries(params || {}).map(([argName, arg]) => (
-                            <div key={argName} className="mb-4">
-                                <label htmlFor={argName} className="block font-medium mb-1">{argName}</label>
-                                <input
-                                    type="text"
-                                    id={argName}
-                                    name={argName}
-                                    value={formValues[argName] || ''}
-                                    onChange={handleInputChange}
-                                    className="border border-gray-300 rounded-md px-3 py-2 w-full"
-                                />
-                            </div>
+                            <Input
+                                className="my-6"
+                                size="lg"
+                                label={argName}
+                                placeholder={arg.description}
+                                type="text"
+                                id={argName}
+                                name={argName}
+                                value={formValues[argName] || ''}
+                                onChange={handleInputChange}
+                            />
                         ))}
                     </form>
                 ) : (

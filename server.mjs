@@ -63,8 +63,12 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 				await new Promise(resolve => setTimeout(resolve, 1000));
 			}
 		};
-		chatLoop().catch(console.error);
+		chatLoop().catch((e) => {
+			socket.emit('error', e),
+			console.error(e)
+		});
 	} catch (e) {
+		socket.emit('error', e)
 		console.error(e);
 	}
 }

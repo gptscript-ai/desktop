@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, ChangeEvent, useEffect } from "react";
+import React, { useCallback, useContext, ChangeEvent } from "react";
 import {
     Table,
     TableHeader,
@@ -9,10 +9,10 @@ import {
     Button,
     getKeyValue
 } from "@nextui-org/react";
-import { FaPlus, FaTrash } from "react-icons/fa"; // Import the FaTrash icon
+import { FaPlus, FaTrash } from "react-icons/fa";
 import { debounce } from 'lodash';
 import type { Property } from "@gptscript-ai/gptscript";
-import { ToolContext } from "./tool";
+import { ToolContext } from "../../tool";
 
 const columns = [
   {
@@ -24,7 +24,7 @@ const columns = [
     label: "Description",
   },
   {
-    key: "actions", // Add a new column for actions
+    key: "actions",
     label: "Actions",
   },
 ];
@@ -121,14 +121,13 @@ export default function ParamsTable() {
                             </TableCell>
                             <TableCell>
                                 <Button
-                                    isIconOnly
-                                    radius="full"
                                     size="sm"
+                                    color="danger"
+                                    isIconOnly
+                                    startContent={<FaTrash />}
                                     className="ml-2"
                                     onClick={() => handleDeleteParam(key)}
-                                >
-                                    <FaTrash />
-                                </Button>
+                                />
                             </TableCell>
                         </TableRow>
                     ))}
