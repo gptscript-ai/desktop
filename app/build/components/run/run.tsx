@@ -46,7 +46,6 @@ export default function Chat({ name, file, params }: RunProps) {
 
     const handleFormSubmit = () => {
         setShowForm(false);
-        console.log(formValues);
         socket?.emit('run', file, name, formValues);
     }
 

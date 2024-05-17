@@ -4,7 +4,6 @@ import { IoTerminalOutline, IoFolderOpenOutline } from "react-icons/io5";
 import { GoArrowUpRight, GoArrowDownLeft, GoDash } from "react-icons/go";
 import { GoTerminal } from "react-icons/go";
 import Logs from "./toolbar/logs";
-import { BuildContext } from "@/app/build/page";
 
 export default function Toolbar() {
     const [collapsed, setCollapsed] = useState(true);
@@ -34,7 +33,6 @@ export default function Toolbar() {
         <Card 
             className={large ? "w-[50vw] lg:w-[55vw] xl:w-[60vw] 2xl:w-[65vw]" : "w-[50vw]"}
             style = {{height: large ? `calc(92vh - 64px)` : `25vh`}}
-            
         >
             <CardBody>
                 <Button
