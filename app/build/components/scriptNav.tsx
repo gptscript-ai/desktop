@@ -14,6 +14,9 @@ export default function App() {
             .catch(error => console.error(error));
     }, []);
 
+    const ScriptItems = files && files.length ? files.map((file) => (
+        <DropdownItem startContent={<FaRegFileCode/>} key={file.replace('.gpt', '')}>{file}</DropdownItem>
+    )) : <DropdownItem key={'no-files'} isReadOnly>No files found</DropdownItem>;
 
     return (
         <Dropdown>
@@ -31,12 +34,10 @@ export default function App() {
                         New script
                     </DropdownItem>
                 </DropdownSection>
-                <DropdownSection title="Scripts">  
-                    {files.map((file) => (
-                        <DropdownItem startContent={<FaRegFileCode/>} key={file.replace('.gpt', '')}>{file}</DropdownItem>
-                    ))}
+                <DropdownSection title="Scripts">
+                    {ScriptItems}
                 </DropdownSection>
-                
+               
             </DropdownMenu>
         </Dropdown>
     );

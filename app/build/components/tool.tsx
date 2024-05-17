@@ -71,7 +71,6 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     }, 1000),[data]);
 
     useEffect(() => {
-        console.log('yo')
         const hasChanged = (
             description !== data.description || 
             temperature !== data.temperature || 
@@ -85,9 +84,8 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             data.chat = isChat;
             data.description = description;
             data.temperature = temperature;
-            if (data.arguments) {
-                data.arguments.properties = params;
-            }
+            if (!data.arguments) data.arguments = { type: "object" };
+            data.arguments.properties = params;
             window.dispatchEvent(new Event("newNodeData"));
         }
 
@@ -214,18 +212,18 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                     </div>
-                    { params && Object.keys(params).length > 0 && (
-                        <Badge color="primary" className="mt-6 right-1" content={Object.keys(params).length}>
-                            <Popover placement="bottom" showArrow>
-                                <PopoverTrigger>
-                                    <Button variant="bordered" className="w-full mt-6">Parameters</Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="p-4">
-                                    <ParamsTable />
-                                </PopoverContent>
-                            </Popover>
-                        </Badge>
-                    )}
+
+                    <Badge color="primary" className="mt-6 right-1" content={params ? Object.keys(params).length : 0}>
+                        <Popover placement="bottom" showArrow>
+                            <PopoverTrigger>
+                                <Button variant="bordered" className="w-full mt-6">Parameters</Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="p-4 w-[500px]">
+                                <ParamsTable />
+                            </PopoverContent>
+                        </Popover>
+                    </Badge>
+
                 </CardBody>
                 <CardFooter>
                     <Button 

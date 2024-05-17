@@ -85,10 +85,8 @@ export default function ParamsTable() {
         setParams(newParams);
     }, [params]);
 
-    if (!params) return null;
-
-    return (
-        <>
+    return (<>
+        {params && Object.keys(params).length !== 0 && (
             <Table 
                 removeWrapper
                 className="overflow-x-scroll"
@@ -111,7 +109,7 @@ export default function ParamsTable() {
                                 </span>
                             </TableCell>
                             <TableCell>
-                                <div className="max-w-[200px]">
+                                <div className="">
                                     <span
                                         contentEditable
                                         suppressContentEditableWarning
@@ -136,7 +134,7 @@ export default function ParamsTable() {
                     ))}
                 </TableBody>
             </Table>
-            <Button startContent={<FaPlus />} size="sm" variant="bordered" className="w-full mt-2" onPress={addParam}>Add parameter</Button>
-        </>
-    );
+        )}
+        <Button startContent={<FaPlus />} size="sm" variant="bordered" className="w-full mt-2" onPress={addParam}>Add parameter</Button>
+    </>);
 }
