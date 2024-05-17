@@ -41,7 +41,7 @@ const Logs = () => {
                 {logs.length === 0 && <li>{'> Start a tool to view logs...'}</li>}
                 {logs.map((log, i) => (
                     <li key={i}>
-                        {log.type === RunEventType.CallChat && <li>{'> Chat started...'}</li>}
+                        {/* {log.type === RunEventType.CallChat && <li>{'> Chat started...'}</li>} */}
                         {`> ${JSON.stringify(log)}`}
                         <br />
                         <br />

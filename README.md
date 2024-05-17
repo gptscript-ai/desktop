@@ -25,10 +25,16 @@ yarn link node-gptscript
 yarn install
 ```
 
-3. Run `chat-builder`.
+3. Set your OPENAI_API_KEY.
+
+```bash
+export OPENAI_API_KEY=your-api-key
+```
+
+4. Run `chat-builder`.
 
 ```bash
 yarn dev
 ```
 
-4. Open `http://localhost:3000` in your browser.
+5. Open `http://localhost:3000` in your browser.

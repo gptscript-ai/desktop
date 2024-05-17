@@ -13,15 +13,24 @@ import {
     Divider,
     Accordion,
     AccordionItem,
-} from "@nextui-org/react";;
-import ArgsTable from "../paramTable";
+} from "@nextui-org/react";
+import Context from "./config/context";
 import { ToolContext } from "../tool";
 import { subtitle } from "@/components/primitives";
 import { BuildContext } from "@/app/build/page";
 import { IoCloseSharp } from "react-icons/io5";
 
 const Custom = () => {
-    const {data, isChat, setIsChat, description, setDescription, temperature, setTemperature, name} = useContext(ToolContext);
+    const { 
+        name,
+        isChat, setIsChat, 
+        description, setDescription, 
+        temperature, setTemperature, 
+        jsonResponse, setJsonResponse,
+        internalPrompt, setInternalPrompt,
+        modelName, setModelName,
+        maxTokens, setMaxTokens,
+    } = useContext(ToolContext);
     const {setConfigPanel} = useContext(BuildContext);
     return (
         <Card className="h-full">
@@ -69,12 +78,17 @@ const Custom = () => {
                             />
                         </div>
                     </AccordionItem>
+                    <AccordionItem key="context" aria-label="Contexts" title="Contexts" subtitle="Add contexts from a file or tool">
+                        <div className="mb-6 px-2" >
+                            <Context />
+                        </div>
+                    </AccordionItem>
                     <AccordionItem key="advanced" aria-label="Advanced" title="Advanced" subtitle="Tweak advanced configuration for this tool">
                         <div className="px-2 flex flex-col space-y-6 mb-6">
-                            <Switch>JSON Response</Switch>
-                            <Switch>Internal Prompt</Switch>
-                            <Input label="Model name"/>
-                            <Input label="Max tokens"/>
+                            <Switch isSelected={jsonResponse} onValueChange={setJsonResponse}>JSON Response</Switch>
+                            <Switch isSelected={internalPrompt} onValueChange={setInternalPrompt}>Internal Prompt</Switch>
+                            <Input defaultValue={modelName} onChange={(e) => setModelName(e.target.value)} label="Model name"/>
+                            <Input type="number" defaultValue={`${maxTokens}`} onChange={(e) => setMaxTokens(parseInt(e.target.value))} label="Max tokens"/>
                             <Slider
                                 label="Creativity"
                                 step={0.01}
