@@ -60,8 +60,8 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const [prompt, setPrompt] = useState(data.instructions);
     const [isChat, setIsChat] = useState(data.chat);
     const [params, setParams ] = useState<Record<string, Property> | undefined>(data.arguments?.properties);
-    const [tools, setTools] = useState(data.tools);
-    const [context, setContext] = useState(data.context);
+    const [tools, setTools] = useState(data.tools || []);
+    const [context, setContext] = useState(data.context || []);
     const { setChatPanel, setConfigPanel, file, getId } = useContext(BuildContext);
 
     const updateName = useCallback(debounce(async (previous: string, incoming: string) => {
