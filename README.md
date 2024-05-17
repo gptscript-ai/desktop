@@ -21,7 +21,7 @@ yarn link
 git clone https://github.com/gptscript-ai/chat-builder
 echo "GPTSCRIPT_BIN=/usr/local/bin/gptscript
 SCRIPTS_PATH=gptscripts" > .env.local
-yarn link node-gptscript
+yarn link "@gptscript-ai/gptscript"
 yarn install
 ```
 
