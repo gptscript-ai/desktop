@@ -12,10 +12,11 @@ To run locally you have to do a few things while features are unreleased.
 git clone https://github.com/gptscript-ai/node-gptscript/
 cd node-gptscript
 npm install
+npx tsc
 yarn link
 ```
 
-2. Setup `chat-builder`.
+2. Setup `chat-builder`. In the parent directory of where you cloned `node-gptscript`:
 
 ```bash
 git clone https://github.com/gptscript-ai/chat-builder
@@ -23,6 +24,7 @@ echo "GPTSCRIPT_BIN=/usr/local/bin/gptscript
 SCRIPTS_PATH=gptscripts" > .env.local
 yarn link "@gptscript-ai/gptscript"
 yarn install
+mkdir gptscripts
 ```
 
 3. Set your OPENAI_API_KEY.
@@ -31,7 +33,7 @@ yarn install
 export OPENAI_API_KEY=your-api-key
 ```
 
-4. Run `chat-builder`.
+4. To run `chat-builder`, navigate to the `chat-builder` directory and run.
 
 ```bash
 yarn dev
