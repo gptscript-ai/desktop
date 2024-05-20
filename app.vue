@@ -1,16 +1,11 @@
-<template>
-  <div>
-    <p id="electron-status">isElectron?: {{ useElectron().isElectron }}</p>
-    <NuxtWelcome />
-  </div>
-</template>
+<script setup lang="ts">
+const gpt = useGpt()
 
-<style>
-#electron-status {
-  background: #000;
-  color: #fff;
-  position: absolute;
-  font-size: 2rem;
-  font: bold;
-}
-</style>
+useHead({ bodyAttrs: { class: 'bg-gray-100 dark:bg-gray-900' } })
+</script>
+
+<template>
+  <NuxtPage/>
+  <UModals/>
+  <UNotifications/>
+</template>

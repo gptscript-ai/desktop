@@ -1,4 +1,5 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import type { BrowserWindow } from 'electron'
+import { ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 
@@ -16,6 +17,7 @@ autoUpdater.autoInstallOnAppQuit = true
 // ======
 export default (mainWindow: BrowserWindow) => {
   const isMac = process.platform === 'darwin'
+
   if (isMac) {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
@@ -24,6 +26,7 @@ export default (mainWindow: BrowserWindow) => {
   // Helpers
   // =======
   let readyToInstall = false
+
   function sendUpdaterStatus(...args: any[]) {
     mainWindow.webContents.send('updater:statusChanged', args)
   }
@@ -56,7 +59,9 @@ export default (mainWindow: BrowserWindow) => {
   })
 
   ipcMain.handle('updater:quitAndInstall', (_event) => {
-    if (!readyToInstall) return
+    if (!readyToInstall) {
+      return
+    }
     autoUpdater.quitAndInstall()
   })
 
@@ -67,5 +72,5 @@ export default (mainWindow: BrowserWindow) => {
     autoUpdater.checkForUpdates()
   }, 1000 * 60 * 60 * 2)
 
-  console.log('[-] MODULE::updater Initialized')
+  console.info('[-] MODULE::updater Initialized')
 }

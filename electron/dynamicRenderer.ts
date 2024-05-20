@@ -22,7 +22,7 @@ export default function (mainWindow: BrowserWindow) {
   const listener = app.listen(8079, 'localhost', () => {
     const port = (listener.address() as any).port
 
-    console.log('Dynamic-Renderer Listening on', port)
+    console.info('Dynamic-Renderer Listening on', port)
     mainWindow.loadURL(`http://localhost:${ port }`)
   })
 }

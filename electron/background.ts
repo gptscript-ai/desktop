@@ -6,26 +6,27 @@ import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
+import clickyServes from './modules/clickyServes'
 
 // Initilize
 // =========
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
-const architucture: '64' | '32' = os.arch() === 'x64' ? '64' : '32'
+const arch = os.arch()
 const headerSize = 32
-const modules = [titleBarActionsModule, macMenuModule, updaterModule]
+const modules = [titleBarActionsModule, macMenuModule, updaterModule, clickyServes]
 
 // Initialize app window
 // =====================
 function createWindow() {
-  console.info('System info', { isProduction, platform, architucture })
+  console.info('System info', { isProduction, platform, arch })
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width:           1440,
-    height:          1024,
-    minWidth:        1024,
-    minHeight:       676,
+    width:           1280,
+    height:          768,
+    minWidth:        720,
+    minHeight:       480,
     backgroundColor: '#000',
     webPreferences:  {
       devTools:         !isProduction,
@@ -91,16 +92,20 @@ app.whenReady().then(async () => {
     mainWindow.show()
   })
 
-  ipcMain.on('doThing', (event, args) => {
-    mainWindow.webContents.send('didThing', 'stuff')
-  })
-})
+  //   ipcMain.on('doThing', (event, args) => {
+  //     console.info('doingThing')
+  //     mainWindow.webContents.send('didThing', 'stuff')
+  //   })
+  // })
+  // ipc.receive('didThing', (data) => console.log(data))
+  // ipc.send('doThing')
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // Quit when all windows are closed, except on macOS. There, it's common
+  // for applications and their menu bar to stay active until the user quits
+  // explicitly with Cmd + Q.
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  })
 })

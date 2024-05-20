@@ -1,6 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
+  colorMode: {
+    preference: 'system',
+    fallback:   'dark',
+  },
   components: true,
   css:        ['@/assets/css/main.scss'],
   devServer:  {
@@ -10,6 +14,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules:  [
     '@nuxt/ui',
+    '@nuxtjs/color-mode',
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
   ],

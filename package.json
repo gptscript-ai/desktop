@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt generate",
+    "clean": "scripts/clean",
+    "download": "node scripts/download.mjs",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && electron-builder install-app-deps",
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",
@@ -52,8 +54,11 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
+    "@nuxtjs/color-mode": "^3.4.1",
     "electron-log": "^5.1.4",
     "electron-updater": "^6.1.8",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   }
 }
