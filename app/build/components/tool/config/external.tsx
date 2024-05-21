@@ -12,7 +12,7 @@ import {
 } from "@nextui-org/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { debounce } from "lodash"
-import { ToolContext } from "../../tool";
+import { ToolContext } from "@/app/build/components/tool";
 
 export const IsExternalTool = (tool: string) => {
     if (tool.includes("from")){

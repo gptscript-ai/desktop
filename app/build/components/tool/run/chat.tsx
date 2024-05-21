@@ -60,7 +60,6 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
 
         socket.on('event', (data: Frame) => setLogs((prevLogs) => [...prevLogs, data]));
         socket.on('error', (data: Frame) => {
-            console.log(data)
             setLogs((prevLogs) => [...prevLogs, data])
         });
         socket.on('disconnect', () => { setConnected(false) });
