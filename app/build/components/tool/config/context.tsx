@@ -11,7 +11,7 @@ import {
     Divider,
 } from "@nextui-org/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { ToolContext } from "../../tool";
+import { ToolContext } from "@/app/build/components/tool";
 
 export const IsValidContext = (tool: string) => {
     if (tool.includes("from")){

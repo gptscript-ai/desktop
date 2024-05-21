@@ -148,7 +148,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
 
     const onConfigClick = () => setConfigPanel(
         <ToolContext.Provider value={toolContext}>
-            <Card className="w-[45vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[43vh] overflow-y-scroll">
+            <Card className="w-[35vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[43vh] overflow-y-scroll">
                 <Config />
             </Card>
         </ToolContext.Provider>
@@ -156,7 +156,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
 
     const onRunClick = () => setChatPanel(
         <ToolContext.Provider value={toolContext}>
-            <Card className="w-[45vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[45vh] overflow-y-scroll">
+            <Card className="w-[35vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[45vh] overflow-y-scroll">
                 { isChat ? 
                     <Chat name={name} file={file} params={params}/> :
                     <Run name={name} file={file} params={params}/>

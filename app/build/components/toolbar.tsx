@@ -31,7 +31,7 @@ export default function Toolbar() {
 
     const expanded = (
         <Card 
-            className={large ? "w-[50vw] lg:w-[55vw] xl:w-[60vw] 2xl:w-[67vw]" : "w-[67vw]"}
+            className={"w-[60vw] xl:w-[60vw] 2xl:w-[67vw]"}
             style = {{height: large ? `calc(96vh - 64px)` : `25vh`}}
         >
             <CardBody>
