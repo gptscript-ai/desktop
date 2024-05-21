@@ -10,6 +10,7 @@ import Run from "./tool/run/run";
 import Chat from "./tool/run/chat";
 import External from "./tool/config/external";
 import ParamsTable from "./tool/config/paramTable";
+import ModalTextArea from "./modalTextArea";
 import { debounce } from 'lodash';
 import { IsExternalTool } from "./tool/config/external";
 import {
@@ -202,12 +203,12 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                             placeholder="Give your tool a name..."
                             onChange={(e) => setName(e.target.value)}
                         />
-                        <Textarea
+                        <ModalTextArea
                             className="nodrag nowheel cursor-text h-full w-full overflow-y-scroll resize-none"
                             placeholder="Tell the tool what do to..."
-                            variant="flat"
+                            header={`Editing the prompt for ${name}`}
                             defaultValue={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
+                            setText={setPrompt}
                         />
                     </div>
 

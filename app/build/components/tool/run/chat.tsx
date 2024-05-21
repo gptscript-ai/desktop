@@ -174,6 +174,7 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
                     />
                     <input
                         id="chatInput"
+                        autoComplete="off"
                         className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
                         placeholder="Ask the chat bot something..."
                         onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
