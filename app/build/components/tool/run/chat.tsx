@@ -5,7 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { IoCloseSharp } from "react-icons/io5";
 import { BuildContext } from "@/app/build/page";
 import { FaBackward } from "react-icons/fa";
-import { RunEventType, type Frame, type Property } from "@gptscript-ai/gptscript";
+import { Run, type Frame, type Property } from "@gptscript-ai/gptscript";
 import { 
     Card,
     CardHeader,
@@ -36,7 +36,7 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [connected, setConnected] = useState(false);
     const [socket, setSocket] = useState<Socket | null>(null);
-    const {setChatPanel, setLogs } = useContext(BuildContext);
+    const {setChatPanel, setRun } = useContext(BuildContext);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
 
@@ -45,7 +45,7 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
 
         socket.on('connect', () => {
             setConnected(true);
-            setLogs([]);
+            setRun(null);
         })
 
         socket.on('message', data => {
@@ -58,10 +58,7 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
             ]);
         });
 
-        socket.on('event', (data: Frame) => setLogs((prevLogs) => [...prevLogs, data]));
-        socket.on('error', (data: Frame) => {
-            setLogs((prevLogs) => [...prevLogs, data])
-        });
+        socket.on('state', (data: Run) => setRun(data));
         socket.on('disconnect', () => { setConnected(false) });
 
         setSocket(socket);
@@ -117,7 +114,7 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
                 </div>
             </CardHeader>
             <Divider />
-            <CardBody id="message" className="overflow-y-scroll shadow px-6 pt-6">
+            <CardBody id="message" className="shadow px-6 pt-6 overflow-y-scroll h-[300px]">
                 {showForm ? (
                     <form>
                         {Object.entries(params || {}).map(([argName, arg]) => (
@@ -170,7 +167,11 @@ export default function Chat({ name, file, params}: ChatBoxProps) {
                         startContent={<FaBackward/>}
                         isIconOnly radius="full"
                         className="mr-2 my-auto text-lg"
-                        onPress={() => setShowForm(true)}
+                        onPress={() => {
+                            setRun(null)
+                            setMessages([])
+                            setShowForm(true)
+                        }}
                     />
                     <input
                         id="chatInput"

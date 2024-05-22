@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { subtitle } from "@/components/primitives";
 import { io, Socket } from "socket.io-client";
-import type { Property, Frame } from "@gptscript-ai/gptscript";
+import type { Property, Frame, Run } from "@gptscript-ai/gptscript";
 import { FaBackward } from "react-icons/fa";
 import { BuildContext } from "@/app/build/page";
 import { IoCloseSharp } from "react-icons/io5";
@@ -27,15 +27,15 @@ export default function Chat({ name, file, params }: RunProps) {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
-    const {setChatPanel, setLogs } = useContext(BuildContext);
+    const {setChatPanel, setRun } = useContext(BuildContext);
 
     useEffect(() => {
         const socket = io();
         socket.on('connect', () => {
-            setLogs([])
+            setRun(null)
             setConnected(true)
         })
-        socket.on('event', (data: Frame) => setLogs((prevLogs) => [...prevLogs, data]))
+        socket.on('state', (data: Run) => setRun(data))
         socket.on('scriptMessage', data => setMessages((prevMessages) => [...prevMessages, data]));
         socket.on('disconnect', () => { setConnected(false) });
         setSocket(socket);
@@ -118,7 +118,11 @@ export default function Chat({ name, file, params }: RunProps) {
                 ) : 
                     <Button 
                         className="w-full"
-                        onPress={() => setShowForm(true)}
+                        onPress={() => {
+                            setRun(null)
+                            setMessages([])
+                            setShowForm(true)
+                        }}
                         startContent={<FaBackward />}
                     >
                         Back

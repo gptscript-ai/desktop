@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { AiOutlineExpandAlt } from "react-icons/ai";
+import { useState } from 'react';
+import { GrExpand } from "react-icons/gr";
 import {
     Textarea,
     Modal,
@@ -20,14 +20,6 @@ interface ModalTextAreaProps {
 const ModalTextArea = (props: ModalTextAreaProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleTextareaClick = () => {
-        setIsModalOpen(true);
-    };
-
-    useEffect(() => {
-        console.log(isModalOpen);
-    }, [isModalOpen]);
-
     return (
         <div className={props.className}>
             <div>
@@ -39,7 +31,7 @@ const ModalTextArea = (props: ModalTextAreaProps) => {
                     radius='full'
                     className="absolute right-3 z-10"
                 >
-                    <AiOutlineExpandAlt className="text-xl"/>
+                    <GrExpand className="text-zinc-500"/>
                 </Button>
                 <Textarea 
                     value={props.defaultValue}

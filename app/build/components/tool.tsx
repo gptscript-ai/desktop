@@ -14,7 +14,6 @@ import ModalTextArea from "./modalTextArea";
 import { debounce } from 'lodash';
 import { IsExternalTool } from "./tool/config/external";
 import {
-    Textarea,
     Button,
     Card,
     CardHeader,

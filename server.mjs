@@ -11,6 +11,8 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+let runningScript = null; // Reference to the currently running script
+
 app.prepare().then(() => {
 	const httpServer = createServer(handler);
 
@@ -38,21 +40,33 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	const opts = {input: JSON.stringify(args || {})};
 	if (tool) opts.subTool = tool;
 
-	console.log('Running', file, opts, args)
-    let exec = gptscript.run(path.join('gptscripts', file), opts);
-
-    exec.on(RunEventType.Event, data => {
-        socket.emit('event', data);
-    });
+	if (runningScript) runningScript.close();
+	
+	let exec = gptscript.run(path.join('gptscripts', file), opts);
+	runningScript = exec;
+	exec.on(RunEventType.Event, data => {
+		if (data.type === "callProgress"){
+			socket.emit('progress', data);
+		} else {
+			socket.emit('state', exec);
+		}
+	});
 
 	try {
 		socket.emit('scriptMessage', await exec.text());
-		socket.on('disconnect', () => exec.close());
+		socket.on('disconnect', () => {
+			exec.close();
+			runningScript = null;
+		});
 
 		socket.on('userMessage', async (message) => {
 			exec = exec.nextChat(message);
 			exec.on(RunEventType.Event, data => {
-				socket.emit('event', data);
+				if (data.type === "callProgress"){
+					socket.emit('progress', data);
+				} else {
+					socket.emit('state', exec);
+				}
 			});
 			socket.emit('scriptMessage', await exec.text());
 		});
@@ -70,5 +84,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	} catch (e) {
 		socket.emit('error', e)
 		console.error(e);
+	} finally {
+		runningScript = null;
 	}
 }
