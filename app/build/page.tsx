@@ -6,7 +6,7 @@ import CustomTool from './components/tool';
 import ToolBar from './components/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
-import type { Tool, Frame } from '@gptscript-ai/gptscript';
+import type { Tool, Run } from '@gptscript-ai/gptscript';
 import { debounce } from 'lodash';
 import ReactFlow, {
     useNodesState,
@@ -43,8 +43,8 @@ type Context = {
     ChatPanel: React.JSX.Element;
     setChatPanel: React.Dispatch<React.SetStateAction<React.JSX.Element>>;
     file: string;
-    logs: Frame[];
-    setLogs: React.Dispatch<React.SetStateAction<Frame[]>>;
+    run: Run | null;
+    setRun: React.Dispatch<React.SetStateAction<Run | null>>;
     getId: () => string;
 }
 
@@ -58,7 +58,7 @@ const AddNodeOnEdgeDrop = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [configPanel, setConfigPanel] = useState(<></>)
     const [chatPanel, setChatPanel] = useState(<></>);
-    const [logs, setLogs] = useState<Frame[]>([]);
+    const [run, setRun] = useState<Run | null>(null);
     const { screenToFlowPosition } = useReactFlow();
 
     // Call a debounced post to update the script with the new nodes every second.
@@ -242,8 +242,8 @@ const AddNodeOnEdgeDrop = () => {
         ChatPanel: chatPanel,
         setChatPanel: setChatPanel,
         file: `${file}.gpt` || '',
-        logs: logs,
-        setLogs: setLogs,
+        run: run,
+        setRun: setRun,
         getId: getId,
     };
 

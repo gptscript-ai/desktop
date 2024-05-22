@@ -50,8 +50,8 @@ const Custom = () => {
                 </div>
             </CardHeader>
             <Divider />
-            <CardBody className="flex flex-col space-y-6 p-6 h-full overflow-y-scroll">
-                <Accordion variant="splitted" defaultExpandedKeys={["basic","parameters"]} selectionMode="multiple">
+            <CardBody className="flex flex-col space-y-6 p-6 pt-2 h-full overflow-y-scroll">
+                <Accordion defaultExpandedKeys={["basic","parameters"]} selectionMode="multiple">
                     <AccordionItem key="basic" aria-label="Basic" title="Basic" subtitle="Define core behavior">
                         <div className="px-2 flex flex-col space-y-6 mb-6">
                             <Switch
