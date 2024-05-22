@@ -132,7 +132,7 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                     className="flex flex-col items-start mb-2"
                 >
                     <div className="rounded-2xl bg-gray-200 text-black dark:text-white dark:bg-zinc-700 py-2 px-4 max-w-full">
-                        <ReactMarkdown className="prose">
+                        <ReactMarkdown className="prose dark:prose-invert">
                             {messages[index].message}
                         </ReactMarkdown>
                     </div>
