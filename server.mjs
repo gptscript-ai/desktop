@@ -40,51 +40,49 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	const opts = {input: JSON.stringify(args || {})};
 	if (tool) opts.subTool = tool;
 
-	if (runningScript) runningScript.close();
-	
-	let exec = gptscript.run(path.join(process.env.SCRIPTS_PATH, file), opts);
-	runningScript = exec;
-	exec.on(RunEventType.Event, data => {
+	if (runningScript) {
+		if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
+			socket.emit("error", new Error(`run is in terminal state ${runningScript.state}, cannot continue chat`));
+		}
+		runningScript.close();
+	}
+
+	runningScript = gptscript.run(path.join(process.env.SCRIPTS_PATH, file), opts);
+	runningScript.on(RunEventType.Event, data => {
 		if (data.type === "callProgress"){
 			socket.emit('progress', data);
 		} else {
-			socket.emit('state', exec);
+			socket.emit('state', {calls:runningScript.calls});
 		}
 	});
 
 	try {
-		socket.emit('scriptMessage', await exec.text());
+		socket.emit('scriptMessage', await runningScript.text());
 		socket.on('disconnect', () => {
-			exec.close();
+			runningScript.close();
 			runningScript = null;
 		});
 
 		socket.on('userMessage', async (message) => {
-			exec = exec.nextChat(message);
-			exec.on(RunEventType.Event, data => {
-				if (data.type === "callProgress"){
-					socket.emit('progress', data);
-				} else {
-					socket.emit('state', exec);
+			if (runningScript) {
+				if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
+					socket.emit("error", new Error(`run is in terminal state ${runningScript.state}, cannot continue chat`));
+					return;
 				}
-			});
-			socket.emit('scriptMessage', await exec.text());
-		});
-
-		// Async the chatLoop to prevent halting execution
-		const chatLoop = async () => { 
-			while (exec.state === RunState.Continue) {
-				await new Promise(resolve => setTimeout(resolve, 1000));
 			}
-		};
-		chatLoop().catch((e) => {
-			socket.emit('error', e),
-			console.error(e)
+			runningScript = runningScript.nextChat(message);
+			runningScript.on(RunEventType.Event, data => {
+				socket.emit('progress', data);
+			});
+			try {
+				socket.emit('scriptMessage', await runningScript.text());
+			} catch (e) {
+				socket.emit('error', e);
+				console.log(JSON.stringify(e));
+			}
 		});
 	} catch (e) {
-		socket.emit('error', e)
+		socket.emit('error', e);
 		console.error(e);
-	} finally {
-		runningScript = null;
 	}
 }
