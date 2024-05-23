@@ -66,7 +66,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
 
     const updateName = useCallback(debounce(async (previous: string, incoming: string) => {
         data.name = incoming;
-        await fetch(`http://localhost:3000/api/file/${file.replace('.gpt','')}/${previous}`, {
+        await fetch(`/api/file/${file.replace('.gpt','')}/${previous}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),

@@ -26,7 +26,7 @@ const nodeTypes = {
 
 const fetchGraph = async (file: string | null) => {
     if (!file) return { nodes: [], edges: [] };
-    const response = await fetch(`http://localhost:3000/api/file/${file}?nodeify=true`);
+    const response = await fetch(`/api/file/${file}?nodeify=true`);
     const data = await response.json();
     const nodes = data.nodes as RFNode[];
     const edges = data.edges as RFEdge[];
@@ -63,7 +63,7 @@ const AddNodeOnEdgeDrop = () => {
 
     // Call a debounced post to update the script with the new nodes every second.
     const updateScript = useCallback(debounce(async (nodes: RFNode[]) => {
-        await fetch(`http://localhost:3000/api/file/${file}`, {
+        await fetch(`/api/file/${file}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(nodes),
@@ -73,7 +73,7 @@ const AddNodeOnEdgeDrop = () => {
     // Create a new file if the file param is 'new'
     useEffect(() => {
         if (file === 'new') {
-            fetch(`http://localhost:3000/api/file`, { method: 'POST' })
+            fetch(`/api/file`, { method: 'POST' })
                 .then((response) => response.json())
                 .then((data: any) => {
                     window.location.href = `/build?file=${data.file.replace('.gpt', '')}`;

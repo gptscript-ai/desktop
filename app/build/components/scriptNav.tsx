@@ -8,7 +8,7 @@ export default function App() {
     const [files, setFiles] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/file')
+        fetch('/api/file')
             .then(response => response.json())
             .then(data => setFiles(data))
             .catch(error => console.error(error));
