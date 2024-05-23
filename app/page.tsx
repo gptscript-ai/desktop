@@ -1,8 +1,4 @@
-import { Link } from "@nextui-org/link";
-import { button as buttonStyles } from "@nextui-org/theme";
-import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
 import Scripts from "@/components/scripts";
 
 export default function Home() {
@@ -17,7 +13,7 @@ export default function Home() {
 				</h2>
 			</div>
 
-			<div className="w-3/4">
+			<div className="w-full">
 				<Scripts/>
 			</div>
 		</section>
