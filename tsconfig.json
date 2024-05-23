@@ -4,7 +4,6 @@
   "compilerOptions": {
     "target": "ESNext",
     "types": [
-      "@nuxtjs/i18n",
     ],
 	}
 }

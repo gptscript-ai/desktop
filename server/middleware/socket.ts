@@ -14,15 +14,17 @@ const appSocket = {
 declare module 'h3' {
   interface H3EventContext {
     appSocket: AppSocket
+    socket:    Socket
     gpt:       ClientType
   }
 }
 
-export default defineEventHandler((event) => {
-  const client = new Client(undefined, './binaries/gptscript-universal-apple-darwin')
+export default defineEventHandler(async (event) => {
+  const client = new Client(undefined, process.env.GPTSCRIPT_BIN || './binaries/gptscript-universal-apple-darwin')
 
   event.context.appSocket = appSocket
   event.context.gpt = client
+  await sessionDir(event)
 
   const g = globalThis as any
 
@@ -37,7 +39,8 @@ export default defineEventHandler((event) => {
   g.io = new Server(node.res.socket?.server)
 
   g.io.on('connection', async (socket: Socket) => {
-    socket.emit('message-channel', `welcome ${ socket.id }`)
+    await sessionDir(event)
+    event.context.socket = socket
 
     // import { readdir } from 'node:fs/promises'
     // readdir('.').then((files) => {

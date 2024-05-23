@@ -1,14 +1,16 @@
 import type { Socket } from 'socket.io-client'
-import io from 'socket.io-client'
+import { io } from 'socket.io-client'
 
-export default function useSocket() {
-  // const app = useNuxtApp()
-  const socket: Socket = io(`${ location.protocol === 'https:' ? 'wss://' : 'ws://' }${ location.host }`)
+export default (function () {
+  //console.debug('Creating Socket')
 
-  console.info('Creating Socket')
+  const socket: Socket = io(`${ location.protocol === 'https:' ? 'wss://' : 'ws://' }${ location.host }`, {
+    rememberUpgrade: true,
+    transports: ['websocket'],
+  })
 
   socket.on('connect', () => {
-    console.info('Socket Connected', socket.id)
+    // console.info('Socket Connected', socket.id)
   })
 
   socket.io.on('error', (err) => {
@@ -16,7 +18,7 @@ export default function useSocket() {
   })
 
   socket.io.on('ping', () => {
-    console.debug('Socket Ping')
+    // console.debug('Socket Ping')
   })
 
   socket.io.on('reconnect', (tries) => {
@@ -48,5 +50,7 @@ export default function useSocket() {
     console.error('Reconnect Failed')
   })
 
-  return socket
-}
+  return () => {
+    return socket
+  }
+})();

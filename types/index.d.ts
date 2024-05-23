@@ -1,14 +1,52 @@
-export interface Settings {
+export interface SelectOption {
+  label:     string
+  value:     string
+  disabled?: boolean
+}
+
+export interface Prefs {
+  debug: boolean
+  cache: boolean
+  defaultTool: string
   openaiApiKey: string
   openaiOrganization: string
 }
 
-export interface ThreadFile {
+export type ThreadDirEntry = ThreadFile | ThreadDir
+
+export interface ThreadDir {
+  type: 'dir'
   name: string
+  children: ThreadDirEntry[]
 }
 
-export interface Thread {
-  id: string
+export interface ThreadFile {
+  type: 'file'
   name: string
-  files: ThreadFile[]
+  path: string
+}
+
+export type Role = 'system'|'user'|'assistant'
+
+export interface ThreadMessage {
+  time: number
+  role: Role
+  content: string
+  runId?: string
+}
+
+export interface ThreadMeta {
+  createdAt: number
+  name: string
+  history: ThreadMessage[]
+}
+
+export interface Thread extends ThreadMeta {
+  id: string
+  workspace: ThreadDirEntry[]
+}
+
+export interface ChatInputEvent {
+  message: string
+  cb: () => void
 }

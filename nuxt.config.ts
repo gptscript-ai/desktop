@@ -13,8 +13,8 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   modules:  [
-    '@nuxt/ui',
     '@nuxtjs/color-mode',
+    '@nuxt/ui',
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
   ],
