@@ -15,7 +15,7 @@ export default function Scripts() {
     const [files, setFiles] = useState<Record<string,string>>({});
 
     useEffect(() => {
-        fetch("http://localhost:3000/api/file")
+        fetch("/api/file")
             .then((response) => response.json())
             .then((files: Record<string, string>) => setFiles(files))
             .catch((error) => console.error(error));
