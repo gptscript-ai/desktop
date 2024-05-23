@@ -5,7 +5,7 @@ import { FaRegFileCode } from "react-icons/fa";
 import { VscNewFile } from "react-icons/vsc";
 
 export default function App() {
-    const [files, setFiles] = useState<string[]>([]);
+    const [files, setFiles] = useState<Record<string, string>>({});
 
     useEffect(() => {
         fetch('http://localhost:3000/api/file')
@@ -14,7 +14,7 @@ export default function App() {
             .catch(error => console.error(error));
     }, []);
 
-    const ScriptItems = files && files.length ? files.map((file) => (
+    const ScriptItems = files && Object.keys(files).length ? Object.keys(files).map((file) => (
         <DropdownItem startContent={<FaRegFileCode/>} key={file.replace('.gpt', '')}>{file}</DropdownItem>
     )) : <DropdownItem key={'no-files'} isReadOnly>No files found</DropdownItem>;
 
