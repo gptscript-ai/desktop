@@ -26,7 +26,7 @@ export default function Scripts() {
     }, [files]);
 
     const ScriptItems = files && Object.keys(files) ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
             <Button
                 size="lg"
                 startContent={<VscNewFile/>}
