@@ -153,7 +153,7 @@ export default function RunScript() {
 
 
 	const ChatBar = () => (
-		<div className="flex border shadow-md rounded-full p-4 w-full">
+		<div className="flex border-2 dark:border-zinc-600 shadow-md rounded-full p-4 w-full">
 			<Button
 				startContent={<FaBackward />}
 				isIconOnly
