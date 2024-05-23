@@ -42,7 +42,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 
 	if (runningScript) runningScript.close();
 	
-	let exec = gptscript.run(path.join('gptscripts', file), opts);
+	let exec = gptscript.run(path.join(process.env.SCRIPTS_PATH, file), opts);
 	runningScript = exec;
 	exec.on(RunEventType.Event, data => {
 		if (data.type === "callProgress"){
