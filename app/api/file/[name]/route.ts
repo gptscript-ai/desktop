@@ -11,6 +11,35 @@ import type {
 
 const gptscript = new Client();
 
+
+export async function DELETE(
+    _: NextRequest,
+    { params }: { params: { slug: string } }
+)  {
+    try {
+        const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
+        const { name } = params as any;
+        await fs.unlink(path.join(`${scriptsPath}/${name}.gpt`));
+        return Response.json({ success: true });
+    } catch (e) {
+        return Response.json({ error: e }, { status: 500 });
+    }
+}
+
+// export async function PUT(req: Request) {
+//     try {
+//         const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
+//         const { name } = req.params as any;
+//         const content = await req.text();
+
+//         await fs.rename(`${scriptsPath}/${name}`, `${scriptsPath}/${name}.bak`);
+//         await fs.writeFile(`${scriptsPath}/${name}`, content);
+//         return Response.json({ success: true });
+//     } catch (e) {
+//         return Response.json({ error: e }, { status: 500 });
+//     }
+// }
+
 export async function GET(
     req: NextRequest,
     { params }: { params: { slug: string } }

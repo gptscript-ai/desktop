@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FaRegFileCode } from "react-icons/fa";
 import { VscNewFile } from "react-icons/vsc";
 import { GoTrash, GoPaperAirplane, GoPencil} from "react-icons/go";
@@ -14,16 +14,27 @@ import {
 export default function Scripts() {
     const [files, setFiles] = useState<Record<string,string>>({});
 
+    const deleteFile = useCallback((file: string) => {
+        fetch(`/api/file/${file}`, {
+            method: "DELETE",
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    const newFiles = { ...files };
+                    delete newFiles[file+ ".gpt"];
+                    setFiles(newFiles);
+                }
+            })
+            .catch((error) => console.error(error));
+    }, [files]);
+
     useEffect(() => {
         fetch("/api/file")
             .then((response) => response.json())
             .then((files: Record<string, string>) => setFiles(files))
             .catch((error) => console.error(error));
     }, []);
-
-    useEffect(() => {
-        console.log(files)
-    }, [files]);
 
     const ScriptItems = files && Object.keys(files) ? (
         <div className="grid grid-cols-2 gap-6">
@@ -46,7 +57,7 @@ export default function Scripts() {
                         <div className="flex-col flex absolute bottom-1 right-4">
                             <Button startContent={<GoPaperAirplane />} onPress={() => {{ window.location.href = `/run?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
                             <Button startContent={<GoPencil />} onPress={() => {{ window.location.href = `/build?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
-                            <Button startContent={<GoTrash />} radius="full" variant="light" isIconOnly/>
+                            <Button startContent={<GoTrash />} onPress={() => {deleteFile(file.replace('.gpt', ''))}}radius="full" variant="light" isIconOnly/>
                         </div>
                     </CardHeader>
                     <CardBody>
