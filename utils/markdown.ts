@@ -31,10 +31,10 @@ md.use(linkAttributes, {
 md.use(anchorLinks)
 md.use(footnotes)
 
-export function renderMarkdown(markdown: string, docId?: string) {
+export function renderMarkdown(markdown: string, docId?: string, tag="span") {
   if (!docId) {
     docId = randomStr()
   }
 
-  return `<div class="markdown">${  md.render(markdown, { docId })  }</div>`
+  return `<${tag} class="markdown">${  md.render(markdown, { docId })  }</${tag}>`
 }

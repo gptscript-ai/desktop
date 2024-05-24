@@ -11,21 +11,14 @@ export default defineNuxtConfig({
     port:  3000,
     host: '0.0.0.0',
   },
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   modules:  [
     '@nuxtjs/color-mode',
     '@nuxt/ui',
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
   ],
-  runtimeConfig: {
-    public: {
-      workspacesDir:      `${ process.dev ? 'dev-' : '' }workspaces`,
-      workspaceExtension: 'workspace',
-      scriptExtension:    'gpt',
-      workspaceScript:    'script.gpt',
-    },
-  },
-  typescript: { shim: false },
-  ssr:        false,
+  runtimeConfig: { public: {} },
+  typescript:    { shim: false },
+  ssr:           false,
 })

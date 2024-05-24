@@ -1,5 +1,13 @@
+<script setup lang="ts">
+interface Props {
+  size: 'sm' | 'md'
+}
+
+const { size } = withDefaults(defineProps<Props>(), { size: 'md' })
+</script>
+
 <template>
-  <div class="waiting">
+  <div class="waiting" :class="[size]">
     <div class="dot" />
     <div class="dot" />
     <div class="dot" />
@@ -38,5 +46,12 @@
     .dot:nth-child(1) { animation-delay:0s; }
     .dot:nth-child(2) { animation-delay:0.2s; }
     .dot:nth-child(3) { animation-delay:0.4s; }
+
+    &.sm .dot {
+      height: 7px;
+      width: 7px;
+      margin: 0 0.125rem;
+    }
+
   }
 </style>

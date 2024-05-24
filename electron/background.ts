@@ -56,13 +56,13 @@ function createWindow() {
 // App events
 // ==========
 app.whenReady().then(async () => {
-  if (!isProduction) {
-    try {
-      await session.defaultSession.loadExtension(path.join(__dirname, '../..', '__extensions', 'vue-devtools'))
-    } catch (err) {
-      console.error('[Electron::loadExtensions] An error occurred: ', err)
-    }
-  }
+  //  if (!isProduction) {
+  //    try {
+  //      await session.defaultSession.loadExtension(path.join(__dirname, '../..', '__extensions', 'vue-devtools'))
+  //    } catch (err) {
+  //      console.error('[Electron::loadExtensions] An error occurred: ', err)
+  //    }
+  //  }
 
   const mainWindow = createWindow()
 

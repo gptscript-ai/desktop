@@ -1,6 +1,4 @@
-import { isArray as lodashIsArray } from 'lodash'
-
-export const isArray = lodashIsArray
+export const isArray = Array.isArray
 
 export function firstOf<T>(arg: T | T[] | undefined, def?: T): T {
   if (isArray(arg)) {

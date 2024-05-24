@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import type { ChatInputEvent } from '~/types';
-
-const { metaSymbol } = useShortcuts()
+import type { ChatInputEvent } from '~/types'
 
 interface Props {
-  previous?: string[]
+  previous?:       string[]
+  initialMessage?: string
 }
 
-const { previous } = defineProps<Props>()
+const {
+  previous,
+  initialMessage,
+} = defineProps<Props>()
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
@@ -15,7 +17,9 @@ const emit = defineEmits<{
 }>()
 
 const waiting = ref(false)
-const message = ref('')
+const message = ref(initialMessage || '')
+
+defineExpose({ send })
 
 async function send() {
   const ev: ChatInputEvent = {
@@ -41,7 +45,7 @@ function keypress(e: KeyboardEvent) {
 function keydown(e: KeyboardEvent) {
   const el = e.target as HTMLTextAreaElement
 
-  if (!el || !previous?.length ) {
+  if (!el || !previous?.length) {
     return
   }
 
@@ -61,33 +65,38 @@ function keydown(e: KeyboardEvent) {
   // }
 
   let newIdx = -1
-  let toEnd = e.code === 'ArrowDown'
+  const toEnd = e.code === 'ArrowDown'
 
-  if ( e.code === 'ArrowUp' && start === 0 ) {
-    if ( message.value ) {
+  if (e.code === 'ArrowUp' && start === 0) {
+    if (message.value) {
       newIdx = idx - 1
     } else {
       newIdx = previous.length - 1
     }
-  } else if ( e.code === 'ArrowDown' && start === len && message.value) {
-    if ( idx >= 0 && (idx + 1 ) === previous.length ) {
+  } else if (e.code === 'ArrowDown' && start === len && message.value) {
+    if (idx >= 0 && (idx + 1) === previous.length) {
       message.value = ''
+
       return
     } else {
       newIdx = idx + 1
     }
   }
 
-  if ( newIdx !== -1 ) {
+  if (newIdx !== -1) {
     newIdx = Math.max(0, Math.min(newIdx, previous.length - 1))
     message.value  = previous[newIdx]
-    if ( toEnd ) {
+    if (toEnd) {
       nextTick(() => {
         el.setSelectionRange(el.value.length, el.value.length)
       })
     }
   }
 }
+
+const placeholder = computed(() => {
+  return `Say something…\nHit Enter to send, Shift+Enter to add a line-break${  previous?.length ? '\nUp/Down to access previous messages' : '' }`
+})
 </script>
 
 <template>
@@ -100,7 +109,7 @@ function keydown(e: KeyboardEvent) {
     <UTextarea
       v-else
       v-model="message"
-      :placeholder="`Say something…\nHit Enter to send, Shift+Enter to add a line-break`"
+      :placeholder="placeholder"
       autofocus
       class="inside-btn"
       @keydown="keydown"

@@ -1,3 +1,4 @@
+--ignore-dir=__extensions
 --ignore-dir=.git
 --ignore-dir=.nuxt
 --ignore-dir=.nuxt-prod

@@ -1,7 +1,10 @@
 <script lang="ts" setup>
+import { type InferType, object, string } from 'yup'
+import type { FormSubmitEvent } from '#ui/types'
 
-import { object, string, type InferType } from 'yup'
-import type { Form, FormSubmitEvent } from '#ui/types'
+const emit = defineEmits<{
+  done: []
+}>()
 
 const prefs = usePrefs()
 const schema = object({
@@ -13,15 +16,10 @@ type Schema = InferType<typeof schema>
 
 const state = reactive({
   key: prefs.openaiApiKey || '',
-  org: prefs.openaiOrganization || ''
+  org: prefs.openaiOrganization || '',
 })
 
-const emit = defineEmits<{
-  done: []
-}>()
-
 function done(e: FormSubmitEvent<Schema>) {
-  console.log('Done', e)
   prefs.openaiApiKey = e.data.key || ''
   prefs.openaiOrganization = e.data.org || ''
 
@@ -31,13 +29,13 @@ function done(e: FormSubmitEvent<Schema>) {
 
 <template>
   <UModal>
-    <UForm @submit="done" :state="state" :schema="schema">
+    <UForm :state="state" :schema="schema" @submit="done">
       <UCard>
         <template #header>
           Welcome to GPTStudio!
         </template>
 
-        <img src="/img/clicky.svg" class="mb-4 w-[50%] mx-auto" />
+        <img src="/img/clicky.svg" class="mb-4 w-[50%] mx-auto">
 
         The first thing we need is an OpenAI API key.  This will be used to exceute the instructions you write.
 

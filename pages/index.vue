@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SelectOption, ChatInputEvent } from '@/types';
+import type { ChatInputEvent, SelectOption, Thread } from '@/types'
 
 const threads = useThreads()
 const sock = useSocket()
@@ -8,19 +8,19 @@ const prefs = usePrefs()
 const tools = await sock.emitWithAck('tool:list')
 const tool = ref(prefs.defaultTool || '')
 
-if ( !tools.includes(tool.value) ) {
+if (!tools.includes(tool.value)) {
   tool.value = ''
 }
 
 const toolOptions = computed((): SelectOption => {
   return [
-    {label: 'Default', value: ''},
-    ...tools.map(x => {
+    { label: 'Default', value: '' },
+    ...tools.map((x) => {
       return {
-        label: titleCase(x.replace(/\.gpt$/,'')),
-        value: x
+        label: titleCase(x.replace(/\.gpt$/, '')),
+        value: x,
       }
-    })
+    }),
   ]
 })
 
@@ -29,19 +29,16 @@ async function send(e: ChatInputEvent) {
 
   const thread = await threads.create(tool.value) as Thread
 
-  navigateTo({name: 'id', params: {id: thread.id}})
-
-  await threads.chat(thread, e.message)
+  navigateTo({ name: 'id', query: { msg: e.message }, params: { id: thread.id } })
 
   e.cb()
 }
-
 </script>
 
 <template>
   <div class="wrapper">
     <nav class="threads bg-gray-200 dark:bg-gray-900">
-      <div class="relative bg-blue-400 text-blue-50 text-sm font-bold py-1 px-2">
+      <div class="relative bg-emerald-500 text-emerald-50 text-sm font-bold py-1 px-2">
         Threads
         <UButton
           icon="i-heroicons-plus"
@@ -52,17 +49,21 @@ async function send(e: ChatInputEvent) {
           @click.stop="navigateTo('/')"
         />
       </div>
-      <ThreadLinks/>
+      <ThreadLinks />
     </nav>
     <main class="main border-x border-slate-300">
       <div class="relative max-w-[900px] m-auto min-h-[100%] p-2">
         <div class="text-center">
-          <h1 class="text-4xl my-5">Welcome to GPTStudio!</h1>
-          <img src="/img/clicky.svg" class="w-[50%] mx-auto"/>
-          <h1 class="text-xl my-5">Say something below to get started.</h1>
+          <h1 class="text-4xl my-5">
+            Welcome to GPTStudio!
+          </h1>
+          <img src="/img/clicky.svg" class="w-[50%] mx-auto">
+          <h1 class="text-xl my-5">
+            Say something below to get started.
+          </h1>
           <div class="w-[50%] mx-auto">
             <UFormGroup label="Tool">
-              <USelect v-model="tool" :options="toolOptions"/>
+              <USelect v-model="tool" :options="toolOptions" />
             </UFormGroup>
           </div>
         </div>
@@ -76,10 +77,10 @@ async function send(e: ChatInputEvent) {
     </main>
 
     <nav class="files bg-gray-200 dark:bg-gray-900">
-      <div class="relative bg-blue-400 text-blue-50 text-sm font-bold py-1 px-2">
+      <div class="relative bg-emerald-500 text-emerald-50 text-sm font-bold py-1 px-2">
         Files
       </div>
-      <ThreadFiles class="mt-2 px-2"/>
+      <ThreadFiles class="mt-2 px-2" />
     </nav>
   </div>
 </template>

@@ -1,6 +1,6 @@
 import { Server, type Socket } from 'socket.io'
 import { Client, type Client as ClientType } from '@gptscript-ai/gptscript'
-import handlers, { type Handler, type Handlers } from '../messages'
+import handlers, { type Handler, type Handlers } from '../handlers'
 
 interface AppSocket {
   emit: (chanel: string, message: string) => void

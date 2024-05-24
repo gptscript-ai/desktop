@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import dayjs from 'dayjs'
 import type { RouteLocationRaw } from 'vue-router'
-import { useThreads } from '@/stores/threads'
+import { useThreads } from '@/stores/thread'
 
 const threads = useThreads()
 const allThreads = await threads.findAll()
@@ -11,7 +11,7 @@ function remove(id: string) {
 }
 
 async function removeAll() {
-  const promises = threads.list.map(x => threads.remove(x.id))
+  const promises = threads.list.map((x) => threads.remove(x.id))
 
   await Promise.all(promises)
 }
@@ -59,11 +59,11 @@ const threadLinks = computed(() => {
     }
 
     out[group].push({
-      id:   x.id,
+      id:    x.id,
       group,
       label: x.name || '',
-      icon: 'i-heroicons-chat-bubble-left',
-      to:   { name: 'id', params: { id: x.id } },
+      icon:  'i-heroicons-chat-bubble-left',
+      to:    { name: 'id', params: { id: x.id } },
     })
   }
 
@@ -87,7 +87,6 @@ function clearHistory() {
   removeAll()
   navigateTo('/')
 }
-
 </script>
 
 <template>
@@ -97,26 +96,27 @@ function clearHistory() {
         {{ k }}
       </h5>
 
-      <ul class="relative">
-        <li
+      <div class="relative">
+        <nuxt-link
           v-for="(obj, idx) in group" :key="idx"
-          class="group hover:bg-blue-300 relative cursor-pointer px-2 py-1"
-          @click="navigateTo({ name: 'id', params: { id: obj.id } })"
+          class="block group hover:bg-blue-200 hover:text-black relative cursor-pointer px-2 py-1 hover:pr-8"
+          :to="{ name: 'id', params: { id: obj.id } }"
+          exact-active-class="exact-active bg-blue-500 text-white"
         >
-          <div class="overflow-hidden overflow-ellipsis mr-3" v-if="obj.label">
-            <UIcon class="text-slate-500" name="i-heroicons-chat-bubble-left" />
-            {{obj.label}}
+          <div v-if="obj.label" class="text-sm overflow-hidden overflow-ellipsis whitespace-nowrap">
+            {{ obj.label }}
           </div>
-          <Waiting v-else/>
+          <Waiting v-else />
+
           <UButton
             icon="i-heroicons-trash"
-            variant="ghost"
+            variant="link"
             size="xs"
-            class="absolute right-[0.125rem] top-[0.125rem] invisible group-hover:visible"
+            class="absolute right-0 top-0 invisible group-hover:visible"
             @click.stop="remove(obj.id)"
           />
-        </li>
-      </ul>
+        </nuxt-link>
+      </div>
     </div>
 
     <div class="px-4 absolute bottom-2">

@@ -3,7 +3,7 @@ import ModalApiKeys from '@/components/modal/api-key.vue'
 
 const gpt = useGpt()
 
-useHead({ bodyAttrs: { class: 'bg-gray-100 dark:bg-gray-950' } })
+useHead({ title: 'GPTStudio', bodyAttrs: { class: 'bg-gray-100 dark:bg-gray-950' } })
 
 const prefs = usePrefs()
 const threads = useThreads()
@@ -16,7 +16,7 @@ onMounted(async () => {
   ])
   loaded.value = true
 
-  if ( !prefs.openaiApiKey ) {
+  if (!prefs.openaiApiKey) {
     const modal = useModal()
 
     modal.open(ModalApiKeys, {
@@ -26,15 +26,15 @@ onMounted(async () => {
     })
   }
 })
-
-
 </script>
 
 <template>
   <div>
-    <NuxtPage v-if="loaded"/>
-    <div v-else>Loading…</div>
-    <UModals/>
-    <UNotifications/>
+    <NuxtPage v-if="loaded" />
+    <div v-else>
+      Loading…
+    </div>
+    <UModals />
+    <UNotifications />
   </div>
 </template>

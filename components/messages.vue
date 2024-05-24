@@ -1,47 +1,41 @@
 <script setup lang="ts">
 import '@/assets/css/markdown.scss'
+import { RunState } from '@gptscript-ai/gptscript'
 import { renderMarkdown } from '@/utils/markdown'
-import type { Thread } from '@/types';
-import type { RunWithOutput } from '~/stores/runs';
-import { RunState } from '@gptscript-ai/gptscript';
+import type { Thread } from '@/types'
+import type { RunWithOutput } from '@/stores/run'
 
 interface Props {
-  run?: RunWithOutput
+  run?:   RunWithOutput
   thread: Thread
 }
 
 const { thread, run } = defineProps<Props>()
-
-const partialContent = computed(() => {
-  if ( !run ) {
-    return ''
-  }
-
-  const top = run.calls.find((x) => !x.parentID)
-
-  return top?.output || ''
-})
-
 </script>
 
 <template>
   <div class="messages">
-    <div v-for="(m, idx) in thread.history" :key="idx" class="message shadow-md" :class="[m.role]">
-      <div class="content">
-        <div v-html="renderMarkdown(m.content)" />
+    <template v-for="(m, idx) in thread.history" :key="idx">
+      <div v-if="m.runId && (m.role !== 'assistant' || m.runId !== run?.id)" class="message shadow-md" :class="[m.role]">
+        <div class="content">
+          <div v-html="renderMarkdown(m.content)" />
+        </div>
       </div>
-    </div>
+    </template>
 
     <div v-if="run?.state === RunState.Creating" class="message assistant">
       <div class="content">
-        <Waiting/>
+        <Waiting />
       </div>
     </div>
     <div v-else-if="run?.state === RunState.Error">
-      <UAlert color="red" variant="subtle" title="Error" :description="run.err"/>
+      <UAlert color="red" variant="ghost" title="Error" :description="run.err" />
     </div>
-    <div v-else-if="run?.state === RunState.Running">
-      <div>Content:  {{partialContent}}</div>
+    <div v-else-if="run" class="message shadow-md assistant">
+      <div class="content relative">
+        <span v-if="run.output" v-html="renderMarkdown(run.output)" />
+        <Waiting v-if="run?.state !== RunState.Finished" size="sm" class="absolute bottom-0 right-[-3rem] " />
+      </div>
     </div>
   </div>
 </template>

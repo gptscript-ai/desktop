@@ -1,6 +1,10 @@
 import antfu from '@antfu/eslint-config'
 
 export default antfu({
+  ignores: [
+    '__extensions/*',
+  ],
+
   stylistic: {
     indent: 2,
     quotes: 'single',
