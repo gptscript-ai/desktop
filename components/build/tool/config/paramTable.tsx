@@ -12,7 +12,7 @@ import {
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { debounce } from 'lodash';
 import type { Property } from "@gptscript-ai/gptscript";
-import { ToolContext } from "@/app/build/components/tool";
+import { ToolContext } from "@/components/build/tool";
 
 const columns = [
   {

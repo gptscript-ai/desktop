@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
     Table,
     TableHeader,
@@ -11,9 +11,10 @@ import {
     Divider,
 } from "@nextui-org/react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { ToolContext } from "@/app/build/components/tool";
+import { debounce } from "lodash"
+import { ToolContext } from "@/components/build/tool";
 
-export const IsValidContext = (tool: string) => {
+export const IsExternalTool = (tool: string) => {
     if (tool.includes("from")){
         const parsedTool = tool.split(" ");
         if (parsedTool.length !== 3){
@@ -22,38 +23,60 @@ export const IsValidContext = (tool: string) => {
         tool = parsedTool[2];
     }
 
-    // this will have to be updated for sure
     return tool.startsWith("http://") ||
         tool.startsWith("https://") ||
         tool.startsWith("github.com") ||
         tool.startsWith("sys.") ||
-        tool.startsWith("/") ||
-        tool.startsWith("./")
+        tool.includes("from") ||
+        tool.endsWith(".gpt");
 }
 
 const External = () => {
-    const { context, setContext } = useContext(ToolContext);
+    const [results, setResults] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [externalTools, setExternalTools] = useState<string[]>([]);
+    const { tools, setTools } = useContext(ToolContext);
     const [error, setError] = useState<string | null>(null);
+    
+    const search = debounce((query: string) => {
+        setLoading(true);
+        fetch(`https://tools.gptscript.ai/api/search?q=${query}&limit=50`)
+            .then(response => response.json())
+            .then((result: any) => {
+                setResults(Object.keys(result.tools));
+            })
+            .then(() => setLoading(false))
+            .catch(err => console.error(err));
+    }, 500);
 
-    const handleDeleteContext = (tool: string) => {
-        const updatedContext = context.filter((c) => c !== tool);
-        setContext(updatedContext);
+    useEffect(() => search("gptscript-ai"), [])
+
+    useEffect(() => {
+        if (tools) {
+            const externalTools = tools.filter((tool) => IsExternalTool(tool));
+            setExternalTools(externalTools);
+        }
+    }, [tools]);
+
+    const handleDeleteTool = (tool: string) => {
+        const updatedTools = tools.filter((t) => t !== tool);
+        setTools(updatedTools);
     }
 
     return (
         <>
-            {context && context.length > 0 && (
+            {externalTools && externalTools.length > 0 && (
                 <>
-                    <Table removeWrapper aria-label="Contexts">
+                    <Table removeWrapper aria-label="External Tools">
                         <TableHeader>
-                            <TableColumn>Context</TableColumn>
+                            <TableColumn>Tool</TableColumn>
                             <TableColumn>Action</TableColumn>
                         </TableHeader>
                         <TableBody>
-                            {context.map((c) => (
-                                <TableRow key={c} >
+                            {externalTools.map((tool) => (
+                                <TableRow key={tool} >
                                     <TableCell>
-                                        <p className="overflow-x-scroll truncate">{c}</p>
+                                        <p className="w-[390px] overflow-x-scroll truncate">{tool}</p>
                                     </TableCell>
                                     <TableCell>
                                         <Button
@@ -61,7 +84,7 @@ const External = () => {
                                             color="danger"
                                             isIconOnly
                                             startContent={<FaTrash />}
-                                            onPress={() => handleDeleteContext(c)}
+                                            onPress={() => handleDeleteTool(tool)}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -74,17 +97,17 @@ const External = () => {
             <div className="flex w-full h-full">
                 <Input
                     size="md"
-                    id="contextInput"
+                    id="externalToolInput"
                     placeholder="Enter a URL or file path"
                     isInvalid={error !== null}
                     errorMessage={error}
                     onKeyDown={(e) => {
                         setError(null);
                         if (e.key === 'Enter') {
-                            if (IsValidContext(e.currentTarget.value)) {
-                                setContext([...context, e.currentTarget.value]);
+                            if (IsExternalTool(e.currentTarget.value)) {
+                                setTools([...tools, e.currentTarget.value]);
                             } else {
-                                setError("Must be a path to a file or URL.")
+                                setError("Must be a path to a .gpt file or URL.")
                             }
                         }
                     }}
@@ -98,11 +121,11 @@ const External = () => {
                     startContent={<FaPlus/>}
                     onPress={() => {
                         setError(null);
-                        const input = document.querySelector("#contextInput") as HTMLInputElement;
-                        if (IsValidContext(input.value)) {
-                            setContext([...context, input.value]);
+                        const input = document.querySelector("#externalToolInput") as HTMLInputElement;
+                        if (IsExternalTool(input.value)) {
+                            setTools([...tools, input.value]);
                         } else {
-                            setError("Must be a path to a file or URL.")
+                            setError("Must be a path to a .gpt file or URL.")
                         }
                     }}
                 />

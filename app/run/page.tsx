@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from 'next/navigation';
 import type { Tool, Block} from "@gptscript-ai/gptscript";
-import Messages, { type Message, MessageType } from "./components/messages";
-import ChatBar from "./components/chatBar";
-import ToolForm from "./components/form";
+import Messages, { type Message, MessageType } from "../../components/run/messages";
+import ChatBar from "@/components/run/chatBar";
+import ToolForm from "@/components/run/form";
 import Loading from "@/components/loading";
-import useChatSocket from './components/useChatSocket';
+import useChatSocket from '@/components/run/useChatSocket';
 import { Button } from "@nextui-org/react";
 
 const fetchScript = async (file: string): Promise<Tool> => {

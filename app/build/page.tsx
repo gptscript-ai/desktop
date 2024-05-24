@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useCallback, useRef, useEffect, createContext, useState } from 'react';
-import ScriptNav from './components/scriptNav';
-import CustomTool from './components/tool';
-import ToolBar from './components/toolbar';
+import ScriptNav from '@/components/build/scriptNav';
+import CustomTool from '@/components/build/tool';
+import ToolBar from '@/components/build/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
 import type { Tool, Run } from '@gptscript-ai/gptscript';
