@@ -1,13 +1,12 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from 'next/navigation';
-import { subtitle } from "@/components/primitives";
 import type { Tool, Block} from "@gptscript-ai/gptscript";
 import Messages, { type Message, MessageType } from "./components/messages";
 import ChatBar from "./components/chatBar";
 import ToolForm from "./components/form";
-import Loading from "./components/loading";
+import Loading from "@/components/loading";
 import useChatSocket from './components/useChatSocket';
 import { Button } from "@nextui-org/react";
 
@@ -127,7 +126,7 @@ const RunScript = () => {
 					)}
 				</div>
 			</>) : (
-				<Loading />
+				<Loading>Loading your script...</Loading>
 			)}
 		</div>
 	);

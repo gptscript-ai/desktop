@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaRegFileCode } from "react-icons/fa";
 import { VscNewFile } from "react-icons/vsc";
 import { GoTrash, GoPaperAirplane, GoPencil} from "react-icons/go";
+import Loading from "@/components/loading";
 import {
     Card,
     CardHeader,
@@ -13,6 +14,7 @@ import {
 
 export default function Scripts() {
     const [files, setFiles] = useState<Record<string,string>>({});
+    const [loading, setLoading] = useState(true);
 
     const deleteFile = useCallback((file: string) => {
         fetch(`/api/file/${file}`, {
@@ -26,17 +28,18 @@ export default function Scripts() {
                     setFiles(newFiles);
                 }
             })
-            .catch((error) => console.error(error));
+            .catch((error) => console.error(error))
     }, [files]);
 
     useEffect(() => {
         fetch("/api/file")
             .then((response) => response.json())
             .then((files: Record<string, string>) => setFiles(files))
-            .catch((error) => console.error(error));
+            .catch((error) => console.error(error))
+            .finally(() => setLoading(false));
     }, []);
 
-    const ScriptItems = files && Object.keys(files) ? (
+    const ScriptItems = () => files && Object.keys(files) ? (
         <div className="grid grid-cols-2 gap-6">
             <Button
                 size="lg"
@@ -76,7 +79,10 @@ export default function Scripts() {
 
     return (
         <div>
-            {ScriptItems}
+            {loading ? 
+                <div className="h-[50vh]"><Loading/></div>:
+                <ScriptItems />
+            }
         </div>
     );
 }

@@ -10,7 +10,8 @@ export const siteConfig = {
 		},
 		{
 			label: "Docs",
-			href: "/docs",
+			href: "https://docs.gptscript.ai",
+			external: true,
 		},
 		{
 			label: "Build",
@@ -29,7 +30,8 @@ export const siteConfig = {
 		},
 		{
 			label: "Docs",
-			href: "/docs",
+			href: "https://docs.gptscript.ai",
+			external: true,
 		},
 		{
 			label: "Build",
@@ -43,7 +45,6 @@ export const siteConfig = {
 	links: {
 		github: "https://github.com/gptscript-ai/gptscript",
 		twitter: "https://twitter.com/ibuildthecloud",
-		docs: "https://docs.gptscript.ai",
 		discord: "https://discord.gg/eMrC4Uf8",
 	},
 };
