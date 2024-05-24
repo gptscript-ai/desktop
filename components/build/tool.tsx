@@ -5,7 +5,7 @@ import { IoIosChatboxes } from "react-icons/io";
 import { Handle, Position } from "reactflow";
 import type { Tool, Property } from "@gptscript-ai/gptscript";
 import Config from "./tool/config";
-import { BuildContext } from "../page"
+import { BuildContext } from "@/app/build/page";
 import Run from "./tool/run/run";
 import Chat from "./tool/run/chat";
 import External from "./tool/config/external";
