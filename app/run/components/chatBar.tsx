@@ -10,8 +10,10 @@ import {
 const ChatBar = ({
     onBack,
     onMessageSent,
+    backButton,
 }: {
     onBack: () => void;
+    backButton: boolean;
     onMessageSent: (message: string) => void;
 }) => {
     const [inputValue, setInputValue] = useState('');
@@ -23,13 +25,13 @@ const ChatBar = ({
 
     return (
         <div className="flex border-2 dark:border-zinc-600 rounded-full p-4 w-full">
-            <Button
+            {backButton && <Button
                 startContent={<FaBackward />}
                 isIconOnly
                 radius="full"
                 className="mr-2 my-auto text-lg"
                 onPress={onBack}
-            />
+            />}
             <input
                 id="chatInput"
                 autoComplete="off"

@@ -87,30 +87,11 @@ const RunScript = () => {
     };
 
 	return (
-		<div className="h-full flex flex-col items-center justify-center w-full px-10 2xl:w-1/2 2xl:mx-auto 2xl:px-0">
-			{messages.length ? (<>
-				<div className="border-2 dark:border-zinc-600 rounded-lg w-full py-2 text-center">
-					<h1 className={subtitle()}>
-						{showForm && hasParams ?
-							"You're about to chat with " :
-							"You're chatting with "}
-						<span className="capitalize font-bold text-primary">
-							{tool.name}
-						</span>
-					</h1>
-					{showForm && hasParams ?
-						<h2 className="text-zinc-500">
-							The script you're trying to run needs some information from you before running. Please fill out the form below and click 'Start Chat' to begin.
-						</h2> :
-						<h2 className="text-zinc-500">
-							{tool.description || "This tool doesn't have a description."}
-						</h2>
-					}
-				</div>
-
+		<div className="h-full w-full px-10 2xl:w-1/2 2xl:mx-auto 2xl:px-0 flex flex-col pb-10">
+			{messages.length || (showForm && hasParams)  ? (<>
 				<div
 					id="small-message"
-					className="h-5/6 px-6 pt-6 overflow-y-scroll w-full items-center"
+					className="px-6 pt-10 overflow-y-scroll w-full items-center h-full"
 				>
 					{showForm && hasParams ? (
 						<ToolForm
@@ -123,7 +104,7 @@ const RunScript = () => {
 					)}
 				</div>
 
-				<div className="w-full">
+				<div className="w-full ">
 					{showForm && hasParams ? (
 						<Button
 							className="mt-4 w-full"
@@ -136,6 +117,7 @@ const RunScript = () => {
 						</Button>
 					) : (
 						<ChatBar
+							backButton={hasParams}
 							onBack={() => {
 								setMessages([]);
 								setShowForm(true);
