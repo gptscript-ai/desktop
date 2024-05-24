@@ -18,10 +18,6 @@ export const siteConfig = {
 			href: "/build",
 		},
 
-		{
-			label: "About",
-			href: "/about",
-		}
 	],
 	navMenuItems: [
 		{
@@ -37,10 +33,6 @@ export const siteConfig = {
 			label: "Build",
 			href: "/build",
 		},
-		{
-			label: "About",
-			href: "/about",
-		}
 	],
 	links: {
 		github: "https://github.com/gptscript-ai/gptscript",
