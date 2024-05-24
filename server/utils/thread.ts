@@ -132,7 +132,13 @@ export async function appendMessages(event: H3Event, threadId: string, messages:
 
   history.push(...messages)
 
-  await renameThread(event, threadId, history.filter((x) => x.role === 'assistant').map((x) => x.content).join('\n\n'))
+  // await renameThread(event, threadId, history.filter((x) => x.role === 'assistant').map((x) => x.content).join('\n\n'))
+  const assistantMsg = messages.find((x) => x.role === 'assistant')?.content
+
+  if (assistantMsg) {
+    await renameThread(event, threadId, assistantMsg)
+  }
+
   await fs.writeFile(p, JSON.stringify(history))
 }
 

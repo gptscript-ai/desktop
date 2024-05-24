@@ -218,7 +218,7 @@ async function send(e: ChatInputEvent) {
     grid-template-columns: 200px 1fr 200px;
     grid-template-rows: min-content 1fr min-content;
 
-    @media all and (max-width: 767px)  {
+    @media all and (max-width: 1023px)  {
       grid-template-areas:  "threads switcher"
                             "threads main"
                             "files main"

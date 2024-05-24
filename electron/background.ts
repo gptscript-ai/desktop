@@ -35,7 +35,7 @@ function createWindow() {
       preload:          path.join(__dirname, 'preload.js'),
     },
 
-    titleBarStyle:   'hiddenInset',
+    titleBarStyle:   'default', // 'hiddenInset',
     // frame: platform === 'darwin',
     frame:           true, // <= Remove this line if you wanted to implement your own title bar
     titleBarOverlay: platform === 'darwin' && { height: headerSize },

@@ -55,8 +55,8 @@ function keydown(e: KeyboardEvent) {
   const end = el.selectionEnd
   const len = el.value.length
 
-  if (start !== end) {
-    return
+  if (start !== end || (e.code !== 'ArrowDown' && e.code !== 'ArrowUp')) {
+    return true
   }
 
   // if (start === 0 && e.code === 'ArrowUp') {

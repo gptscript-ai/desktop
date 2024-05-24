@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  size: 'sm' | 'md'
+  size?: 'sm' | 'md'
 }
 
 const { size } = withDefaults(defineProps<Props>(), { size: 'md' })

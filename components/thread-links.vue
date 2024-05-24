@@ -104,9 +104,9 @@ function clearHistory() {
           exact-active-class="exact-active bg-blue-500 text-white"
         >
           <div v-if="obj.label" class="text-sm overflow-hidden overflow-ellipsis whitespace-nowrap">
-            {{ obj.label }}
+            {{ obj.label || 'New Thread…' }}
           </div>
-          <Waiting v-else />
+          <Waiting v-else size="sm" />
 
           <UButton
             icon="i-heroicons-trash"
