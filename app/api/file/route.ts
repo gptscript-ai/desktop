@@ -50,28 +50,3 @@ export async function POST(_req: Request) {
         return Response.json({ error: e }, { status: 500 });
     }
 }
-
-// export async function DELETE(req: Request) {
-//     try {
-//         const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
-//         const { name } = req.params as any;
-//         await fs.unlink(`${scriptsPath}/${name}`);
-//         return Response.json({ success: true });
-//     } catch (e) {
-//         return Response.json({ error: e }, { status: 500 });
-//     }
-// }
-
-// export async function PUT(req: Request) {
-//     try {
-//         const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
-//         const { name } = req.params as any;
-//         const content = await req.text();
-
-//         await fs.rename(`${scriptsPath}/${name}`, `${scriptsPath}/${name}.bak`);
-//         await fs.writeFile(`${scriptsPath}/${name}`, content);
-//         return Response.json({ success: true });
-//     } catch (e) {
-//         return Response.json({ error: e }, { status: 500 });
-//     }
-// }

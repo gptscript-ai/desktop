@@ -6,7 +6,6 @@ import path from 'path';
 
 const gptscript = new Client();
 
-
 // Create a datastructure for the tool bindings in the UI
 export async function PUT(
     req: Request,
