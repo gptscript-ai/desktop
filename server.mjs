@@ -66,7 +66,10 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 		socket.on('userMessage', async (message) => {
 			if (runningScript) {
 				if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
-					socket.emit("error", new Error(`run is in terminal state ${runningScript.state}, cannot continue chat`));
+					socket.emit(
+						"scriptMessage", 
+						`This chat session is in a terminal state ${runningScript.state}, you cannot continue chat. Please start a new chat session.`
+					);
 					return;
 				}
 			}
