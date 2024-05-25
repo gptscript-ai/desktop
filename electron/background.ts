@@ -1,12 +1,11 @@
 import * as path from 'node:path'
 import * as os from 'node:os'
-import { BrowserWindow, app, ipcMain, session } from 'electron'
+import { BrowserWindow, app } from 'electron'
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
 import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
-import clickyServes from './modules/clickyServes'
 
 // Initilize
 // =========
@@ -15,7 +14,9 @@ const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
 const arch = os.arch()
 const headerSize = 32
-const modules = [titleBarActionsModule, macMenuModule, updaterModule, clickyServes]
+const modules = [titleBarActionsModule, macMenuModule, updaterModule]
+
+app.commandLine.appendSwitch('ignore-certificate-errors')
 
 // Initialize app window
 // =====================
@@ -29,7 +30,7 @@ function createWindow() {
     minHeight:       480,
     backgroundColor: '#000',
     webPreferences:  {
-      devTools:         !isProduction,
+      devTools:         true, // !isProduction,
       nodeIntegration:  true,
       contextIsolation: false,
       preload:          path.join(__dirname, 'preload.js'),
@@ -48,7 +49,8 @@ function createWindow() {
   }
 
   // Open the DevTools.
-  !isProduction && mainWindow.webContents.openDevTools({ mode: 'bottom' })
+  // !isProduction && mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   return mainWindow
 }

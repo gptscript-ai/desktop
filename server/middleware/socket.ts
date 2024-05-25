@@ -1,3 +1,5 @@
+import * as path from 'node:path'
+import * as os from 'node:os'
 import { Server, type Socket } from 'socket.io'
 import { Client, type Client as ClientType } from '@gptscript-ai/gptscript'
 import handlers, { type Handler, type Handlers } from '../handlers'
@@ -19,12 +21,32 @@ declare module 'h3' {
   }
 }
 
+function gptscriptPath() {
+  if (process.env.GPTSCRIPT_BIN) {
+    return process.env.GPTSCRIPT_BIN
+  }
+
+  let exe = ''
+
+  switch (os.platform()) {
+    case 'darwin':
+      exe = 'gptscript-universal-apple-darwin'
+      break
+    case 'win32':
+      exe = 'gptscript-x86_64-pc-windows-msvc.exe'
+      break
+    default:
+      exe = 'gptscript-x86_64-unknown-linux-gnu'
+  }
+
+  return path.resolve(path.dirname(''), 'binaries', exe)
+}
+
 export default defineEventHandler(async (event) => {
-  const client = new Client(undefined, process.env.GPTSCRIPT_BIN || './binaries/gptscript-universal-apple-darwin')
+  const client = new Client(undefined, gptscriptPath())
 
   event.context.appSocket = appSocket
   event.context.gpt = client
-  await sessionDir(event)
 
   const g = globalThis as any
 
@@ -32,7 +54,7 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  console.log('Starting socket middleware')
+  console.info('Starting socket middleware')
 
   const node = event.node
 

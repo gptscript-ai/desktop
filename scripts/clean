@@ -3,4 +3,4 @@ set -e
 
 cd $(dirname $0)/..
 
-rm -rf dist .nuxt* .output node_modules/.cache node_modules/.vite
+rm -rf dist .nuxt* .output node_modules/.cache node_modules/.vite electron-dist

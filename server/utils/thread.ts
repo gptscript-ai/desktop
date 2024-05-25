@@ -28,7 +28,14 @@ export async function getThread(event: H3Event, id: string): Promise<Thread> {
   const historyPath = path.join(threadPath, THREAD_HISTORY_FILE)
 
   const dir = await fs.readdir(workspacePath, { recursive: true, withFileTypes: true })
-  const toolSrc = (await fs.readFile(toolPath)).toString()
+  let toolSrc = ''
+
+  try {
+    toolSrc = (await fs.readFile(toolPath)).toString()
+  } catch (e)  {
+    console.error('Error reading tool', toolPath, e)
+  }
+
   let json: ThreadMeta
 
   try {
@@ -132,7 +139,6 @@ export async function appendMessages(event: H3Event, threadId: string, messages:
 
   history.push(...messages)
 
-  // await renameThread(event, threadId, history.filter((x) => x.role === 'assistant').map((x) => x.content).join('\n\n'))
   const assistantMsg = messages.find((x) => x.role === 'assistant')?.content
 
   if (assistantMsg) {
@@ -140,6 +146,8 @@ export async function appendMessages(event: H3Event, threadId: string, messages:
   }
 
   await fs.writeFile(p, JSON.stringify(history))
+
+  event.context.socket.emit(`thread:update`, await getThread(event, threadId))
 }
 
 export async function renameThread(event: H3Event, threadId: string, message: string) {

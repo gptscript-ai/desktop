@@ -15,8 +15,8 @@ const { thread, run } = defineProps<Props>()
 
 <template>
   <div class="messages">
-    <template v-for="(m, idx) in thread.history" :key="idx">
-      <div v-if="m.runId && (m.role !== 'assistant' || m.runId !== run?.id)" class="message shadow-md" :class="[m.role]">
+    <template v-for="(m, idx) in thread.history">
+      <div v-if="!m.runId || m.role !== 'assistant' || m.runId !== run?.id" :key="idx" class="message shadow-md" :class="[m.role]">
         <div class="content">
           <div v-html="renderMarkdown(m.content)" />
         </div>
@@ -33,8 +33,11 @@ const { thread, run } = defineProps<Props>()
     </div>
     <div v-else-if="run" class="message shadow-md assistant">
       <div class="content relative">
-        <span v-if="run.output" v-html="renderMarkdown(run.output)" />
-        <Waiting v-if="run?.state !== RunState.Finished" size="sm" class="absolute bottom-0 right-[-3rem] " />
+        <template v-if="run.output && run.output !== 'Waiting for model response...'">
+          <span v-html="renderMarkdown(run.output)" />
+          <Waiting v-if="run?.state !== RunState.Finished" size="sm" class="absolute bottom-0 right-[-3rem]" />
+        </template>
+        <Waiting v-else-if="run?.state !== RunState.Finished" size="sm" />
       </div>
     </div>
   </div>
@@ -57,9 +60,6 @@ const { thread, run } = defineProps<Props>()
     position: relative;
 
     .content {
-      word-wrap: break-word;
-      word-break: break-all;
-
       :deep(A) {
         text-decoration: underline;
       }

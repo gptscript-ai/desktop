@@ -121,8 +121,9 @@ chat: true
       const opts: RunOpts = {
         input,
         workspace,
-        chdir:    workspace,
-        cacheDir: await cacheDir(),
+        chdir:        workspace,
+        cacheDir:     await cacheDir(),
+        disableCache: false,
       }
 
       if (state) {
@@ -133,7 +134,6 @@ chat: true
 
       appendMessages(event, threadId, [{
         time:    dayjs().valueOf(),
-        runId:   run.id,
         role:    'user',
         content: input,
       }])

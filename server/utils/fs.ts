@@ -64,15 +64,22 @@ declare module 'h3' {
 }
 
 export function sessionId(event: H3Event) {
+  const agent = event.headers.get('user-agent') || ''
+  const isElectron = agent.includes('Electron/')
+
   if (event.context.sessionId) {
     return event.context.sessionId
   }
 
-  let id = getCookie(event, SESS_COOKIE) || ''
+  let id = ''
 
-  if (!id) {
-    id = randomStr(32, Charsets.ALPHA_NUM_LOWER)
-    console.debug('Assigned session id', id)
+  if ( !agent ) {
+    id = 'build'
+  } else if (isElectron) {
+    id = 'electron'
+  } else {
+    id = getCookie(event, SESS_COOKIE) || randomStr(32, Charsets.ALPHA_NUM_LOWER)
+
     setCookie(event, SESS_COOKIE, id, {
       httpOnly: true,
       path:     '/',

@@ -17,24 +17,36 @@ export async function readPrefs(event: H3Event): Promise<Prefs> {
   } catch (e) {
     const def = cloneDeep(defaultPrefs)
 
-    if (process.env.OPENAI_API_KEY && !def.openaiApiKey) {
-      def.openaiApiKey = process.env.OPENAI_API_KEY
-    }
-
-    if (process.env.OPENAI_ORGANIZATION && !def.openaiOrganization) {
-      def.openaiOrganization = process.env.OPENAI_ORGANIZATION
-    }
-
     await writePrefs(event, def)
   }
 
-  return JSON.parse((await fs.readFile(p)).toString())
+  const out = JSON.parse((await fs.readFile(p)).toString())
+
+  if (process.env.OPENAI_API_KEY && !out.openaiApiKey) {
+    out.openaiApiKey = process.env.OPENAI_API_KEY
+  }
+
+  if (process.env.OPENAI_ORGANIZATION && !out.openaiOrganization) {
+    out.openaiOrganization = process.env.OPENAI_ORGANIZATION
+  }
+
+  return out
 }
 
 export async function writePrefs(event: H3Event, val: Prefs) {
   const p = path.join(await sessionDir(event), PREF_FILE)
 
-  await fs.writeFile(p, JSON.stringify(val, null, 2))
+  const json = JSON.parse(JSON.stringify(val))
+
+  if (process.env.OPENAI_API_KEY && json.openaiApiKey === process.env.OPENAI_API_KEY) {
+    delete json.openaiApiKey
+  }
+
+  if (process.env.OPENAI_ORGANIZATION && json.openaiOrganization === process.env.OPENAI_ORGANIZATION) {
+    delete json.openaiOrganization
+  }
+
+  await fs.writeFile(p, JSON.stringify(json, null, 2))
 
   return true
 }

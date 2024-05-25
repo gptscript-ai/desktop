@@ -1,12 +1,13 @@
 {
   "name": "gptstudio",
+  "description": "GUI for gptscript",
   "author": "Acorn Labs <info@acorn.io>",
   "license": "Apache-2.0",
   "version": "0.0.0",
   "main": ".output/electron/background.js",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt generate",
+    "build": "nuxt build",
     "clean": "scripts/clean",
     "download": "node scripts/download.mjs",
     "lint": "eslint --max-warnings 0 .",
@@ -16,11 +17,7 @@
     "transpile-electron": "tsc -p ./electron --outDir .output/electron",
     "dev:electron": "NODE_ENV=development concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess 'electron ./.output/electron/background.js'\"",
     "dev:electron:win": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"tsc-watch -p ./electron --outDir .output/electron --onSuccess run.electron\"",
-    "build:electron": "yarn build && yarn transpile-electron && node build.js"
-  },
-  "build": {
-    "appId": "ai.gptstudio",
-    "productName": "GPTStudio"
+    "build:electron": "yarn build && yarn transpile-electron && node build.mjs"
   },
   "devDependencies": {
     "@antfu/eslint-config": "2.18.0",

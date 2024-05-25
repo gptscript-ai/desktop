@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import ModalApiKeys from '@/components/modal/api-key.vue'
 
-const gpt = useGpt()
-
 useHead({ title: 'GPTStudio', bodyAttrs: { class: 'bg-gray-100 dark:bg-gray-950' } })
 
 const prefs = usePrefs()
@@ -10,10 +8,12 @@ const threads = useThreads()
 const loaded = ref(false)
 
 onMounted(async () => {
-  await Promise.all([
-    prefs.load(),
-    threads.load(),
-  ])
+  try {
+    await prefs.load()
+    await threads.load()
+  } catch (e) {
+  }
+
   loaded.value = true
 
   if (!prefs.openaiApiKey) {

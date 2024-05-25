@@ -2,15 +2,14 @@ import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'
 
 export default (function () {
-  //console.debug('Creating Socket')
-
+  // console.debug('Creating Socket')
   const socket: Socket = io(`${ location.protocol === 'https:' ? 'wss://' : 'ws://' }${ location.host }`, {
     rememberUpgrade: true,
-    transports: ['websocket'],
+    transports:      ['websocket'],
   })
 
   socket.on('connect', () => {
-    // console.info('Socket Connected', socket.id)
+    console.info('Socket Connected', socket.id)
   })
 
   socket.io.on('error', (err) => {
@@ -53,4 +52,4 @@ export default (function () {
   return () => {
     return socket
   }
-})();
+})()

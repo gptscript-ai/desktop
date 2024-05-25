@@ -1,5 +1,5 @@
 import type { Block, Text, Tool } from 'gptstudio'
-import { cloneDeep } from 'lodash'
+import cloneDeep from 'lodash/cloneDeep'
 import { LineError } from './error'
 
 interface Context {
@@ -11,7 +11,7 @@ interface Context {
 }
 
 const embeddedRegex = /^(#|\/\/)\s?gptscript:(.*)/
-const separatorRegex = /^\s*---+\s*$/
+const separatorRegex = /^\s*-{3,}\s*$/
 
 export function parse(src: string): Block[] {
   const out: Block[] = []

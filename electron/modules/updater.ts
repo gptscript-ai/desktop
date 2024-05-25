@@ -5,8 +5,8 @@ import log from 'electron-log'
 
 // Logger
 // ======
-autoUpdater.logger = log
-;(autoUpdater.logger as typeof log).transports.file.level = 'info'
+autoUpdater.logger = log;
+(autoUpdater.logger as typeof log).transports.file.level = 'info'
 
 // Config
 // ======
@@ -65,12 +65,12 @@ export default (mainWindow: BrowserWindow) => {
     autoUpdater.quitAndInstall()
   })
 
-  autoUpdater.checkForUpdates()
+  // autoUpdater.checkForUpdates()
 
   // Check for updates every 2 hours
-  setInterval(() => {
-    autoUpdater.checkForUpdates()
-  }, 1000 * 60 * 60 * 2)
+  // setInterval(() => {
+  //   autoUpdater.checkForUpdates()
+  // }, 1000 * 60 * 60 * 2)
 
   console.info('[-] MODULE::updater Initialized')
 }

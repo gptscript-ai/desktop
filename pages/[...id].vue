@@ -14,7 +14,11 @@ const run = ref<RunWithOutput>()
 const thread = await threads.find(id)
 const initialMessage = ref(fromArray(route.query.msg, '') || '')
 
-const previous = reactive((thread.history || []).filter((x) => x.role === 'user').map((x) => x.content))
+if (!thread) {
+  navigateTo('/')
+}
+
+const previous = reactive((thread?.history || []).filter((x) => x.role === 'user').map((x) => x.content))
 
 throttledWatch(() => run.value?.output, () => {
   scroll()
@@ -145,6 +149,7 @@ async function send(e: ChatInputEvent) {
     <main ref="scroller" class="main border-x border-slate-300">
       <div v-if="view === 'chat'" class="max-w-[900px] m-auto p-2">
         <Messages
+          v-if="thread"
           :thread="thread"
           :run="run"
         />
