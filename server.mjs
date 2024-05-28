@@ -38,7 +38,7 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
-	const opts = {input: JSON.stringify(args || {})};
+	const opts = {input: JSON.stringify(args || {}), disableCache: true};
 	if (tool) opts.subTool = tool;
 
 	if (runningScript) {
@@ -48,12 +48,12 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 		runningScript.close();
 	}
 
-	runningScript = gptscript.run(path.join(SCRIPTS_PATH, file), opts);
+	runningScript = await gptscript.run(path.join(SCRIPTS_PATH, file), opts);
 	runningScript.on(RunEventType.Event, data => {
-		if (data.type === "callProgress"){
-			socket.emit('progress', data);
+		if (data.type === "runStart" || data.type == "runFinish"){
+			socket.emit('run', {calls:runningScript.calls});
 		} else {
-			socket.emit('state', {calls:runningScript.calls});
+			socket.emit('progress', data);
 		}
 	});
 

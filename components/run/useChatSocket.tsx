@@ -1,8 +1,9 @@
 // useChatSocket.ts
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { CallProgressFrame, Tool, Block } from '@gptscript-ai/gptscript';
+import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
+import { data } from 'autoprefixer';
 
 const fetchScript = async (file: string): Promise<Tool> => {
 	const response = await fetch(`/api/file/${file}`);
@@ -32,37 +33,39 @@ const useChatSocket = () => {
 
 	const handleFullMessage = useCallback((data: string) => {
 		if (latestBotMessageIndex.current !== null) {
-			setMessages((prevMessages) => {
-				const updatedMessages = [...prevMessages];
-				updatedMessages[latestBotMessageIndex.current!] = {
-				type: MessageType.Bot,
-				message: data,
-				};
-				return updatedMessages;
-			});
+			// setMessages((prevMessages) => {
+			// 	const updatedMessages = [...prevMessages];
+			// 	updatedMessages[latestBotMessageIndex.current!] = {
+			// 	type: MessageType.Bot,
+			// 	message: data,
+			// 	};
+			// 	return updatedMessages;
+			// });
 			latestBotMessageIndex.current = null;
 		} else {
-			setMessages((prevMessages) => [
-				...prevMessages,
-				{ type: MessageType.Bot, message: data },
-			]);
+			// setMessages((prevMessages) => [
+			// 	...prevMessages,
+			// 	{ type: MessageType.Bot, message: data },
+			// ]);
 		}
 	}, []);
 
-	const handlePartialMessage = useCallback((data: CallProgressFrame) => {
+	const handlePartialMessage = useCallback((data: CallFrame) => {
+		const message = data.output && data.output.length > 0 && !data.parentID && !data.output[data.output.length - 1].subCalls ? data.output[data.output.length -1].content || "" : ""
+		if (message.startsWith("<tool call>") || !message) return;
 		if (latestBotMessageIndex.current === null) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
-				updatedMessages.push({ type: MessageType.Bot, message: data.content });
+				updatedMessages.push({ type: MessageType.Bot, message: message });
 				return updatedMessages;
 			});
 		} else {
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
 				updatedMessages[latestBotMessageIndex.current!] = {
-				type: MessageType.Bot,
-				message: data.content,
+					type: MessageType.Bot,
+					message: message,
 				};
 				return updatedMessages;
 			});
@@ -74,12 +77,12 @@ const useChatSocket = () => {
 
 		socket.on("connect", () => {
 			setConnected(true);
-			// if (immediate) socket?.emit("run", file, name, formData)
 		});
 
 		socket.on("scriptMessage", (data) => { handleFullMessage(data) });
 
-		socket.on("progress", (data: CallProgressFrame) => handlePartialMessage(data));
+		socket.on("progress", (data: CallFrame) => handlePartialMessage(data));
+		socket.on("progress", (data) => console.log(data));
 
 		socket.on("disconnect", () => {
 			setConnected(false);
