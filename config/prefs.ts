@@ -1,9 +1,9 @@
-import type { Prefs } from "~/types";
+import type { Prefs } from '~/types'
 
 export const defaultPrefs: Prefs = {
-  debug: false,
-  cache: true,
-  defaultTool: '',
-  openaiApiKey: '',
-  openaiOrganization: ''
+  debug:              false,
+  cache:              true,
+  defaultTool:        '',
+  openaiApiKey:       '',
+  openaiOrganization: '',
 }

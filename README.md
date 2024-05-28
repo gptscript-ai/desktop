@@ -22,6 +22,7 @@ Lots of files will be generated in `electron-dist`.  You probably want one of:
 ```
 GPTStudio-x.y.z.dmg
 GPTStudio-Setup-x.y.z.exe
+# Something for linux
 ```
 
 ## Environment Vars

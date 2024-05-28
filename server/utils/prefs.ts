@@ -1,7 +1,6 @@
 import path from 'node:path'
 import * as fs from 'node:fs/promises'
 import type { H3Event } from 'h3'
-import cloneDeep from 'lodash/cloneDeep'
 import { defaultPrefs } from '@/config/prefs'
 import {
   PREF_FILE,
@@ -15,7 +14,7 @@ export async function readPrefs(event: H3Event): Promise<Prefs> {
   try {
     await fs.access(p)
   } catch (e) {
-    const def = cloneDeep(defaultPrefs)
+    const def = Object.assign({}, defaultPrefs)
 
     await writePrefs(event, def)
   }

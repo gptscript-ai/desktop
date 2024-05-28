@@ -37,7 +37,7 @@
     "busboy": "^1.6.0",
     "concurrently": "^8.2.2",
     "dayjs": "^1.11.10",
-    "electron": "^30.0.6",
+    "electron": "^30.0.8",
     "electron-builder": "^24.13.3",
     "eslint": "^9.2.0",
     "highlight.js": "^11.9.0",

@@ -38,18 +38,16 @@ export default (mainWindow: BrowserWindow) => {
       },
     ]
 
-    if (isDevelopment) {
-      submenu.splice(1, 0, {
-        label:       'Toggle Developer Tools',
-        accelerator: 'Alt+Command+I',
-        click() {
-          // Open the DevTools.
-          if (mainWindow) {
-            mainWindow.webContents.toggleDevTools()
-          }
-        },
-      })
-    }
+    submenu.splice(1, 0, {
+      label:       'Toggle Developer Tools',
+      accelerator: 'Alt+Command+I',
+      click() {
+        // Open the DevTools.
+        if (mainWindow) {
+          mainWindow.webContents.toggleDevTools()
+        }
+      },
+    })
 
     template.unshift({
       label: name,

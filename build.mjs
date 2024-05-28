@@ -9,6 +9,10 @@ const options = {
   appId:       'ai.gptstudio',
   productName: 'GPTStudio',
 
+  extraResources: [
+    '.output/server/**',
+  ],
+
   mac:  {
     hardenedRuntime:     true,
     gatekeeperAssess:    false,

@@ -1,5 +1,6 @@
 import * as path from 'node:path'
 import * as os from 'node:os'
+
 import { BrowserWindow, app } from 'electron'
 import singleInstance from './singleInstance'
 import dynamicRenderer from './dynamicRenderer'
@@ -7,8 +8,6 @@ import titleBarActionsModule from './modules/titleBarActions'
 import updaterModule from './modules/updater'
 import macMenuModule from './modules/macMenu'
 
-// Initilize
-// =========
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 const isProduction = process.env.NODE_ENV !== 'development'
 const platform: 'darwin' | 'win32' | 'linux' = process.platform as any
@@ -49,8 +48,8 @@ function createWindow() {
   }
 
   // Open the DevTools.
-  // !isProduction && mainWindow.webContents.openDevTools()
-  mainWindow.webContents.openDevTools()
+  !isProduction && mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   return mainWindow
 }
@@ -73,7 +72,13 @@ app.whenReady().then(async () => {
   }
 
   // Load renderer process
-  dynamicRenderer(mainWindow)
+  const isDev = process.env.NODE_ENV === 'development'
+
+  if (isDev) {
+    return mainWindow.loadURL('http://localhost:3000/')
+  } else {
+    dynamicRenderer(mainWindow)
+  }
 
   // Initialize modules
   console.info(`${ '-'.repeat(30)  }\n[+] Loading modules...`)

@@ -21,4 +21,5 @@ export default defineNuxtConfig({
   runtimeConfig: { public: {} },
   typescript:    { shim: false },
   ssr:           false,
+  nitro:         { preset: 'node-server' },
 })

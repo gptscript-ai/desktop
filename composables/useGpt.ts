@@ -1,5 +1,4 @@
-import useSocket from '@/composables/useSocket'
-import { Run } from '@gptscript-ai/gptscript'
+import useSocket from './useSocket'
 
 export default function useGpt() {
   const sock = useSocket()
