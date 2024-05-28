@@ -3,7 +3,9 @@ import next from "next";
 import { Server } from "socket.io";
 import { Client, RunEventType, RunState } from '@gptscript-ai/gptscript';
 import path from 'path';
+import dotenv from 'dotenv';
 
+dotenv.config({path: ['.env', '.env.local']});
 const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
