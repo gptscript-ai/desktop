@@ -24,7 +24,7 @@ const ChatBar = ({
     };
 
     return (
-        <div className="flex border-2 dark:border-zinc-600 rounded-full p-4 w-full">
+        <div className="flex p-4 w-full">
             {backButton && <Button
                 startContent={<FaBackward />}
                 isIconOnly
