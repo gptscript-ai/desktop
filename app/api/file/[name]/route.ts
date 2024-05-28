@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { Client, type Block, Text } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
 import path from 'path';
+import { SCRIPTS_PATH } from '@/config/env';
 import type {
     Node as RFNode, 
     Edge as RFEdge,
@@ -17,9 +18,8 @@ export async function DELETE(
     { params }: { params: { slug: string } }
 )  {
     try {
-        const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
         const { name } = params as any;
-        await fs.unlink(path.join(`${scriptsPath}/${name}.gpt`));
+        await fs.unlink(path.join(`${SCRIPTS_PATH}/${name}.gpt`));
         return Response.json({ success: true });
     } catch (e) {
         return Response.json({ error: e }, { status: 500 });
@@ -44,10 +44,9 @@ export async function GET(
     req: NextRequest,
     { params }: { params: { slug: string } }
 )  {
-    const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts'
     try {
         const { name } = params as any;
-        const script = await gptscript.parse(path.join(scriptsPath,`${name}.gpt`));
+        const script = await gptscript.parse(path.join(SCRIPTS_PATH,`${name}.gpt`));
         if (req.nextUrl.searchParams.get('nodeify') === 'true') {
             const { nodes, edges } = await nodeify(script);
             return Response.json({ nodes: nodes, edges: edges });
@@ -66,13 +65,12 @@ export async function PUT(
     { params }: { params: { slug: string } }
 )  {
     try {
-        const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts'
         const { name } = params as any;
         const nodes = (await req.json()) as RFNode[];
         const script = denodeify(nodes);
 
-        await fs.writeFile(path.join(scriptsPath,`${name}.gpt`), await gptscript.stringify(script));
-        return Response.json(await gptscript.parse(path.join(scriptsPath,`${name}.gpt`)));
+        await fs.writeFile(path.join(SCRIPTS_PATH,`${name}.gpt`), await gptscript.stringify(script));
+        return Response.json(await gptscript.parse(path.join(SCRIPTS_PATH,`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
             return Response.json({ error: '.gpt file not found' }, { status: 404 });

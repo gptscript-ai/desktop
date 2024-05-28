@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import { Client, RunEventType, RunState } from '@gptscript-ai/gptscript';
 import path from 'path';
 
+const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000;
@@ -47,7 +48,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 		runningScript.close();
 	}
 
-	runningScript = gptscript.run(path.join(process.env.SCRIPTS_PATH, file), opts);
+	runningScript = gptscript.run(path.join(SCRIPTS_PATH, file), opts);
 	runningScript.on(RunEventType.Event, data => {
 		if (data.type === "callProgress"){
 			socket.emit('progress', data);

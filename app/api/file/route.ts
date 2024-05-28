@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic' // defaults to auto
 import { Client } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
+import { SCRIPTS_PATH } from '@/config/env';
 
 const gptscript = new Client();
 
 export async function GET() {
     try {
-        const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
-        const files = await fs.readdir(scriptsPath);
+        const files = await fs.readdir(SCRIPTS_PATH);
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
         
         if (gptFiles.length === 0) 
@@ -15,7 +15,7 @@ export async function GET() {
 
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
-            const script = await gptscript.parse(`${scriptsPath}/${file}`);
+            const script = await gptscript.parse(`${SCRIPTS_PATH}/${file}`);
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;
@@ -34,8 +34,7 @@ export async function GET() {
 
 export async function POST(_req: Request) {
     try {
-        const scriptsPath = process.env.SCRIPTS_PATH || 'gptscripts';
-        const files = await fs.readdir(scriptsPath);
+        const files = await fs.readdir(SCRIPTS_PATH);
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
 
         let id = 0;
@@ -44,7 +43,7 @@ export async function POST(_req: Request) {
             id++;
             newFileName = `new-file-${id}.gpt`;
         }
-        await fs.writeFile(`${scriptsPath}/${newFileName}`, '---\nname: main');
+        await fs.writeFile(`${SCRIPTS_PATH}/${newFileName}`, '---\nname: main');
         return Response.json({ file: newFileName });
     } catch (e) {
         return Response.json({ error: e }, { status: 500 });
