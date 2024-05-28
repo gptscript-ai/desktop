@@ -1,7 +1,7 @@
 // useChatSocket.ts
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
+import type { CallFrame, RunFrame, Tool, Block } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
 import { data } from 'autoprefixer';
 
@@ -31,42 +31,40 @@ const useChatSocket = () => {
 
 	messagesRef.current = messages;
 
-	const handleFullMessage = useCallback((data: string) => {
+	// handles the situation where the full bot message when received (i.e runningScript.text() output).
+	const handleBotMessage = useCallback((_: string) => {
 		if (latestBotMessageIndex.current !== null) {
-			// setMessages((prevMessages) => {
-			// 	const updatedMessages = [...prevMessages];
-			// 	updatedMessages[latestBotMessageIndex.current!] = {
-			// 	type: MessageType.Bot,
-			// 	message: data,
-			// 	};
-			// 	return updatedMessages;
-			// });
 			latestBotMessageIndex.current = null;
-		} else {
-			// setMessages((prevMessages) => [
-			// 	...prevMessages,
-			// 	{ type: MessageType.Bot, message: data },
-			// ]);
 		}
 	}, []);
 
-	const handlePartialMessage = useCallback((data: CallFrame) => {
-		const message = data.output && data.output.length > 0 && !data.parentID && !data.output[data.output.length - 1].subCalls ? data.output[data.output.length -1].content || "" : ""
-		if (message.startsWith("<tool call>") || !message) return;
+	// handles progress being recieved from the server (callProgress style frames).
+	const handleProgress = useCallback((data: CallFrame) => {
+		const isMainContent = data.output && 
+			data.output.length > 0 &&
+			(!data.parentID || data.tool?.chat) &&
+			!data.output[data.output.length - 1].subCalls
+		const content = isMainContent ? data.output[data.output.length -1].content || "" : ""
+		if (!content || content.startsWith('<tool call>')) return;
+		
+		let message: Message = { type: MessageType.Bot, message: content };
+		// if (content.startsWith("<tool call>")) {
+		// 	if (!message.toolCalls) message.toolCalls = {};
+		// 	message.toolCalls[data.id] = { type: MessageType.Bot, message: content};
+		// 	return;
+		// }
+
 		if (latestBotMessageIndex.current === null) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
-				updatedMessages.push({ type: MessageType.Bot, message: message });
+				updatedMessages.push(message);
 				return updatedMessages;
 			});
 		} else {
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
-				updatedMessages[latestBotMessageIndex.current!] = {
-					type: MessageType.Bot,
-					message: message,
-				};
+				updatedMessages[latestBotMessageIndex.current!] = message;
 				return updatedMessages;
 			});
 		}
@@ -79,9 +77,9 @@ const useChatSocket = () => {
 			setConnected(true);
 		});
 
-		socket.on("scriptMessage", (data) => { handleFullMessage(data) });
-
-		socket.on("progress", (data: CallFrame) => handlePartialMessage(data));
+		socket.on("botMessage", (data) => { handleBotMessage(data) });
+		socket.on("botMessage", (data) => console.log(data));
+		socket.on("progress", (data: CallFrame) => handleProgress(data));
 		socket.on("progress", (data) => console.log(data));
 
 		socket.on("disconnect", () => {
@@ -94,7 +92,7 @@ const useChatSocket = () => {
 			setSocket(null);
 			socket.disconnect();
 		};
-	}, [handleFullMessage, handlePartialMessage]);
+	}, [handleBotMessage, handleProgress]);
 
 	return { socket, setSocket, connected, setConnected, messages, setMessages };
 };

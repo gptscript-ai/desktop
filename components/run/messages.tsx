@@ -12,6 +12,7 @@ export enum MessageType {
 export type Message = {
 	type: MessageType;
 	message: string;
+	toolCalls?: Record<string,Message>;
 };
 
 const Messages = ({ messages }: { messages: Message[] }) => (

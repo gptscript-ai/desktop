@@ -6,11 +6,11 @@ import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config({path: ['.env', '.env.local']});
+
 const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = 3000;
-// when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
@@ -60,7 +60,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	});
 
 	try {
-		socket.emit('scriptMessage', await runningScript.text());
+		socket.emit('botMessage', await runningScript.text());
 		socket.on('disconnect', () => {
 			runningScript.close();
 			runningScript = null;
@@ -70,7 +70,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 			if (runningScript) {
 				if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
 					socket.emit(
-						"scriptMessage", 
+						"botMessage", 
 						`This chat session is in a terminal state ${runningScript.state}, you cannot continue chat. Please start a new chat session.`
 					);
 					return;
@@ -81,7 +81,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 				socket.emit('progress', data);
 			});
 			try {
-				socket.emit('scriptMessage', await runningScript.text());
+				socket.emit('botMessage', await runningScript.text());
 			} catch (e) {
 				socket.emit('error', e);
 				console.log(JSON.stringify(e));
