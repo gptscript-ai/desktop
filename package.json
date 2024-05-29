@@ -6,8 +6,7 @@
         "dev": "node server.mjs",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "open": "open http://localhost:${PORT}/run?file=${FILE}"
+        "lint": "next lint"
     },
     "dependencies": {
         "@gptscript-ai/gptscript": "^0.7.2",

@@ -1,1 +1,1 @@
-export const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts";
+export const SCRIPTS_PATH = process.env.SCRIPTS_PATH || process.env.GPTSCRIPT_WORKSPACE_DIR ||  "gptscripts";
