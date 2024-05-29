@@ -10,7 +10,7 @@ dotenv.config({path: ['.env', '.env.local']});
 const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
-const port = 3000;
+const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
