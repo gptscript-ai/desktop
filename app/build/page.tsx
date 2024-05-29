@@ -6,7 +6,7 @@ import CustomTool from '@/components/build/tool';
 import ToolBar from '@/components/build/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
-import type { Tool, Run } from '@gptscript-ai/gptscript';
+import type { Tool, CallFrame, Call } from '@gptscript-ai/gptscript';
 import { debounce } from 'lodash';
 import ReactFlow, {
     useNodesState,
@@ -43,8 +43,8 @@ type Context = {
     ChatPanel: React.JSX.Element;
     setChatPanel: React.Dispatch<React.SetStateAction<React.JSX.Element>>;
     file: string;
-    run: Run | null;
-    setRun: React.Dispatch<React.SetStateAction<Run | null>>;
+    calls: CallFrame[] | null;
+    setCalls: React.Dispatch<React.SetStateAction<CallFrame[] | null>>;
     getId: () => string;
 }
 
@@ -58,7 +58,7 @@ const AddNodeOnEdgeDrop = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [configPanel, setConfigPanel] = useState(<></>)
     const [chatPanel, setChatPanel] = useState(<></>);
-    const [run, setRun] = useState<Run | null>(null);
+    const [calls, setCalls] = useState<CallFrame[] | null>(null);
     const { screenToFlowPosition } = useReactFlow();
 
     // Call a debounced post to update the script with the new nodes every second.
@@ -242,8 +242,8 @@ const AddNodeOnEdgeDrop = () => {
         ChatPanel: chatPanel,
         setChatPanel: setChatPanel,
         file: `${file}.gpt` || '',
-        run: run,
-        setRun: setRun,
+        calls: calls,
+        setCalls: setCalls,
         getId: getId,
     };
 
