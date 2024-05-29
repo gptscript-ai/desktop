@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({path: ['.env', '.env.local']});
 
-const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
+const SCRIPTS_PATH = process.env.SCRIPTS_PATH || process.env.GPTSCRIPT_WORKSPACE_DIR || "gptscripts"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
