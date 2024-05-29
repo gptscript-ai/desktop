@@ -1,7 +1,7 @@
-tools: service, port, open_file, open
+tools: service, open-file, open, port
 
 Get the port for the running service and use the port with the open tool.
-If there is a file, trim the directory from the file and remove the '.gpt' suffix. Pass the file to the open_file tool.
+If there is a file, trim the directory from the file and remove the '.gpt' suffix. Then use the open-file tool.
 If there is no file, use the open tool.
 
 ---
@@ -18,17 +18,15 @@ description: Get the port for the running service
 
 ---
 
-name: open_file
-tools: github.com/gptscript-ai/browser
+name: open-file
 arg: port: The port the service is listening on
 arg: file: The file to open
 
-Use the browser tool to open http://localhost:${port}/run?file=${file}
+#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} --silent open-file
 
 ---
 
 name: open
-tools: github.com/gptscript-ai/browser
 arg: port: The port the service is listening on
 
-Use the browser tool to open http://localhost:${port}
+#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} --silent open
