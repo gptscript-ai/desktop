@@ -1,7 +1,7 @@
 tools: service, open, port
 
 Get the port for the running service and use the port with the open tool.
-If there is a file, pass the directory the file is in as gptscripts_path and pass the file with the directory and '.gpt' suffix removed.
+If there is a file, pass the directory the file is in as scripts_path and pass the file with the directory and '.gpt' suffix removed.
 
 ---
 name: service
@@ -20,6 +20,6 @@ description: Get the port for the running service
 name: open
 arg: port: The port the service is listening on
 arg: file: The file to open
-arg: gptscripts_path: the directory where the file is
+arg: scripts_path: the directory where the file is
 
 #!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} --silent open
