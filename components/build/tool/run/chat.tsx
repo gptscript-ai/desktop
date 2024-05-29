@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
 import { IoMdSend } from "react-icons/io";
 import { subtitle } from "@/components/primitives";
-import { io, Socket } from "socket.io-client";
 import { IoCloseSharp } from "react-icons/io5";
 import { BuildContext } from "@/app/build/page";
 import { FaBackward } from "react-icons/fa";
 import { GrExpand, } from "react-icons/gr";
 import { BsArrowsFullscreen } from "react-icons/bs";
 import { HiOutlineArrowsPointingIn } from "react-icons/hi2";
-import { Run, type Frame, type Property } from "@gptscript-ai/gptscript";
-import ReactMarkdown from "react-markdown";
+import { type Property, type CallFrame } from "@gptscript-ai/gptscript";
+import useChatSocket from "@/components/run/useChatSocket";
+import Messages from "@/components/run/messages";
 import {
     Card,
     CardHeader,
@@ -42,46 +42,12 @@ interface ChatBoxProps {
 }
 
 export default function Chat({ name, file, params }: ChatBoxProps) {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [connected, setConnected] = useState(false);
-    const [socket, setSocket] = useState<Socket | null>(null);
-    const { setChatPanel, setRun } = useContext(BuildContext);
+    const { setChatPanel, setCalls } = useContext(BuildContext);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [showModal, setShowModal] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
-
-    useEffect(() => {
-        const socket = io();
-
-        socket.on("connect", () => {
-            setConnected(true);
-            setRun(null);
-        });
-
-        socket.on("message", (data) => {
-            console.log("system message:", data);
-        });
-
-        socket.on("scriptMessage", (data) => {
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                { type: MessageType.Bot, message: data },
-            ]);
-        });
-
-        socket.on("state", (data: Run) => setRun(data));
-        socket.on("disconnect", () => {
-            setConnected(false);
-        });
-
-        setSocket(socket);
-
-        return () => {
-            setSocket(null);
-            socket.disconnect();
-        };
-    }, []);
+    const { socket, connected, messages, setMessages} = useChatSocket();
 
     useEffect(() => {
         const smallBody = document.getElementById("small-message");
@@ -93,6 +59,11 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
             largeBody.scrollTop = largeBody.scrollHeight;
         }
     }, [messages]);
+
+    useEffect(() => {
+        if (!connected) return;
+        socket!.on("progress", (data: {_: any, state: CallFrame[]}) => setCalls(data.state) );
+    }, [connected])
 
     const handleFormSubmit = () => {
         setShowForm(false);
@@ -115,33 +86,6 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
         socket.emit("userMessage", message.message);
     };
 
-    const Messages = () => <div>
-        {messages.map((message, index) =>
-            message.type === MessageType.User ? (
-                <div
-                    key={index}
-                    className="flex flex-col items-end mb-2"
-                >
-                    <div className="rounded-2xl bg-blue-500 text-white py-2 px-4 max-w-full">
-                        {messages[index].message}
-                    </div>
-                </div>
-            ) : (
-                <div
-                    key={index}
-                    className="flex flex-col items-start mb-2"
-                >
-                    <div className="rounded-2xl bg-gray-200 text-black dark:text-white dark:bg-zinc-700 py-2 px-4 max-w-full">
-                        <ReactMarkdown className="prose dark:prose-invert">
-                            {messages[index].message}
-                        </ReactMarkdown>
-                    </div>
-                </div>
-            )
-        )}
-    </div>
-
-
     const ChatBar = () => <>
         <Button
             startContent={<FaBackward />}
@@ -149,7 +93,7 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
             radius="full"
             className="mr-2 my-auto text-lg"
             onPress={() => {
-                setRun(null);
+                setCalls(null);
                 setMessages([]);
                 setShowForm(true);
             }}
@@ -248,7 +192,7 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                             )}
                         </form>
                     ) : (
-                        < Messages />
+                        <Messages noAvatar messages={messages}/>
                     )}
                 </CardBody>
 
@@ -309,7 +253,7 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                         id="large-message"
                         className="shadow px-6 pt-6 overflow-y-scroll"
                     >
-                        <Messages />
+                        <Messages messages={messages}/>
                     </ModalBody>
                     <ModalFooter>
                         <ChatBar />

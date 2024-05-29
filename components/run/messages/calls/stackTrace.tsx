@@ -1,24 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Tooltip } from '@nextui-org/react';
-import { RiArrowDownSLine, RiCloseLine} from 'react-icons/ri';
 import type { CallFrame } from '@gptscript-ai/gptscript';
+import { GoArrowDown, GoArrowUp } from 'react-icons/go';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 const StackTrace = ({calls}: {calls: CallFrame[]}) => {
     const logsContainerRef = useRef<HTMLDivElement>(null);
-    const [isStickingToBottom, setIsStickingToBottom] = useState(false);
-
-    useEffect(() => {
-        if (logsContainerRef.current) {
-            if (isStickingToBottom) {
-                logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
-            }
-        }
-    }, [calls, isStickingToBottom]);
-
-    const handleStickToBottom = () => {
-        setIsStickingToBottom(!isStickingToBottom);
-    };
+    const [allOpen, setAllOpen] = useState(true);
 
     const EmptyLogs = () => {
         return (
@@ -44,7 +32,7 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
                 <div className={parentId ? "pl-10" : ""}>
                     {logs.map((call, key) => (
                         <div key={key}>
-                            <details open={true} className="cursor-pointer">
+                            <details open={allOpen} className="cursor-pointer">
                                 <summary>
                                     {call.type !== "callFinish" ? 
                                         call.tool?.name ? `Running ${call.tool.name}` : `Loading ${call.toolCategory}` + "..." : 
@@ -53,26 +41,29 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
                                     {call?.type !== "callFinish" && <AiOutlineLoading3Quarters className="ml-2 animate-spin inline"/>}
                                 </summary>
                                 <div className='ml-10'>
-                                    <details className="cursor-pointer">
+                                    <details open={allOpen} className="cursor-pointer">
                                         <summary>Input</summary>
                                         <p className="ml-10">{JSON.stringify(call?.input)}</p>
                                     </details>
-                                    <details className="cursor-pointer">
-                                        <summary>Output</summary>
-                                        <p className="ml-10">{JSON.stringify(call.output)}</p>
-                                    </details>
-                                    <details className="cursor-pointer">
+                                    <details open={allOpen} className="cursor-pointer">
                                         <summary>Messages</summary>
-                                        {call.output && call.output.map((output, key) => (
-                                            <div className="ml-10" key={key}>
-                                                <p>{ output.content && JSON.stringify(output.content)}</p>
-                                            </div>
-                                        ))} 
+
+                                        <div className="">
+                                            <ul className="ml-10 list-disc">
+                                                {call.output && call.output.map((output, key) => output.content &&(
+                                                    <li key={key}>
+                                                        <p>{ output.content && output.content}</p>
+                                                    </li>
+                                                ))} 
+                                            </ul>
+                                        </div>
                                     </details>
-                                    <details open={true} className="cursor-pointer">
-                                        <summary>Calls</summary>
-                                        {renderLogsRecursive(call.id)}
-                                    </details>
+                                    { callMap.get(call.id) && (
+                                        <details open={allOpen}className="cursor-pointer">
+                                            <summary>Calls</summary>
+                                            {renderLogsRecursive(call.id)}
+                                        </details> 
+                                    )}
                                 </div>
                             </details>
                         </div>
@@ -87,17 +78,17 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
     return (
         <div className="h-full overflow-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white" ref={logsContainerRef}>
             <Tooltip 
-                content={isStickingToBottom ? 'Unstick from bottom' : 'Stick to bottom'} 
+                content={allOpen ? 'Collapse all' : 'Expand all'} 
                 closeDelay={0}
             >
                 <Button
-                    onPress={handleStickToBottom}
+                    onPress={()=> {setAllOpen(!allOpen)}}
                     className="absolute right-8"
                     isIconOnly
                     radius='full'
                     color="primary"
                 >
-                    { isStickingToBottom ? <RiCloseLine /> : <RiArrowDownSLine /> }
+                    { allOpen ? <GoArrowUp/> : <GoArrowDown /> }
                 </Button>
             </Tooltip>
             {calls ? <RenderLogs /> : <EmptyLogs />}

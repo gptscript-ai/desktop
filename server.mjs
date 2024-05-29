@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config({path: ['.env', '.env.local']});
 
 const SCRIPTS_PATH = process.env.SCRIPTS_PATH || process.env.GPTSCRIPT_WORKSPACE_DIR || "gptscripts"
+const ENABLE_CACHE = process.env.ENABLE_CACHE === "true";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
@@ -40,7 +41,7 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
-	const opts = {input: JSON.stringify(args || {}), disableCache: true};
+	const opts = {input: JSON.stringify(args || {}), disableCache: !ENABLE_CACHE};
 	if (tool) opts.subTool = tool;
 
 	if (runningScript) {

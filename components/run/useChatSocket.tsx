@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
+import { parse } from 'path';
 
 const fetchScript = async (file: string): Promise<Tool> => {
 	const response = await fetch(`/api/file/${file}`);
@@ -36,9 +37,18 @@ const useChatSocket = () => {
 			frame.output.length > 0 &&
 			(!frame.parentID || frame.tool?.chat) &&
 			!frame.output[frame.output.length - 1].subCalls
-		const content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
 		
-		if (!content || content.startsWith('<tool call>')) return;
+		let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
+		if (!content) return;
+		if ( content === "Waiting for model response..." &&
+			latestBotMessageIndex.current !== null &&
+			messagesRef.current[latestBotMessageIndex.current].message
+		) return;
+
+		if (content.startsWith('<tool call>')) {
+			const parsedToolCall = parseToolCall(content);
+			content = `Calling tool ${parsedToolCall.tool}...`;
+		}
 		
 		let message: Message = { type: MessageType.Bot, message: content, calls: state };
 		if (latestBotMessageIndex.current === null) {
@@ -56,6 +66,11 @@ const useChatSocket = () => {
 			});
 		}
 	}, []);
+
+	const parseToolCall = (toolCall: string): {tool: string, params: string} => {
+		const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
+		return { tool, params };
+	}
 
 	useEffect(() => {
 		const socket = io();

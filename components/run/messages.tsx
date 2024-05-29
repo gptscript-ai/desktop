@@ -15,7 +15,7 @@ export type Message = {
 	calls?: CallFrame[];
 };
 
-const Messages = ({ messages }: { messages: Message[] }) => (
+const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
 	<div>
 		{messages.map((message, index) =>
 			message.type === MessageType.User ? (
@@ -27,7 +27,7 @@ const Messages = ({ messages }: { messages: Message[] }) => (
 			) : (
 				<div key={index} className="flex flex-col items-start mb-10">
 					<div className="flex gap-2 w-full">
-						<Avatar isBordered icon={<GoSquirrel className="text-xl" />} />
+						{ !noAvatar && <Avatar isBordered icon={<GoSquirrel className="text-xl" />} /> }
 						<div className="rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600">
 							<ReactMarkdown className="prose dark:prose-invert p-4 !max-w-none">
 								{messages[index].message}
