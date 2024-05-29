@@ -1,0 +1,25 @@
+tools: service, open, port
+
+Get the port for the running service and use the port with the open tool.
+If there is a file, pass the directory the file is in as gptscripts_path and pass the file with the directory and '.gpt' suffix removed.
+
+---
+name: service
+
+#!sys.daemon /usr/bin/env npm run --silent dev
+
+---
+name: port
+tools: service
+description: Get the port for the running service
+
+#!http://service.daemon.gptscript.local/api/port
+
+---
+
+name: open
+arg: port: The port the service is listening on
+arg: file: The file to open
+arg: gptscripts_path: the directory where the file is
+
+#!/usr/bin/env npm run --silent open
