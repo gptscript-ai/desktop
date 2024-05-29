@@ -1,9 +1,8 @@
 // useChatSocket.ts
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { CallFrame, RunFrame, Tool, Block } from '@gptscript-ai/gptscript';
+import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
-import { data } from 'autoprefixer';
 
 const fetchScript = async (file: string): Promise<Tool> => {
 	const response = await fetch(`/api/file/${file}`);
@@ -14,13 +13,6 @@ const fetchScript = async (file: string): Promise<Tool> => {
 	}
 	return {} as Tool;
 };
-
-// export interface ChatSocketProps {
-// 	immediate?: boolean;
-// 	file?: string;
-// 	name?: string;
-// 	formData?: Record<string, string>;
-// }
 
 const useChatSocket = () => {
 	const [socket, setSocket] = useState<Socket | null>(null);
@@ -39,21 +31,16 @@ const useChatSocket = () => {
 	}, []);
 
 	// handles progress being recieved from the server (callProgress style frames).
-	const handleProgress = useCallback((data: CallFrame) => {
-		const isMainContent = data.output && 
-			data.output.length > 0 &&
-			(!data.parentID || data.tool?.chat) &&
-			!data.output[data.output.length - 1].subCalls
-		const content = isMainContent ? data.output[data.output.length -1].content || "" : ""
+	const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: CallFrame[]}) => {
+		const isMainContent = frame.output && 
+			frame.output.length > 0 &&
+			(!frame.parentID || frame.tool?.chat) &&
+			!frame.output[frame.output.length - 1].subCalls
+		const content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
+		
 		if (!content || content.startsWith('<tool call>')) return;
 		
-		let message: Message = { type: MessageType.Bot, message: content };
-		// if (content.startsWith("<tool call>")) {
-		// 	if (!message.toolCalls) message.toolCalls = {};
-		// 	message.toolCalls[data.id] = { type: MessageType.Bot, message: content};
-		// 	return;
-		// }
-
+		let message: Message = { type: MessageType.Bot, message: content, calls: state };
 		if (latestBotMessageIndex.current === null) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
@@ -77,10 +64,8 @@ const useChatSocket = () => {
 			setConnected(true);
 		});
 
+		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
 		socket.on("botMessage", (data) => { handleBotMessage(data) });
-		socket.on("botMessage", (data) => console.log(data));
-		socket.on("progress", (data: CallFrame) => handleProgress(data));
-		socket.on("progress", (data) => console.log(data));
 
 		socket.on("disconnect", () => {
 			setConnected(false);

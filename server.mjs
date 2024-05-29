@@ -52,11 +52,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 
 	runningScript = await gptscript.run(path.join(SCRIPTS_PATH, file), opts);
 	runningScript.on(RunEventType.Event, data => {
-		if (data.type === "runStart" || data.type == "runFinish"){
-			socket.emit('run', {calls:runningScript.calls});
-		} else {
-			socket.emit('progress', data);
-		}
+		socket.emit('progress', {frame: data, state: runningScript.calls});
 	});
 
 	try {
@@ -78,7 +74,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 			}
 			runningScript = runningScript.nextChat(message);
 			runningScript.on(RunEventType.Event, data => {
-				socket.emit('progress', data);
+				socket.emit('progress', {frame: data, state: runningScript.calls});
 			});
 			try {
 				socket.emit('botMessage', await runningScript.text());
