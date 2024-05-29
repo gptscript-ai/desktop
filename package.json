@@ -6,7 +6,8 @@
 		"dev": "node server.mjs",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"open": "open http://localhost:${PORT}/run?file=${FILE}"
 	},
 	"dependencies": {
 		"@nextui-org/button": "^2.0.31",
@@ -30,10 +31,9 @@
 		"autoprefixer": "10.4.19",
 		"clsx": "^2.0.0",
 		"dotenv": "^16.4.5",
-		"eslint": "8.48.0",
+		"eslint": "8.56.0",
 		"eslint-config-next": "14.2.1",
 		"framer-motion": "^11.1.1",
-		"gptscript": "gptscript-ai/gptscript",
 		"intl-messageformat": "^10.5.0",
 		"lodash": "^4.17.21",
 		"next": "14.2.1",
@@ -49,6 +49,5 @@
 		"tailwind-variants": "^0.1.20",
 		"tailwindcss": "3.4.3",
 		"typescript": "5.0.4"
-	},
-	"devDependencies": {}
+	}
 }
