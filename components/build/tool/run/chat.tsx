@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { IoMdSend } from "react-icons/io";
 import { subtitle } from "@/components/primitives";
 import { IoCloseSharp } from "react-icons/io5";
-import { BuildContext } from "@/app/build/page";
+import { GraphContext } from "@/contexts/graph";
 import { FaBackward } from "react-icons/fa";
 import { GrExpand, } from "react-icons/gr";
 import { BsArrowsFullscreen } from "react-icons/bs";
@@ -43,7 +43,7 @@ interface ChatProps {
 }
 
 export default function Chat({ name, file, params, chat }: ChatProps) {
-    const { setChatPanel, setCalls } = useContext(BuildContext);
+    const { setChatPanel, setCalls } = useContext(GraphContext);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [showModal, setShowModal] = useState(false);

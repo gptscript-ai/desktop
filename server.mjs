@@ -82,7 +82,6 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 				socket.emit('botMessage', await runningScript.text());
 			} catch (e) {
 				socket.emit('error', e);
-				console.log(JSON.stringify(e));
 			}
 		});
 	} catch (e) {

@@ -17,7 +17,7 @@ import {
 import Context from "./config/context";
 import { ToolContext } from "../tool";
 import { subtitle } from "@/components/primitives";
-import { BuildContext } from "@/app/build/page";
+import { GraphContext } from "@/contexts/graph";
 import { IoCloseSharp } from "react-icons/io5";
 
 const Custom = () => {
@@ -31,7 +31,7 @@ const Custom = () => {
         modelName, setModelName,
         maxTokens, setMaxTokens,
     } = useContext(ToolContext);
-    const {setConfigPanel} = useContext(BuildContext);
+    const {setConfigPanel} = useContext(GraphContext);
     return (
         <Card className="h-full">
             <CardHeader className="px-4 py-2">
