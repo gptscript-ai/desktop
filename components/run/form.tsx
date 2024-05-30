@@ -16,7 +16,7 @@ const ToolForm = ({
         <h1 className="text-2xl font-bold mb-2">You're about to run <span className="text-primary">{tool.name}</span></h1>
         <h2 className="text-zinc-600">
             Almost there! The script you're trying to run is requesting input from you first.
-            Fill them out and then get started by clicking "Start Chat".
+            Fill them out and then get started by clicking the button at the bottom of the page.
         </h2>
         <Divider className="my-6"/>
         {tool.arguments?.properties && Object.entries(tool.arguments.properties).map(([argName, arg]) => (

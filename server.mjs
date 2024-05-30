@@ -59,7 +59,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	try {
 		socket.emit('botMessage', await runningScript.text());
 		socket.on('disconnect', () => {
-			runningScript.close();
+			if (runningScript) runningScript.close();
 			runningScript = null;
 		});
 

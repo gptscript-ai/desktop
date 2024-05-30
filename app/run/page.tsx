@@ -108,15 +108,16 @@ const RunScript = () => {
 						<Button
 							className="mt-4 w-full"
 							type="submit"
-							color="primary"
+							color={tool.chat ? "primary" : "secondary"}
 							onPress={handleFormSubmit}
 							size="lg"
 						>
-							Start Chat
+							{ tool.chat ? "Start chat" : "Run script" }
 						</Button>
 					) : (
 						<ChatBar
 							backButton={hasParams}
+							noChat={!tool.chat}
 							onBack={() => {
 								setMessages([]);
 								setShowForm(true);
