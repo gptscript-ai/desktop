@@ -9,12 +9,14 @@ import {
 
 const ChatBar = ({
     onBack,
+    noChat,
     onMessageSent,
     backButton,
 }: {
     onBack: () => void;
-    backButton: boolean;
     onMessageSent: (message: string) => void;
+    backButton: boolean;
+    noChat?: boolean;
 }) => {
     const [inputValue, setInputValue] = useState('');
 
@@ -22,6 +24,19 @@ const ChatBar = ({
         onMessageSent(inputValue);
         setInputValue(''); // Clear the input field after sending the message
     };
+
+    if (noChat) {
+        if (backButton) return (
+            <Button
+                startContent={<FaBackward />}
+                className="mr-2 my-auto text-lg w-full"
+                onPress={onBack}
+            >
+                Change options
+            </Button>
+        );
+        return null;
+    }
 
     return (
         <div className="flex p-4 w-full">

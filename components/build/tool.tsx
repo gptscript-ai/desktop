@@ -6,7 +6,6 @@ import { Handle, Position } from "reactflow";
 import type { Tool, Property } from "@gptscript-ai/gptscript";
 import Config from "./tool/config";
 import { BuildContext } from "@/app/build/page";
-import Run from "./tool/run/run";
 import Chat from "./tool/run/chat";
 import External from "./tool/config/external";
 import ParamsTable from "./tool/config/paramTable";
@@ -157,10 +156,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const onRunClick = () => setChatPanel(
         <ToolContext.Provider value={toolContext}>
             <Card className="w-[35vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[45vh] overflow-y-scroll">
-                { isChat ? 
-                    <Chat name={name} file={file} params={params}/> :
-                    <Run name={name} file={file} params={params}/>
-                }
+                <Chat chat={isChat} name={name} file={file} params={params}/>
             </Card>
         </ToolContext.Provider>
     )

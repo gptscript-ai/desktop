@@ -3,7 +3,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
-import { parse } from 'path';
 
 const fetchScript = async (file: string): Promise<Tool> => {
 	const response = await fetch(`/api/file/${file}`);

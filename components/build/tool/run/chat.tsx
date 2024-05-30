@@ -35,13 +35,14 @@ type Message = {
     message: string;
 };
 
-interface ChatBoxProps {
+interface ChatProps {
     name: string;
     file: string;
+    chat: boolean;
     params: Record<string, Property> | undefined;
 }
 
-export default function Chat({ name, file, params }: ChatBoxProps) {
+export default function Chat({ name, file, params, chat }: ChatProps) {
     const { setChatPanel, setCalls } = useContext(BuildContext);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -87,51 +88,56 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
     };
 
     const ChatBar = () => <>
-        <Button
-            startContent={<FaBackward />}
-            isIconOnly
-            radius="full"
-            className="mr-2 my-auto text-lg"
-            onPress={() => {
-                setCalls(null);
-                setMessages([]);
-                setShowForm(true);
-            }}
-        />
-        <input
-            id="chatInput"
-            autoComplete="off"
-            className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
-            placeholder="Ask the chat bot something..."
-            onKeyDown={(
-                event: React.KeyboardEvent<HTMLInputElement>
-            ) => {
-                if (event.key === "Enter") {
-                    handleMessageSent({
-                        type: MessageType.User,
-                        message: event.currentTarget.value,
-                    });
-                    event.currentTarget.value = "";
-                }
-            }}
-        />
-        <Button
-            startContent={<IoMdSend />}
-            isIconOnly
-            radius="full"
-            className="ml-2 my-auto text-lg"
-            color="primary"
-            onPress={() => {
-                const input = document.querySelector(
-                    "#chatInput"
-                ) as HTMLInputElement;
-                handleMessageSent({
-                    type: MessageType.User,
-                    message: input.value,
-                });
-                input.value = "";
-            }}
-        />
+        {chat ? (
+            <>
+                <input
+                    id="chatInput"
+                    autoComplete="off"
+                    className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
+                    placeholder="Ask the chat bot something..."
+                    onKeyDown={(
+                        event: React.KeyboardEvent<HTMLInputElement>
+                    ) => {
+                        if (event.key === "Enter") {
+                            handleMessageSent({
+                                type: MessageType.User,
+                                message: event.currentTarget.value,
+                            });
+                            event.currentTarget.value = "";
+                        }
+                    }}
+                />
+                <Button
+                    startContent={<IoMdSend />}
+                    isIconOnly
+                    radius="full"
+                    className="ml-2 my-auto text-lg"
+                    color="primary"
+                    onPress={() => {
+                        const input = document.querySelector(
+                            "#chatInput"
+                        ) as HTMLInputElement;
+                        handleMessageSent({
+                            type: MessageType.User,
+                            message: input.value,
+                        });
+                        input.value = "";
+                    }}
+                />
+            </>
+        ): (
+            <Button
+                startContent={<FaBackward />}
+                isIconOnly
+                radius="full"
+                className="mr-2 my-auto text-lg w-full"
+                onPress={() => {
+                    setCalls(null);
+                    setMessages([]);
+                    setShowForm(true);
+                }}
+            />
+        )}
     </>
 
     return (
@@ -141,8 +147,9 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                     <div className="w-full flex justify-between">
                         <h1 className={subtitle()}>
                             {showForm
-                                ? "You're about to chat with "
-                                : "You're chatting with "}
+                                ? chat ? "You're about to chat with " : "You're about to run "
+                                : chat ? "You're chatting with " : "You're running "
+                            }
                             <span className="capitalize font-bold text-primary">
                                 {name}
                             </span>
@@ -201,10 +208,10 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                         <Button
                             className="w-full"
                             type="submit"
-                            color="primary"
+                            color={chat ? "primary" : "secondary"}
                             onPress={handleFormSubmit}
                         >
-                            Start Chat
+                            {chat ? "Start chat" : "Run tool"}
                         </Button>
                     ) : (
                         <ChatBar />
@@ -223,8 +230,9 @@ export default function Chat({ name, file, params }: ChatBoxProps) {
                     <ModalHeader>
                         <h1 className={subtitle()}>
                             {showForm
-                                ? "You're about to chat with "
-                                : "You're chatting with "}
+                                ? chat ? "You're about to chat with " : "You're about to run "
+                                : chat ? "You're chatting with " : "You're running "
+                            }
                             <span className="capitalize font-bold text-primary">
                                 {name}
                             </span>
