@@ -3,13 +3,13 @@ import { Tabs, Tab, Card, CardBody, Button } from "@nextui-org/react";
 import { IoTerminalOutline, IoFolderOpenOutline } from "react-icons/io5";
 import { GoArrowUpRight, GoArrowDownLeft, GoDash } from "react-icons/go";
 import { GoTerminal } from "react-icons/go";
-import { BuildContext } from "@/app/build/page";
+import { GraphContext } from "@/contexts/graph";
 import StackTrace from "@/components/run/messages/calls/stackTrace";
 
 export default function Toolbar() {
     const [collapsed, setCollapsed] = useState(true);
     const [large, setLarge] = useState(false);
-    const { calls } = useContext(BuildContext);
+    const { calls } = useContext(GraphContext);
 
     const handleToggleCollapse = () => {
         setCollapsed(!collapsed);

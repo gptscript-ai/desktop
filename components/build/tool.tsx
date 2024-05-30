@@ -5,7 +5,7 @@ import { IoIosChatboxes } from "react-icons/io";
 import { Handle, Position } from "reactflow";
 import type { Tool, Property } from "@gptscript-ai/gptscript";
 import Config from "./tool/config";
-import { BuildContext } from "@/app/build/page";
+import { GraphContext } from "@/contexts/graph";
 import Chat from "./tool/run/chat";
 import External from "./tool/config/external";
 import ParamsTable from "./tool/config/paramTable";
@@ -49,6 +49,7 @@ type Context = {
 export const ToolContext = createContext({} as Context);
 
 export default memo(({data, isConnectable}: CustomToolProps) => {
+    console.log('rendering tool')
     const [description, setDescription] = useState(data.description);
     const [temperature, setTemperature] = useState(data.temperature);
     const [jsonResponse, setJsonResponse] = useState(data.jsonResponse)
@@ -61,7 +62,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const [params, setParams ] = useState<Record<string, Property> | undefined>(data.arguments?.properties);
     const [tools, setTools] = useState(data.tools || []);
     const [context, setContext] = useState(data.context || []);
-    const { setChatPanel, setConfigPanel, file, getId } = useContext(BuildContext);
+    const { setChatPanel, setConfigPanel, file, getId } = useContext(GraphContext);
 
     const updateName = useCallback(debounce(async (previous: string, incoming: string) => {
         data.name = incoming;
@@ -70,7 +71,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
-    }, 1000),[data]);
+    }, 1000),[file, data]);
 
     useEffect(() => {
         const hasChanged = (
@@ -88,7 +89,6 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
         );
 
         if (hasChanged) {
-            console.log('updating tool data')
             data.instructions = prompt;
             data.chat = isChat;
             data.description = description;
