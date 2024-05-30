@@ -9,6 +9,7 @@ dotenv.config({path: ['.env', '.env.local']});
 
 const SCRIPTS_PATH = process.env.SCRIPTS_PATH || process.env.GPTSCRIPT_WORKSPACE_DIR || "gptscripts"
 const ENABLE_CACHE = process.env.ENABLE_CACHE === "true";
+const WORKSPACE_DIR = process.env.GPTSCRIPT_WORKSPACE_DIR || "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
@@ -41,7 +42,7 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
-	const opts = {input: JSON.stringify(args || {}), disableCache: !ENABLE_CACHE};
+	const opts = {input: JSON.stringify(args || {}), disableCache: !ENABLE_CACHE, workspace: WORKSPACE_DIR};
 	if (tool) opts.subTool = tool;
 
 	if (runningScript) {
