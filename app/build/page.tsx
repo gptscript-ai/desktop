@@ -6,7 +6,7 @@ import CustomTool from '@/components/build/tool';
 import ToolBar from '@/components/build/toolbar';
 import { useSearchParams } from 'next/navigation';
 import 'reactflow/dist/style.css';
-import type { Tool, CallFrame, Call } from '@gptscript-ai/gptscript';
+import type { Tool, CallFrame } from '@gptscript-ai/gptscript';
 import { debounce } from 'lodash';
 import ReactFlow, {
     useNodesState,
