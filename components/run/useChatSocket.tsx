@@ -1,18 +1,8 @@
 // useChatSocket.ts
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { CallFrame, Tool, Block } from '@gptscript-ai/gptscript';
+import type { CallFrame } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
-
-const fetchScript = async (file: string): Promise<Tool> => {
-	const response = await fetch(`/api/file/${file}`);
-	const script = await response.json() as Block[];
-	for (let tool of script) {
-		if (tool.type === 'text') continue;
-		return tool;
-	}
-	return {} as Tool;
-};
 
 const useChatSocket = () => {
 	const [socket, setSocket] = useState<Socket | null>(null);
@@ -28,6 +18,20 @@ const useChatSocket = () => {
 		if (latestBotMessageIndex.current !== null) {
 			latestBotMessageIndex.current = null;
 		}
+	}, []);
+
+	const handleError = useCallback((error: string) => {
+		setMessages((prevMessages) => {
+			const updatedMessages = [...prevMessages];
+			if (latestBotMessageIndex.current !== null) {
+				// Append the error to the latest message
+				updatedMessages[latestBotMessageIndex.current].error = `${error}`
+			} else {
+				// If there are no previous messages, create a new error message
+				updatedMessages.push({ type: MessageType.Bot, message: "An error occured before the first message.", error: error });
+			}
+			return updatedMessages;
+		});
 	}, []);
 
 	// handles progress being recieved from the server (callProgress style frames).
@@ -79,6 +83,7 @@ const useChatSocket = () => {
 		});
 
 		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
+		socket.on("error", (data: string) => handleError(data));
 		socket.on("botMessage", (data) => { handleBotMessage(data) });
 
 		socket.on("disconnect", () => {

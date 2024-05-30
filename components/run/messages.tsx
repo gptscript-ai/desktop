@@ -1,8 +1,9 @@
 import { GoSquirrel } from "react-icons/go";
 import ReactMarkdown from "react-markdown";
-import { Avatar } from "@nextui-org/react";
+import { Avatar, Button } from "@nextui-org/react";
 import type { CallFrame } from "@gptscript-ai/gptscript";
 import Calls from "./messages/calls"
+import { GoIssueReopened } from "react-icons/go";
 
 export enum MessageType {
 	User,
@@ -12,6 +13,7 @@ export enum MessageType {
 export type Message = {
 	type: MessageType;
 	message: string;
+	error?: string;
 	calls?: CallFrame[];
 };
 
@@ -27,14 +29,29 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 			) : (
 				<div key={index} className="flex flex-col items-start mb-10">
 					<div className="flex gap-2 w-full">
-						{ !noAvatar && <Avatar isBordered icon={<GoSquirrel className="text-xl" />} /> }
-						<div className="rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600">
+						{ !noAvatar && <Avatar isBordered color={message.error ? "danger": "default"} icon={<GoSquirrel className="text-xl" />} /> }
+						<div 
+							className={`rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
+						>
 							<ReactMarkdown className="prose dark:prose-invert p-4 !max-w-none">
 								{messages[index].message}
 							</ReactMarkdown>
+							{message.error && (
+								<>
+									<p className="text-danger text-base pl-4 pb-6">{message.error}</p>
+									<Button 
+										startContent={<GoIssueReopened className="text-lg"/>}
+										color="danger"
+										className="ml-4 mb-6"
+										onPress={() => window.location.reload()}
+									>
+										Restart Script
+									</Button>
+								</>
+							)}
 						</div>
 					</div>
-					{ messages[index].calls && 
+					{ messages[index].calls && message.error &&
 						<div className="flex w-full justify-end mt-2">
 							<Calls calls={messages[index].calls!}/>
 						</div> 
