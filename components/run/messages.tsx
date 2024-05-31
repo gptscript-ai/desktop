@@ -23,9 +23,9 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 		{messages.map((message, index) =>
 			message.type === MessageType.User ? (
 				<div key={index} className="flex flex-col items-end mb-10">
-					<div className="rounded-2xl bg-blue-500 text-white py-2 px-4 max-w-full">
+					<p className="whitespace-pre-wrap rounded-2xl bg-blue-500 text-white py-2 px-4 max-w-full">
 						{messages[index].message}
-					</div>
+					</p>
 				</div>
 			) : (
 				<div key={index} className="flex flex-col items-start mb-10">
