@@ -7,7 +7,7 @@ If there is no file, use the open tool.
 ---
 name: service
 
-#!sys.daemon /usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} dev
+#!sys.daemon /usr/bin/env RUN_ONLY=true npm run --prefix ${GPTSCRIPT_TOOL_DIR} dev
 
 ---
 name: port
@@ -22,7 +22,7 @@ name: open-file
 arg: port: The port the service is listening on
 arg: file: The file to open
 
-#!/usr/bin/env RUN_ONLY=true npm run --prefix ${GPTSCRIPT_TOOL_DIR} open-file
+#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} open-file
 
 ---
 
