@@ -1,5 +1,6 @@
 import { GoSquirrel } from "react-icons/go";
-import ReactMarkdown from "react-markdown";
+import Markdown from "react-markdown";
+import remarkGfm from 'remark-gfm'
 import { Avatar, Button } from "@nextui-org/react";
 import type { CallFrame } from "@gptscript-ai/gptscript";
 import Calls from "./messages/calls"
@@ -33,9 +34,9 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						<div 
 							className={`rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
-							<ReactMarkdown className="prose dark:prose-invert p-4 !max-w-none">
+							<Markdown className="prose dark:prose-invert p-4 !max-w-none" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
-							</ReactMarkdown>
+							</Markdown>
 							{message.error && (
 								<>
 									<p className="text-danger text-base pl-4 pb-6">{message.error}</p>
