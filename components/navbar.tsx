@@ -22,7 +22,7 @@ import { Logo } from "@/components/icons";
 
 
 export const Navbar = () => {
-	const usedConfig = process.env.RUN_ONLY === "true" ? runOnlySiteConfig : siteConfig;
+	const usedConfig = process.env.BUILDER_UI === "true" ? siteConfig : runOnlySiteConfig;
 	return (
 		<NextUINavbar maxWidth="xl" position="sticky">
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
