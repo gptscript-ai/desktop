@@ -34,7 +34,7 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						<div 
 							className={`rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
-							<Markdown className="prose dark:prose-invert p-4 !max-w-none" remarkPlugins={[remarkGfm]}>
+							<Markdown className="prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
 							</Markdown>
 							{message.error && (
