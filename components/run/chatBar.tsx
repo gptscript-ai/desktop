@@ -5,6 +5,7 @@ import { IoMdSend } from "react-icons/io";
 import { FaBackward } from "react-icons/fa";
 import {
 	Button,
+    Textarea,
 } from "@nextui-org/react";
 
 const ChatBar = ({
@@ -47,15 +48,19 @@ const ChatBar = ({
                 className="mr-2 my-auto text-lg"
                 onPress={onBack}
             />}
-            <input
+            <Textarea
                 id="chatInput"
                 autoComplete="off"
-                className="border border-gray-300 dark:border-zinc-700 rounded-full shadow px-3 py-2 w-full focus:outline-primary"
                 placeholder="Ask the chat bot something..."
                 value={inputValue}
+                radius="full"
+                minRows={1}
+                variant="bordered"
+                color="primary"
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (event.key === "Enter") {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
                         handleSend();
                     }
                 }}
