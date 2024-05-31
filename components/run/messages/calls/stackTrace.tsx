@@ -16,6 +16,24 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
         )
     }
 
+    const Summary = ({call}: {call: CallFrame}) => {
+        if (call.tool?.chat) {
+            return <summary>
+                {call.type !== "callFinish" ? `Chat open with ${call.tool.name}` : `Chatted with ${call.tool.name}`}
+            </summary>
+        }
+
+        return (
+            <summary>
+                {call.type !== "callFinish" ?
+                    call.tool?.name ? `Running ${call.tool.name}` : `Loading ${call.toolCategory}` + "..." : 
+                    call.tool?.name ? `Ran ${call.tool.name}` : `Loaded ${call.toolCategory}`
+                } 
+                {call?.type !== "callFinish" && <AiOutlineLoading3Quarters className="ml-2 animate-spin inline"/>}
+            </summary>
+        )
+    };
+
     const RenderLogs = () => {
         const callMap = new Map<string, CallFrame[]>();
 
@@ -33,13 +51,7 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
                     {logs.map((call, key) => (
                         <div key={key}>
                             <details open={allOpen} className="cursor-pointer">
-                                <summary>
-                                    {call.type !== "callFinish" ? 
-                                        call.tool?.name ? `Running ${call.tool.name}` : `Loading ${call.toolCategory}` + "..." : 
-                                        call.tool?.name ? `Ran ${call.tool.name}` : `Loaded ${call.toolCategory}`
-                                    } 
-                                    {call?.type !== "callFinish" && <AiOutlineLoading3Quarters className="ml-2 animate-spin inline"/>}
-                                </summary>
+                                <Summary call={call} />
                                 <div className='ml-10'>
                                     <details open={allOpen} className="cursor-pointer">
                                         <summary>Input</summary>
