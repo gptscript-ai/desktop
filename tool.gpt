@@ -22,7 +22,7 @@ name: open-file
 arg: port: The port the service is listening on
 arg: file: The file to open
 
-#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} open-file
+#!/usr/bin/env RUN_ONLY=true npm run --prefix ${GPTSCRIPT_TOOL_DIR} open-file
 
 ---
 
