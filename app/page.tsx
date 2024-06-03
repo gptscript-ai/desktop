@@ -2,6 +2,7 @@ import { title, subtitle } from "@/components/primitives";
 import Scripts from "@/components/scripts";
 
 export default function Home() {
+	console.log(process.env.BUILDER_UI)
 	return (
 		<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
 			<div className="inline-block max-w-lg text-center justify-center">
@@ -14,7 +15,7 @@ export default function Home() {
 			</div>
 
 			<div className="w-full">
-				<Scripts/>
+				<Scripts buildOptions={process.env.BUILDER_UI === "true"}/>
 			</div>
 		</section>
 	);
