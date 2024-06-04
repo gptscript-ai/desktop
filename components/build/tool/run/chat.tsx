@@ -63,7 +63,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
 
     useEffect(() => {
         if (!connected) return;
-        socket!.on("progress", (data: {_: any, state: CallFrame[]}) => setCalls(data.state) );
+        socket!.on("progress", (data: {_: any, state: Record<string, CallFrame>}) => setCalls(data.state) );
     }, [connected])
 
     const handleFormSubmit = () => {

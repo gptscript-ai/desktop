@@ -14,7 +14,7 @@ import {
     Tooltip,
 } from "@nextui-org/react";
 
-const Calls = ({calls}: {calls: CallFrame[]}) => {
+const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
     const [showModal, setShowModal] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
 

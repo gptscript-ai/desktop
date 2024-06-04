@@ -42,7 +42,14 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
-	const opts = {input: JSON.stringify(args || {}), disableCache: !ENABLE_CACHE, workspace: WORKSPACE_DIR};
+	const opts = {
+		input: JSON.stringify(args || {}),
+		disableCache: !ENABLE_CACHE,
+		workspace: WORKSPACE_DIR, 
+		prompt: true,
+		confirm: true,
+	};
+
 	if (tool) opts.subTool = tool;
 
 	if (runningScript) {
@@ -53,9 +60,15 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	}
 
 	runningScript = await gptscript.run(path.join(SCRIPTS_PATH, file), opts);
-	runningScript.on(RunEventType.Event, data => {
-		socket.emit('progress', {frame: data, state: runningScript.calls});
-	});
+	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}) );
+
+	// Handle prompt events
+	runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", data));
+	socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
+
+	// Handle confirm events
+	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
+	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
 	try {
 		socket.emit('botMessage', await runningScript.text());
@@ -75,9 +88,16 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 				}
 			}
 			runningScript = runningScript.nextChat(message);
-			runningScript.on(RunEventType.Event, data => {
-				socket.emit('progress', {frame: data, state: runningScript.calls});
-			});
+			runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
+
+			// Handle prompt events
+			runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", data));
+			socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
+
+			// Handle confirm events
+			runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
+			socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
+
 			try {
 				socket.emit('botMessage', await runningScript.text());
 			} catch (e) {

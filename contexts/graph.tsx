@@ -18,8 +18,8 @@ type context = {
     setChatPanel: React.Dispatch<React.SetStateAction<React.JSX.Element>>;
     file: string;
     setFile: React.Dispatch<React.SetStateAction<string>>;
-    calls: CallFrame[] | null;
-    setCalls: React.Dispatch<React.SetStateAction<CallFrame[] | null>>;
+    calls: Record<string, CallFrame> | null;
+    setCalls: React.Dispatch<React.SetStateAction<Record<string, CallFrame> | null>>;
     getId: () => string;
     updateScript: DebouncedFunc<(nodes: RFNode[]) => Promise<void>>;
     fetchGraph: (file: string | null) => Promise<{nodes: RFNode[], edges: RFEdge[]}>;
@@ -33,7 +33,7 @@ export const GraphContextProvider = ({ children }: {children?: React.ReactNode})
     const [configPanel, setConfigPanel] = useState<React.JSX.Element>(<></>);
     const [chatPanel, setChatPanel] = useState<React.JSX.Element>(<></>);
     const [file, setFile] = useState<string>('');
-    const [calls, setCalls] = useState<CallFrame[] | null>(null);
+    const [calls, setCalls] = useState<Record<string, CallFrame>| null>(null);
     
     const getId = (): string => {
         let id = 1;
