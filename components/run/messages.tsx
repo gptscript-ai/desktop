@@ -32,11 +32,11 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 			) : (
 				<div key={index} className="flex flex-col items-start mb-10">
 					<div className="flex gap-2 w-full">
-						{ !noAvatar && <Avatar isBordered color={message.error ? "danger": "default"} icon={<GoSquirrel className="text-xl" />} /> }
+						{ !noAvatar && <Avatar isBordered className="w-[40px]" color={message.error ? "danger": "default"} icon={<GoSquirrel className="text-xl" />} /> }
 						<div 
-							className={`rounded-2xl text-black dark:text-white pt-1 px-4 w-full border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
+							className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
-							<Markdown className="prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
+							<Markdown className="!text-wrap overflow-x-scroll prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
 							</Markdown>
 							{ messages[index].component }
@@ -56,7 +56,7 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						</div>
 					</div>
 					{ messages[index].calls &&
-						<div className="flex w-full justify-end mt-2">
+						<div className="flex w-full justify-end mt-2 pr-2">
 							<Calls calls={messages[index].calls!}/>
 						</div> 
 					}
