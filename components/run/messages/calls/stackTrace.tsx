@@ -4,7 +4,9 @@ import type { CallFrame } from '@gptscript-ai/gptscript';
 import { GoArrowDown, GoArrowUp } from 'react-icons/go';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
-const StackTrace = ({calls}: {calls: CallFrame[]}) => {
+const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
+    if (!calls) return null;
+
     const logsContainerRef = useRef<HTMLDivElement>(null);
     const [allOpen, setAllOpen] = useState(true);
 
@@ -35,20 +37,23 @@ const StackTrace = ({calls}: {calls: CallFrame[]}) => {
     };
 
     const RenderLogs = () => {
-        const callMap = new Map<string, CallFrame[]>();
+        const callMap = new Map<string, Map<string, CallFrame>>();
 
-        calls.forEach((call) => {
-            const parentId = call.parentID || "";
-            const logs = callMap.get(parentId) || [];
-            logs.push(call);
-            callMap.set(parentId, logs);
+        Object.keys(calls).forEach((key) => {
+            const parentId = calls[key].parentID || "";
+            const callFrame = callMap.get(parentId);
+            if (!callFrame) {
+                callMap.set(parentId, new Map<string, CallFrame>());
+            }
+            callMap.get(parentId)?.set(key, calls[key]);
         });
 
         const renderLogsRecursive = (parentId: string) => {
-            const logs = callMap.get(parentId) || [];
+            const logs = callMap.get(parentId);
+            if (!logs) return null;
             return (
                 <div className={parentId ? "pl-10" : ""}>
-                    {logs.map((call, key) => (
+                    {Array.from(logs.entries()).map(([key, call]) => (
                         <div key={key}>
                             <details open={allOpen} className="cursor-pointer">
                                 <Summary call={call} />

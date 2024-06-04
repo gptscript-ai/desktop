@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { GoSquirrel } from "react-icons/go";
 import Markdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
@@ -12,10 +13,11 @@ export enum MessageType {
 }
 
 export type Message = {
-	type: MessageType;
-	message: string;
-	error?: string;
-	calls?: CallFrame[];
+    type: MessageType;
+    message: string;
+    error?: string;
+    calls?: Record<string, CallFrame>;
+    component?: ReactNode;
 };
 
 const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
@@ -37,6 +39,7 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 							<Markdown className="prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
 							</Markdown>
+							{ messages[index].component }
 							{message.error && (
 								<>
 									<p className="text-danger text-base pl-4 pb-6">{message.error}</p>

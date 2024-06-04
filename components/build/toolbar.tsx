@@ -68,7 +68,7 @@ export default function Toolbar() {
                             </div>
                         }
                     >
-                        <StackTrace calls={calls || []}/>
+                        <StackTrace calls={calls}/>
                     </Tab>
                     <Tab
                         key="workspace"
