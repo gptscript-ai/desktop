@@ -6,7 +6,7 @@ import { Handle, Position } from "reactflow";
 import type { Tool, Property } from "@gptscript-ai/gptscript";
 import Config from "./tool/config";
 import { GraphContext } from "@/contexts/graph";
-import Chat from "./tool/run/chat";
+import Chat from "./tool/chat";
 import External from "./tool/config/external";
 import ParamsTable from "./tool/config/paramTable";
 import ModalTextArea from "./modalTextArea";

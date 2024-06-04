@@ -69,7 +69,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
     const handleFormSubmit = () => {
         setShowForm(false);
         setMessages([]);
-        socket?.emit("run", file, name, formValues);
+        socket?.emit("run", file+".gpt", name, formValues);
     };
 
     const handleInputChange = (

@@ -18,9 +18,8 @@ const useChatSocket = () => {
 	const latestBotMessageIndex = useRef<number | null>(null);
 	const trustedRef = useRef<Record<string, boolean>>({});
 
-	messagesRef.current = messages;
-
-	// update the socket ref
+	// update the refs
+	useEffect(() => { messagesRef.current = messages }, [messages]);
 	useEffect(() => { socketRef.current = socket }, [socket]);
 	
 	// handles the situation where the full bot message when received (i.e runningScript.text() output).
@@ -105,7 +104,10 @@ const useChatSocket = () => {
 	}, []);
 
 	const handleConfirmRequest = useCallback((frame: CallFrame) => {
-		if (trustedRef.current[frame.toolName]) {
+		console.log(frame)
+		if (!frame.tool) return;
+
+		if (trustedRef.current[frame.tool.name]) {
 			console.log(trustedRef.current)
 			socketRef.current?.emit("confirmResponse", { id: frame.id, accept: true});
 			return;
@@ -131,8 +133,8 @@ const useChatSocket = () => {
 						frame.displayText.replace(/`/g, "")
 					}
 				</Code>);
-				const tool = frame.tool?.instructions.slice(2).replace('sys.', '')
-				confirmMessage = `Proceed with running the following (or allow all ${tool} calls)?`
+				const tool = frame.tool?.name.replace('sys.', '')
+				confirmMessage = `Proceed with running the following (or allow all **${tool}** calls)?`
 			}
 
 			// Build up the form to allow the user to decide
@@ -140,8 +142,8 @@ const useChatSocket = () => {
 				{command}
 				<ConfirmForm
 					id={frame.id}
-					tool={frame.toolName}
-					addTrusted={() => { trustedRef.current[frame.toolName] = true}}
+					tool={frame.tool!.name}
+					addTrusted={() => { trustedRef.current[frame.tool!.name] = true}}
 					onSubmit={(response: AuthResponse) => { 
 						socketRef.current?.emit("confirmResponse", response) 
 					}}
@@ -171,27 +173,27 @@ const useChatSocket = () => {
 	useEffect(() => {
 		const socket = io();
 
-		socket.on("connect", () => {
-			setConnected(true);
-		});
-
+		socket.on("connect", () => setConnected(true));
+		socket.on("disconnect", () => setConnected(false));
 		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
 		socket.on("error", (data: string) => handleError(data));
 		socket.on("botMessage", (data) => { handleBotMessage(data) });
 		socket.on("promptRequest", (data: PromptFrame) => { handlePromptRequest(data) });
 		socket.on("confirmRequest", (data: CallFrame) => { handleConfirmRequest(data) });
 
-		socket.on("disconnect", () => {
-			setConnected(false);
-		});
-
 		setSocket(socket);
 
 		return () => {
-			setSocket(null);
+			socket.off("connect");
+			socket.off("disconnect")
+			socket.off("progress");
+			socket.off("error");
+			socket.off("botMessage");
+			socket.off("promptRequest");
+			socket.off("confirmRequest");
 			socket.disconnect();
 		};
-	}, [handleBotMessage, handleProgress]);
+	}, []);
 
 	return { socket, setSocket, connected, setConnected, messages, setMessages };
 };

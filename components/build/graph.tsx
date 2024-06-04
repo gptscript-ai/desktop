@@ -17,7 +17,6 @@ const nodeTypes = {
 };
 
 export default memo(() => {
-    console.log('rendering graph')
     const file = useSearchParams().get('file');
     const connectingNode = useRef({id:'', handleId:''});
     const { screenToFlowPosition } = useReactFlow();
