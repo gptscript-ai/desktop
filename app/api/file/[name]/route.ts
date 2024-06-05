@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic' // defaults to auto
 import { NextRequest } from 'next/server'
-import { Client, type Block, Text } from '@gptscript-ai/gptscript'
+import { GPTScript, type Block, Text } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
 import path from 'path';
 import { SCRIPTS_PATH } from '@/config/env';
@@ -10,7 +10,7 @@ import type {
     XYPosition,
 } from 'reactflow';
 
-const gptscript = new Client();
+const gptscript = new GPTScript();
 
 
 export async function DELETE(
