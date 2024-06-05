@@ -12,11 +12,12 @@ const PromptForm = ({ frame, onSubmit }: { frame: PromptFrame, onSubmit: (data: 
         <form onSubmit={handleSubmit(onSubmitForm)} className="mx-4">
             {frame.fields.map((field, index) => (
                 <Input 
-                key={index}
-                {...register(field)}
-                label={field}
-                className="mb-6"
-                variant="underlined"
+                    key={index}
+                    {...register(field)}
+                    label={field}
+                    className="mb-6"
+                    variant="underlined"
+                    type={frame.sensitive ? "password" : "text"}
                 />
             ))}
             <Button

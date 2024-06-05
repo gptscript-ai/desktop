@@ -49,7 +49,6 @@ type Context = {
 export const ToolContext = createContext({} as Context);
 
 export default memo(({data, isConnectable}: CustomToolProps) => {
-    console.log('rendering tool')
     const [description, setDescription] = useState(data.description);
     const [temperature, setTemperature] = useState(data.temperature);
     const [jsonResponse, setJsonResponse] = useState(data.jsonResponse)
