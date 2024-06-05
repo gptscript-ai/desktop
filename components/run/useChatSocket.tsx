@@ -17,6 +17,7 @@ const useChatSocket = () => {
 	const messagesRef = useRef(messages);
 	const latestBotMessageIndex = useRef<number | null>(null);
 	const trustedRef = useRef<Record<string, boolean>>({});
+	const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
 	// update the refs
 	useEffect(() => { messagesRef.current = messages }, [messages]);
@@ -173,17 +174,13 @@ const useChatSocket = () => {
 		
 		// Check if the tool has already been allowed
 		if (trustedRef.current[frame.tool.name]) return true;
-
-		const trustedRepoPrefixes = [
-			"github.com/gptscript-ai/context",
-		];
 		
 		// If this tool have a source repo, check if it is trusted. If it isn't already,
 		// return false since we need to ask the user for permission.
 		if (frame.tool.source.repo) {
-			const repo = (frame.tool?.source.repo as any).Root;
+			const repo = frame.tool?.source.repo.Root;
 			const trimmedRepo = repo.replace("https://", "").replace("http://", "");
-			for (const prefix of trustedRepoPrefixes) {
+			for (const prefix of trustedRepoPrefixesRef.current) {
 				if (trimmedRepo.startsWith(prefix)) {
 					return true;
 				}
