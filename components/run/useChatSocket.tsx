@@ -104,11 +104,9 @@ const useChatSocket = () => {
 	}, []);
 
 	const handleConfirmRequest = useCallback((frame: CallFrame) => {
-		console.log(frame)
 		if (!frame.tool) return;
 
-		if (trustedRef.current[frame.tool.name]) {
-			console.log(trustedRef.current)
+		if (alreadyAllowed(frame)) {
 			socketRef.current?.emit("confirmResponse", { id: frame.id, accept: true});
 			return;
 		}
@@ -168,6 +166,36 @@ const useChatSocket = () => {
 	const parseToolCall = (toolCall: string): {tool: string, params: string} => {
 		const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
 		return { tool, params };
+	}
+
+	const alreadyAllowed = (frame: CallFrame): boolean => {
+		if (!frame.tool) return false;
+		
+		// Check if the tool has already been allowed
+		if (trustedRef.current[frame.tool.name]) return true;
+
+		const trustedRepoPrefixes = [
+			"github.com/gptscript-ai/context",
+		];
+		
+		// If this tool have a source repo, check if it is trusted. If it isn't already,
+		// return false since we need to ask the user for permission.
+		if (frame.tool.source.repo) {
+			const repo = (frame.tool?.source.repo as any).Root;
+			const trimmedRepo = repo.replace("https://", "").replace("http://", "");
+			for (const prefix of trustedRepoPrefixes) {
+				if (trimmedRepo.startsWith(prefix)) {
+					return true;
+				}
+			}
+			return false
+		}
+
+		// If the tool is a system tool and wasn't already trusted, return false.
+		if (frame.tool.name.startsWith("sys.")) return false;
+
+		// Automatically allow all other tools
+		return true;
 	}
 
 	useEffect(() => {
