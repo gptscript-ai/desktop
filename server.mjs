@@ -87,6 +87,12 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 					return;
 				}
 			}
+
+			// Remove any previous promptResponse or confirmResponse listeners
+			socket.removeAllListeners("promptResponse");
+			socket.removeAllListeners("confirmResponse");
+
+			// Start the next chat
 			runningScript = runningScript.nextChat(message);
 			runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
 
