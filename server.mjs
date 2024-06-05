@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import { Client, RunEventType, RunState } from '@gptscript-ai/gptscript';
+import { GPTScript, RunEventType, RunState } from '@gptscript-ai/gptscript';
 import path from 'path';
 import dotenv from 'dotenv';
 
@@ -22,7 +22,7 @@ app.prepare().then(() => {
 	const httpServer = createServer(handler);
 
 	const io = new Server(httpServer);
-	const gptscript = new Client()
+	const gptscript = new GPTScript()
 
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");

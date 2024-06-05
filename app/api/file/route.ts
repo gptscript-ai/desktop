@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic' // defaults to auto
-import { Client } from '@gptscript-ai/gptscript'
+import { GPTScript } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
 import { SCRIPTS_PATH } from '@/config/env';
 
-const gptscript = new Client();
+const gptscript = new GPTScript();
 
 export async function GET() {
     try {

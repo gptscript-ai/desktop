@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic' // defaults to autover'
-import { Client, type Block, Tool} from '@gptscript-ai/gptscript'
+import { GPTScript, type Block, Tool} from '@gptscript-ai/gptscript'
 import { Positions } from '../route';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { SCRIPTS_PATH } from '@/config/env';
 
-const gptscript = new Client();
+const gptscript = new GPTScript();
 
 // Create a datastructure for the tool bindings in the UI
 export async function PUT(
