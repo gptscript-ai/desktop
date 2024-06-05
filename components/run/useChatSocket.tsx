@@ -133,7 +133,9 @@ const useChatSocket = () => {
 					}
 				</Code>);
 				const tool = frame.tool?.name.replace('sys.', '')
-				confirmMessage = `Proceed with running the following (or allow all **${tool}** calls)?`
+				confirmMessage = frame.tool?.source.repo ? 
+					`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
+					`Proceed with running the following (or allow all **${tool}** calls)?`
 			}
 
 			// Build up the form to allow the user to decide
@@ -142,7 +144,7 @@ const useChatSocket = () => {
 				<ConfirmForm
 					id={frame.id}
 					tool={frame.tool!.name}
-					addTrusted={() => { trustedRef.current[frame.tool!.name] = true}}
+					addTrusted={addTrustedFor(frame)}
 					onSubmit={(response: AuthResponse) => { 
 						socketRef.current?.emit("confirmResponse", response) 
 					}}
@@ -169,6 +171,10 @@ const useChatSocket = () => {
 		return { tool, params };
 	}
 
+	const trimRepo = (repo: string): string => {
+		return repo.replace("https://", "").replace("http://", "").replace(".git", "");
+	}
+
 	const alreadyAllowed = (frame: CallFrame): boolean => {
 		if (!frame.tool) return false;
 		
@@ -179,7 +185,7 @@ const useChatSocket = () => {
 		// return false since we need to ask the user for permission.
 		if (frame.tool.source.repo) {
 			const repo = frame.tool?.source.repo.Root;
-			const trimmedRepo = repo.replace("https://", "").replace("http://", "");
+			const trimmedRepo = trimRepo(repo);
 			for (const prefix of trustedRepoPrefixesRef.current) {
 				if (trimmedRepo.startsWith(prefix)) {
 					return true;
@@ -193,6 +199,20 @@ const useChatSocket = () => {
 
 		// Automatically allow all other tools
 		return true;
+	}
+
+	const addTrustedFor = (frame: CallFrame) => {
+		if (!frame.tool) return () => {};
+
+		return frame.tool.source.repo ? 
+			() => {
+				const repo = frame.tool!.source.repo!.Root;
+				const trimmedRepo = trimRepo(repo);
+				trustedRepoPrefixesRef.current.push(trimmedRepo);
+			} :
+			() => {
+				trustedRef.current[frame.tool!.name] = true;
+			}
 	}
 
 	useEffect(() => {
