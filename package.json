@@ -11,7 +11,7 @@
         "open": "open http://localhost:${PORT}"
     },
     "dependencies": {
-        "@gptscript-ai/gptscript": "^0.7.3",
+        "@gptscript-ai/gptscript": "^0.8.0-rc1",
         "@nextui-org/button": "^2.0.31",
         "@nextui-org/code": "^2.0.27",
         "@nextui-org/dropdown": "^2.1.23",

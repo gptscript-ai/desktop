@@ -54,7 +54,6 @@ export const GraphContextProvider = ({ children }: {children?: React.ReactNode})
 
     // Call a debounced post to update the script with the new nodes every second.
     const updateScript = useCallback(debounce(async (nodes: RFNode[]) => {
-        console.log(file)
         await fetch(`/api/file/${file}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
