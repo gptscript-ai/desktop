@@ -7,6 +7,7 @@ import {
 	Button,
     Textarea,
 } from "@nextui-org/react";
+import Upload from "./chatBar/upload";
 
 const ChatBar = ({
     onBack,
@@ -48,6 +49,7 @@ const ChatBar = ({
                 className="mr-2 my-auto text-lg"
                 onPress={onBack}
             />}
+            <Upload />
             <Textarea
                 id="chatInput"
                 autoComplete="off"
