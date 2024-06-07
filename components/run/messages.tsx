@@ -41,16 +41,16 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 							>
 								<Avatar
 									showFallback
-									isBordered
 									name={message.name} 
 									icon={!message.name && <GoSquirrel className="text-xl" />}
 									className="w-[40px] cursor-default"
+									classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
 									color={message.error ? "danger": "default"} 
 								/>
 							</Tooltip>
 						}
 						<div 
-							className={`w-[93%] rounded-2xl bg-gray-100 text-black dark:text-white pt-1 px-4 dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
+							className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
 							<Markdown className="!text-wrap overflow-x-scroll prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
