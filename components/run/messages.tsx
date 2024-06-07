@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { GoSquirrel } from "react-icons/go";
 import Markdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
-import { Avatar, Button } from "@nextui-org/react";
+import { Avatar, Button, Tooltip } from "@nextui-org/react";
 import type { CallFrame } from "@gptscript-ai/gptscript";
 import Calls from "./messages/calls"
 import { GoIssueReopened } from "react-icons/go";
@@ -16,6 +16,7 @@ export type Message = {
     type: MessageType;
     message: string;
     error?: string;
+	name?: string;
     calls?: Record<string, CallFrame>;
     component?: ReactNode;
 };
@@ -32,9 +33,24 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 			) : (
 				<div key={index} className="flex flex-col items-start mb-10">
 					<div className="flex gap-2 w-full">
-						{ !noAvatar && <Avatar isBordered className="w-[40px]" color={message.error ? "danger": "default"} icon={<GoSquirrel className="text-xl" />} /> }
+						{ !noAvatar &&
+							<Tooltip 
+								content={`Sent from ${message.name || "system"}`}
+								placement="bottom"
+								closeDelay={0.5}
+							>
+								<Avatar
+									showFallback
+									isBordered
+									name={message.name} 
+									icon={!message.name && <GoSquirrel className="text-xl" />}
+									className="w-[40px] cursor-default"
+									color={message.error ? "danger": "default"} 
+								/>
+							</Tooltip>
+						}
 						<div 
-							className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border-2 dark:border-zinc-600 ${message.error ? "border-danger dark:border-danger" : ""}`}
+							className={`w-[93%] rounded-2xl bg-gray-100 text-black dark:text-white pt-1 px-4 dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
 							<Markdown className="!text-wrap overflow-x-scroll prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}

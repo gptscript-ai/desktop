@@ -19,7 +19,7 @@ const useChatSocket = () => {
 	const trustedRef = useRef<Record<string, boolean>>({});
 	const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
-	// update the refs
+	// update the refs as the state changes
 	useEffect(() => { messagesRef.current = messages }, [messages]);
 	useEffect(() => { socketRef.current = socket }, [socket]);
 	
@@ -46,6 +46,7 @@ const useChatSocket = () => {
 
 	// handles progress being recieved from the server (callProgress style frames).
 	const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
+		console.log(frame.tool?.name)
 		const isMainContent = frame.output && 
 			frame.output.length > 0 &&
 			(!frame.parentID || frame.tool?.chat) &&
@@ -63,7 +64,7 @@ const useChatSocket = () => {
 			content = `Calling tool ${parsedToolCall.tool}...`;
 		}
 		
-		let message: Message = { type: MessageType.Bot, message: content, calls: state };
+		let message: Message = { type: MessageType.Bot, message: content, calls: state, name: frame.tool?.name };
 		if (latestBotMessageIndex.current === null) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
@@ -95,7 +96,7 @@ const useChatSocket = () => {
 			if (latestBotMessageIndex.current !== null) {
 				// Update the message content
 				updatedMessages[latestBotMessageIndex.current].message = prompt.message;
-				updatedMessages[latestBotMessageIndex.current].component = form
+				updatedMessages[latestBotMessageIndex.current].component = form;
 			} else {
 				// If there are no previous messages, create a new message
 				updatedMessages.push({ type: MessageType.Bot, message: prompt.message, component: form });
@@ -155,11 +156,13 @@ const useChatSocket = () => {
 			if (latestBotMessageIndex.current !== null) {
 				updatedMessages[latestBotMessageIndex.current].component = form;
 				updatedMessages[latestBotMessageIndex.current].message = confirmMessage;
+				updatedMessages[latestBotMessageIndex.current].name = frame.tool?.name;
 			} else {
 				updatedMessages.push({ 
 					type: MessageType.Bot, 
 					message: confirmMessage,
-					component: form 
+					component: form,
+					name: frame.tool?.name
 				});
 			}
 			return updatedMessages;
