@@ -1,8 +1,9 @@
-tools: service, open-file, open, port
+tools: service, port, get-operating-system, open-file, open, start-file, start
 
-Get the port for the running service and use the port with the open tool.
-If there is a file, trim the directory from the file and remove the '.gpt' suffix. Then use the open-file tool.
-If there is no file, use the open tool.
+Get the port for the running service.
+Get the operating system.
+If a file is provided, trim the directory from the file and remove the '.gpt' suffix. If the operating system is Windows, then use the start-file tool. Otherwise, use the open-file tool.
+If there is no file and the operating system is Windows, use the start tool. Otherwise, use the open tool.
 
 ---
 name: service
@@ -10,6 +11,7 @@ name: service
 #!sys.daemon /usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} dev
 
 ---
+
 name: port
 tools: service
 description: Get the port for the running service
@@ -18,15 +20,48 @@ description: Get the port for the running service
 
 ---
 
+name: get-operating-system
+
+#!/usr/bin/env python3
+
+import platform
+
+print(platform.system())
+
+---
+
 name: open-file
 arg: port: The port the service is listening on
 arg: file: The file to open
 
-#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} open-file
+#!/usr/bin/env sh
+
+open http://localhost:${PORT}/run?file=${FILE}
 
 ---
 
 name: open
 arg: port: The port the service is listening on
 
-#!/usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} open
+#!/usr/bin/env sh
+
+open http://localhost:${PORT}
+
+---
+
+name: start-file
+arg: port: The port the service is listening on
+arg: file: The file to open
+
+#!/usr/bin/env powershell.exe
+
+start http://localhost:$env:PORT/run?file=$env:FILE
+
+---
+
+name: start
+arg: port: The port the service is listening on
+
+#!/usr/bin/env sh
+
+open http://localhost:$env:PORT
