@@ -56,7 +56,7 @@ const RunScript = () => {
 
 	useEffect(() => {
 		fetchScript(file || '').then((data) => setTool(data));
-	}, [file]);
+	}, []);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
