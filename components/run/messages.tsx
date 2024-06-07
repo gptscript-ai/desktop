@@ -72,7 +72,7 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						</div>
 					</div>
 					{ messages[index].calls &&
-						<div className="flex w-full justify-end mt-2 pr-2">
+						<div className="flex w-full justify-end mt-2">
 							<Calls calls={messages[index].calls!}/>
 						</div> 
 					}
