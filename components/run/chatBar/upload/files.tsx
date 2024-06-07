@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GoTrash, GoFile } from 'react-icons/go';
 import { Table, TableBody, TableHeader, TableRow, TableCell, TableColumn, Button } from '@nextui-org/react'; // Replace 'next-ui' with the actual package name
-import { openFile, deleteFile, lsWorkspaceFiles } from './actions';
+import { deleteFile, lsWorkspaceFiles } from './actions';
 import { Dirent } from 'fs';
 import path from 'path';
 
