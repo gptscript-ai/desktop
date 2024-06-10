@@ -35,7 +35,7 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
         fetch("/api/file")
             .then((response) => {
                 let files = {};
-                if (response.status === 202) files = response.json();
+                if (response.status === 200) files = response.json();
                 return files
             })
             .then((files: Record<string, string>) => setFiles(files))
