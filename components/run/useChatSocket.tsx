@@ -46,7 +46,6 @@ const useChatSocket = () => {
 
 	// handles progress being recieved from the server (callProgress style frames).
 	const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
-		console.log(frame.tool?.name)
 		const isMainContent = frame.output && 
 			frame.output.length > 0 &&
 			(!frame.parentID || frame.tool?.chat) &&
@@ -133,7 +132,7 @@ const useChatSocket = () => {
 						frame.displayText.replace(/`/g, "")
 					}
 				</Code>);
-				const tool = frame.tool?.name.replace('sys.', '')
+				const tool = frame.tool?.name?.replace('sys.', '')
 				confirmMessage = frame.tool?.source.repo ? 
 					`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
 					`Proceed with running the following (or allow all **${tool}** calls)?`
