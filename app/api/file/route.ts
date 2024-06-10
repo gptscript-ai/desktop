@@ -27,7 +27,10 @@ export async function GET() {
 
         return Response.json(scripts);
     } catch (e) {
-        console.log(e)
+        const error = e as NodeJS.ErrnoException;
+        if (error.code === 'ENOENT'){
+            return Response.json({ error: 'no .gpt files found' }, { status: 404 });
+        }
         return Response.json({ error: e }, { status: 500 });
     }    
 }

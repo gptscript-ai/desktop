@@ -33,7 +33,11 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
 
     useEffect(() => {
         fetch("/api/file")
-            .then((response) => response.json())
+            .then((response) => {
+                let files = {};
+                if (response.status === 202) files = response.json();
+                return files
+            })
             .then((files: Record<string, string>) => setFiles(files))
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
@@ -51,6 +55,16 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
                 >
                     Create a new script
                 </Button>
+            }
+            { !loading && Object.keys(files).length === 0 && 
+                <Card className="col-span-2 p-4 text-center">
+                    <CardHeader>
+                        <h1 className="font-bold">No scripts found</h1>
+                    </CardHeader>
+                    <CardBody className="flex gap-3">
+                        Create a new script in the folder you started the UI in to see it here!
+                    </CardBody>
+                </Card>
             }
             {Object.keys(files).map((file) => (
                 <Card key={file.replace(".gpt", "")} className="p-4">
