@@ -2,12 +2,10 @@ import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
 import { GPTScript, RunEventType, RunState } from '@gptscript-ai/gptscript';
-import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config({path: ['.env', '.env.local']});
 
-const SCRIPTS_PATH = process.env.SCRIPTS_PATH || "gptscripts"
 const ENABLE_CACHE = process.env.ENABLE_CACHE === "true";
 const WORKSPACE_DIR = process.env.GPTSCRIPT_WORKSPACE_DIR || "";
 const dev = process.env.NODE_ENV !== "production";
@@ -59,7 +57,7 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 		runningScript.close();
 	}
 
-	runningScript = await gptscript.run(path.join(SCRIPTS_PATH, file), opts);
+	runningScript = await gptscript.run(file, opts);
 	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}) );
 
 	// Handle prompt events

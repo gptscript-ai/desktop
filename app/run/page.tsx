@@ -9,19 +9,10 @@ import ToolForm from "@/components/run/form";
 import Loading from "@/components/loading";
 import useChatSocket from '@/components/run/useChatSocket';
 import { Button } from "@nextui-org/react";
-
-const fetchScript = async (file: string): Promise<Tool> => {
-	const response = await fetch(`/api/file/${file}`);
-	const script = await response.json() as Block[];
-	for (let tool of script) {
-		if (tool.type === 'text') continue;
-		return tool;
-	}
-	return {} as Tool;
-};
+import { fetchScript, path } from "@/actions/scripts/fetch";
 
 const RunScript = () => {
-	const file = useSearchParams().get('file');
+	const file = useSearchParams().get('file') || '';
 	const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -39,7 +30,7 @@ const RunScript = () => {
 	useEffect(() => {
 		if (hasRun || !socket || !connected) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
-			socket.emit("run", file + ".gpt", tool.name, formValues);
+			path(file).then((path) => { socket.emit("run", path, tool.name, formValues) });
 			setHasRun(true);
 		}
 	}, [tool, file, formValues]);
@@ -55,7 +46,7 @@ const RunScript = () => {
 	}, [messages]);
 
 	useEffect(() => {
-		fetchScript(file || '').then((data) => setTool(data));
+		fetchScript(file).then((data) => setTool(data));
 	}, []);
 
 	useEffect(() => {
