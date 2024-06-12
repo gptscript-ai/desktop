@@ -214,8 +214,19 @@ const useChatSocket = () => {
 			}
 	}
 
-	useEffect(() => {
+	const loadSocket = () => {
 		const socket = io();
+
+		socket.off("connect");
+		socket.off("disconnect")
+		socket.off("progress");
+		socket.off("error");
+		socket.off("botMessage");
+		socket.off("promptRequest");
+		socket.off("confirmRequest");
+
+		setConnected(false);
+		setMessages([]);
 
 		socket.on("connect", () => setConnected(true));
 		socket.on("disconnect", () => setConnected(false));
@@ -225,20 +236,15 @@ const useChatSocket = () => {
 		socket.on("confirmRequest", (data: CallFrame) => { handleConfirmRequest(data) });
 
 		setSocket(socket);
+	}
 
-		return () => {
-			socket.off("connect");
-			socket.off("disconnect")
-			socket.off("progress");
-			socket.off("error");
-			socket.off("botMessage");
-			socket.off("promptRequest");
-			socket.off("confirmRequest");
-			socket.disconnect();
-		};
-	}, []);
 
-	return { socket, setSocket, connected, setConnected, messages, setMessages };
+	useEffect(() => { loadSocket() }, []);
+	const restart = useCallback(() => {
+		loadSocket();
+	}, [socket]);
+
+	return { socket, setSocket, connected, setConnected, messages, setMessages, restart };
 };
 
 export default useChatSocket;

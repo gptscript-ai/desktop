@@ -4,7 +4,11 @@ import { IoMenu } from "react-icons/io5";
 import { FaRegFileCode } from "react-icons/fa";
 import { VscNewFile } from "react-icons/vsc";
 
-export default function App() {
+interface ScriptNavProps {
+    className?: string;
+}
+
+const ScriptNav: React.FC<ScriptNavProps> = ({className }) => {
     const [files, setFiles] = useState<Record<string, string>>({});
 
     useEffect(() => {
@@ -19,14 +23,14 @@ export default function App() {
     )) : <DropdownItem key={'no-files'} isReadOnly>No files found</DropdownItem>;
 
     return (
-        <Dropdown>
+        <Dropdown className={className}>
             <DropdownTrigger>
                 <Button size="lg" variant="shadow" color="primary" isIconOnly radius="full">
                     <IoMenu />
                 </Button>
             </DropdownTrigger>
             <DropdownMenu 
-                aria-label="Action event example" 
+                aria-label="edit" 
                 onAction={(key) => { window.location.href = `/edit?file=${key}`;}}
             >
                 <DropdownSection title="Actions" showDivider>
@@ -42,3 +46,5 @@ export default function App() {
         </Dropdown>
     );
 }
+
+export default ScriptNav

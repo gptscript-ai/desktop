@@ -31,6 +31,7 @@ export async function GET() {
         if (error.code === 'ENOENT'){
             return Response.json({ error: 'no .gpt files found' }, { status: 404 });
         }
+        console.error(e)
         return Response.json({ error: e }, { status: 500 });
     }    
 }
