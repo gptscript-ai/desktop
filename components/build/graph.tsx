@@ -210,6 +210,13 @@ export default memo(() => {
             onEdgesDelete={onEdgesDelete}
             nodeOrigin={[0.0, 0.5]}
             fitView
+            fitViewOptions={{
+                padding: 0.2,
+                minZoom: 0.5,
+                maxZoom: 1,
+            }}
+            maxZoom={2}
+            minZoom={0.1}
         >
             <Panel position="top-left">
                 <ScriptNav />

@@ -10,6 +10,7 @@ import { HiOutlineArrowsPointingIn } from "react-icons/hi2";
 import { type Property, type CallFrame } from "@gptscript-ai/gptscript";
 import useChatSocket from "@/components/run/useChatSocket";
 import Messages from "@/components/run/messages";
+import { path } from "@/actions/scripts/fetch";
 import {
     Card,
     CardHeader,
@@ -69,7 +70,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
     const handleFormSubmit = () => {
         setShowForm(false);
         setMessages([]);
-        socket?.emit("run", file+".gpt", name, formValues);
+        path(file).then((file) => socket?.emit("run", file, name, formValues));
     };
 
     const handleInputChange = (

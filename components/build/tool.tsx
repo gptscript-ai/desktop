@@ -36,10 +36,10 @@ type Context = {
     name: string; setName: (name: string) => void;
     prompt: string; setPrompt: (prompt: string) => void;
     description: string; setDescription: (description: string) => void;
-    temperature: number; setTemperature: (temperature: number) => void;
+    temperature: number | undefined; setTemperature: (temperature: number) => void;
     params: Record<string, Property> | undefined; setParams: (params: Record<string, Property> | undefined) => void;
     jsonResponse: boolean; setJsonResponse: (jsonResponse: boolean) => void;
-    internalPrompt: boolean; setInternalPrompt: (internalPrompt: boolean) => void;
+    internalPrompt: boolean | undefined; setInternalPrompt: (internalPrompt: boolean) => void;
     modelName: string; setModelName: (modelName: string) => void;
     maxTokens: number; setMaxTokens: (maxTokens: number) => void;
     tools: string[]; setTools: (tools: string[]) => void;
@@ -128,7 +128,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
         context,
     ]);
 
-    const toolContext = {
+    const toolContext: Context = {
         data,
         isChat, setIsChat,
         name, setName,
