@@ -4,7 +4,7 @@ import { IoTerminalOutline, IoFolderOpenOutline } from "react-icons/io5";
 import { GoArrowUpRight, GoArrowDownLeft, GoDash } from "react-icons/go";
 import { GoTerminal } from "react-icons/go";
 import { GraphContext } from "@/contexts/graph";
-import StackTrace from "@/components/run/messages/calls/stackTrace";
+import StackTrace from "@/components/script/messages/calls/stackTrace";
 
 export default function Toolbar() {
     const [collapsed, setCollapsed] = useState(true);

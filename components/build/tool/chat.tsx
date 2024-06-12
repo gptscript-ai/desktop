@@ -8,8 +8,8 @@ import { GrExpand, } from "react-icons/gr";
 import { BsArrowsFullscreen } from "react-icons/bs";
 import { HiOutlineArrowsPointingIn } from "react-icons/hi2";
 import { type Property, type CallFrame } from "@gptscript-ai/gptscript";
-import useChatSocket from "@/components/run/useChatSocket";
-import Messages from "@/components/run/messages";
+import useChatSocket from "@/components/script/useChatSocket";
+import Messages from "@/components/script/messages";
 import { path } from "@/actions/scripts/fetch";
 import {
     Card,

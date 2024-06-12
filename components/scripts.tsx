@@ -47,7 +47,7 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
                     startContent={<VscNewFile/>}
                     color="primary"
                     className="col-span-2"
-                    onPress={() => {{ window.location.href = '/build?file=new'}}}
+                    onPress={() => {{ window.location.href = '/edit'}}}
                 >
                     Create a new script
                 </Button>
@@ -72,7 +72,7 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
                         { buildOptions ? 
                             <div className="flex-col flex absolute bottom-1 right-4">
                                 <Button startContent={<GoPaperAirplane />} onPress={() => {{ window.location.href = `/run?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
-                                <Button startContent={<GoPencil />} onPress={() => {{ window.location.href = `/build?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
+                                <Button startContent={<GoPencil />} onPress={() => {{ window.location.href = `/edit?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
                                 <Button startContent={<GoTrash />} onPress={() => {deleteFile(file.replace('.gpt', ''))}}radius="full" variant="light" isIconOnly/>
                             </div> :
                             <div className="absolute right-4 top-10">

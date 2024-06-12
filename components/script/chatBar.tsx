@@ -6,18 +6,22 @@ import { FaBackward } from "react-icons/fa";
 import {
 	Button,
     Textarea,
+    Tooltip,
 } from "@nextui-org/react";
 import Upload from "./chatBar/upload";
+import { GoIssueReopened } from "react-icons/go";
 
 const ChatBar = ({
     onBack,
     noChat,
     onMessageSent,
     backButton,
+    onRestart,
 }: {
     onBack: () => void;
     onMessageSent: (message: string) => void;
     backButton: boolean;
+    onRestart: () => void;
     noChat?: boolean;
 }) => {
     const [inputValue, setInputValue] = useState('');
@@ -49,6 +53,16 @@ const ChatBar = ({
                 className="mr-2 my-auto text-lg"
                 onPress={onBack}
             />}
+            <Tooltip content="Restart the chat">
+                <Button
+                    radius="full"
+                    className="mr-2"
+                    color="primary"
+                    isIconOnly
+                    startContent={<GoIssueReopened className="text-lg"/>}
+                    onPress={onRestart}
+                />
+            </Tooltip>
             <Upload />
             <Textarea
                 id="chatInput"
