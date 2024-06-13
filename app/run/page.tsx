@@ -59,7 +59,7 @@ const RunScript = () => {
 	const handleFormSubmit = () => {
 		setShowForm(false);
 		setMessages([]);
-		socket?.emit("run", file + ".gpt", tool.name, formValues);
+		path(file).then((path) => { socket?.emit("run", path, tool.name, formValues) });
 		setHasRun(true);
 	};
 
