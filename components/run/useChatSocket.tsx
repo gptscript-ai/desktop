@@ -112,46 +112,40 @@ const useChatSocket = () => {
 			return;
 		}
 
-		setMessages((prevMessages) => {
-			const updatedMessages = [...prevMessages];
-
-			// Set the default confirm message
-			let confirmMessage = `Proceed with running the following?` +
-				"\`\`\`"+
-				`**Description**: ${frame.tool?.description}\n\n` +
-				`**Interpreter**: ${frame.tool?.name}\n\n` +
-				`**Input**: ${frame.input}` +
-				'\n\n---';
-			
-			// Build up the command to be displayed into a code component
-			let command = <></>
-			if (frame.displayText) {
-				command = (<Code className="ml-4">
+		let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
+		let command = <></>
+		if (frame.displayText) {
+			command = (
+				<Code className="ml-4">
 					{frame.displayText.startsWith("Running") ? 
 						frame.displayText.replace("Running", "").replace(/`/g, "") : 
 						frame.displayText.replace(/`/g, "")
 					}
-				</Code>);
-				const tool = frame.tool?.name?.replace('sys.', '')
-				confirmMessage = frame.tool?.source.repo ? 
-					`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
-					`Proceed with running the following (or allow all **${tool}** calls)?`
-			}
+				</Code>
+			);
 
-			// Build up the form to allow the user to decide
-			const form = (<>
+			const tool = frame.tool?.name?.replace('sys.', '')
+			confirmMessage = frame.tool?.source.repo ? 
+				`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
+				`Proceed with running the following (or allow all **${tool}** calls)?`
+		}
+
+		const form = (
+			<>
 				{command}
 				<ConfirmForm
 					id={frame.id}
 					tool={frame.tool!.name}
 					addTrusted={addTrustedFor(frame)}
-					onSubmit={(response: AuthResponse) => { 
+					onSubmit={(response: AuthResponse) => {
 						socketRef.current?.emit("confirmResponse", response) 
 					}}
 				/>
-			</>);
+			</>
+		);
 
-		    // Handle setting the message
+		setMessages((prevMessages) => {
+			const updatedMessages = [...prevMessages];
 			if (latestBotMessageIndex.current !== null) {
 				updatedMessages[latestBotMessageIndex.current].component = form;
 				updatedMessages[latestBotMessageIndex.current].message = confirmMessage;
