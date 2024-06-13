@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { GoCheckCircle, GoXCircle, GoCheckCircleFill} from "react-icons/go";
 import type { AuthResponse } from "@gptscript-ai/gptscript";
 import { Button, Tooltip } from "@nextui-org/react";
@@ -13,6 +13,8 @@ type ConfirmFormProps = {
 
 const ConfirmForm = ({ id, onSubmit, tool, addTrusted}: ConfirmFormProps) => {
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => { setLoading(false) }, [id]);
     
     const onSubmitForm = (accept: boolean) => {
         setLoading(true);
