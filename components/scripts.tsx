@@ -5,6 +5,7 @@ import { FaRegFileCode } from "react-icons/fa";
 import { VscNewFile } from "react-icons/vsc";
 import { GoTrash, GoPaperAirplane, GoPencil} from "react-icons/go";
 import Loading from "@/components/loading";
+import { fetchScripts } from "@/actions/scripts/fetch";
 import {
     Card,
     CardHeader,
@@ -32,13 +33,8 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
     }, [files]);
 
     useEffect(() => {
-        fetch("/api/file")
-            .then((response) => {
-                let files = {};
-                if (response.status === 200) files = response.json();
-                return files
-            })
-            .then((files: Record<string, string>) => setFiles(files))
+        fetchScripts()
+            .then((files) => setFiles(files))
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
     }, []);
