@@ -1,5 +1,6 @@
 tools: service, port, get-operating-system, open-file, open, start-file, start
 
+Run the service.
 Get the port for the running service.
 Get the operating system.
 A file can be local or remote. For the provided file, do one of the following two options:
