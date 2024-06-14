@@ -2,8 +2,11 @@ tools: service, port, get-operating-system, open-file, open, start-file, start
 
 Get the port for the running service.
 Get the operating system.
-If a file is provided, trim the directory from the file and remove the '.gpt' suffix. If the operating system is Windows, then use the start-file tool. Otherwise, use the open-file tool.
-If there is no file and the operating system is Windows, use the start tool. Otherwise, use the open tool.
+A file can be local or remote. For the provided file, do one of the following two options:
+    1. If it is a URL or starts with github.com, do not edit it.
+    2. If it is a file, trim the directory from the file and remove the '.gpt' suffix.
+If a file or URL is provided and the operating system is Windows, then use the start-file tool. Otherwise, use the open-file tool.
+If there is no file or URL and the operating system is Windows, use the start tool. Otherwise, use the open tool.
 
 ---
 name: service
