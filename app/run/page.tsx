@@ -81,7 +81,7 @@ const RunScript = () => {
 			{messages.length || (showForm && hasParams)  ? (<>
 				<div
 					id="small-message"
-					className="px-6 pt-10 overflow-y-scroll w-full items-center h-full"
+					className="px-6 pt-10 overflow-y-auto w-full items-center h-full"
 				>
 					{showForm && hasParams ? (
 						<ToolForm

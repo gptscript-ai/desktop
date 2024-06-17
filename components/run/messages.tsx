@@ -52,7 +52,7 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						<div 
 							className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
-							<Markdown className="!text-wrap overflow-x-scroll prose dark:prose-invert p-4 !max-w-none prose-thead:text-left" remarkPlugins={[remarkGfm]}>
+							<Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left" remarkPlugins={[remarkGfm]}>
 								{messages[index].message}
 							</Markdown>
 							{ messages[index].component }
