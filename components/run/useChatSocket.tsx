@@ -15,25 +15,18 @@ const useChatSocket = () => {
 	// Refs
 	const socketRef = useRef<Socket | null>(null);
 	const messagesRef = useRef(messages);
-	const latestBotMessageIndex = useRef<number | null>(null);
+	const latestBotMessageIndex = useRef<number>(-1);
 	const trustedRef = useRef<Record<string, boolean>>({});
 	const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
 	// update the refs as the state changes
 	useEffect(() => { messagesRef.current = messages }, [messages]);
 	useEffect(() => { socketRef.current = socket }, [socket]);
-	
-	// handles the situation where the full bot message when received (i.e runningScript.text() output).
-	const handleBotMessage = useCallback((_: string) => {
-		if (latestBotMessageIndex.current !== null) {
-			latestBotMessageIndex.current = null;
-		}
-	}, []);
 
 	const handleError = useCallback((error: string) => {
 		setMessages((prevMessages) => {
 			const updatedMessages = [...prevMessages];
-			if (latestBotMessageIndex.current !== null) {
+			if (latestBotMessageIndex.current !== -1) {
 				// Append the error to the latest message
 				updatedMessages[latestBotMessageIndex.current].error = `${error}`
 			} else {
@@ -46,15 +39,15 @@ const useChatSocket = () => {
 
 	// handles progress being recieved from the server (callProgress style frames).
 	const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
-		const isMainContent = frame.output && 
+		const isMainContent = frame.output &&
 			frame.output.length > 0 &&
 			(!frame.parentID || frame.tool?.chat) &&
 			!frame.output[frame.output.length - 1].subCalls
-		
+
 		let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
 		if (!content) return;
 		if ( content === "Waiting for model response..." &&
-			latestBotMessageIndex.current !== null &&
+			latestBotMessageIndex.current !== -1 &&
 			messagesRef.current[latestBotMessageIndex.current].message
 		) return;
 
@@ -62,9 +55,9 @@ const useChatSocket = () => {
 			const parsedToolCall = parseToolCall(content);
 			content = `Calling tool ${parsedToolCall.tool}...`;
 		}
-		
+
 		let message: Message = { type: MessageType.Bot, message: content, calls: state, name: frame.tool?.name };
-		if (latestBotMessageIndex.current === null) {
+		if (latestBotMessageIndex.current === -1) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
@@ -74,9 +67,18 @@ const useChatSocket = () => {
 		} else {
 			setMessages((prevMessages) => {
 				const updatedMessages = [...prevMessages];
-				updatedMessages[latestBotMessageIndex.current!] = message;
+				if (latestBotMessageIndex.current !== -1) {
+					updatedMessages[latestBotMessageIndex.current] = message;
+				} else {
+					updatedMessages[messagesRef.current.length - 1] = message;
+				}
 				return updatedMessages;
+
 			});
+		}
+
+		if (isMainContent && frame.type == "callFinish") {
+			latestBotMessageIndex.current = -1
 		}
 	}, []);
 
@@ -173,10 +175,10 @@ const useChatSocket = () => {
 
 	const alreadyAllowed = (frame: CallFrame): boolean => {
 		if (!frame.tool) return false;
-		
+
 		// Check if the tool has already been allowed
 		if (trustedRef.current[frame.tool.name]) return true;
-		
+
 		// If this tool have a source repo, check if it is trusted. If it isn't already,
 		// return false since we need to ask the user for permission.
 		if (frame.tool.source.repo) {
@@ -218,7 +220,6 @@ const useChatSocket = () => {
 		socket.on("disconnect", () => setConnected(false));
 		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
 		socket.on("error", (data: string) => handleError(data));
-		socket.on("botMessage", (data) => { handleBotMessage(data) });
 		socket.on("promptRequest", (data: PromptFrame) => { handlePromptRequest(data) });
 		socket.on("confirmRequest", (data: CallFrame) => { handleConfirmRequest(data) });
 
