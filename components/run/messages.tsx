@@ -21,6 +21,12 @@ export type Message = {
     component?: ReactNode;
 };
 
+const abbreviate = (name: string) => {
+	const words = name.split(/(?=[A-Z])|[\s_-]/);
+	const firstLetters = words.map(word => word[0]);
+	return firstLetters.slice(0, 2).join('').toUpperCase();
+}
+
 const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
 	<div>
 		{messages.map((message, index) =>
@@ -35,13 +41,13 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 					<div className="flex gap-2 w-full">
 						{ !noAvatar &&
 							<Tooltip 
-								content={`Sent from ${message.name || "system"}`}
+								content={`Sent from ${message.name || "Chat Bot"}`}
 								placement="bottom"
 								closeDelay={0.5}
 							>
 								<Avatar
 									showFallback
-									name={message.name} 
+									name={abbreviate(message.name || 'Chat Bot')} 
 									icon={!message.name && <GoSquirrel className="text-xl" />}
 									className="w-[40px] cursor-default"
 									classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
