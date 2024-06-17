@@ -19,17 +19,19 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
     }
 
     const Summary = ({call}: {call: CallFrame}) => {
+        const name = call.tool?.name || call.tool?.source?.repo || call.tool?.source?.location || "main";
+        const category = call.toolCategory
         if (call.tool?.chat) {
             return <summary>
-                {call.type !== "callFinish" ? `Chat open with ${call.tool.name}` : `Chatted with ${call.tool.name}`}
+                {call.type !== "callFinish" ? `Chat open with ${name}` : `Chatted with ${name}`}
             </summary>
         }
 
         return (
             <summary>
                 {call.type !== "callFinish" ?
-                    call.tool?.name ? `Running ${call.tool.name}` : `Loading ${call.toolCategory}` + "..." : 
-                    call.tool?.name ? `Ran ${call.tool.name}` : `Loaded ${call.toolCategory}`
+                    category ? `Loading ${category} from ${name}` + "..." : `Running ${name}` :  
+                    category ? `Loaded ${category} from ${name}` : `Ran ${name}`
                 } 
                 {call?.type !== "callFinish" && <AiOutlineLoading3Quarters className="ml-2 animate-spin inline"/>}
             </summary>

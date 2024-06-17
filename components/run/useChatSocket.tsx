@@ -127,7 +127,7 @@ const useChatSocket = () => {
 			);
 
 			const tool = frame.tool?.name?.replace('sys.', '')
-			confirmMessage = frame.tool?.source.repo ? 
+			confirmMessage = frame.tool?.source?.repo ? 
 				`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
 				`Proceed with running the following (or allow all **${tool}** calls)?`
 		}
@@ -137,7 +137,7 @@ const useChatSocket = () => {
 				{command}
 				<ConfirmForm
 					id={frame.id}
-					tool={frame.tool!.name}
+					tool={frame.tool?.name || "main"}
 					addTrusted={addTrustedFor(frame)}
 					onSubmit={(response: AuthResponse) => {
 						socketRef.current?.emit("confirmResponse", response) 
@@ -177,11 +177,12 @@ const useChatSocket = () => {
 		if (!frame.tool) return false;
 
 		// Check if the tool has already been allowed
-		if (trustedRef.current[frame.tool.name]) return true;
+		if (frame.tool.name && trustedRef.current[frame.tool.name]) return true;
+
 
 		// If this tool have a source repo, check if it is trusted. If it isn't already,
 		// return false since we need to ask the user for permission.
-		if (frame.tool.source.repo) {
+		if (frame.tool.source?.repo) {
 			const repo = frame.tool?.source.repo.Root;
 			const trimmedRepo = trimRepo(repo);
 			for (const prefix of trustedRepoPrefixesRef.current) {
@@ -193,7 +194,7 @@ const useChatSocket = () => {
 		}
 
 		// If the tool is a system tool and wasn't already trusted, return false.
-		if (frame.tool.name.startsWith("sys.")) return false;
+		if (frame.tool?.name?.startsWith("sys.")) return false;
 
 		// Automatically allow all other tools
 		return true;
@@ -202,14 +203,14 @@ const useChatSocket = () => {
 	const addTrustedFor = (frame: CallFrame) => {
 		if (!frame.tool) return () => {};
 
-		return frame.tool.source.repo ? 
+		return frame.tool.source?.repo ? 
 			() => {
-				const repo = frame.tool!.source.repo!.Root;
-				const trimmedRepo = trimRepo(repo);
+				const repo = frame.tool!.source?.repo!.Root;
+				const trimmedRepo = trimRepo(repo || "");
 				trustedRepoPrefixesRef.current.push(trimmedRepo);
 			} :
 			() => {
-				trustedRef.current[frame.tool!.name] = true;
+				if (frame.tool?.name) trustedRef.current[frame.tool.name] = true;
 			}
 	}
 
