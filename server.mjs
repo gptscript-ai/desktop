@@ -69,23 +69,12 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
 	try {
-		socket.emit('botMessage', await runningScript.text());
 		socket.on('disconnect', () => {
 			if (runningScript) runningScript.close();
 			runningScript = null;
 		});
 
 		socket.on('userMessage', async (message) => {
-			if (runningScript) {
-				if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
-					socket.emit(
-						"botMessage", 
-						`This chat session is in a terminal state ${runningScript.state}, you cannot continue chat. Please start a new chat session.`
-					);
-					return;
-				}
-			}
-
 			// Remove any previous promptResponse or confirmResponse listeners
 			socket.removeAllListeners("promptResponse");
 			socket.removeAllListeners("confirmResponse");
@@ -101,12 +90,6 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 			// Handle confirm events
 			runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
 			socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
-
-			try {
-				socket.emit('botMessage', await runningScript.text());
-			} catch (e) {
-				socket.emit('error', e);
-			}
 		});
 	} catch (e) {
 		socket.emit('error', e);
