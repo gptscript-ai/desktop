@@ -42,11 +42,11 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             if (tools?.includes(input)) {
-                setError("tool already exists");
+                setError(`Tool ${input} has already been imported`);
                 return;
             }
             if (!input) {
-                setError("tool cannot be empty");
+                setError("Tool cannot be empty");
                 return;
             }
             setTools([...tools || [], e.currentTarget.value]);
