@@ -19,6 +19,7 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
     const [results, setResults] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [input, setInput] = useState<string>("");
     
     const search = debounce((query: string) => {
         setLoading(true);
@@ -37,6 +38,21 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
         const updatedTools = tools!.filter((t) => t !== tool);
         setTools(updatedTools);
     }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            if (tools?.includes(input)) {
+                setError("tool already exists");
+                return;
+            }
+            if (!input) {
+                setError("tool cannot be empty");
+                return;
+            }
+            setTools([...tools || [], e.currentTarget.value]);
+            setInput("");
+        }
+    };
 
     return (
         <div className={`${className}`}>
@@ -72,9 +88,9 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
                     placeholder={`Enter a URL or custom tool...`}
                     isInvalid={error !== null}
                     errorMessage={error}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') setTools([...tools || [], e.currentTarget.value]);
-                    }}
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => {setError(null); setInput(e.currentTarget.value)}}
+                    value={input}
                 />
             </div>
         </div>
