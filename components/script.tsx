@@ -13,9 +13,10 @@ import { fetchScript, path } from "@/actions/scripts/fetch";
 interface ScriptProps {
     file: string;
 	className?: string
+	messagesHeight?: string
 }
 
-const Script: React.FC<ScriptProps> = ({ file, className }) => {
+const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-full' }) => {
 	const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -92,7 +93,7 @@ const Script: React.FC<ScriptProps> = ({ file, className }) => {
 			{messages.length || (showForm && hasParams)  ? (<>
 				<div
 					id="small-message"
-					className="px-6 pt-10 overflow-y-auto w-full items-center h-full"
+					className={`px-6 pt-10 overflow-y-auto w-full items-center ${messagesHeight}`}
 				>
 					{showForm && hasParams ? (
 						<ToolForm

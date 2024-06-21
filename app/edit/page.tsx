@@ -26,15 +26,13 @@ export default function Edit() {
 	return (
 		<EditContextProvider file={file}>
 			<div className="w-full h-full grid grid-cols-2">
-				<div className="absolute left-2 top-2">
+				<div className="absolute left-6 top-6">
 					<ScriptNav />
 				</div>
 				<div className="h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6">
 					<Configure file={file} />
 				</div>
-				<div className="overflow-auto w-full">
-					<Script className="h-[92%]" file={file} />
-				</div>
+				<Script messagesHeight='h-[93%]' className="p-6" file={file} />
 			</div>
 		</EditContextProvider>
 	);
