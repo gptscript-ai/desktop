@@ -65,9 +65,13 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
 
     // note - this deletes text tools right now
     const update = useCallback(async () => {
-        return updateScript(file, [root, ...tools])
-            .catch((error) => console.error(error));
+        updateScript(file, [root, ...tools]).catch((error) => console.error(error));
     }, [file, root, tools]);
+
+    useEffect(() => {
+        if (loading) return;
+        update();
+    }, [root, tools])
 
 
     const newestToolName = useCallback(() => {

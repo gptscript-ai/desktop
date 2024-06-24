@@ -18,7 +18,7 @@ interface ConfigureProps {
     className?: string;
 }
 
-const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
+const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
     const [name, setName] = useState<string>('');
     const { update, setRoot, setTools} = useContext(EditContext)
@@ -27,15 +27,13 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
 
     useEffect(() => {
         setTools((prevTools) => {
-            let newTools = prevTools.map((tool: Tool) => {
+            return prevTools.map((tool: Tool) => {
                 if (tool.name === customTool.name) {
                     return customTool;
                 }
                 return tool;
             });
-            return newTools
         });
-        update();
     }, [customTool]);
     
     useEffect(() => {
@@ -59,8 +57,6 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
             });
             return updatedTools;
         });
-        
-        setCustomTool({...customTool, name: name});
     }, [name])
 
     const setCustomToolTools = useCallback((newTools: string[]) => {
@@ -89,12 +85,15 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
         });
 
         setTools((prevTools) => {
-            prevTools.forEach((t: Tool) => {
-                t.tools?.filter(tImport => tImport !== customTool.name);
+            let updatedTools = prevTools.filter((t: Tool) => t.name !== customTool.name);
+            updatedTools = updatedTools.map((t: Tool) => {
+                if (t.tools) {
+                    t.tools = t.tools?.filter(tImport => tImport !== customTool.name);
+                }
+                return t;
             });
-            return prevTools.filter((t: Tool) => t.name !== customTool.name)
+            return updatedTools;
         });
-        update();
     }
 
     return customTool && 
@@ -146,4 +145,4 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
         </div>
 };
 
-export default Configure;
+export default CustomTool;

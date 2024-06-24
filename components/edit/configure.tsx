@@ -49,12 +49,6 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
         setRoot({...root, context: newAgents});
     }, [root]);
 
-    useEffect(() => {
-        if (loading) return;
-        update();
-    }, [root, loading]);
-
-
     if (loading) return <Loading>Loading your script's details...</Loading>;
 
     return (
