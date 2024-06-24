@@ -1,8 +1,7 @@
 "use server"
-import { Tool } from '@gptscript-ai/gptscript';
-import { GPTScript } from '@gptscript-ai/gptscript';
+import { Tool, GPTScript, Block } from '@gptscript-ai/gptscript';
 import { SCRIPTS_PATH } from '@/config/env';
-import { promises as fs } from 'fs';
+import fs from 'fs/promises';
 
 const external = (file: string): boolean => {
     return file.startsWith('http') || file.startsWith('https') || file.startsWith('github.com')
@@ -12,6 +11,17 @@ export const path = async (file: string): Promise<string> => {
     if (!external(file)) return `${SCRIPTS_PATH}/${file}.gpt`;
     return file;
 };
+
+export const fetchFullScript = async (file: string): Promise<Block[]> => {
+    if (!external(file)) file = `${SCRIPTS_PATH}/${file}.gpt`;
+
+    const gptscript = new GPTScript();
+    try {
+        return await gptscript.parse(file);
+    } catch (e) {
+        throw e;
+    }
+}
 
 export const fetchScript = async (file: string): Promise<Tool> => {
     if (!external(file)) file = `${SCRIPTS_PATH}/${file}.gpt`;
@@ -46,7 +56,7 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;
-                description = tool.description;
+                description = tool.description || '';
                 break;
             }
             scripts[file] = description || '';
@@ -56,6 +66,15 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
     } catch (e) {
         const error = e as NodeJS.ErrnoException;
         if (error.code === 'ENOENT') return {} as Record<string, string>;
+        throw e;
+    }
+}
+
+export const fetchScriptCode = async (file: string): Promise<string> => {
+    file = file.includes('.gpt') ? file : `${file}.gpt`;
+    try {
+        return await fs.readFile(`${SCRIPTS_PATH}/${file}`, 'utf-8');
+    } catch (e) {
         throw e;
     }
 }
