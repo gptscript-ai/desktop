@@ -1,21 +1,16 @@
-tools: service, port, get-operating-system, open-file, open, start-file, start
+context: github.com/gptscript-ai/context/os
+tools: service, port, open-file-nix, open-nix, open-file-windows, open-windows
+params: file: (optional) A reference to a tool file. Can refer to either a local or remote file.
 
-!!Important!! -  A file can be local or remote.
+Never run steps in parallel.
 
-Do all of the following in order and do not skip a step.
-1. Run the service.
-2. Get the port for the running service.
-3. Get the operating system.
-4. For the provided file, do one of the following two options:
-    - If it is remote or starts with github.com, do not edit it.
-    - If it is local, trim the directory from the file and remove the '.gpt' suffix.
-5. Do one of the following options.
-    - If the operating system is Windows:
-        - If a file or URL is provided, use the start file tool.
-        - If no file or URL is provided, use the start tool.
-    - If the operating system is not Windows:
-        - If a file or URL is provided, use the open-file tool.
-        - If a file or URL is not provided, use the open tool.
+Perform the following steps in the order they appear:
+1. Run the service
+2. Get the port for the running service
+3. If no {file} was provided AND the local operating system is windows, use the open-windows tool then skip the remaining steps
+4. If no {file} was provided use the open-nix tool then skip the remaining steps
+5. If the operating system is windows, use the open-file-windows tool then skip the remaining steps
+6. Use the open-file-nix tool
 
 ---
 name: service
@@ -32,17 +27,7 @@ description: Get the port for the running service
 
 ---
 
-name: get-operating-system
-
-#!/usr/bin/env python3
-
-import platform
-
-print(platform.system())
-
----
-
-name: open-file
+name: open-file-nix
 arg: port: The port the service is listening on
 arg: file: The file to open
 
@@ -52,7 +37,7 @@ open http://localhost:${PORT}/run?file=${FILE}
 
 ---
 
-name: open
+name: open-nix
 arg: port: The port the service is listening on
 
 #!/usr/bin/env sh
@@ -61,7 +46,7 @@ open http://localhost:${PORT}
 
 ---
 
-name: start-file
+name: open-file-windows
 arg: port: The port the service is listening on
 arg: file: The file to open
 
@@ -71,7 +56,7 @@ start http://localhost:$env:PORT/run?file=$env:FILE
 
 ---
 
-name: start
+name: open-windows 
 arg: port: The port the service is listening on
 
 #!/usr/bin/env sh
