@@ -46,7 +46,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
     }, [root]);
 
     const setRootAgents = useCallback((newAgents: string[]) => {
-        setRoot({...root, context: newAgents});
+        setRoot({...root, agents: newAgents});
     }, [root]);
 
     if (loading) return <Loading>Loading your script's details...</Loading>;
