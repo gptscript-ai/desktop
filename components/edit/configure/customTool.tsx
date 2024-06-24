@@ -9,7 +9,7 @@ import {
     Button,
 } from "@nextui-org/react";
 import { EditContext } from "@/contexts/edit";
-import { debounce } from "lodash";
+import { debounce, set } from "lodash";
 import { GoTrash } from "react-icons/go";
 
 interface ConfigureProps {
@@ -19,36 +19,61 @@ interface ConfigureProps {
 }
 
 const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
-    const [root, setRoot] = useState<Tool>({} as Tool);
+    const [customTool, setCustomTool] = useState<Tool>({} as Tool);
+    const [name, setName] = useState<string>('');
+    const { update, setRoot, setTools} = useContext(EditContext)
     
-    const { update, tools, setTools} = useContext(EditContext)
-    
-    useEffect(() => { setRoot(tool) }, []);
+    useEffect(() => { setCustomTool(tool); setName(tool.name || '') }, []);
 
     useEffect(() => {
         setTools((prevTools) => {
-            const updatedTools = prevTools.map((tool: Tool) => {
-                if (tool.name === root.name) {
-                    return root;
+            let newTools = prevTools.map((tool: Tool) => {
+                if (tool.name === customTool.name) {
+                    return customTool;
                 }
                 return tool;
             });
-            return updatedTools as Tool[];
+            return newTools
         });
         update();
-    }, [root]);
+    }, [customTool]);
+    
+    useEffect(() => {
+        setRoot((prevRoot) => {
+            if (!prevRoot.tools) return prevRoot;
 
-    const setRootTools = useCallback((newTools: string[]) => {
-        setRoot({...root, tools: newTools});
-    }, [root]);
+            prevRoot.tools = prevRoot.tools.map((tool: string) => {
+                if (tool === customTool.name) return name;
+                return tool;
+            });
 
-    const setRootContexts = useCallback((newContexts: string[]) => {
-        setRoot({...root, context: newContexts});
-    }, [root]);
+            return prevRoot;
+        });
 
-    const setRootAgents = useCallback((newAgents: string[]) => {
-        setRoot({...root, context: newAgents});
-    }, [root]);
+        setTools((prevTools) => {
+            let updatedTools = prevTools.map((t: Tool) => {
+                // replace all instances of the old name with the new name
+                t.tools?.map((tImport) => tImport === customTool.name ? name : tImport);
+                if (t.name === customTool.name) t.name = name;
+                return t;
+            });
+            return updatedTools;
+        });
+        
+        setCustomTool({...customTool, name: name});
+    }, [name])
+
+    const setCustomToolTools = useCallback((newTools: string[]) => {
+        setCustomTool({...customTool, tools: newTools});
+    }, [customTool]);
+
+    const setCustomToolContexts = useCallback((newContexts: string[]) => {
+        setCustomTool({...customTool, context: newContexts});
+    }, [customTool]);
+
+    const setCustomToolAgents = useCallback((newAgents: string[]) => {
+        setCustomTool({...customTool, context: newAgents});
+    }, [customTool]);
 
     const abbreviate = (name: string) => {
         const words = name.split(/(?=[A-Z])|[\s_-]/);
@@ -57,26 +82,32 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
     }
 
     const handleDelete = () => {
+        setRoot((prevRoot) => {
+            if (!prevRoot.tools) return prevRoot;
+            prevRoot.tools = prevRoot.tools.filter(tImport => tImport !== customTool.name);
+            return prevRoot;
+        });
+
         setTools((prevTools) => {
             prevTools.forEach((t: Tool) => {
-                t.tools?.filter(tImport => tImport !== root.name);
+                t.tools?.filter(tImport => tImport !== customTool.name);
             });
-            return prevTools.filter((t: Tool) => t.name !== root.name)
+            return prevTools.filter((t: Tool) => t.name !== customTool.name)
         });
         update();
     }
 
-    return root && 
+    return customTool && 
         <div>
             <div className="w-full">
                 <Tooltip 
-                    content={`${root.name || "Main"}`}
+                    content={`${name || "Main"}`}
                     placement="bottom"
                     closeDelay={0.5}
                 >
                     <Avatar 
                         size="md" 
-                        name={abbreviate(root.name || 'Main')} 
+                        name={abbreviate(name || 'Main')} 
                         className="mx-auto mb-6 mt-4"
                         classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
                     />
@@ -87,8 +118,8 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     variant="bordered"
                     label="Name"
                     placeholder="Give your chat bot a name"
-                    value={root.name}
-                    onChange={(e) => setRoot({...root, name: e.target.value})}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                 />
 
                 <Textarea
@@ -96,21 +127,21 @@ const Configure: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     variant="bordered"
                     label="Description"
                     placeholder="Describe your script..."
-                    value={root.description}
-                    onChange={(e) => setRoot({...root, description: e.target.value})}
+                    value={customTool.description}
+                    onChange={(e) => setCustomTool({...customTool, description: e.target.value})}
                 />
                 <Textarea
                     fullWidth
                     variant="bordered"
                     label="Instructions"
                     placeholder="Describe your how your script should behave..."
-                    value={root.instructions}
-                    onChange={(e) => setRoot({...root, instructions: e.target.value})}
+                    value={customTool.instructions}
+                    onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
                 />
-                <Imports className="py-2" tools={root.tools} setTools={setRootTools} label={"Basic Tool"}/>
-                <Imports className="py-2" tools={root.context} setTools={setRootContexts} label={"Context Tool"}/>
-                <Imports className="py-2" tools={root.agents} setTools={setRootAgents} label={"Agent Tool"}/>
-                <Button onClick={handleDelete} color="danger" startContent={<GoTrash/>} className="w-full">Delete Tool</Button>
+                <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
+                <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts} label={"Context Tool"}/>
+                <Imports className="py-2" tools={customTool.agents} setTools={setCustomToolAgents} label={"Agent Tool"}/>
+                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>} className="w-full">Delete Tool</Button>
             </div>
         </div>
 };

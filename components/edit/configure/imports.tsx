@@ -60,8 +60,9 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
             <h2>{description}</h2>
             {tools && tools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                    {tools.map((tool) => (
+                    {tools.map((tool, i) => (
                         <div
+                            key={i}
                             className="w-full border-2 dark:border-zinc-800 text-sm pl-2 rounded-lg flex items-center justify-between"
                         >
                             <p className="truncate">{tool}</p>

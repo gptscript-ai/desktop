@@ -26,9 +26,9 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
     const {
         root, setRoot,
         tools, setTools,
-        texts, setTexts,
         loading, setLoading,
         update,
+        newestToolName,
     } = useContext(EditContext);
 
     const abbreviate = (name: string) => {
@@ -114,7 +114,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
                         const newTool: Tool = {
                             id,
                             type: 'tool',
-                            name: `new-tool-${id}`,
+                            name: newestToolName(),
                         }
                         setRoot({...root, tools: [...(root.tools || []), newTool.name!]});
                         setTools([...(tools || []), newTool]);

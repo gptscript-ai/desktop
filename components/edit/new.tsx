@@ -16,7 +16,6 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('submitting', filename, name, instructions);
         newFile(name, instructions, filename)
             .then((file) => setFile(file))
             .catch((error) => setError(`${error}`));
