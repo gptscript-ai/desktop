@@ -17,6 +17,7 @@ interface EditContextState {
 
     // actions
     update: () => Promise<void>;
+    newestToolName: () => string;
 }
 
 // EditContext is managing the state of the script editor.
@@ -68,6 +69,15 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
             .catch((error) => console.error(error));
     }, [file, root, tools]);
 
+
+    const newestToolName = useCallback(() => {
+        let num = 1
+        for (let tool of [root, ...tools]) {
+            if (tool.name === `new-tool-${num}`) num++;
+        }
+        return `new-tool-${num}`;
+    }, [root, tools]);
+
     // Provide the context value to the children components
     return (
         <EditContext.Provider 
@@ -78,6 +88,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
                 texts, setTexts,
                 script, setScript,
                 update,
+                newestToolName,
             }}
         >
             {children}
@@ -86,58 +97,3 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
 };
 
 export { EditContext, EditContextProvider };
-
-/*
-
-interface ConfigureProps {
-    file: string;
-    tool?: Tool;
-    className?: string;
-    custom?: boolean;
-}
-
-const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
-    const [loading, setLoading] = useState(true);
-    const [root, setRoot] = useState<Tool>({} as Tool);
-    const [rootIndex, setRootIndex] = useState<number>(0);
-    const [tools, setTools] = useState<string[]>([]);
-    const [contexts, setContexts] = useState<string[]>([]);
-    const [script, setScript] = useState<Block[]>([]);
-
-    // initial fetch
-    useEffect(() => {
-        fetchFullScript(file)
-            .then((data: Block[]) => { setScript(data); return data })
-            .then((data: Block[]) => findRoot(data))
-            .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
-    }, []);
-
-    useEffect(debounce(() => {
-        if (loading) return;
-        updateTool(file, root.name || "root", script)
-    }, 1000), [root, script, loading]);
-
-    const findRoot = (script: Block[]): Tool => {
-        for (let i = 0; i < script.length; i++) {
-            const tool = script[i];
-            if (tool.type === 'text') continue;
-            setRoot(tool);
-            setRootIndex(i);
-            return tool;
-        }
-        return {} as Tool;
-    }
-
-    const abbreviate = (name: string) => {
-        const words = name.split(/(?=[A-Z])|[\s_-]/);
-        const firstLetters = words.map(word => word[0]);
-        return firstLetters.slice(0, 2).join('').toUpperCase();
-    }
-
-    const customTools = useCallback(() => {
-        return script.filter((block, i) => block.type === 'tool' && i > rootIndex ) as Tool[];
-    }, [script, rootIndex]);
-
-    if (loading) return <Loading>Loading your script's details...</Loading>;
-*/

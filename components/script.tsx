@@ -32,10 +32,8 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	}, [tool]);
 
 	useEffect(() => {
-		console.log(hasRun, socket, connected)
 		if (hasRun || !socket || !connected) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
-			console.log('running script')
 			path(file).then((path) => { socket.emit("run", path, tool.name, formValues) });
 			setHasRun(true);
 		}
