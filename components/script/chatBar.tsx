@@ -9,16 +9,20 @@ import {
     Tooltip,
 } from "@nextui-org/react";
 import Upload from "./chatBar/upload";
-import { GoIssueReopened } from "react-icons/go";
+import { GoIssueReopened, GoSquare, GoSquareFill } from "react-icons/go";
 
 const ChatBar = ({
+    generating,
     onBack,
     noChat,
+    onInterrupt,
     onMessageSent,
     backButton,
     onRestart,
 }: {
+    generating: boolean;
     onBack: () => void;
+    onInterrupt: () => void;
     onMessageSent: (message: string) => void;
     backButton: boolean;
     onRestart: () => void;
@@ -76,19 +80,29 @@ const ChatBar = ({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
                     if (event.key === "Enter" && !event.shiftKey) {
+                        if (generating) return;
                         event.preventDefault();
                         handleSend();
                     }
                 }}
             />
-            <Button
-                startContent={<IoMdSend />}
-                isIconOnly
-                radius="full"
-                className="ml-2 my-auto text-lg"
-                color="primary"
-                onPress={handleSend}
-            />
+            {generating ?
+                <Button
+                    startContent={<GoSquareFill className="mr-[1px] text-xl" />}
+                    isIconOnly
+                    radius="full"
+                    className="ml-2 my-auto text-lg"
+                    onPress={onInterrupt}
+                /> : 
+                <Button
+                    startContent={<IoMdSend />}
+                    isIconOnly
+                    radius="full"
+                    className="ml-2 my-auto text-lg"
+                    color="primary"
+                    onPress={handleSend}
+                />
+            }
         </div>
     );
 };

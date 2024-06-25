@@ -5,12 +5,14 @@ import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
 import { Code } from '@nextui-org/react';
+import { set } from 'lodash';
 
 const useChatSocket = () => {
 	// State
 	const [socket, setSocket] = useState<Socket | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [messages, setMessages] = useState<Message[]>([]);
+	const [generating, setGenerating] = useState(false);
 
 	// Refs
 	const socketRef = useRef<Socket | null>(null);
@@ -46,6 +48,7 @@ const useChatSocket = () => {
 
 		let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
 		if (!content) return;
+		setGenerating(true);
 		if ( content === "Waiting for model response..." &&
 			latestBotMessageIndex.current !== -1 &&
 			messagesRef.current[latestBotMessageIndex.current].message
@@ -78,6 +81,7 @@ const useChatSocket = () => {
 		}
 
 		if (isMainContent && frame.type == "callFinish") {
+			setGenerating(false);
 			latestBotMessageIndex.current = -1
 		}
 	}, []);
@@ -244,7 +248,14 @@ const useChatSocket = () => {
 		loadSocket();
 	}, [socket]);
 
-	return { socket, setSocket, connected, setConnected, messages, setMessages, restart };
+    const interrupt = useCallback(() => {
+        if (!socket || !connected) return;
+		latestBotMessageIndex.current = -1
+        socket.emit("interrupt");
+		setGenerating(false);
+    }, [socket, connected]);
+
+	return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating};
 };
 
 export default useChatSocket;

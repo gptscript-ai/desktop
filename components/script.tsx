@@ -23,7 +23,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	const [inputValue, setInputValue] = useState('');
 	const messagesRef = useRef<Message[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { socket, connected, messages, setMessages, restart} = useChatSocket();
+	const { socket, connected, messages, setMessages, restart, interrupt, generating} = useChatSocket();
 	const [hasRun, setHasRun] = useState(false);
 	const [hasParams, setHasParams] = useState(false);
 
@@ -120,6 +120,8 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 							backButton={hasParams}
 							noChat={!tool.chat}
 							onRestart={restartScript}
+                            onInterrupt={interrupt}
+                            generating={generating}
 							onBack={() => {
 								setMessages([]);
 								setShowForm(true);
