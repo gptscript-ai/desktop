@@ -68,6 +68,10 @@ const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => 
 	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
 	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
+    socket.on("interrupt", async() => {
+        if (runningScript) runningScript.close();
+    });
+
 	try {
 		socket.on('disconnect', () => {
 			if (runningScript) runningScript.close();
