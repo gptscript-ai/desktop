@@ -1,7 +1,9 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Tool, Text, Block } from '@gptscript-ai/gptscript';
 import { fetchFullScript } from '@/actions/scripts/fetch';
 import { updateScript } from '@/actions/scripts/update';
+
+const DEBOUNCE_TIME = 1000; // milliseconds
 
 interface EditContextProps{
     file: string,
@@ -28,6 +30,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
     const [tools, setTools] = useState<Tool[]>([]);
     const [texts, setTexts] = useState<Text[]>([]);
     const [script, setScript] = useState<Block[]>([]);
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
     // The first tool in the script is not always the root tool, so we find it
     // by finding the first non-text tool in the script.
@@ -63,16 +66,19 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
             .finally(() => setLoading(false));
     }, []);
 
-    // note - this deletes text tools right now
+    // note: The update function is debounced to prevent too many requests. The
+    //       lodash debounce function was not used because it was causing issues.
     const update = useCallback(async () => {
-        updateScript(file, [root, ...tools]).catch((error) => console.error(error));
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(async () => {
+            await updateScript(file, [root, ...tools]).catch((error) => console.error(error));
+        }, DEBOUNCE_TIME);
     }, [file, root, tools]);
 
     useEffect(() => {
         if (loading) return;
         update();
     }, [root, tools])
-
 
     const newestToolName = useCallback(() => {
         let num = 1
