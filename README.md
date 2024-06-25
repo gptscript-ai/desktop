@@ -1,23 +1,51 @@
-# GPTStack UI
+# Next.js & NextUI Template
+
+This is a template for creating applications using Next.js 14 (app directory) and NextUI (v2).
+
+## Technologies Used
+
+- [Next.js 14](https://nextjs.org/docs/getting-started)
+- [NextUI v2](https://nextui.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Tailwind Variants](https://tailwind-variants.org)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [next-themes](https://github.com/pacocoursey/next-themes)
+
+## How to Use
+
+### Use the template with create-next-app
+
+To create a new project based on this template using `create-next-app`, run the following command:
 
 ```bash
-yarn
-NUXT_API=http://your-openai-api NUXT_API_KEY=your-key yarn dev
-# Open up https://localhost:3100/
+npx create-next-app -e https://github.com/nextui-org/next-app-template
 ```
+
+### Install dependencies
+
+You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
+
+```bash
+npm install
+```
+
+### Run the development server
+
+```bash
+npm run dev
+```
+
+### Setup pnpm (optional)
+
+If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+
+```bash
+public-hoist-pattern[]=*@nextui-org/*
+```
+
+After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
 
 ## License
 
-Copyright (c) 2024 [Acorn Labs, Inc.](http://acorn.io)
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Licensed under the [MIT license](https://github.com/nextui-org/next-app-template/blob/main/LICENSE).
