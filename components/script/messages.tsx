@@ -14,7 +14,7 @@ export enum MessageType {
 
 export type Message = {
     type: MessageType;
-    message: string;
+    message?: string;
     error?: string;
 	name?: string;
     calls?: Record<string, CallFrame>;
@@ -58,9 +58,11 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 						<div 
 							className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
 						>
-							<Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" remarkPlugins={[remarkGfm]}>
-								{messages[index].message}
-							</Markdown>
+							{ messages[index].message && 
+                                <Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" remarkPlugins={[remarkGfm]}>
+								    {messages[index].message}
+							    </Markdown>
+                            }
 							{ messages[index].component }
 							{message.error && (
 								<>

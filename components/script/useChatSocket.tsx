@@ -118,17 +118,7 @@ const useChatSocket = () => {
 		}
 
 		let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
-		let command = <></>
 		if (frame.displayText) {
-			command = (
-				<Code className="ml-4">
-					{frame.displayText.startsWith("Running") ? 
-						frame.displayText.replace("Running", "").replace(/`/g, "") : 
-						frame.displayText.replace(/`/g, "")
-					}
-				</Code>
-			);
-
 			const tool = frame.tool?.name?.replace('sys.', '')
 			confirmMessage = frame.tool?.source?.repo ? 
 				`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
@@ -136,20 +126,19 @@ const useChatSocket = () => {
 		}
 
 		const form = (
-			<>
-				{command}
-				<ConfirmForm
-					id={frame.id}
-					tool={frame.tool?.name || "main"}
-					addTrusted={addTrustedFor(frame)}
-					onSubmit={(response: AuthResponse) => {
-						socketRef.current?.emit("confirmResponse", response) 
-					}}
-				/>
-			</>
-		);
+            <ConfirmForm
+                id={frame.id}
+                message={confirmMessage}
+                command={frame.displayText}
+                tool={frame.tool?.name || "main"}
+                addTrusted={addTrustedFor(frame)}
+                onSubmit={(response: AuthResponse) => {
+                    socketRef.current?.emit("confirmResponse", response)
+                }}
+            />
+        );
 
-		let message: Message = { type: MessageType.Bot, message: confirmMessage, name: frame.tool?.name, component: form};
+		let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form};
 		if (latestBotMessageIndex.current === -1) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {

@@ -1,17 +1,21 @@
 import React, { useState, useEffect} from "react";
 import { GoCheckCircle, GoXCircle, GoCheckCircleFill} from "react-icons/go";
 import type { AuthResponse } from "@gptscript-ai/gptscript";
-import { Button, Tooltip } from "@nextui-org/react";
+import { Button, Code, Tooltip } from "@nextui-org/react";
+import Markdown from "react-markdown";
+import remarkGfm from 'remark-gfm'
 
 type ConfirmFormProps = {
     id: string;
-    onSubmit: (data: AuthResponse) => void;
     tool: string;
+    message?: string;
+    command?: string;
+    onSubmit: (data: AuthResponse) => void;
     addTrusted: () => void;
 };
 
 
-const ConfirmForm = ({ id, onSubmit, tool, addTrusted}: ConfirmFormProps) => {
+const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: ConfirmFormProps) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => { setLoading(false) }, [id]);
@@ -21,9 +25,24 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted}: ConfirmFormProps) => {
         onSubmit({ id, message: `denied by user`, accept })
     };
 
+    if (loading) {
+        return <div className="p-4">Calling tool {tool}...</div>
+    }
+
     return (
-        <form className="mx-2 mt-4">
-            <div className="flex justify-between">
+        <form>
+            <Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" remarkPlugins={[remarkGfm]}>
+                {message}
+            </Markdown>
+            {command && 
+                <Code className="ml-4">
+                    {command.startsWith("Running") ?
+                        command.replace("Running", "").replace(/`/g, "") :
+                        command.replace(/`/g, "")
+                    }
+                </Code>
+            }
+            <div className="flex justify-between mt-4 mx-4">
                 <Tooltip content="Allow this command to be executed" closeDelay={0.5} placement="top">
                     <Button
                         startContent={!loading && <GoCheckCircle />}
