@@ -19,7 +19,7 @@ export const runOnlySiteConfig = {
 	],
 	links: {
 		github: "https://github.com/gptscript-ai/gptscript",
-		twitter: "https://twitter.com/ibuildthecloud",
+		twitter: "https://x.com/GPTScript_ai",
 		discord: "https://discord.gg/eMrC4Uf8",
 	},
 };
@@ -52,7 +52,7 @@ export const siteConfig = {
 	],
 	links: {
 		github: "https://github.com/gptscript-ai/gptscript",
-		twitter: "https://twitter.com/ibuildthecloud",
-		discord: "https://discord.gg/eMrC4Uf8",
+		twitter: "https://x.com/GPTScript_ai",
+		discord: "https://discord.gg/QrZbhy55",
 	},
 };
