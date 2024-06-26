@@ -8,11 +8,12 @@
   "editor.quickSuggestions": {
     "strings": true
   },
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "eslint.format.enable": true,
   "eslint.run": "onSave",
   "eslint.validate": [
     "vue",
+    "react",
     "html",
     "javascript",
     "typescript"

@@ -5,7 +5,6 @@ import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
 import { Code } from '@nextui-org/react';
-import { set } from 'lodash';
 
 const useChatSocket = () => {
 	// State
