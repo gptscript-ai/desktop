@@ -94,7 +94,7 @@ const useChatSocket = () => {
 				/>
 			);
 
-			if (latestBotMessageIndex.current !== null) {
+			if (latestBotMessageIndex.current !== -1) {
 				// Update the message content
 				updatedMessages[latestBotMessageIndex.current].message = prompt.message;
 				updatedMessages[latestBotMessageIndex.current].component = form;
@@ -148,7 +148,7 @@ const useChatSocket = () => {
 
 		setMessages((prevMessages) => {
 			const updatedMessages = [...prevMessages];
-			if (latestBotMessageIndex.current !== null) {
+			if (latestBotMessageIndex.current !== -1) {
 				updatedMessages[latestBotMessageIndex.current].component = form;
 				updatedMessages[latestBotMessageIndex.current].message = confirmMessage;
 				updatedMessages[latestBotMessageIndex.current].name = frame.tool?.name;
