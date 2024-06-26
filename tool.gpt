@@ -59,6 +59,6 @@ start http://localhost:$env:PORT/run?file=$env:FILE
 name: open-windows 
 arg: port: The port the service is listening on
 
-#!/usr/bin/env sh
+#!/usr/bin/env powershell.exe
 
-open http://localhost:$env:PORT
+start http://localhost:$env:PORT
