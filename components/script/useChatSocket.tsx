@@ -50,7 +50,7 @@ const useChatSocket = () => {
 		setGenerating(true);
 		if ( content === "Waiting for model response..." &&
 			latestBotMessageIndex.current !== -1 &&
-			messagesRef.current[latestBotMessageIndex.current].message
+			messagesRef.current[latestBotMessageIndex.current]?.message
 		) return;
 
 		if (content.startsWith('<tool call>')) {

@@ -15,11 +15,11 @@ export async function PUT(
     try {
         const { name, tool } = params as any;
 
-        const script = await gptscript.parse(path.join(SCRIPTS_PATH,`${name}.gpt`));
+        const script = await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
         const updatedScript = updateScript(script, tool, (await req.json()) as Tool);
 
-        await fs.writeFile(path.join(SCRIPTS_PATH,`${name}.gpt`), await gptscript.stringify(updatedScript));
-        return Response.json(await gptscript.parse(path.join(SCRIPTS_PATH,`${name}.gpt`)));
+        await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gptscript.stringify(updatedScript));
+        return Response.json(await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
             return Response.json({ error: '.gpt file not found' }, { status: 404 });

@@ -67,7 +67,7 @@ const ChatBar = ({
                     onPress={onRestart}
                 />
             </Tooltip>
-            <Upload />
+            <Upload onRestart={onRestart}/>
             <Textarea
                 id="chatInput"
                 autoComplete="off"
