@@ -146,22 +146,25 @@ const useChatSocket = () => {
 			</>
 		);
 
-		setMessages((prevMessages) => {
-			const updatedMessages = [...prevMessages];
-			if (latestBotMessageIndex.current !== -1) {
-				updatedMessages[latestBotMessageIndex.current].component = form;
-				updatedMessages[latestBotMessageIndex.current].message = confirmMessage;
-				updatedMessages[latestBotMessageIndex.current].name = frame.tool?.name;
-			} else {
-				updatedMessages.push({ 
-					type: MessageType.Bot, 
-					message: confirmMessage,
-					component: form,
-					name: frame.tool?.name
-				});
-			}
-			return updatedMessages;
-		});
+		let message: Message = { type: MessageType.Bot, message: confirmMessage, name: frame.tool?.name, component: form};
+		if (latestBotMessageIndex.current === -1) {
+			latestBotMessageIndex.current = messagesRef.current.length;
+			setMessages((prevMessages) => {
+				const updatedMessages = [...prevMessages];
+				updatedMessages.push(message);
+				return updatedMessages;
+			});
+		} else {
+			setMessages((prevMessages) => {
+				const updatedMessages = [...prevMessages];
+				if (latestBotMessageIndex.current !== -1) {
+					updatedMessages[latestBotMessageIndex.current] = message;
+				} else {
+					updatedMessages[messagesRef.current.length - 1] = message;
+				}
+				return updatedMessages;
+			});
+		}
 	}, []);
 
 	const parseToolCall = (toolCall: string): {tool: string, params: string} => {
