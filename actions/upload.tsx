@@ -10,7 +10,7 @@ export async function uploadFile(formData: FormData) {
     const file = formData.get("file") as File;
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
-    await fs.writeFile(path.join(WORKSPACE_DIR,file.name), buffer);
+    await fs.writeFile(path.join(WORKSPACE_DIR(),file.name), buffer);
     revalidatePath("/");
 }
 
@@ -35,7 +35,7 @@ export async function deleteFile(path: string) {
 
 export async function lsWorkspaceFiles(): Promise<string> {
     try {
-        const dirents = await fs.readdir(WORKSPACE_DIR, { withFileTypes: true });
+        const dirents = await fs.readdir(WORKSPACE_DIR(), { withFileTypes: true });
         const filesOnly = dirents.filter((dirent: Dirent) => !dirent.isDirectory());
         return JSON.stringify(filesOnly);
     } catch (e) {

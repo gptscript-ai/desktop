@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { GoPlus, GoUpload, GoFile, GoX } from 'react-icons/go';
+import { useState, useRef, useEffect } from 'react';
+import { GoFileDirectory, GoUpload, GoFile, GoX } from 'react-icons/go';
 import Files from './upload/files';
-import { uploadFile, lsWorkspaceFiles } from './upload/actions';
+import { uploadFile, lsWorkspaceFiles } from '@/actions/upload';
 import { Dirent } from 'fs';
+import Workspace from '@/components/script/chatBar/upload/workspace';
 import { 
     Modal,
     ModalContent,
@@ -15,7 +16,11 @@ import {
     Divider,
 } from '@nextui-org/react';
 
-const UploadModal = () => {
+interface UploadModalProps {
+    onRestart: () => void;
+}
+
+const UploadModal = ({onRestart}: UploadModalProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [files, setFiles] = useState<Dirent[]>([]);
@@ -29,7 +34,6 @@ const UploadModal = () => {
             .then((data: string) => setFiles(JSON.parse(data) as Dirent[]))
             .catch((error) => console.error('Error fetching files:', error));
     }
-
 
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false);
@@ -54,12 +58,12 @@ const UploadModal = () => {
 
     return (
         <>
-            <Tooltip content="Add files to your workspace" closeDelay={0.5} placement="top">
+            <Tooltip content="View and manage your workspace" closeDelay={0.5} placement="top">
                 <Button
-                    startContent={<GoPlus />}
+                    startContent={<GoFileDirectory />}
                     isIconOnly
                     radius="full"
-                    className="mr-2 my-auto text-2xl"
+                    className="mr-2 my-auto text-xl"
                     color="primary"
                     onPress={handleOpen}
                 />
@@ -76,6 +80,7 @@ const UploadModal = () => {
                         <h1>Your workspace</h1>
                     </ModalHeader>
                     <ModalBody className="max-h-[900px] overflow-y-scroll">
+                        <Workspace onRestart={onRestart}/>
                         <ScrollShadow>
                             <Files files={files} setFiles={setFiles} />
                         </ScrollShadow>

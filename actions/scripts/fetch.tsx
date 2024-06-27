@@ -8,12 +8,12 @@ const external = (file: string): boolean => {
 };
 
 export const path = async (file: string): Promise<string> => {
-    if (!external(file)) return `${SCRIPTS_PATH}/${file}.gpt`;
+    if (!external(file)) return `${SCRIPTS_PATH()}/${file}.gpt`;
     return file;
 };
 
 export const fetchFullScript = async (file: string): Promise<Block[]> => {
-    if (!external(file)) file = `${SCRIPTS_PATH}/${file}.gpt`;
+    if (!external(file)) file = `${SCRIPTS_PATH()}/${file}.gpt`;
 
     const gptscript = new GPTScript();
     try {
@@ -24,7 +24,7 @@ export const fetchFullScript = async (file: string): Promise<Block[]> => {
 }
 
 export const fetchScript = async (file: string): Promise<Tool> => {
-    if (!external(file)) file = `${SCRIPTS_PATH}/${file}.gpt`;
+    if (!external(file)) file = `${SCRIPTS_PATH()}/${file}.gpt`;
 
     const gptscript = new GPTScript();
     try {
@@ -44,7 +44,7 @@ export const fetchScript = async (file: string): Promise<Tool> => {
 
 export const fetchScripts = async (): Promise<Record<string, string>> => {
     try {
-        const files = await fs.readdir(SCRIPTS_PATH);
+        const files = await fs.readdir(SCRIPTS_PATH());
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
         
         if (gptFiles.length === 0) throw new Error('no files found in scripts directory');
@@ -52,7 +52,7 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
         const gptscript = new GPTScript();
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
-            const script = await gptscript.parse(`${SCRIPTS_PATH}/${file}`);
+            const script = await gptscript.parse(`${SCRIPTS_PATH()}/${file}`);
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;
@@ -73,7 +73,7 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
 export const fetchScriptCode = async (file: string): Promise<string> => {
     file = file.includes('.gpt') ? file : `${file}.gpt`;
     try {
-        return await fs.readFile(`${SCRIPTS_PATH}/${file}`, 'utf-8');
+        return await fs.readFile(`${SCRIPTS_PATH()}/${file}`, 'utf-8');
     } catch (e) {
         throw e;
     }

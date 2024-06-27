@@ -9,7 +9,7 @@ const external = (file: string): boolean => {
 };
 
 export const path = async (file: string): Promise<string> => {
-    if (!external(file)) return `${SCRIPTS_PATH}/${file}.gpt`;
+    if (!external(file)) return `${SCRIPTS_PATH()}/${file}.gpt`;
     return file;
 };
 
@@ -18,7 +18,7 @@ export const updateScript = async (file: string, script: Block[]) => {
 
     const gptscript = new GPTScript();
     try {
-        await fs.writeFile(`${SCRIPTS_PATH}/${file}.gpt`, await gptscript.stringify(script));
+        await fs.writeFile(`${SCRIPTS_PATH()}/${file}.gpt`, await gptscript.stringify(script));
     } catch (e) {
         throw e;
     }

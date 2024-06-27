@@ -9,6 +9,7 @@ import Loading from "@/components/loading";
 import useChatSocket from '@/components/script/useChatSocket';
 import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
+import { getWorkspaceDir } from "@/actions/workspace";
 
 interface ScriptProps {
     file: string;
@@ -34,7 +35,12 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	useEffect(() => {
 		if (hasRun || !socket || !connected) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
-			path(file).then((path) => { socket.emit("run", path, tool.name, formValues) });
+			path(file)
+                .then(async (path) => { 
+                    const workspace = await getWorkspaceDir()
+                    return { path, workspace}
+                })
+                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace) });
 			setHasRun(true);
 		}
 	}, [tool, file, formValues]);

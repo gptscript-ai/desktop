@@ -7,7 +7,7 @@ const gptscript = new GPTScript();
 
 export async function GET() {
     try {
-        const files = await fs.readdir(SCRIPTS_PATH);
+        const files = await fs.readdir(SCRIPTS_PATH());
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
         
         if (gptFiles.length === 0) 
@@ -15,11 +15,11 @@ export async function GET() {
 
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
-            const script = await gptscript.parse(`${SCRIPTS_PATH}/${file}`);
+            const script = await gptscript.parse(`${SCRIPTS_PATH()}/${file}`);
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;
-                description = tool.description;
+                description = tool.description || '';
                 break;
             }
             scripts[file] = description || '';
@@ -38,7 +38,7 @@ export async function GET() {
 
 export async function POST(_req: Request) {
     try {
-        const files = await fs.readdir(SCRIPTS_PATH);
+        const files = await fs.readdir(SCRIPTS_PATH());
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
 
         let id = 0;
@@ -47,7 +47,7 @@ export async function POST(_req: Request) {
             id++;
             newFileName = `new-file-${id}.gpt`;
         }
-        await fs.writeFile(`${SCRIPTS_PATH}/${newFileName}`, '---\nname: main');
+        await fs.writeFile(`${SCRIPTS_PATH()}/${newFileName}`, '---\nname: main');
         return Response.json({ file: newFileName });
     } catch (e) {
         return Response.json({ error: e }, { status: 500 });

@@ -7,7 +7,6 @@ import dotenv from 'dotenv';
 dotenv.config({path: ['.env', '.env.local']});
 
 const ENABLE_CACHE = process.env.ENABLE_CACHE === "true";
-const WORKSPACE_DIR = process.env.GPTSCRIPT_WORKSPACE_DIR || "";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
@@ -24,8 +23,8 @@ app.prepare().then(() => {
 
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");
-		socket.on("run", async (file, tool, args) => {
-			setImmediate(() => streamExecFileWithEvents(file, tool, args, socket, gptscript));
+		socket.on("run", async (file, tool, args, workspace) => {
+			setImmediate(() => streamExecFileWithEvents(file, tool, args, workspace, socket, gptscript));
 		});
 	});
 
@@ -39,11 +38,13 @@ app.prepare().then(() => {
 		});
 });
 
-const streamExecFileWithEvents = async (file, tool, args, socket, gptscript) => {
+const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gptscript) => {
+    process.env.GPTSCRIPT_WORKSPACE_DIR = workspace;
+    console.log(workspace, process.env.GPTSCRIPT_WORKSPACE_DIR )
 	const opts = {
 		input: JSON.stringify(args || {}),
 		disableCache: !ENABLE_CACHE,
-		workspace: WORKSPACE_DIR, 
+        workspace: workspace,
 		prompt: true,
 		confirm: true,
 	};
