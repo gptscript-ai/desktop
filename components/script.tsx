@@ -69,7 +69,12 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	const handleFormSubmit = () => {
 		setShowForm(false);
 		setMessages([]);
-		path(file).then((path) => { socket?.emit("run", path, tool.name, formValues) });
+		path(file)
+            .then(async (path) => { 
+                const workspace = await getWorkspaceDir()
+                return { path, workspace}
+            })
+            .then(({path, workspace}) => { socket?.emit("run", path, tool.name, formValues, workspace) });
 		setHasRun(true);
 	};
 

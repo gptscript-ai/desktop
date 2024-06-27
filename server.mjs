@@ -39,8 +39,6 @@ app.prepare().then(() => {
 });
 
 const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gptscript) => {
-    process.env.GPTSCRIPT_WORKSPACE_DIR = workspace;
-    console.log(workspace, process.env.GPTSCRIPT_WORKSPACE_DIR )
 	const opts = {
 		input: JSON.stringify(args || {}),
 		disableCache: !ENABLE_CACHE,

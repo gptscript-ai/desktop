@@ -30,7 +30,7 @@ const abbreviate = (name: string) => {
 const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
 	<div>
 		{messages.map((message, index) =>
-			message.type === MessageType.User ? (
+			message?.type === MessageType.User ? (
 				<div key={index} className="flex flex-col items-end mb-10">
 					<p className="whitespace-pre-wrap rounded-2xl bg-blue-500 text-white py-2 px-4 max-w-full">
 						{messages[index].message}
@@ -41,17 +41,17 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 					<div className="flex gap-2 w-full">
 						{ !noAvatar &&
 							<Tooltip 
-								content={`Sent from ${message.name || "Main"}`}
+								content={`Sent from ${message?.name || "Main"}`}
 								placement="bottom"
 								closeDelay={0.5}
 							>
 								<Avatar
 									showFallback
-									name={abbreviate(message.name || 'Main')} 
-									icon={!message.name && <GoSquirrel className="text-xl" />}
+									name={abbreviate(message?.name || 'Main')} 
+									icon={!message?.name && <GoSquirrel className="text-xl" />}
 									className="w-[40px] cursor-default"
 									classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
-									color={message.error ? "danger": "default"} 
+									color={message?.error ? "danger": "default"} 
 								/>
 							</Tooltip>
 						}
@@ -64,9 +64,9 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
 							    </Markdown>
                             }
 							{ messages[index].component }
-							{message.error && (
+							{message?.error && (
 								<>
-									<p className="text-danger text-base pl-4 pb-6">{message.error}</p>
+									<p className="text-danger text-base pl-4 pb-6">{message?.error}</p>
 									<Button 
 										startContent={<GoIssueReopened className="text-lg"/>}
 										color="danger"
