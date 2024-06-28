@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({path: ['.env', '.env.local']});
 
-const ENABLE_CACHE = process.env.ENABLE_CACHE === "true";
+const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
@@ -41,7 +41,7 @@ app.prepare().then(() => {
 const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gptscript) => {
 	const opts = {
 		input: JSON.stringify(args || {}),
-		disableCache: !ENABLE_CACHE,
+		disableCache: DISABLE_CACHE,
         workspace: workspace,
 		prompt: true,
 		confirm: true,
