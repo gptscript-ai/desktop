@@ -9,7 +9,7 @@ import {
 } from "@nextui-org/react";
 import { Link } from "@nextui-org/link";
 import { link as linkStyles } from "@nextui-org/theme";
-import { siteConfig, runOnlySiteConfig } from "@/config/site";
+import { siteConfig } from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -22,7 +22,6 @@ import { Logo } from "@/components/icons";
 
 
 export const Navbar = () => {
-	const usedConfig = process.env.BUILDER_UI === "true" ? siteConfig : runOnlySiteConfig;
 	return (
 		<NextUINavbar maxWidth="xl" position="sticky">
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -33,7 +32,7 @@ export const Navbar = () => {
 					</NextLink>
 				</NavbarBrand>
 				<ul className="hidden lg:flex gap-4 justify-start ml-2">
-					{usedConfig.navItems.map((item) => (
+					{siteConfig.navItems.map((item) => (
 						<NavbarItem key={item.href}>
 							<NextLink
 								className={clsx(
@@ -57,13 +56,13 @@ export const Navbar = () => {
 				justify="end"
 			>
 				<NavbarItem className="hidden sm:flex gap-2">
-					<Link isExternal href={usedConfig.links.twitter} aria-label="Twitter">
+					<Link isExternal href={siteConfig.links.twitter} aria-label="Twitter">
 						<TwitterIcon className="text-default-500" />
 					</Link>
-					<Link isExternal href={usedConfig.links.discord} aria-label="Discord">
+					<Link isExternal href={siteConfig.links.discord} aria-label="Discord">
 						<DiscordIcon className="text-default-500" />
 					</Link>
-					<Link isExternal href={usedConfig.links.github} aria-label="Github">
+					<Link isExternal href={siteConfig.links.github} aria-label="Github">
 						<GithubIcon className="text-default-500" />
 					</Link>
 					<ThemeSwitch />
@@ -73,7 +72,7 @@ export const Navbar = () => {
 			</NavbarContent>
 
 			<NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-				<Link isExternal href={usedConfig.links.github} aria-label="Github">
+				<Link isExternal href={siteConfig.links.github} aria-label="Github">
 					<GithubIcon className="text-default-500" />
 				</Link>
 				<ThemeSwitch />
@@ -82,7 +81,7 @@ export const Navbar = () => {
 
 			<NavbarMenu>
 				<div className="mx-4 mt-2 flex flex-col gap-2">
-					{usedConfig.navMenuItems.map((item, index) => (
+					{siteConfig.navMenuItems.map((item, index) => (
 						<NavbarMenuItem key={`${item}-${index}`}>
 							<Link
 								color={"foreground"}

@@ -13,7 +13,7 @@ import {
     Button,
 } from "@nextui-org/react";
 
-export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
+export default function Scripts() {
     const [files, setFiles] = useState<Record<string,string>>({});
     const [loading, setLoading] = useState(true);
 
@@ -41,17 +41,15 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
 
     const ScriptItems = () => files && Object.keys(files) ? (
         <div className="grid grid-cols-2 gap-6">
-            { buildOptions &&
-                <Button
-                    size="lg"
-                    startContent={<VscNewFile/>}
-                    color="primary"
-                    className="col-span-2"
-                    onPress={() => {{ window.location.href = '/edit'}}}
-                >
-                    Create a new script
-                </Button>
-            }
+            <Button
+                size="lg"
+                startContent={<VscNewFile/>}
+                color="primary"
+                className="col-span-2"
+                onPress={() => {{ window.location.href = '/edit'}}}
+            >
+                Create a new script
+            </Button>
             { !loading && Object.keys(files).length === 0 && 
                 <Card className="col-span-2 p-4 text-center">
                     <CardHeader>
@@ -69,16 +67,11 @@ export default function Scripts({buildOptions}: {buildOptions?: boolean}) {
                             <FaRegFileCode />
                             {file.replace('.gpt', '')}
                         </div>
-                        { buildOptions ? 
-                            <div className="flex-col flex absolute bottom-1 right-4">
-                                <Button startContent={<GoPaperAirplane />} onPress={() => {{ window.location.href = `/run?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
-                                <Button startContent={<GoPencil />} onPress={() => {{ window.location.href = `/edit?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
-                                <Button startContent={<GoTrash />} onPress={() => {deleteFile(file.replace('.gpt', ''))}}radius="full" variant="light" isIconOnly/>
-                            </div> :
-                            <div className="absolute right-4 top-10">
-                                <Button startContent={<GoPaperAirplane />} onPress={() => {{ window.location.href = `/run?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" size="lg" isIconOnly/>    
-                            </div>
-                        }
+                        <div className="flex-col flex absolute bottom-1 right-4">
+                            <Button startContent={<GoPaperAirplane />} onPress={() => {{ window.location.href = `/run?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
+                            <Button startContent={<GoPencil />} onPress={() => {{ window.location.href = `/edit?file=${file.replace('.gpt', '')}`;}}} radius="full" variant="light" isIconOnly/>
+                            <Button startContent={<GoTrash />} onPress={() => {deleteFile(file.replace('.gpt', ''))}}radius="full" variant="light" isIconOnly/>
+                        </div>
                     </CardHeader>
                     <CardBody>
                         <p className="truncate w-4/5 text-zinc-500">{files[file] ? files[file] : "No description provided"}</p>

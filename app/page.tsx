@@ -14,7 +14,7 @@ export default function Home() {
 			</div>
 
 			<div className="w-full">
-				<Scripts buildOptions={process.env.BUILDER_UI === "true"}/>
+				<Scripts />
 			</div>
 		</section>
 	);
