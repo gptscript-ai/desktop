@@ -60,11 +60,11 @@ const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gpt
 	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}) );
 
 	// Handle prompt events
-	runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", data));
+	runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
 	socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
 
 	// Handle confirm events
-	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
+	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
 	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
     socket.on("interrupt", async() => {
@@ -87,11 +87,11 @@ const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gpt
 			runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
 
 			// Handle prompt events
-			runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", data));
+			runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
 			socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
 
 			// Handle confirm events
-			runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", data));
+			runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
 			socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 		});
 	} catch (e) {

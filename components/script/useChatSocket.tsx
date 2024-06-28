@@ -75,7 +75,6 @@ const useChatSocket = () => {
 					updatedMessages[messagesRef.current.length - 1] = message;
 				}
 				return updatedMessages;
-
 			});
 		}
 
@@ -85,12 +84,12 @@ const useChatSocket = () => {
 		}
 	}, []);
 
-	const handlePromptRequest = useCallback((prompt: PromptFrame) => {
+	const handlePromptRequest = useCallback(({frame, state}: {frame: PromptFrame, state: Record<string, CallFrame>}) => {
 		setMessages((prevMessages) => {
 			const updatedMessages = [...prevMessages];
 			const form = (
 				<PromptForm 
-					frame={prompt} 
+					frame={frame} 
 					onSubmit={(response: PromptResponse) => { 
 						socketRef.current?.emit("promptResponse", response) 
 					}}
@@ -99,17 +98,18 @@ const useChatSocket = () => {
 
 			if (latestBotMessageIndex.current !== -1) {
 				// Update the message content
-				updatedMessages[latestBotMessageIndex.current].message = prompt.message;
+				updatedMessages[latestBotMessageIndex.current].message = frame.message;
 				updatedMessages[latestBotMessageIndex.current].component = form;
+                updatedMessages[latestBotMessageIndex.current].calls = state;
 			} else {
 				// If there are no previous messages, create a new message
-				updatedMessages.push({ type: MessageType.Bot, message: prompt.message, component: form });
+				updatedMessages.push({ type: MessageType.Bot, message: frame.message, component: form, calls: state});
 			}
 			return updatedMessages;
 		});
 	}, []);
 
-	const handleConfirmRequest = useCallback((frame: CallFrame) => {
+	const handleConfirmRequest = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
 		if (!frame.tool) return;
 
 		if (alreadyAllowed(frame)) {
@@ -138,7 +138,7 @@ const useChatSocket = () => {
             />
         );
 
-		let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form};
+		let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form, calls: state};
 		if (latestBotMessageIndex.current === -1) {
 			latestBotMessageIndex.current = messagesRef.current.length;
 			setMessages((prevMessages) => {
@@ -227,8 +227,8 @@ const useChatSocket = () => {
 		socket.on("disconnect", () => setConnected(false));
 		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
 		socket.on("error", (data: string) => handleError(data));
-		socket.on("promptRequest", (data: PromptFrame) => { handlePromptRequest(data) });
-		socket.on("confirmRequest", (data: CallFrame) => { handleConfirmRequest(data) });
+		socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
+		socket.on("confirmRequest", (data: {frame: CallFrame, state: any}) => { handleConfirmRequest(data) });
 
 		setSocket(socket);
 	}
