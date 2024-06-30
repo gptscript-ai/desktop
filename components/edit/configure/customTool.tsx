@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-import { Tool, Block } from "@gptscript-ai/gptscript";
+import { Tool, Property } from "@gptscript-ai/gptscript";
 import Imports from "@/components/edit/configure/imports";
+import Params from "@/components/edit/configure/params";
 import {
     Textarea,
     Input,
@@ -9,7 +10,6 @@ import {
     Button,
 } from "@nextui-org/react";
 import { EditContext } from "@/contexts/edit";
-import { debounce, set } from "lodash";
 import { GoTrash } from "react-icons/go";
 
 interface ConfigureProps {
@@ -71,6 +71,10 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
         setCustomTool({...customTool, context: newAgents});
     }, [customTool]);
 
+    const setParams = useCallback((newParams: Record<string, Property>) => {
+        setCustomTool(prevCustomTool => ({...prevCustomTool, arguments: {properties: newParams, type: "object"}}));
+    }, [setCustomTool]);
+
     const abbreviate = (name: string) => {
         const words = name.split(/(?=[A-Z])|[\s_-]/);
         const firstLetters = words.map(word => word[0]);
@@ -120,7 +124,6 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
-
                 <Textarea
                     fullWidth
                     variant="bordered"
@@ -137,6 +140,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     value={customTool.instructions}
                     onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
                 />
+                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams} />
                 <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
                 <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts} label={"Context Tool"}/>
                 <Imports className="py-2" tools={customTool.agents} setTools={setCustomToolAgents} label={"Agent Tool"}/>

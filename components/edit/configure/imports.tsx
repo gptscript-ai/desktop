@@ -61,21 +61,17 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
             {tools && tools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
                     {tools.map((tool, i) => (
-                        <div
-                            key={i}
-                            className="w-full border-2 dark:border-zinc-800 text-sm pl-2 rounded-lg flex items-center justify-between"
-                        >
-                            <p className="truncate">{tool}</p>
-                            <div className="">
-                                <Button
-                                    className="w-1/6 ml-2 h-[28px]"
-                                    isIconOnly
-                                    size="sm"
-                                    variant="light"
-                                    startContent={<GoTrash/>}
-                                    onPress={() => handleDeleteTool(tool)}
-                                />
-                            </div>
+                        <div key={i} className="flex space-x-2">
+                            <p className="truncate w-full border-2 dark:border-zinc-800 text-sm pt-1 pl-2 rounded-lg">
+                                {tool}
+                            </p>
+                            <Button
+                                variant="bordered"
+                                isIconOnly
+                                size="sm"
+                                startContent={<GoTrash/>}
+                                onPress={() => handleDeleteTool(tool)}
+                            />
                         </div>
                     ))}
                 </div>
