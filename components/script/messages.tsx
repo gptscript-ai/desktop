@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { GoSquirrel } from "react-icons/go";
 import Markdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
+import rehypeExternalLinks from 'rehype-external-links'
 import { Avatar, Button, Tooltip } from "@nextui-org/react";
 import type { CallFrame } from "@gptscript-ai/gptscript";
 import Calls from "./messages/calls"
@@ -26,6 +27,10 @@ const abbreviate = (name: string) => {
 	const firstLetters = words.map(word => word[0]);
 	return firstLetters.slice(0, 2).join('').toUpperCase();
 }
+
+const linkRenderer = (props: { href: string, children: ReactNode }) => {
+    return <a href={props.href} target="_blank">{props.children}</a>
+}  
 
 const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
 	<div>
@@ -61,7 +66,11 @@ const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: bool
                                 className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${message.error ? "border-danger dark:border-danger" : ""}`}
                             >
                                 { messages[index].message && 
-                                    <Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" remarkPlugins={[remarkGfm]}>
+                                    <Markdown 
+                                        className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" 
+                                        remarkPlugins={[remarkGfm]}
+                                        rehypePlugins={[[rehypeExternalLinks, {target: '_blank'}]]}
+                                    >
                                         {messages[index].message}
                                     </Markdown>
                                 }

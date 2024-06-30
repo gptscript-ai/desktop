@@ -46,6 +46,7 @@
         "react-markdown": "^9.0.1",
         "react-svg": "^16.1.34",
         "reactflow": "^11.11.2",
+        "rehype-external-links": "^3.0.0",
         "remark-gfm": "^4.0.0",
         "socket.io": "^4.7.5",
         "socket.io-client": "^4.7.5",
