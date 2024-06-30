@@ -66,6 +66,13 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 		}
 	}, [messages]);
 
+    useEffect(() => {
+        if (!connected) return;
+        if (messages.length === 0) {
+            setMessages([{ type: MessageType.Alert, message: `Connected with and running ${file}!`, name: "System" }])
+        }
+    }, [connected, messages, file]);
+
 	const handleFormSubmit = () => {
 		setShowForm(false);
 		setMessages([]);
@@ -99,7 +106,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 
 	return (
 		<div className={`h-full w-full ${className}`}>
-			{messages.length || (showForm && hasParams)  ? (<>
+			{connected || (showForm && hasParams)  ? (<>
 				<div
 					id="small-message"
 					className={`px-6 pt-10 overflow-y-auto w-full items-center ${messagesHeight}`}
