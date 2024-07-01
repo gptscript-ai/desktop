@@ -4,129 +4,128 @@ import type { CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptsc
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
-import { Code } from '@nextui-org/react';
 
 const useChatSocket = () => {
-	// State
-	const [socket, setSocket] = useState<Socket | null>(null);
-	const [connected, setConnected] = useState(false);
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [generating, setGenerating] = useState(false);
+    // State
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [connected, setConnected] = useState(false);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [generating, setGenerating] = useState(false);
     const [running, setRunning] = useState(false);
 
-	// Refs
-	const socketRef = useRef<Socket | null>(null);
-	const messagesRef = useRef(messages);
-	const latestBotMessageIndex = useRef<number>(-1);
-	const trustedRef = useRef<Record<string, boolean>>({});
-	const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
+    // Refs
+    const socketRef = useRef<Socket | null>(null);
+    const messagesRef = useRef(messages);
+    const latestBotMessageIndex = useRef<number>(-1);
+    const trustedRef = useRef<Record<string, boolean>>({});
+    const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
-	// update the refs as the state changes
-	useEffect(() => { messagesRef.current = messages }, [messages]);
-	useEffect(() => { socketRef.current = socket }, [socket]);
+    // update the refs as the state changes
+    useEffect(() => { messagesRef.current = messages }, [messages]);
+    useEffect(() => { socketRef.current = socket }, [socket]);
 
-	const handleError = useCallback((error: string) => {
-		setMessages((prevMessages) => {
-			const updatedMessages = [...prevMessages];
-			if (latestBotMessageIndex.current !== -1) {
-				// Append the error to the latest message
-				updatedMessages[latestBotMessageIndex.current].error = `${error}`
-			} else {
-				// If there are no previous messages, create a new error message
-				updatedMessages.push({ type: MessageType.Bot, message: "An error occured before the first message.", error: error });
-			}
-			return updatedMessages;
-		});
-	}, []);
+    const handleError = useCallback((error: string) => {
+        setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            if (latestBotMessageIndex.current !== -1) {
+                // Append the error to the latest message
+                updatedMessages[latestBotMessageIndex.current].error = `${error}`
+            } else {
+                // If there are no previous messages, create a new error message
+                updatedMessages.push({ type: MessageType.Bot, message: "An error occured before the first message.", error: error });
+            }
+            return updatedMessages;
+        });
+    }, []);
 
-	// handles progress being recieved from the server (callProgress style frames).
-	const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
-		const isMainContent = frame.output &&
-			frame.output.length > 0 &&
-			(!frame.parentID || frame.tool?.chat) &&
-			!frame.output[frame.output.length - 1].subCalls
+    // handles progress being recieved from the server (callProgress style frames).
+    const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
+        const isMainContent = frame.output &&
+            frame.output.length > 0 &&
+            (!frame.parentID || frame.tool?.chat) &&
+            !frame.output[frame.output.length - 1].subCalls
 
-		let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
-		if (!content) return;
-		setGenerating(true);
-		if ( content === "Waiting for model response..." &&
-			latestBotMessageIndex.current !== -1 &&
-			messagesRef.current[latestBotMessageIndex.current]?.message
-		) return;
+        let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
+        if (!content) return;
+        setGenerating(true);
+        if ( content === "Waiting for model response..." &&
+            latestBotMessageIndex.current !== -1 &&
+            messagesRef.current[latestBotMessageIndex.current]?.message
+        ) return;
 
-		if (content.startsWith('<tool call>')) {
-			const parsedToolCall = parseToolCall(content);
-			content = `Calling tool ${parsedToolCall.tool}...`;
-		}
+        if (content.startsWith('<tool call>')) {
+            const parsedToolCall = parseToolCall(content);
+            content = `Calling tool ${parsedToolCall.tool}...`;
+        }
 
-		let message: Message = { type: MessageType.Bot, message: content, calls: state, name: frame.tool?.name };
-		if (latestBotMessageIndex.current === -1) {
-			latestBotMessageIndex.current = messagesRef.current.length;
-			setMessages((prevMessages) => {
-				const updatedMessages = [...prevMessages];
-				updatedMessages.push(message);
-				return updatedMessages;
-			});
-		} else {
-			setMessages((prevMessages) => {
-				const updatedMessages = [...prevMessages];
-				if (latestBotMessageIndex.current !== -1) {
-					updatedMessages[latestBotMessageIndex.current] = message;
-				} else {
-					updatedMessages[messagesRef.current.length - 1] = message;
-				}
-				return updatedMessages;
-			});
-		}
+        let message: Message = { type: MessageType.Bot, message: content, calls: state, name: frame.tool?.name };
+        if (latestBotMessageIndex.current === -1) {
+            latestBotMessageIndex.current = messagesRef.current.length;
+            setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                updatedMessages.push(message);
+                return updatedMessages;
+            });
+        } else {
+            setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                if (latestBotMessageIndex.current !== -1) {
+                    updatedMessages[latestBotMessageIndex.current] = message;
+                } else {
+                    updatedMessages[messagesRef.current.length - 1] = message;
+                }
+                return updatedMessages;
+            });
+        }
 
-		if (isMainContent && frame.type == "callFinish") {
-			setGenerating(false);
-			latestBotMessageIndex.current = -1
-		}
-	}, []);
+        if (isMainContent && frame.type == "callFinish") {
+            setGenerating(false);
+            latestBotMessageIndex.current = -1
+        }
+    }, []);
 
-	const handlePromptRequest = useCallback(({frame, state}: {frame: PromptFrame, state: Record<string, CallFrame>}) => {
-		setMessages((prevMessages) => {
-			const updatedMessages = [...prevMessages];
-			const form = (
-				<PromptForm 
-					frame={frame} 
-					onSubmit={(response: PromptResponse) => { 
-						socketRef.current?.emit("promptResponse", response) 
-					}}
-				/>
-			);
+    const handlePromptRequest = useCallback(({frame, state}: {frame: PromptFrame, state: Record<string, CallFrame>}) => {
+        setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const form = (
+                <PromptForm 
+                    frame={frame} 
+                    onSubmit={(response: PromptResponse) => { 
+                        socketRef.current?.emit("promptResponse", response) 
+                    }}
+                />
+            );
 
-			if (latestBotMessageIndex.current !== -1) {
-				// Update the message content
-				updatedMessages[latestBotMessageIndex.current].message = frame.message;
-				updatedMessages[latestBotMessageIndex.current].component = form;
+            if (latestBotMessageIndex.current !== -1) {
+                // Update the message content
+                updatedMessages[latestBotMessageIndex.current].message = frame.message;
+                updatedMessages[latestBotMessageIndex.current].component = form;
                 updatedMessages[latestBotMessageIndex.current].calls = state;
-			} else {
-				// If there are no previous messages, create a new message
-				updatedMessages.push({ type: MessageType.Bot, message: frame.message, component: form, calls: state});
-			}
-			return updatedMessages;
-		});
-	}, []);
+            } else {
+                // If there are no previous messages, create a new message
+                updatedMessages.push({ type: MessageType.Bot, message: frame.message, component: form, calls: state});
+            }
+            return updatedMessages;
+        });
+    }, []);
 
-	const handleConfirmRequest = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
-		if (!frame.tool) return;
+    const handleConfirmRequest = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
+        if (!frame.tool) return;
 
-		if (alreadyAllowed(frame)) {
-			socketRef.current?.emit("confirmResponse", { id: frame.id, accept: true});
-			return;
-		}
+        if (alreadyAllowed(frame)) {
+            socketRef.current?.emit("confirmResponse", { id: frame.id, accept: true});
+            return;
+        }
 
-		let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
-		if (frame.displayText) {
-			const tool = frame.tool?.name?.replace('sys.', '')
-			confirmMessage = frame.tool?.source?.repo ? 
-				`Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
-				`Proceed with running the following (or allow all **${tool}** calls)?`
-		}
+        let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
+        if (frame.displayText) {
+            const tool = frame.tool?.name?.replace('sys.', '')
+            confirmMessage = frame.tool?.source?.repo ? 
+                `Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
+                `Proceed with running the following (or allow all **${tool}** calls)?`
+        }
 
-		const form = (
+        const form = (
             <ConfirmForm
                 id={frame.id}
                 message={confirmMessage}
@@ -139,118 +138,127 @@ const useChatSocket = () => {
             />
         );
 
-		let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form, calls: state};
-		if (latestBotMessageIndex.current === -1) {
-			latestBotMessageIndex.current = messagesRef.current.length;
-			setMessages((prevMessages) => {
-				const updatedMessages = [...prevMessages];
-				updatedMessages.push(message);
-				return updatedMessages;
-			});
-		} else {
-			setMessages((prevMessages) => {
-				const updatedMessages = [...prevMessages];
-				if (latestBotMessageIndex.current !== -1) {
-					updatedMessages[latestBotMessageIndex.current] = message;
-				} else {
-					updatedMessages[messagesRef.current.length - 1] = message;
-				}
-				return updatedMessages;
-			});
-		}
-	}, []);
+        let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form, calls: state};
+        if (latestBotMessageIndex.current === -1) {
+            latestBotMessageIndex.current = messagesRef.current.length;
+            setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                updatedMessages.push(message);
+                return updatedMessages;
+            });
+        } else {
+            setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                if (latestBotMessageIndex.current !== -1) {
+                    updatedMessages[latestBotMessageIndex.current] = message;
+                } else {
+                    updatedMessages[messagesRef.current.length - 1] = message;
+                }
+                return updatedMessages;
+            });
+        }
+    }, []);
 
-	const parseToolCall = (toolCall: string): {tool: string, params: string} => {
-		const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
-		return { tool, params };
-	}
+    const parseToolCall = (toolCall: string): {tool: string, params: string} => {
+        const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
+        return { tool, params };
+    }
 
-	const trimRepo = (repo: string): string => {
-		return repo.replace("https://", "").replace("http://", "").replace(".git", "");
-	}
+    const trimRepo = (repo: string): string => {
+        return repo.replace("https://", "").replace("http://", "").replace(".git", "");
+    }
 
-	const alreadyAllowed = (frame: CallFrame): boolean => {
-		if (!frame.tool) return false;
+    const alreadyAllowed = (frame: CallFrame): boolean => {
+        if (!frame.tool) return false;
 
-		// Check if the tool has already been allowed
-		if (frame.tool.name && trustedRef.current[frame.tool.name]) return true;
+        // Check if the tool has already been allowed
+        if (frame.tool.name && trustedRef.current[frame.tool.name]) return true;
 
 
-		// If this tool have a source repo, check if it is trusted. If it isn't already,
-		// return false since we need to ask the user for permission.
-		if (frame.tool.source?.repo) {
-			const repo = frame.tool?.source.repo.Root;
-			const trimmedRepo = trimRepo(repo);
-			for (const prefix of trustedRepoPrefixesRef.current) {
-				if (trimmedRepo.startsWith(prefix)) {
-					return true;
-				}
-			}
-			return false
-		}
+        // If this tool have a source repo, check if it is trusted. If it isn't already,
+        // return false since we need to ask the user for permission.
+        if (frame.tool.source?.repo) {
+            const repo = frame.tool?.source.repo.Root;
+            const trimmedRepo = trimRepo(repo);
+            for (const prefix of trustedRepoPrefixesRef.current) {
+                if (trimmedRepo.startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false
+        }
 
-		// If the tool is a system tool and wasn't already trusted, return false.
-		if (frame.tool?.name?.startsWith("sys.")) return false;
+        // If the tool is a system tool and wasn't already trusted, return false.
+        if (frame.tool?.name?.startsWith("sys.")) return false;
 
-		// Automatically allow all other tools
-		return true;
-	}
+        // Automatically allow all other tools
+        return true;
+    }
 
-	const addTrustedFor = (frame: CallFrame) => {
-		if (!frame.tool) return () => {};
+    const addTrustedFor = (frame: CallFrame) => {
+        if (!frame.tool) return () => {};
 
-		return frame.tool.source?.repo ? 
-			() => {
-				const repo = frame.tool!.source?.repo!.Root;
-				const trimmedRepo = trimRepo(repo || "");
-				trustedRepoPrefixesRef.current.push(trimmedRepo);
-			} :
-			() => {
-				if (frame.tool?.name) trustedRef.current[frame.tool.name] = true;
-			}
-	}
+        return frame.tool.source?.repo ? 
+            () => {
+                const repo = frame.tool!.source?.repo!.Root;
+                const trimmedRepo = trimRepo(repo || "");
+                trustedRepoPrefixesRef.current.push(trimmedRepo);
+            } :
+            () => {
+                if (frame.tool?.name) trustedRef.current[frame.tool.name] = true;
+            }
+    }
 
-	const loadSocket = () => {
-		const socket = io();
+    const loadSocket = () => {
+        const socket = io();
 
-		socket.off("connect");
-		socket.off("disconnect")
-		socket.off("progress");
-		socket.off("error");
-		socket.off("botMessage");
-		socket.off("promptRequest");
-		socket.off("confirmRequest");
+        socket.off("connect");
+        socket.off("disconnect")
+        socket.off("progress");
+        socket.off("error");
+        socket.off("botMessage");
+        socket.off("promptRequest");
+        socket.off("confirmRequest");
 
-		setConnected(false);
-		setMessages([]);
+        setConnected(false);
+        setMessages([]);
 
-		socket.on("connect", () => setConnected(true));
-		socket.on("disconnect", () => setConnected(false));
+        socket.on("connect", () => setConnected(true));
+        socket.on("disconnect", () => setConnected(false));
         socket.on("running", () => setRunning(true));
-		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
-		socket.on("error", (data: string) => handleError(data));
-		socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
-		socket.on("confirmRequest", (data: {frame: CallFrame, state: any}) => { handleConfirmRequest(data) });
+        socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
+        socket.on("error", (data: string) => handleError(data));
+        socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
+        socket.on("confirmRequest", (data: {frame: CallFrame, state: any}) => { handleConfirmRequest(data) });
 
-		setSocket(socket);
-	}
+        setSocket(socket);
+    }
 
-
-	useEffect(() => { loadSocket() }, []);
-	const restart = useCallback(() => {
+    useEffect(() => { loadSocket() }, []);
+    const restart = useCallback(() => {
         trustedRef.current = {};
         trustedRepoPrefixesRef.current = ["github.com/gptscript-ai/context"];
-		loadSocket();
-	}, [socket]);
+        loadSocket();
+    }, [socket]);
 
     const interrupt = useCallback(() => {
         if (!socket || !connected) return;
-		latestBotMessageIndex.current = -1
+        latestBotMessageIndex.current = -1
         socket.emit("interrupt");
-		setGenerating(false);
+        setGenerating(false);
     }, [socket, connected]);
 
-	return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating, running};
+    useEffect(() => {
+        if (running && messages.length === 0) {
+            setMessages([
+                { type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System" },
+                { type: MessageType.Bot, message: "Waiting for model response..." }
+            ]);
+            latestBotMessageIndex.current = 1;
+        }
+    }, [running, messages]);
+
+    return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating, running};
 };
 
 export default useChatSocket;

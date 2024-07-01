@@ -67,13 +67,6 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 		}
 	}, [messages]);
 
-    useEffect(() => {
-        if (!connected) return;
-        if (messages.length === 0) {
-            setMessages([{ type: MessageType.Alert, message: `Connected with and running ${file}!`, name: "System" }])
-        }
-    }, [connected, messages, file]);
-
 	const handleFormSubmit = () => {
 		setShowForm(false);
 		setMessages([]);
