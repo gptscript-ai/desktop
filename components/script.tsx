@@ -10,6 +10,7 @@ import useChatSocket from '@/components/script/useChatSocket';
 import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
 import { getWorkspaceDir } from "@/actions/workspace";
+import debounce from "lodash/debounce";
 
 interface ScriptProps {
     file: string;
@@ -43,7 +44,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                 .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace) });
 			setHasRun(true);
 		}
-	}, [tool, file, formValues]);
+	}, [tool, connected, file, formValues]);
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -98,11 +99,17 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
         socket.emit("userMessage", message);
     };
 
-	const restartScript = useCallback(() => {
-		fetchScript(file).then((data) => setTool(data));
-		restart();
-		setHasRun(false);
-	}, [file, restart]);
+    const restartScript = useCallback(
+        // This is debonced as allowing the user to spam the restart button can cause race
+        // conditions. In particular, the restart may not be processed correctly and can
+        // get the user into a state where no run has been sent to the server.
+        debounce(async () => {
+            setTool(await fetchScript(file));
+            restart();
+            setHasRun(false);
+        }, 200),
+        [file, restart]
+    );
 
 	return (
 		<div className={`h-full w-full ${className}`}>

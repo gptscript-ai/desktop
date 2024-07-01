@@ -13,8 +13,6 @@ const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
-let runningScript = null; // Reference to the currently running script
-
 app.prepare().then(() => {
 	const httpServer = createServer(handler);
 
@@ -24,7 +22,8 @@ app.prepare().then(() => {
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");
 		socket.on("run", async (file, tool, args, workspace) => {
-			setImmediate(() => streamExecFileWithEvents(file, tool, args, workspace, socket, gptscript));
+            await dismount(socket);
+            await mount(file, tool, args, workspace, socket, gptscript);
 		});
 	});
 
@@ -38,7 +37,7 @@ app.prepare().then(() => {
 		});
 });
 
-const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gptscript) => {
+const mount = async (file, tool, args, workspace, socket, gptscript) => {
 	const opts = {
 		input: JSON.stringify(args || {}),
 		disableCache: DISABLE_CACHE,
@@ -49,15 +48,8 @@ const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gpt
 
 	if (tool) opts.subTool = tool;
 
-	if (runningScript) {
-		if (runningScript.state === RunState.Finished || runningScript.state === RunState.Error) {
-			socket.emit("error", new Error(`run is in terminal state ${runningScript.state}, cannot continue chat`));
-		}
-		runningScript.close();
-	}
-
-	runningScript = await gptscript.run(file, opts);
-	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}) );
+	let runningScript = await gptscript.run(file, opts);
+	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
 
 	// Handle prompt events
 	runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
@@ -67,9 +59,7 @@ const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gpt
 	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
 	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
-    socket.on("interrupt", async() => {
-        if (runningScript) runningScript.close();
-    });
+    socket.on("interrupt", async() => { if (runningScript) runningScript.close() });
 
 	try {
 		socket.on('disconnect', () => {
@@ -98,4 +88,13 @@ const streamExecFileWithEvents = async (file, tool, args, workspace, socket, gpt
 		socket.emit('error', e);
 		console.error(e);
 	}
+}
+
+// Only one script is allowed to run at a time in this system. This function is to dismount and
+// previously mounted listeners.
+const dismount = async (socket) => {
+    socket.removeAllListeners("promptResponse");
+    socket.removeAllListeners("confirmResponse");
+    socket.removeAllListeners("userMessage");
+    socket.removeAllListeners("disconnect");
 }
