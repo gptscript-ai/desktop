@@ -13,6 +13,8 @@ const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+let runningScript = null;
+
 app.prepare().then(() => {
 	const httpServer = createServer(handler);
 
@@ -22,6 +24,10 @@ app.prepare().then(() => {
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");
 		socket.on("run", async (file, tool, args, workspace) => {
+            if (runningScript) {
+                await runningScript.close();
+                runningScript = null;
+            }
             await dismount(socket);
             await mount(file, tool, args, workspace, socket, gptscript);
 		});
@@ -48,7 +54,8 @@ const mount = async (file, tool, args, workspace, socket, gptscript) => {
 
 	if (tool) opts.subTool = tool;
 
-	let runningScript = await gptscript.run(file, opts);
+    socket.emit("running");
+	runningScript = await gptscript.run(file, opts);
 	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
 
 	// Handle prompt events

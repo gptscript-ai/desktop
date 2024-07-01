@@ -25,7 +25,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	const [inputValue, setInputValue] = useState('');
 	const messagesRef = useRef<Message[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { socket, connected, messages, setMessages, restart, interrupt, generating} = useChatSocket();
+	const { socket, connected, running, messages, setMessages, restart, interrupt, generating} = useChatSocket();
 	const [hasRun, setHasRun] = useState(false);
 	const [hasParams, setHasParams] = useState(false);
 
@@ -113,7 +113,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 
 	return (
 		<div className={`h-full w-full ${className}`}>
-			{connected || (showForm && hasParams)  ? (<>
+			{(connected && running)|| (showForm && hasParams)  ? (<>
 				<div
 					id="small-message"
 					className={`px-6 pt-10 overflow-y-auto w-full items-center ${messagesHeight}`}

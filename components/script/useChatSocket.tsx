@@ -12,6 +12,7 @@ const useChatSocket = () => {
 	const [connected, setConnected] = useState(false);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [generating, setGenerating] = useState(false);
+    const [running, setRunning] = useState(false);
 
 	// Refs
 	const socketRef = useRef<Socket | null>(null);
@@ -225,6 +226,7 @@ const useChatSocket = () => {
 
 		socket.on("connect", () => setConnected(true));
 		socket.on("disconnect", () => setConnected(false));
+        socket.on("running", () => setRunning(true));
 		socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
 		socket.on("error", (data: string) => handleError(data));
 		socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
@@ -236,6 +238,8 @@ const useChatSocket = () => {
 
 	useEffect(() => { loadSocket() }, []);
 	const restart = useCallback(() => {
+        trustedRef.current = {};
+        trustedRepoPrefixesRef.current = ["github.com/gptscript-ai/context"];
 		loadSocket();
 	}, [socket]);
 
@@ -246,7 +250,7 @@ const useChatSocket = () => {
 		setGenerating(false);
     }, [socket, connected]);
 
-	return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating};
+	return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating, running};
 };
 
 export default useChatSocket;
