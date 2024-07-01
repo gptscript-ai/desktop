@@ -28,7 +28,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	const [hasParams, setHasParams] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
     const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error
     } = useChatSocket(isEmpty);
 
 	useEffect(() => {
@@ -117,7 +117,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 						handleInputChange={handleInputChange}
 						/>
 					) : (
-						<Messages messages={messages} />
+						<Messages restart={restartScript} messages={messages} />
 					)}
 				</div>
 

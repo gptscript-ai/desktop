@@ -13,6 +13,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [generating, setGenerating] = useState(false);
     const [running, setRunning] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Refs
     const socketRef = useRef<Socket | null>(null);
@@ -26,6 +27,8 @@ const useChatSocket = (isEmpty?: boolean) => {
     useEffect(() => { socketRef.current = socket }, [socket]);
 
     const handleError = useCallback((error: string) => {
+        setGenerating(false);
+        setError(error);
         setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
             if (latestBotMessageIndex.current !== -1) {
@@ -33,7 +36,13 @@ const useChatSocket = (isEmpty?: boolean) => {
                 updatedMessages[latestBotMessageIndex.current].error = `${error}`
             } else {
                 // If there are no previous messages, create a new error message
-                updatedMessages.push({ type: MessageType.Bot, message: "An error occured before the first message.", error: error });
+                updatedMessages.push(
+                    {
+                        type: MessageType.Bot, 
+                        message: "The script encountered an error. You can either restart the script or try to continue chatting.", 
+                        error 
+                    }
+                );
             }
             return updatedMessages;
         });
@@ -239,6 +248,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const restart = useCallback(() => {
         trustedRef.current = {};
         setRunning(false);
+        setError(null)
         setMessages([]);
         trustedRepoPrefixesRef.current = ["github.com/gptscript-ai/context"];
         loadSocket();
@@ -267,7 +277,16 @@ const useChatSocket = (isEmpty?: boolean) => {
         }
     }, [running, messages, isEmpty]);
 
-    return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating, running};
+    return { 
+        error,
+        socket, setSocket, 
+        connected, setConnected, 
+        messages, setMessages, 
+        restart, 
+        interrupt, 
+        generating, 
+        running,
+    };
 };
 
 export default useChatSocket;

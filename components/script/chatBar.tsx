@@ -13,6 +13,7 @@ import { GoIssueReopened, GoSquare, GoSquareFill } from "react-icons/go";
 
 const ChatBar = ({
     generating,
+    disabled = false,
     onBack,
     noChat,
     onInterrupt,
@@ -21,6 +22,7 @@ const ChatBar = ({
     onRestart,
 }: {
     generating: boolean;
+    disabled?: boolean;
     onBack: () => void;
     onInterrupt: () => void;
     onMessageSent: (message: string) => void;
@@ -67,8 +69,9 @@ const ChatBar = ({
                     onPress={onRestart}
                 />
             </Tooltip>
-            <Upload onRestart={onRestart}/>
+            <Upload disabled={disabled} onRestart={onRestart}/>
             <Textarea
+                isDisabled={disabled}
                 id="chatInput"
                 autoComplete="off"
                 placeholder="Ask the chat bot something..."
@@ -91,11 +94,13 @@ const ChatBar = ({
                     startContent={<GoSquareFill className="mr-[1px] text-xl" />}
                     isIconOnly
                     radius="full"
+                    isDisabled={disabled}
                     className="ml-2 my-auto text-lg"
                     onPress={onInterrupt}
                 /> : 
                 <Button
                     startContent={<IoMdSend />}
+                    isDisabled={disabled}
                     isIconOnly
                     radius="full"
                     className="ml-2 my-auto text-lg"

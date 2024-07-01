@@ -28,8 +28,12 @@ app.prepare().then(() => {
                 await runningScript.close();
                 runningScript = null;
             }
-            await dismount(socket);
-            await mount(file, tool, args, workspace, socket, gptscript);
+            try {
+                dismount(socket);
+                await mount(file, tool, args, workspace, socket, gptscript);
+            } catch (e) {
+                socket.emit("error", e);
+            }
 		});
 	});
 
@@ -54,52 +58,48 @@ const mount = async (file, tool, args, workspace, socket, gptscript) => {
 
 	if (tool) opts.subTool = tool;
 
+    // Start the script
+    runningScript = await gptscript.run(file, opts)
     socket.emit("running");
-	runningScript = await gptscript.run(file, opts);
+
+    // Handle initial runningScript events
 	runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
-
-	// Handle prompt events
 	runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
-	socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
-
-	// Handle confirm events
 	runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
+	socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
 	socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
-
     socket.on("interrupt", async() => { if (runningScript) runningScript.close() });
+    socket.on('disconnect', () => { if (runningScript) runningScript.close(); runningScript = null; });
 
-	try {
-		socket.on('disconnect', () => {
-			if (runningScript) runningScript.close();
-			runningScript = null;
-		});
+    // Wait for the run to finish and emit any errors that occur. Specifically look for the "Run has been aborted" error
+    // as this is a marker of an interrupt.
+    runningScript.text().catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
 
-		socket.on('userMessage', async (message) => {
-			// Remove any previous promptResponse or confirmResponse listeners
-			socket.removeAllListeners("promptResponse");
-			socket.removeAllListeners("confirmResponse");
+    // If the user sends a message, we continue and setup the next chat's event listeners
+    socket.on('userMessage', async (message) => {
+        // Remove any previous promptResponse or confirmResponse listeners
+        socket.removeAllListeners("promptResponse");
+        socket.removeAllListeners("confirmResponse");
 
-			// Start the next chat
-			runningScript = runningScript.nextChat(message);
-			runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
+        // Start the next chat
+        runningScript = runningScript.nextChat(message);
 
-			// Handle prompt events
-			runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
-			socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
+        runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
+        runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
+        runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
+        
+        socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
+        socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
-			// Handle confirm events
-			runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
-			socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
-		});
-	} catch (e) {
-		socket.emit('error', e);
-		console.error(e);
-	}
+        // Wait for the run to finish and emit any errors that occur
+        runningScript.text().catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
+    });
+
 }
 
 // Only one script is allowed to run at a time in this system. This function is to dismount and
 // previously mounted listeners.
-const dismount = async (socket) => {
+const dismount = (socket) => {
     socket.removeAllListeners("promptResponse");
     socket.removeAllListeners("confirmResponse");
     socket.removeAllListeners("userMessage");
