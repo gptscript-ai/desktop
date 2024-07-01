@@ -57,10 +57,11 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                         placeholder="Name..."
                         className="w-1/3"
                         variant="bordered"
-                        value={param}
-                        onChange={(e) => {
+                        defaultValue={param}
+                        onBlur={(e) => {
+                            const target = e.target as HTMLInputElement;
                             const updatedParams = { ...params };
-                            updatedParams[e.target.value] = updatedParams[param];
+                            updatedParams[target.value] = updatedParams[param];
                             delete updatedParams[param];
                             setParams(updatedParams);
                         }}

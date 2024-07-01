@@ -4,7 +4,6 @@ import type { CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptsc
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
-import { initial } from 'lodash';
 
 const useChatSocket = (isEmpty?: boolean) => {
     // State
