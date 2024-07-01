@@ -250,6 +250,7 @@ const useChatSocket = () => {
 
     useEffect(() => {
         if (running && messages.length === 0) {
+            setGenerating(true);
             setMessages([
                 { type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System" },
                 { type: MessageType.Bot, message: "Waiting for model response..." }

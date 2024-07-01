@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Input, Textarea, Button, Divider } from '@nextui-org/react';
+import { Input, Textarea, Button } from '@nextui-org/react';
 import { newFile } from '@/actions/scripts/new';
 import { GoCheckCircle } from 'react-icons/go';
 
