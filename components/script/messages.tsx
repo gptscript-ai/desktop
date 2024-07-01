@@ -29,7 +29,7 @@ const abbreviate = (name: string) => {
 	return firstLetters.slice(0, 2).join('').toUpperCase();
 }
 
-const Message = ({ message, noAvatar }: { message: Message ,noAvatar?: boolean }) => {
+const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: boolean, restart: () => void }) => {
     switch (message.type) {
         case MessageType.User:
             return (
@@ -45,17 +45,15 @@ const Message = ({ message, noAvatar }: { message: Message ,noAvatar?: boolean }
                     <div className="flex gap-2 w-full">
                         { !noAvatar &&
                             <Tooltip 
-                                content={`Sent from ${message.name || "Main"}`}
+                                content={`Sent from ${message.name || "System"}`}
                                 placement="bottom"
                                 closeDelay={0.5}
                             >
                                 <Avatar
                                     showFallback
-                                    name={abbreviate(message.name || 'Main')} 
-                                    icon={!message.name && <GoSquirrel className="text-xl" />}
+                                    name={abbreviate(message.name || "System")} 
                                     className="w-[40px] cursor-default"
-                                    classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
-                                    color={message.error ? "danger": "default"} 
+                                    classNames={{base: `bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900 ${message.error && "border-danger dark:border-danger"}`}}
                                 />
                             </Tooltip>
                         }
@@ -75,14 +73,21 @@ const Message = ({ message, noAvatar }: { message: Message ,noAvatar?: boolean }
                             {message.error && (
                                 <>
                                     <p className="text-danger text-base pl-4 pb-6">{message.error}</p>
-                                    <Button 
-                                        startContent={<GoIssueReopened className="text-lg"/>}
+                                    <Tooltip 
+                                        content="If you are no longer able to chat, click here to restart the script."
+                                        closeDelay={0.5}
+                                        placement="bottom"
                                         color="danger"
-                                        className="ml-4 mb-6"
-                                        onPress={() => window.location.reload()}
                                     >
-                                        Restart Script
-                                    </Button>
+                                        <Button
+                                            startContent={<GoIssueReopened className="text-lg"/>}
+                                            color="danger"
+                                            className="ml-4 mb-6"
+                                            onPress={restart}
+                                        >
+                                            Restart Script
+                                        </Button>
+                                    </Tooltip>
                                 </>
                             )}
                         </div>
@@ -110,10 +115,10 @@ const Message = ({ message, noAvatar }: { message: Message ,noAvatar?: boolean }
     }
 };
 
-const Messages = ({ messages, noAvatar }: { messages: Message[], noAvatar?: boolean }) => (
+const Messages = ({ messages, noAvatar, restart }: { messages: Message[], noAvatar?: boolean, restart: () => void}) => (
 	<div>
 		{messages.map((message, index) => 
-			<Message key={index} message={message} noAvatar={noAvatar} />
+			<Message key={index} restart={restart} message={message} noAvatar={noAvatar} />
 		)}
 	</div>
 );

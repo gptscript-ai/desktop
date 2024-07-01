@@ -18,9 +18,10 @@ import {
 
 interface UploadModalProps {
     onRestart: () => void;
+    disabled: boolean;
 }
 
-const UploadModal = ({onRestart}: UploadModalProps) => {
+const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [files, setFiles] = useState<Dirent[]>([]);
@@ -60,6 +61,7 @@ const UploadModal = ({onRestart}: UploadModalProps) => {
         <>
             <Tooltip content="View and manage your workspace" closeDelay={0.5} placement="top">
                 <Button
+                    isDisabled={disabled}
                     startContent={<GoFileDirectory />}
                     isIconOnly
                     radius="full"
