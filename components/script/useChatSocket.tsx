@@ -4,8 +4,9 @@ import type { CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptsc
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
+import { initial } from 'lodash';
 
-const useChatSocket = () => {
+const useChatSocket = (isEmpty?: boolean) => {
     // State
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connected, setConnected] = useState(false);
@@ -237,6 +238,8 @@ const useChatSocket = () => {
     useEffect(() => { loadSocket() }, []);
     const restart = useCallback(() => {
         trustedRef.current = {};
+        setRunning(false);
+        setMessages([]);
         trustedRepoPrefixesRef.current = ["github.com/gptscript-ai/context"];
         loadSocket();
     }, [socket]);
@@ -250,14 +253,19 @@ const useChatSocket = () => {
 
     useEffect(() => {
         if (running && messages.length === 0) {
-            setGenerating(true);
-            setMessages([
+            const initialMessages: Array<Message>= [
                 { type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System" },
-                { type: MessageType.Bot, message: "Waiting for model response..." }
-            ]);
-            latestBotMessageIndex.current = 1;
+            ]
+            if (!isEmpty) {
+                setGenerating(true);
+                initialMessages.push({ type: MessageType.Bot, message: "Waiting for model response..." });
+                latestBotMessageIndex.current = 1;
+            } else {
+                initialMessages.push({ type: MessageType.Bot, name: "System", message: "The chat bot running but is waiting for you to talk to it. Say hello!" });
+            }
+            setMessages(initialMessages);
         }
-    }, [running, messages]);
+    }, [running, messages, isEmpty]);
 
     return { socket, setSocket, connected, setConnected, messages, setMessages, restart, interrupt, generating, running};
 };

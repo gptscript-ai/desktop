@@ -23,14 +23,17 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
 	const [inputValue, setInputValue] = useState('');
-	const messagesRef = useRef<Message[]>([]);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { socket, connected, running, messages, setMessages, restart, interrupt, generating} = useChatSocket();
 	const [hasRun, setHasRun] = useState(false);
 	const [hasParams, setHasParams] = useState(false);
+    const [isEmpty, setIsEmpty] = useState(false);
+    const { 
+        socket, connected, running, messages, setMessages, restart, interrupt, generating
+    } = useChatSocket(isEmpty);
 
 	useEffect(() => {
 		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
+        setIsEmpty(!tool.instructions);
 	}, [tool]);
 
 	useEffect(() => {
@@ -51,10 +54,6 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 			inputRef.current.focus();
 		}
 	}, [messages, inputValue]);
-
-	useEffect(() => {
-		messagesRef.current = messages;
-	}, [messages]);
 
 	useEffect(() => {
 		fetchScript(file).then((data) => setTool(data));
