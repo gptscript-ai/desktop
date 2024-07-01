@@ -26,21 +26,26 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
         setParams(updatedParams);
     }
 
+    const handleAddParam = () => {
+        if (params && Object.keys(params)?.includes(input)) {
+            setError(`Parameter ${input} already exists`);
+            return;
+        }
+        if (!input) {
+            setError("Parameter cannot be empty");
+            return;
+        }
+        setParams({...params || {}, [input]: {type: "string", description: inputDescription}});
+        setInput("");
+        setInputDescription("");
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            if (params && Object.keys(params)?.includes(input)) {
-                setError(`Parameter ${input} already exists`);
-                return;
-            }
-            if (!input) {
-                setError("Parameter cannot be empty");
-                return;
-            }
-            setParams({...params || {}, [input]: {type: "string", description: inputDescription}});
-            setInput("");
-            setInputDescription("");
+            handleAddParam();
         }
     };
+
     return (
         <div className={className}>
             <h1>Parameters</h1>
@@ -104,9 +109,10 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                     onChange={(e) => setInputDescription(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
-                 <Button
+                <Button
                     variant="bordered"
                     size="sm"
+                    onClick={handleAddParam}
                     isIconOnly
                     startContent={<GoPlus />}
                 />

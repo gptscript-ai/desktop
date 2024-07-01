@@ -5,7 +5,7 @@ import {
     input,
 } from "@nextui-org/react";
 import { debounce, set } from "lodash"
-import { GoTrash } from "react-icons/go";
+import { GoPlus, GoTrash } from "react-icons/go";
 
 interface ExternalProps {
     tools: string[] | undefined;
@@ -20,7 +20,7 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [input, setInput] = useState<string>("");
-    
+
     const search = debounce((query: string) => {
         setLoading(true);
         fetch(`https://tools.gptscript.ai/api/search?q=${query}&limit=50`)
@@ -39,18 +39,22 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
         setTools(updatedTools);
     }
 
+    const handleAddTool = () => {
+        if (tools?.includes(input)) {
+            setError(`Tool ${input} has already been imported`);
+            return;
+        }
+        if (!input) {
+            setError("Tool cannot be empty");
+            return;
+        }
+        setTools([...tools || [], input]);
+        setInput("");
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            if (tools?.includes(input)) {
-                setError(`Tool ${input} has already been imported`);
-                return;
-            }
-            if (!input) {
-                setError("Tool cannot be empty");
-                return;
-            }
-            setTools([...tools || [], e.currentTarget.value]);
-            setInput("");
+            handleAddTool();
         }
     };
 
@@ -76,7 +80,7 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
                     ))}
                 </div>
             )}
-            <div className="flex w-full h-full">
+            <div className="flex w-full h-full space-x-2">
                 <Input
                     size="sm"
                     variant="bordered"
@@ -88,6 +92,13 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
                     onKeyDown={handleKeyDown}
                     onChange={(e) => {setError(null); setInput(e.currentTarget.value)}}
                     value={input}
+                />
+                 <Button
+                    variant="bordered"
+                    isIconOnly
+                    size="sm"
+                    startContent={<GoPlus />}
+                    onPress={handleAddTool}
                 />
             </div>
         </div>
