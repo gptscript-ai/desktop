@@ -84,4 +84,3 @@ arg: port: The port the service is listening on
 #!/usr/bin/env sh
 
 open http://localhost:${PORT}
-

@@ -8,9 +8,12 @@ import {
     Avatar,
     Tooltip,
     Button,
+    Switch,
 } from "@nextui-org/react";
 import { EditContext } from "@/contexts/edit";
 import { GoTrash } from "react-icons/go";
+import { LuWrench, LuMessageSquare } from "react-icons/lu";
+
 
 interface ConfigureProps {
     file: string;
@@ -21,11 +24,13 @@ interface ConfigureProps {
 const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
     const [name, setName] = useState<string>('');
-    const { update, setRoot, setTools} = useContext(EditContext)
+    const [chat, setChat] = useState<boolean>(false);
+    const { setRoot, setTools} = useContext(EditContext)
     
     useEffect(() => { setCustomTool(tool); setName(tool.name || '') }, []);
 
     useEffect(() => {
+        setChat(customTool.chat || false);
         setTools((prevTools) => {
             return prevTools.map((tool: Tool) => {
                 if (tool.name === customTool.name) {
@@ -102,7 +107,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
 
     return customTool && 
         <div>
-            <div className="w-full">
+            <div className="w-full flex flex-col justify-center space-y-4 mb-6">
                 <Tooltip 
                     content={`${name || "Main"}`}
                     placement="bottom"
@@ -111,8 +116,26 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     <Avatar 
                         size="md" 
                         name={abbreviate(name || 'Main')} 
-                        className="mx-auto mb-6 mt-4"
+                        className="mx-auto mt-4"
                         classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
+                    />
+                </Tooltip>
+                <Tooltip 
+                    content={`${customTool.chat ? "Disable" : "Enable"} chat for this tool`}
+                    placement="bottom"
+                    closeDelay={0.5}
+                >
+                    <Switch
+                        className="mx-auto pl-2"
+                        isSelected={chat}
+                        onChange={(e) => setCustomTool({...customTool, chat: e.target.checked})}
+                        thumbIcon={({ isSelected, className }) =>
+                            isSelected ? (
+                            <LuMessageSquare className={className} />
+                            ) : (
+                            <LuWrench className={className} />
+                            )
+                        }
                     />
                 </Tooltip>
             </div>
