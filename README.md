@@ -1,42 +1,31 @@
 # chat-builder 
-This provides a visual way to run and build your GPTScripts. It does this through a node based GUI library called React Flow.
+This provides a graphical interface to run and build your GPTScripts.
 
 ![Chat Image](assets/chat.png)
 
 ## Running
-To run locally you have to do a few things while features are unreleased.
-
-1. Setup `node-gptscript`.
+The UI is baked directly into the [gptscript](https://docs.gptscript.ai/) CLI. To run the UI, simply run the following command:
 
 ```bash
-git clone https://github.com/gptscript-ai/node-gptscript/
-cd node-gptscript
+gptscript --ui
+```
+
+## Development
+If you'd like to contribute to the UI, you can run the following commands to get started:
+
+```bash
+git clone
+cd ui
 npm install
-npx tsc
-yarn link
+npm run dev
 ```
 
-2. Setup `chat-builder`. In the parent directory of where you cloned `node-gptscript`:
+From here any changed you make to the NextJS app will be hot reloaded. Changes to `server.mjs`
+will require a restart of the server.
 
-```bash
-git clone https://github.com/gptscript-ai/chat-builder
-echo "GPTSCRIPT_BIN=/usr/local/bin/gptscript
-SCRIPTS_PATH=gptscripts" > .env.local
-yarn link "@gptscript-ai/gptscript"
-yarn install
-mkdir gptscripts
-```
-
-3. Set your OPENAI_API_KEY.
-
-```bash
-export OPENAI_API_KEY=your-api-key
-```
-
-4. To run `chat-builder`, navigate to the `chat-builder` directory and run.
-
-```bash
-yarn dev
-```
-
-5. Open `http://localhost:3000` in your browser.
+### Tech stack
+- [React](https://reactjs.org/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Next.js](https://nextjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Socket.io](https://socket.io/)
