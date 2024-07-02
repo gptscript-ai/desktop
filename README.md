@@ -10,6 +10,12 @@ The UI is baked directly into the [gptscript](https://docs.gptscript.ai/) CLI. T
 gptscript --ui
 ```
 
+You can also specify a specific script to run (locally or remote).
+
+```bash
+gptscript --ui github.com/gptscript-ai/llm-basics-demo
+```
+
 ## Development
 If you'd like to contribute to the UI, you can run the following commands to get started:
 
@@ -20,7 +26,7 @@ npm install
 npm run dev
 ```
 
-From here any changed you make to the NextJS app will be hot reloaded. Changes to `server.mjs`
+From here any changes you make to the NextJS app will be hot reloaded. Changes to `server.mjs`
 will require a restart of the server.
 
 ### Tech stack
