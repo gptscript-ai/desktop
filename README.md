@@ -1,4 +1,4 @@
-# chat-builder 
+# ui
 This provides a graphical interface to run and build your GPTScripts.
 
 ![Chat Image](assets/chat.png)
