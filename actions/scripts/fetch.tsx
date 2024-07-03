@@ -1,6 +1,6 @@
 "use server"
 import { Tool, GPTScript, Block } from '@gptscript-ai/gptscript';
-import { SCRIPTS_PATH } from '@/config/env';
+import { SCRIPTS_PATH, gpt } from '@/config/env';
 import fs from 'fs/promises';
 
 const external = (file: string): boolean => {
@@ -15,9 +15,8 @@ export const path = async (file: string): Promise<string> => {
 export const fetchFullScript = async (file: string): Promise<Block[]> => {
     if (!external(file)) file = `${SCRIPTS_PATH()}/${file}.gpt`;
 
-    const gptscript = new GPTScript();
     try {
-        return await gptscript.parse(file);
+        return await gpt().parse(file);
     } catch (e) {
         throw e;
     }
@@ -26,9 +25,8 @@ export const fetchFullScript = async (file: string): Promise<Block[]> => {
 export const fetchScript = async (file: string): Promise<Tool> => {
     if (!external(file)) file = `${SCRIPTS_PATH()}/${file}.gpt`;
 
-    const gptscript = new GPTScript();
     try {
-        const script = await gptscript.parse(file);
+        const script = await gpt().parse(file);
         for (let tool of script) {
             if (tool.type === 'text') continue;
             return tool;
@@ -49,10 +47,9 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
         
         if (gptFiles.length === 0) throw new Error('no files found in scripts directory');
 
-        const gptscript = new GPTScript();
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
-            const script = await gptscript.parse(`${SCRIPTS_PATH()}/${file}`);
+            const script = await gpt().parse(`${SCRIPTS_PATH()}/${file}`);
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;

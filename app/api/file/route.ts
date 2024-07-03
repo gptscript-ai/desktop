@@ -1,9 +1,7 @@
 export const dynamic = 'force-dynamic' // defaults to auto
 import { GPTScript } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
-import { SCRIPTS_PATH } from '@/config/env';
-
-const gptscript = new GPTScript();
+import { SCRIPTS_PATH, gpt } from '@/config/env';
 
 export async function GET() {
     try {
@@ -15,7 +13,7 @@ export async function GET() {
 
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
-            const script = await gptscript.parse(`${SCRIPTS_PATH()}/${file}`);
+            const script = await gpt().parse(`${SCRIPTS_PATH()}/${file}`);
             let description = '';
             for (let tool of script) {
                 if (tool.type === 'text') continue;

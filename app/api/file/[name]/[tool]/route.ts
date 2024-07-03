@@ -1,11 +1,9 @@
 export const dynamic = 'force-dynamic' // defaults to autover'
-import { GPTScript, type Block, Tool} from '@gptscript-ai/gptscript'
+import {type Block, Tool} from '@gptscript-ai/gptscript'
 import { Positions } from '../route';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { SCRIPTS_PATH } from '@/config/env';
-
-const gptscript = new GPTScript();
+import { SCRIPTS_PATH, gpt} from '@/config/env';
 
 // Create a datastructure for the tool bindings in the UI
 export async function PUT(
@@ -15,11 +13,11 @@ export async function PUT(
     try {
         const { name, tool } = params as any;
 
-        const script = await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
+        const script = await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
         const updatedScript = updateScript(script, tool, (await req.json()) as Tool);
 
-        await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gptscript.stringify(updatedScript));
-        return Response.json(await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
+        await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gpt().stringify(updatedScript));
+        return Response.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
             return Response.json({ error: '.gpt file not found' }, { status: 404 });
@@ -39,7 +37,7 @@ const updateScript = (script: Block[], tool: string, updatedTool: Tool) => {
     if (tool !== updatedTool.name) {
         updatedScript = script.map(block => {
             if (block.type === 'tool' && block.name !== tool) {
-                block.tools = block.tools?.map(t => t === tool ? updatedTool.name : t);
+                block.tools = block.tools?.map(t => t === tool ? updatedTool.name : t) as string[] | undefined;
             } else if (block.type === 'text') {
                 const positions = JSON.parse(block.content) as Positions
                 block.content = JSON.stringify(

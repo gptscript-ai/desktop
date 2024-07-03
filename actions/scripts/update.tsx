@@ -1,7 +1,7 @@
 "use server"
 
 import { Tool, GPTScript, Block } from '@gptscript-ai/gptscript';
-import { SCRIPTS_PATH } from '@/config/env';
+import { SCRIPTS_PATH, gpt} from '@/config/env';
 import fs from 'fs/promises';
 
 const external = (file: string): boolean => {
@@ -16,9 +16,8 @@ export const path = async (file: string): Promise<string> => {
 export const updateScript = async (file: string, script: Block[]) => {
     if (external(file)) throw new Error('cannot update external tools');
 
-    const gptscript = new GPTScript();
     try {
-        await fs.writeFile(`${SCRIPTS_PATH()}/${file}.gpt`, await gptscript.stringify(script));
+        await fs.writeFile(`${SCRIPTS_PATH()}/${file}.gpt`, await gpt().stringify(script));
     } catch (e) {
         throw e;
     }
@@ -27,9 +26,8 @@ export const updateScript = async (file: string, script: Block[]) => {
 export const updateTool = async (file: string, name: string, script: Block[]) => {
     if (external(file)) throw new Error('cannot update external tools');
 
-    const gptscript = new GPTScript();
     try {
-        return await gptscript.stringify(script);
+        return await gpt().stringify(script);
     } catch (e) {
         throw e;
     }

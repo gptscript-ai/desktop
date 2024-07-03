@@ -1,17 +1,14 @@
 export const dynamic = 'force-dynamic' // defaults to auto
 import { NextRequest } from 'next/server'
-import { GPTScript, type Block, Text } from '@gptscript-ai/gptscript'
+import { type Block, Text } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
 import path from 'path';
-import { SCRIPTS_PATH } from '@/config/env';
+import { SCRIPTS_PATH, gpt } from '@/config/env';
 import type {
     Node as RFNode, 
     Edge as RFEdge,
     XYPosition,
 } from 'reactflow';
-
-const gptscript = new GPTScript();
-
 
 export async function DELETE(
     _: NextRequest,
@@ -46,7 +43,7 @@ export async function GET(
 )  {
     try {
         const { name } = params as any;
-        const script = await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
+        const script = await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
         if (req.nextUrl.searchParams.get('nodeify') === 'true') {
             const { nodes, edges } = await nodeify(script);
             return Response.json({ nodes: nodes, edges: edges });
@@ -69,8 +66,8 @@ export async function PUT(
         const nodes = (await req.json()) as RFNode[];
         const script = denodeify(nodes);
 
-        await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gptscript.stringify(script));
-        return Response.json(await gptscript.parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
+        await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gpt().stringify(script));
+        return Response.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
             return Response.json({ error: '.gpt file not found' }, { status: 404 });
