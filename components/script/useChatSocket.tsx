@@ -270,7 +270,7 @@ const useChatSocket = (isEmpty?: boolean) => {
                 initialMessages.push({ type: MessageType.Bot, message: "Waiting for model response..." });
                 latestBotMessageIndex.current = 1;
             } else {
-                initialMessages.push({ type: MessageType.Bot, name: "System", message: "The chat bot running but is waiting for you to talk to it. Say hello!" });
+                initialMessages.push({ type: MessageType.Bot, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!" });
             }
             setMessages(initialMessages);
         }
