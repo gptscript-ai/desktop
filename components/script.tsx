@@ -44,7 +44,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                     const workspace = await getWorkspaceDir()
                     return { path, workspace}
                 })
-                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace) });
+                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace, "./threads/3m9s5qp/state.txt")});
 			setHasRun(true);
 		}
 	}, [tool, connected, file, formValues]);

@@ -3,6 +3,7 @@ import next from "next";
 import { Server } from "socket.io";
 import { GPTScript, RunEventType, RunState } from '@gptscript-ai/gptscript';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config({path: ['.env', '.env.local']});
 
@@ -23,14 +24,14 @@ app.prepare().then(() => {
 
 	io.on("connection", (socket) => {
 		io.emit("message", "connected");
-		socket.on("run", async (file, tool, args, workspace) => {
+		socket.on("run", async (file, tool, args, workspace, statePath) => {
             if (runningScript) {
                 await runningScript.close();
                 runningScript = null;
             }
             try {
                 dismount(socket);
-                await mount(file, tool, args, workspace, socket, gptscript);
+                await mount(file, tool, args, workspace, socket, statePath, gptscript);
             } catch (e) {
                 socket.emit("error", e);
             }
@@ -47,7 +48,7 @@ app.prepare().then(() => {
 		});
 });
 
-const mount = async (file, tool, args, workspace, socket, gptscript) => {
+const mount = async (file, tool, args, workspace, socket, statePath, gptscript) => {
 	const opts = {
 		input: JSON.stringify(args || {}),
 		disableCache: DISABLE_CACHE,
@@ -57,6 +58,10 @@ const mount = async (file, tool, args, workspace, socket, gptscript) => {
 	};
 
 	if (tool) opts.subTool = tool;
+
+    try {
+        const state = fs.readFileSync(statePath, 'utf8');
+    } catch (e) {}
 
     // Start the script
     runningScript = await gptscript.run(file, opts)
@@ -73,7 +78,17 @@ const mount = async (file, tool, args, workspace, socket, gptscript) => {
 
     // Wait for the run to finish and emit any errors that occur. Specifically look for the "Run has been aborted" error
     // as this is a marker of an interrupt.
-    runningScript.text().catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
+    runningScript.text()
+        .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e))
+        .finally(() => {
+            if (!runningScript) return;
+            let state = runningScript.currentChatState();
+            if (statePath) {
+                fs.writeFile(statePath, JSON.stringify(state), (err) => {
+                    if (err) { socket.emit("error", err)} 
+                });
+            }
+        });
 
     // If the user sends a message, we continue and setup the next chat's event listeners
     socket.on('userMessage', async (message) => {
@@ -92,7 +107,17 @@ const mount = async (file, tool, args, workspace, socket, gptscript) => {
         socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
         // Wait for the run to finish and emit any errors that occur
-        runningScript.text().catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
+        runningScript.text()
+            .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e))
+            .finally(() => { 
+                if (!runningScript) return;
+                let state = runningScript.currentChatState();
+                if (statePath) {
+                    fs.writeFile(statePath, JSON.stringify(state), (err) => {
+                        if (err) { socket.emit("error", err)} 
+                    });
+                }
+            });
     });
 
 }
