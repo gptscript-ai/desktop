@@ -44,7 +44,7 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
     try {
         const files = await fs.readdir(SCRIPTS_PATH());
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
-        
+
         if (gptFiles.length === 0) throw new Error('no files found in scripts directory');
 
         const scripts: Record<string, string> = {};

@@ -4,6 +4,7 @@ import { Positions } from '../route';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { SCRIPTS_PATH, gpt} from '@/config/env';
+import { NextResponse } from 'next/server';
 
 // Create a datastructure for the tool bindings in the UI
 export async function PUT(
@@ -17,13 +18,13 @@ export async function PUT(
         const updatedScript = updateScript(script, tool, (await req.json()) as Tool);
 
         await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gpt().stringify(updatedScript));
-        return Response.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
+        return NextResponse.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
-            return Response.json({ error: '.gpt file not found' }, { status: 404 });
+            return NextResponse.json({ error: '.gpt file not found' }, { status: 404 });
         }
         console.error(e)
-        return Response.json({ error: e }, {status: 500});
+        return NextResponse.json({ error: e }, {status: 500});
     }
 }
 

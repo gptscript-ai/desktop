@@ -9,6 +9,7 @@ import type {
     Edge as RFEdge,
     XYPosition,
 } from 'reactflow';
+import { NextResponse } from 'next/server';
 
 export async function DELETE(
     _: NextRequest,
@@ -17,9 +18,9 @@ export async function DELETE(
     try {
         const { name } = params as any;
         await fs.unlink(path.join(`${SCRIPTS_PATH()}/${name}.gpt`));
-        return Response.json({ success: true });
+        return NextResponse.json({ success: true });
     } catch (e) {
-        return Response.json({ error: e }, { status: 500 });
+        return NextResponse.json({ error: e }, { status: 500 });
     }
 }
 
@@ -31,9 +32,9 @@ export async function DELETE(
 
 //         await fs.rename(`${scriptsPath}/${name}`, `${scriptsPath}/${name}.bak`);
 //         await fs.writeFile(`${scriptsPath}/${name}`, content);
-//         return Response.json({ success: true });
+//         return NextResponse.json({ success: true });
 //     } catch (e) {
-//         return Response.json({ error: e }, { status: 500 });
+//         return NextResponse.json({ error: e }, { status: 500 });
 //     }
 // }
 
@@ -46,14 +47,14 @@ export async function GET(
         const script = await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`));
         if (req.nextUrl.searchParams.get('nodeify') === 'true') {
             const { nodes, edges } = await nodeify(script);
-            return Response.json({ nodes: nodes, edges: edges });
+            return NextResponse.json({ nodes: nodes, edges: edges });
         }
-        return Response.json(script);
+        return NextResponse.json(script);
     } catch (e) {
         if (`${e}`.includes('no such file')){
-            return Response.json({ error: '.gpt file not found' }, { status: 404 });
+            return NextResponse.json({ error: '.gpt file not found' }, { status: 404 });
         } 
-        return Response.json({ error: e }, {status: 500});
+        return NextResponse.json({ error: e }, {status: 500});
     }
 }
 
@@ -67,12 +68,12 @@ export async function PUT(
         const script = denodeify(nodes);
 
         await fs.writeFile(path.join(SCRIPTS_PATH(),`${name}.gpt`), await gpt().stringify(script));
-        return Response.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
+        return NextResponse.json(await gpt().parse(path.join(SCRIPTS_PATH(),`${name}.gpt`)));
     } catch (e) {
         if (`${e}`.includes('no such file')){
-            return Response.json({ error: '.gpt file not found' }, { status: 404 });
+            return NextResponse.json({ error: '.gpt file not found' }, { status: 404 });
         } 
-        return Response.json({ error: e }, {status: 500});
+        return NextResponse.json({ error: e }, {status: 500});
     }
 }
 

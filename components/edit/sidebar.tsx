@@ -38,8 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onChangeFile }) => {
             <CardBody className="flex flex-col space-y-2">
                 { loading && <p>Loading...</p> }
                 { !loading && Object.keys(files).length === 0 && <p>No scripts found</p> }
-                { !loading && Object.keys(files).map((file) => (
-                    <div className="flex space-x-2 items-center">
+                { !loading && Object.keys(files).map((file, idx) => (
+                    <div className="flex space-x-2 items-center" key={idx}>
                         <Button
                             className="w-full"
                             key={file}

@@ -13,9 +13,9 @@ const ToolForm = ({
     handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) => (
     <form className="flex mt-6 flex-col w-full">
-        <h1 className="text-2xl font-bold mb-2">You're about to run <span className="text-primary">{tool.name}</span></h1>
+        <h1 className="text-2xl font-bold mb-2">You&apos;re about to run <span className="text-primary">{tool.name}</span></h1>
         <h2 className="text-zinc-600">
-            Almost there! The script you're trying to run is requesting input from you first.
+            Almost there! The script you&apos;re trying to run is requesting input from you first.
             Fill them out and then get started by clicking the button at the bottom of the page.
         </h2>
         <Divider className="my-6"/>

@@ -108,7 +108,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
             if (!incoming) {
                 incoming = `new-tool-${getId()}`
             }
-            updateName(data.name, incoming);
+            updateName(`${data.name}`, incoming);
         }
 
     }, [
@@ -130,16 +130,24 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
 
     const toolContext: Context = {
         data,
-        isChat, setIsChat,
-        name, setName,
-        prompt, setPrompt,
-        description, setDescription,
-        temperature, setTemperature,
+        isChat: !!isChat,
+        setIsChat,
+        name: `${name}`,
+        setName,
+        prompt: `${prompt}`,
+        setPrompt,
+        description: `${description}`,
+        setDescription,
+        temperature,
+        setTemperature,
         params, setParams,
-        jsonResponse, setJsonResponse,
+        jsonResponse: !!jsonResponse,
+        setJsonResponse,
         internalPrompt, setInternalPrompt,
-        modelName, setModelName,
-        maxTokens, setMaxTokens,
+        modelName: `${modelName}`,
+        setModelName,
+        maxTokens: maxTokens || 0,
+        setMaxTokens,
         tools, setTools,
         context, setContext,
     }
@@ -155,7 +163,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
     const onRunClick = () => setChatPanel(
         <ToolContext.Provider value={toolContext}>
             <Card className="w-[35vw] 2xl:w-[30vw] 3xl:w-[25vw] h-[45vh] overflow-y-scroll">
-                <Chat chat={isChat} name={name} file={file} params={params}/>
+                <Chat chat={!!isChat} name={name||''} file={file} params={params}/>
             </Card>
         </ToolContext.Provider>
     )
@@ -201,7 +209,7 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
                             className="nodrag nowheel cursor-text h-full w-full overflow-y-scroll resize-none"
                             placeholder="Tell the tool what do to..."
                             header={`Editing the prompt for ${name}`}
-                            defaultValue={prompt}
+                            defaultValue={prompt||''}
                             setText={setPrompt}
                         />
                     </div>
@@ -230,9 +238,9 @@ export default memo(({data, isConnectable}: CustomToolProps) => {
 
                 </CardBody>
                 <CardFooter>
-                    <Button 
-                        className="w-full" 
-                        onPress={onRunClick} 
+                    <Button
+                        className="w-full"
+                        onPress={onRunClick}
                         color={isChat ? 'primary' : 'secondary'}
                         startContent={isChat ? <IoIosChatboxes /> : <FaRunning />}
                     >

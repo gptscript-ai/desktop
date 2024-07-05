@@ -3,8 +3,7 @@ import { GoNote } from "react-icons/go";
 import StackTrace from './calls/stackTrace';
 import type { CallFrame } from '@gptscript-ai/gptscript';
 import { IoCloseSharp } from 'react-icons/io5';
-import { BsArrowsFullscreen } from 'react-icons/bs';
-import { HiOutlineArrowsPointingIn } from 'react-icons/hi2';
+import { MdFullscreen, MdCloseFullscreen } from 'react-icons/md';
 import {
     Modal,
     ModalContent,
@@ -43,28 +42,33 @@ const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
                             <h2 className="text-base text-zinc-500">Below you can see what this call is doing or has done.</h2>
                         </div>
                         <div>
-                            <Button
-                                radius="full"
-                                size="sm"
-                                isIconOnly
-                                color="primary"
-                                onPress={(_) => setShowModal(false)}
+                            <Tooltip
+                                content={fullscreen ? 'Regular Size' : 'Full Screen'} 
+                                closeDelay={0}
                             >
-                                <IoCloseSharp />
-                            </Button>
+                                <Button
+                                    radius="full"
+                                    size="sm"
+                                    isIconOnly
+                                    color="primary"
+                                    onPress={(_) => setFullscreen(!fullscreen)}
+                                >
+                                    { fullscreen ? <MdCloseFullscreen className="text-lg"/> : <MdFullscreen className="text-lg" />}
+                                </Button>
+                            </Tooltip>
                             <Button
                                 radius="full"
                                 size="sm"
                                 isIconOnly
                                 color="primary"
                                 className="ml-2"
-                                onPress={(_) => setFullscreen(!fullscreen)}
+                                onPress={(_) => setShowModal(false)}
                             >
-                                { fullscreen ? <HiOutlineArrowsPointingIn className="text-lg"/> : <BsArrowsFullscreen />}
+                                <IoCloseSharp className="text-lg" />
                             </Button>
                         </div>
                     </ModalHeader>
-                    <ModalBody className='mb-4 h-full overflow-y-scroll'>
+                    <ModalBody className='mb-4 h-full overflow-y-auto'>
                         <StackTrace calls={calls}/>
                     </ModalBody>
                 </ModalContent>

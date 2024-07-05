@@ -29,7 +29,7 @@ const abbreviate = (name: string) => {
 	return firstLetters.slice(0, 2).join('').toUpperCase();
 }
 
-const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: boolean, restart: () => void }) => {
+const Message = ({ message, noAvatar, restart }: { message: Message, noAvatar?: boolean, restart?: () => void }) => {
     switch (message.type) {
         case MessageType.User:
             return (
@@ -132,7 +132,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
     }
 };
 
-const Messages = ({ messages, noAvatar, restart }: { messages: Message[], noAvatar?: boolean, restart: () => void}) => (
+const Messages = ({ messages, noAvatar, restart }: { messages: Message[], noAvatar?: boolean, restart?: () => void}) => (
 	<div>
 		{messages.map((message, index) => 
 			<Message key={index} restart={restart} message={message} noAvatar={noAvatar} />

@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Tooltip } from '@nextui-org/react';
 import type { CallFrame } from '@gptscript-ai/gptscript';
-import { GoArrowDown, GoArrowUp } from 'react-icons/go';
+import { VscCollapseAll, VscExpandAll} from 'react-icons/vsc'
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
-    if (!calls) return null;
-
     const logsContainerRef = useRef<HTMLDivElement>(null);
     const [allOpen, setAllOpen] = useState(true);
+
+    if (!calls) return null;
 
     const EmptyLogs = () => {
         return (
@@ -95,7 +95,7 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
     }
 
     return (
-        <div className="h-full overflow-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white" ref={logsContainerRef}>
+        <div className="h-full overflow-auto p-4 border-2 shadow-lg border-primary border-lg bg-black text-white" ref={logsContainerRef}>
             <Tooltip 
                 content={allOpen ? 'Collapse all' : 'Expand all'} 
                 closeDelay={0}
@@ -107,7 +107,7 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
                     radius='full'
                     color="primary"
                 >
-                    { allOpen ? <GoArrowUp/> : <GoArrowDown /> }
+                    { allOpen ? <VscCollapseAll className='text-lg'/> : <VscExpandAll className='text-lg' /> }
                 </Button>
             </Tooltip>
             {calls ? <RenderLogs /> : <EmptyLogs />}

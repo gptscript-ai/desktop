@@ -184,7 +184,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                     {showForm ? (
                         <form>
                             {Object.entries(params || {}).map(
-                                ([argName, arg]) => (
+                                ([argName, arg], idx) => (
                                     <Input
                                         className="mb-6"
                                         size="lg"
@@ -195,12 +195,13 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                                         name={argName}
                                         value={formValues[argName] || ""}
                                         onChange={handleInputChange}
+                                        key={idx}
                                     />
                                 )
                             )}
                         </form>
                     ) : (
-                        <Messages noAvatar messages={messages}/>
+                        <Messages noAvatar messages={messages} />
                     )}
                 </CardBody>
 

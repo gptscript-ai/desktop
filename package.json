@@ -1,12 +1,21 @@
 {
-    "name": "next-app-template",
-    "version": "0.0.1",
+    "name": "gptscript",
+    "author": {
+        "name": "Acorn Labs, Inc.",
+        "email": "info@acorn.io",
+        "url": "https://acorn.io"
+    },
     "private": true,
+    "version": "0.0.1",
+    "main": "electron/main.mjs",
     "scripts": {
+        "build": "next build --no-lint",
+        "build:electron": "next build --no-lint && node electron/build.mjs",
+        "pkg": "node electron/build.mjs",
+        "debug": "node --inspect server.mjs",
         "dev": "node server.mjs",
-        "debug" : "node --inspect server.mjs",
-        "build": "next build",
-        "start": "next start",
+        "server": "node server.mjs",
+        "dev:electron": "concurrently -n 'NEXT, TRON' --kill-others 'node server.mjs' 'electron .'",
         "lint": "next lint"
     },
     "dependencies": {
@@ -32,9 +41,11 @@
         "autoprefixer": "10.4.19",
         "clsx": "^2.0.0",
         "dotenv": "^16.4.5",
+        "electron-serve": "^2.0.0",
         "eslint": "8.56.0",
         "eslint-config-next": "14.2.1",
         "framer-motion": "^11.1.1",
+        "get-port-please": "^3.1.2",
         "intl-messageformat": "^10.5.0",
         "lodash": "^4.17.21",
         "next": "14.2.1",
@@ -54,5 +65,10 @@
         "tailwind-variants": "^0.1.20",
         "tailwindcss": "3.4.3",
         "typescript": "5.0.4"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "electron": "^31.1.0",
+        "electron-builder": "^24.13.3"
     }
 }

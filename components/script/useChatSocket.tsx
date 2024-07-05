@@ -218,8 +218,13 @@ const useChatSocket = (isEmpty?: boolean) => {
             }
     }
 
-    const loadSocket = () => {
-        const socket = io();
+	const loadSocket = () => {
+		const socket = io({
+            transports: ['websocket'],
+            rememberUpgrade: true,
+            host: 'localhost',
+            port: 3000
+        });
 
         socket.off("connect");
         socket.off("disconnect")

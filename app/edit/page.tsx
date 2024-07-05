@@ -7,8 +7,9 @@ import Configure from "@/components/edit/configure";
 import { EditContextProvider } from "@/contexts/edit";
 import New from "@/components/edit/new";
 import ScriptNav from "@/components/edit/scriptNav";
+import { Suspense } from 'react'
 
-export default function Edit() {
+const EditInner = () => {
 	const [file, setFile] = useState<string>(useSearchParams().get('file') || '');
 
 	if (!file || file === 'new') return (
@@ -37,3 +38,14 @@ export default function Edit() {
 		</EditContextProvider>
 	);
 }
+
+const Edit = () => {
+	return (
+		<Suspense>
+			<EditInner/>
+		</Suspense>
+	)
+}
+
+export default Edit;
+

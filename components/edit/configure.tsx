@@ -49,7 +49,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
         setRoot({...root, agents: newAgents});
     }, [root]);
 
-    if (loading) return <Loading>Loading your script's details...</Loading>;
+    if (loading) return <Loading>Loading your script&apos;s details...</Loading>;
 
     return (
         <>

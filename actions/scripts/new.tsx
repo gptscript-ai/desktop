@@ -12,7 +12,7 @@ export async function newFile(name: string, instructions: string, fileName: stri
         if (!fileName.endsWith('.gpt')) {
             throw new Error('file cannot be empty and must end with .gpt');
         }
-        
+
         await fs.writeFile(`${SCRIPTS_PATH()}/${fileName}`, `---\nName: ${name}\nChat: true\n\n${instructions}\n\n`);
         return fileName.replace('.gpt', '')
     } catch (e) {
