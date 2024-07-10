@@ -4,7 +4,7 @@ import { THREADS_PATH } from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
 
-const STATE_FILE = "state.txt";
+const STATE_FILE = "state.json";
 const META_FILE = "meta.json";
 
 export type Thread = {
@@ -60,6 +60,7 @@ export async function getThreads() {
         }
         threads.push(thread);
     }
+
     return threads.sort((a, b) => a.meta?.updated > b.meta?.updated ? -1 : 1);
 }
 
@@ -75,6 +76,7 @@ async function newThreadName(): Promise<string> {
 
 export async function createThread(script: string) {
     const threadsPath = THREADS_PATH();
+    script = script.replace('.gpt', '');
 
     // will probably want something else for this
     const id = Math.random().toString(36).substring(7);

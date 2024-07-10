@@ -11,14 +11,17 @@ import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
 import { getWorkspaceDir } from "@/actions/workspace";
 import debounce from "lodash/debounce";
+import { set } from "lodash";
+import { threadId } from "worker_threads";
 
 interface ScriptProps {
     file: string;
+    thread: string;
 	className?: string
 	messagesHeight?: string
 }
 
-const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-full' }) => {
+const Script: React.FC<ScriptProps> = ({ file, thread, className, messagesHeight = 'h-full' }) => {
 	const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -36,6 +39,10 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
         setIsEmpty(!tool.instructions);
 	}, [tool]);
 
+    useEffect(() => {
+        if(thread) restartScript();
+    }, [thread]);
+
 	useEffect(() => {
 		if (hasRun || !socket || !connected) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
@@ -44,10 +51,10 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                     const workspace = await getWorkspaceDir()
                     return { path, workspace}
                 })
-                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace, "./threads/3m9s5qp/state.txt")});
+                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace, thread)});
 			setHasRun(true);
 		}
-	}, [tool, connected, file, formValues]);
+	}, [tool, connected, file, formValues, thread]);
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -74,7 +81,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                 const workspace = await getWorkspaceDir()
                 return { path, workspace}
             })
-            .then(({path, workspace}) => { socket?.emit("run", path, tool.name, formValues, workspace) });
+            .then(({path, workspace}) => { socket?.emit("run", path, tool.name, formValues, workspace, thread) });
 		setHasRun(true);
 	};
 
@@ -112,9 +119,9 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 				>
 					{showForm && hasParams ? (
 						<ToolForm
-						tool={tool}
-						formValues={formValues}
-						handleInputChange={handleInputChange}
+                            tool={tool}
+                            formValues={formValues}
+                            handleInputChange={handleInputChange}
 						/>
 					) : (
 						<Messages restart={restartScript} messages={messages} />

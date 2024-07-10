@@ -39,4 +39,6 @@ next-env.d.ts
 
 # app output
 gptscripts
-threads
+
+# ignore root level threads directory
+/threads
