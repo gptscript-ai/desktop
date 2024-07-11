@@ -11,17 +11,16 @@ import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
 import { getWorkspaceDir } from "@/actions/workspace";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
-import { threadId } from "worker_threads";
 
 interface ScriptProps {
     file: string;
-    thread: string;
+    thread?: string;
 	className?: string
 	messagesHeight?: string
+    enableThreads?: boolean
 }
 
-const Script: React.FC<ScriptProps> = ({ file, thread, className, messagesHeight = 'h-full' }) => {
+const Script: React.FC<ScriptProps> = ({ file, thread, className, messagesHeight = 'h-full', enableThreads = "false" }) => {
 	const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});

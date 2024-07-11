@@ -51,20 +51,25 @@ const Threads: React.FC<ThreadsProps> = ({ className, setThread, setScript }) =>
                 <New setSelectedThreadId={setSelectedThreadId} setThread={setThread} setThreads={setThreads} setScript={setScript} />
             </div>
             <div style={{ width: isCollapsed ? '50px' : '250px', transition: 'width 0.3s ease-in-out' }}>
+                <Divider className="mb-4" style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 0.2s 0.2s' }}/>
                 <div style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 0.05s 0.05s' }}>
                     <div className="space-y-2">
-                        {threads.map((thread, key) => (
-                            <div
-                                key={key} 
-                                className={`border-1 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
-                                onClick={() => handleRun(thread.meta.script, thread.meta.id)}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-sm truncate">{thread.meta.name}</h2>
-                                    <Menu className={isSelected(thread.meta.id) ? 'text-white': ''}setThreads={setThreads} threadId={thread.meta.id} />
+                        {threads.length === 0 ? (
+                            <div className=" text-center text-sm text-gray-500">No threads created yet...</div>
+                        ) : (
+                            threads.map((thread, key) => (
+                                <div
+                                    key={key} 
+                                    className={`border-1 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
+                                    onClick={() => handleRun(thread.meta.script, thread.meta.id)}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-sm truncate">{thread.meta.name}</h2>
+                                        <Menu className={isSelected(thread.meta.id) ? 'text-white': ''}setThreads={setThreads} threadId={thread.meta.id} />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
