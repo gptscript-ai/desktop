@@ -37,10 +37,10 @@ const NewThread = ({ className, setThread, setSelectedThreadId, setScript, setTh
                 <Button startContent={<GoPlus />} className={`${className}`} size="lg" variant="light" isIconOnly/>
             </PopoverTrigger>
             <PopoverContent className="flex flex-col space-y-3 p-4">
-                <Menu>
-                    <MenuSection title="My Scripts">
-                        {Object.keys(scripts).map((script) => (
-                            <MenuItem color="primary" className="py-2 truncate max-w-[200px]" content={script} onClick={() => { handleCreateThread(script); setIsOpen(false)}}>
+                <Menu aria-label="my-scripts">
+                    <MenuSection aria-label={"my-scripts"} title="My Scripts">
+                        {Object.keys(scripts).map((script,i) => (
+                            <MenuItem aria-label={script} key={i} color="primary" className="py-2 truncate max-w-[200px]" content={script} onClick={() => { handleCreateThread(script); setIsOpen(false)}}>
                                 {script}
                             </MenuItem>
                         ))}    

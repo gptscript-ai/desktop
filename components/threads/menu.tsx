@@ -21,9 +21,9 @@ const NewThread = ({ className, threadId, setThreads }: NewThreadProps) => {
                 <Button variant="light" radius="full" className={`${className}`} isIconOnly startContent={<GoKebabHorizontal />}/>
             </PopoverTrigger>
             <PopoverContent className="">
-                <Menu>
+                <Menu aria-label="options">
                     {/* <MenuItem className="py-2" content="Rename" startContent={<GoPencil />} onClick={() => { handleRenameThread() }}>Rename</MenuItem> */}
-                    <MenuItem className="py-2" content="Delete" startContent={<GoTrash />} onClick={() => { handleDeleteThread() }}>Delete</MenuItem>
+                    <MenuItem aria-label="delete" className="py-2" content="Delete" startContent={<GoTrash />} onClick={() => { handleDeleteThread() }}>Delete</MenuItem>
                 </Menu>
             </PopoverContent>
         </Popover>
