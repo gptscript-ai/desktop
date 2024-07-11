@@ -1,6 +1,6 @@
 "use server"
 
-import { THREADS_PATH } from "@/config/env";
+import { THREADS_DIR } from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
 
@@ -22,21 +22,21 @@ export type ThreadMeta = {
 }
 
 export async function init() {
-    const threadsPath = THREADS_PATH();
+    const threadsDir = THREADS_DIR();
     try {
-        await fs.access(threadsPath);
+        await fs.access(threadsDir);
     } catch (error) {
-        await fs.mkdir(threadsPath, { recursive: true });
+        await fs.mkdir(threadsDir, { recursive: true });
     }
 }
 
 export async function getThreads() {
     const threads: Thread[] = [];
-    const threadsPath = THREADS_PATH();
+    const threadsDir = THREADS_DIR();
     
     let threadDirs: void | string[] = [];
     try {
-        threadDirs = await fs.readdir(threadsPath);
+        threadDirs = await fs.readdir(threadsDir);
     } catch (e) {
         return [];
     }
@@ -44,7 +44,7 @@ export async function getThreads() {
     if (!threadDirs) return [];
 
     for(let threadDir of threadDirs) {
-        const threadPath = path.join(threadsPath, threadDir);
+        const threadPath = path.join(threadsDir, threadDir);
         const files = await fs.readdir(threadPath);
 
         const thread: Thread = {} as Thread;
@@ -75,12 +75,12 @@ async function newThreadName(): Promise<string> {
 }
 
 export async function createThread(script: string): Promise<Thread> {
-    const threadsPath = THREADS_PATH();
+    const threadsDir = THREADS_DIR();
     script = script.replace('.gpt', '');
 
     // will probably want something else for this
     const id = Math.random().toString(36).substring(7);
-    const threadPath = path.join(threadsPath, id);
+    const threadPath = path.join(threadsDir, id);
     await fs.mkdir(threadPath, { recursive: true });
 
     const threadMeta = {
@@ -103,14 +103,14 @@ export async function createThread(script: string): Promise<Thread> {
 }
 
 export async function deleteThread(id: string) {
-    const threadsPath = THREADS_PATH();
-    const threadPath = path.join(threadsPath,id);
+    const threadsDir = THREADS_DIR();
+    const threadPath = path.join(threadsDir,id);
     await fs.rm(threadPath, { recursive: true });
 }
 
 export async function updateThread(id: string, thread: Thread) {
-    const threadsPath = THREADS_PATH();
-    const threadPath = path.join(threadsPath,id);
+    const threadsDir = THREADS_DIR();
+    const threadPath = path.join(threadsDir,id);
 
     if (thread.state) await fs.writeFile(path.join(threadPath, STATE_FILE), thread.state);
     if (thread.meta) {

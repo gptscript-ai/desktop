@@ -12,7 +12,6 @@ const AGENT = 1;
 const USER = 2;
 
 const STATE_FILE = "state.json";
-const THREADS_DIR = process.env.THREADS_DIR || "threads";
 const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -20,6 +19,7 @@ const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+let THREADS_DIR = process.env.THREADS_DIR || "";
 let runningScript = null;
 
 app.prepare().then(() => {
@@ -67,7 +67,8 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
 
     let state = {};
     let statePath = ''
-    if (threadID) statePath = path.join(workspace, THREADS_DIR, threadID, STATE_FILE);
+    if (!THREADS_DIR) THREADS_DIR = path.join(workspace, "threads");
+    if (threadID) statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
     try {
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
         if (state && state.chatState) {
