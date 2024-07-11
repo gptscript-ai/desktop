@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@nextui-org/react';
-import { GoPlay, GoTrash } from 'react-icons/go';
 import New from './threads/new';
+import Menu from './threads/menu';
 import { getThreads, deleteThread, Thread } from '@/actions/threads';
+import { Button, Divider, Tooltip } from '@nextui-org/react';
+import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 
 interface ThreadsProps {
     className?: string;
-    setThread: (thread: string) => void;
-    setScript: (script: string) => void;
+    setThread: React.Dispatch<React.SetStateAction<string>>;
+    setScript: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Threads: React.FC<ThreadsProps> = ({ className, setThread, setScript }) => {
     const [threads, setThreads] = useState<Thread[]>([]);
     const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => { fetchThreads() }, []);
 
@@ -29,25 +31,43 @@ const Threads: React.FC<ThreadsProps> = ({ className, setThread, setScript }) =>
     const handleRun = async (script: string, id: string) => {
         setScript(script);
         setThread(id);
-        setSelectedThreadId(id); // Update the selected thread ID
+        setSelectedThreadId(id);
     };
 
     const isSelected = (id: string) => id === selectedThreadId;
 
     return (
-        <div className={`mt-4 ml-4 overflow-y-auto space-y-2 ${className}`}>
-            <New className="w-full" />
-            {threads.map((thread, key) => (
-                <div key={key} className={`border-1 dark:border-none px-4 py-1.5 rounded-xl ${isSelected(thread.meta.id) ? 'bg-blue-100' : ''}`} >
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-sm">{thread.meta.name}</h2>
-                        <div>
-                            <Button startContent={<GoTrash />} size="sm" radius="full" variant="light" isIconOnly onClick={() => handleDelete(thread.meta.id)} />
-                            <Button startContent={<GoPlay />} size="sm" radius="full" variant="light" isIconOnly onClick={() => handleRun(thread.meta.script, thread.meta.id)} />
-                        </div>
+        <div className={`relative p-4 ${isCollapsed ? "border-none" : "border-r-2 dark:border-r-zinc-800"}`}>
+            <div className="flex justify-between items-center mb-2">
+                <Tooltip content={isCollapsed ? "Expand threads" : "Collapse threads"} placement="top" closeDelay={0.5} radius='full'>
+                    <Button 
+                        startContent={isCollapsed ? <GoSidebarCollapse /> : <GoSidebarExpand />}
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        variant="light"
+                        size="lg"
+                        isIconOnly
+                    />
+                </Tooltip>
+                <New setSelectedThreadId={setSelectedThreadId} setThread={setThread} setThreads={setThreads} setScript={setScript} />
+            </div>
+            <div style={{ width: isCollapsed ? '50px' : '250px', transition: 'width 0.3s ease-in-out' }}>
+                <div style={{ opacity: isCollapsed ? 0 : 1, transition: 'opacity 0.05s 0.05s' }}>
+                    <div className="space-y-2">
+                        {threads.map((thread, key) => (
+                            <div
+                                key={key} 
+                                className={`border-2 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
+                                onClick={() => handleRun(thread.meta.script, thread.meta.id)}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-sm truncate">{thread.meta.name}</h2>
+                                    <Menu className={isSelected(thread.meta.id) ? 'text-white': ''}setThreads={setThreads} threadId={thread.meta.id} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            ))}
+            </div>
         </div>
     );
 }

@@ -80,7 +80,7 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
     socket.on("interrupt", async() => { if (runningScript) runningScript.close() });
     socket.on('disconnect', () => { if (runningScript) runningScript.close(); runningScript = null; });
 
-    if (!threadID) {
+    if (!threadID || !state.chatState) {
         runningScript = await gptscript.run(file, opts)
         socket.emit("running");
 

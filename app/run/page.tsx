@@ -11,8 +11,8 @@ const Run = () => {
 
 	return (
         <div className="w-full h-full flex pb-10">
-            <Threads setThread={setThread} setScript={setFile} className="w-1/5 pr-10 border-r dark:border-r-zinc-800"/>
-			<Script className="pb-10 w-3/5 mx-auto" file={file} thread={thread}/>
+            <Threads setThread={setThread} setScript={setFile} className=""/>
+			<Script className="pb-10 w-[52%] mx-auto" file={file} thread={thread}/>
         </div>
 	);
 };

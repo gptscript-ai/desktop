@@ -1,15 +1,20 @@
-import {Popover, PopoverTrigger, PopoverContent, Button, Input} from "@nextui-org/react";
-import { createThread } from '@/actions/threads';
+import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection, Tooltip} from "@nextui-org/react";
+import { createThread, Thread } from '@/actions/threads';
 import { fetchScripts } from '@/actions/scripts/fetch';
 import { useEffect, useState } from 'react';
-import { GoPlus } from "react-icons/go";
+import { GoPencil, GoPersonFill, GoPlus } from "react-icons/go";
 
 interface NewThreadProps {
     className?: string;
+    setSelectedThreadId: React.Dispatch<React.SetStateAction<string | null>>;
+    setThread: React.Dispatch<React.SetStateAction<string>>;
+    setScript: React.Dispatch<React.SetStateAction<string>>;
+    setThreads: React.Dispatch<React.SetStateAction<Thread[]>>;
 }
 
-const NewThread = ({ className }: NewThreadProps) => {
+const NewThread = ({ className, setThread, setSelectedThreadId, setScript, setThreads }: NewThreadProps) => {
     const [scripts, setScripts] = useState<Record<string, string>>({});
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         fetchScripts().then((data) => {
@@ -18,20 +23,31 @@ const NewThread = ({ className }: NewThreadProps) => {
     }, []);
 
     const handleCreateThread = (script: string) => {
-        createThread(script);
+        createThread(script).then((newThread) => {
+            setThreads((threads: Thread[]) => [newThread, ...threads]);
+            setScript(script.replace('.gpt', ''));
+            setThread(newThread.meta.id);
+            setSelectedThreadId(newThread.meta.id);
+        });
     };
 
     return (
-        <Popover placement="right">
-            <PopoverTrigger>
-                <Button color="primary" className={`${className}`} startContent={<GoPlus />}>Create Thread</Button>
-            </PopoverTrigger>
-            <PopoverContent className="flex flex-col space-y-4 p-4">
-                {Object.keys(scripts).map((script) => (
-                    <Button className="w-full" color="primary" key={script} onClick={()=> {handleCreateThread(script)}}>
-                        {script}
-                    </Button>
-                ))}
+        <Popover placement="right" isOpen={isOpen} onOpenChange={(open)=> setIsOpen(open)}>
+            <Tooltip content="Create a new thread" placement="right" closeDelay={0.5}>
+                <PopoverTrigger>
+                    <Button startContent={<GoPlus />} className={`${className}`} size="lg" variant="light" isIconOnly/>
+                </PopoverTrigger>
+            </Tooltip>
+            <PopoverContent className="flex flex-col space-y-3 p-4">
+                <Menu>
+                    <MenuSection title="My Scripts">
+                        {Object.keys(scripts).map((script) => (
+                            <MenuItem color="primary" className="py-2 truncate max-w-[200px]" content={script} onClick={() => { handleCreateThread(script); setIsOpen(false)}}>
+                                {script}
+                            </MenuItem>
+                        ))}    
+                    </MenuSection>
+                </Menu>
             </PopoverContent>
         </Popover>
     );

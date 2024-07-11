@@ -74,7 +74,7 @@ async function newThreadName(): Promise<string> {
     return `New Thread${threads.length ? ' ' + (threads.length+1): '' }`;
 }
 
-export async function createThread(script: string) {
+export async function createThread(script: string): Promise<Thread> {
     const threadsPath = THREADS_PATH();
     script = script.replace('.gpt', '');
 
@@ -83,17 +83,23 @@ export async function createThread(script: string) {
     const threadPath = path.join(threadsPath, id);
     await fs.mkdir(threadPath, { recursive: true });
 
-    await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify({
+    const threadMeta = {
         name: await newThreadName(),
         description: '',
         created: new Date(),
         updated: new Date(),
         id,
         script
-    }));
+    }
+    const threadState = '';
 
+    await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
     await fs.writeFile(path.join(threadPath, STATE_FILE), '');
-    return id;
+
+    return {
+        state: threadState,
+        meta: threadMeta,
+    }
 }
 
 export async function deleteThread(id: string) {
