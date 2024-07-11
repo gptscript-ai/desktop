@@ -66,7 +66,8 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
 	if (tool) opts.subTool = tool;
 
     let state = {};
-    let statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
+    let statePath = ''
+    if (threadID) statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
     try {
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
         if (state && state.chatState) {
