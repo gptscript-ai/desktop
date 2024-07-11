@@ -28,7 +28,7 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
                 label="Filename"
                 type="text"
                 variant="bordered"
-                placeholder='my-assistant.gpt (optional)'
+                placeholder='my-assistant.gpt'
                 value={filename}
                 errorMessage={error}
                 isInvalid={!!error}
