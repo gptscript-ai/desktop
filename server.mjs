@@ -103,7 +103,6 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
                 state.chatState = runningScript.currentChatState();
 
                 if (threadID) {
-                    fs.mkdirSync(threadID, { recursive: true });
                     fs.writeFile(statePath, JSON.stringify(state), (err) => {
                         if (err) { socket.emit("error", err)} 
                     });
@@ -151,8 +150,6 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
                 state.chatState = runningScript.currentChatState();
                 
                 if (threadID) {
-                    const dirname = path.dirname(statePath);
-                    fs.mkdirSync(dirname, { recursive: true });
                     fs.writeFile(statePath, JSON.stringify(state), (err) => {
                         if (err) { socket.emit("error", err)} 
                     });

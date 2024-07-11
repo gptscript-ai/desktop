@@ -37,7 +37,7 @@ const Threads: React.FC<ThreadsProps> = ({ className, setThread, setScript }) =>
     const isSelected = (id: string) => id === selectedThreadId;
 
     return (
-        <div className={`relative p-4 ${isCollapsed ? "border-none" : "border-r-2 dark:border-r-zinc-800"}`}>
+        <div className={`relative p-4 ${isCollapsed ? "border-none" : "border-r-1 dark:border-r-zinc-800"}`}>
             <div className="flex justify-between items-center mb-2">
                 <Tooltip content={isCollapsed ? "Expand threads" : "Collapse threads"} placement="top" closeDelay={0.5} radius='full'>
                     <Button 
@@ -56,7 +56,7 @@ const Threads: React.FC<ThreadsProps> = ({ className, setThread, setScript }) =>
                         {threads.map((thread, key) => (
                             <div
                                 key={key} 
-                                className={`border-2 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
+                                className={`border-1 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
                                 onClick={() => handleRun(thread.meta.script, thread.meta.id)}
                             >
                                 <div className="flex justify-between items-center">

@@ -11,7 +11,7 @@ const Run = () => {
 
 	return (
         <div className="w-full h-full flex pb-10">
-            <Threads setThread={setThread} setScript={setFile} className=""/>
+            <Threads setThread={setThread} setScript={setFile} />
 			<Script className="pb-10 w-[52%] mx-auto" file={file} thread={thread}/>
         </div>
 	);

@@ -33,11 +33,9 @@ const NewThread = ({ className, setThread, setSelectedThreadId, setScript, setTh
 
     return (
         <Popover placement="right" isOpen={isOpen} onOpenChange={(open)=> setIsOpen(open)}>
-            <Tooltip content="Create a new thread" placement="right" closeDelay={0.5}>
-                <PopoverTrigger>
-                    <Button startContent={<GoPlus />} className={`${className}`} size="lg" variant="light" isIconOnly/>
-                </PopoverTrigger>
-            </Tooltip>
+            <PopoverTrigger>
+                <Button startContent={<GoPlus />} className={`${className}`} size="lg" variant="light" isIconOnly/>
+            </PopoverTrigger>
             <PopoverContent className="flex flex-col space-y-3 p-4">
                 <Menu>
                     <MenuSection title="My Scripts">
