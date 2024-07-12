@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, use } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
@@ -17,7 +17,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     // Refs
     const socketRef = useRef<Socket | null>(null);
     const messagesRef = useRef(messages);
-    const latestBotMessageIndex = useRef<number>(-1);
+    const latestAgentMessageIndex = useRef<number>(-1);
     const trustedRef = useRef<Record<string, boolean>>({});
     const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
@@ -30,14 +30,14 @@ const useChatSocket = (isEmpty?: boolean) => {
         setError(error);
         setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
-            if (latestBotMessageIndex.current !== -1) {
+            if (latestAgentMessageIndex.current !== -1) {
                 // Append the error to the latest message
-                updatedMessages[latestBotMessageIndex.current].error = `${error}`
+                updatedMessages[latestAgentMessageIndex.current].error = `${error}`
             } else {
                 // If there are no previous messages, create a new error message
                 updatedMessages.push(
                     {
-                        type: MessageType.Bot, 
+                        type: MessageType.Agent, 
                         message: "The script encountered an error. You can either restart the script or try to continue chatting.", 
                         error 
                     }
@@ -58,8 +58,8 @@ const useChatSocket = (isEmpty?: boolean) => {
         if (!content) return;
         setGenerating(true);
         if ( content === "Waiting for model response..." &&
-            latestBotMessageIndex.current !== -1 &&
-            messagesRef.current[latestBotMessageIndex.current]?.message
+            latestAgentMessageIndex.current !== -1 &&
+            messagesRef.current[latestAgentMessageIndex.current]?.message
         ) return;
 
         if (content.startsWith('<tool call>')) {
@@ -67,9 +67,9 @@ const useChatSocket = (isEmpty?: boolean) => {
             content = `Calling tool ${parsedToolCall.tool}...`;
         }
 
-        let message: Message = { type: MessageType.Bot, message: content, calls: state, name: frame.tool?.name };
-        if (latestBotMessageIndex.current === -1) {
-            latestBotMessageIndex.current = messagesRef.current.length;
+        let message: Message = { type: MessageType.Agent, message: content, calls: state, name: frame.tool?.name };
+        if (latestAgentMessageIndex.current === -1) {
+            latestAgentMessageIndex.current = messagesRef.current.length;
             setMessages((prevMessages) => {
                 const updatedMessages = [...prevMessages];
                 updatedMessages.push(message);
@@ -78,8 +78,8 @@ const useChatSocket = (isEmpty?: boolean) => {
         } else {
             setMessages((prevMessages) => {
                 const updatedMessages = [...prevMessages];
-                if (latestBotMessageIndex.current !== -1) {
-                    updatedMessages[latestBotMessageIndex.current] = message;
+                if (latestAgentMessageIndex.current !== -1) {
+                    updatedMessages[latestAgentMessageIndex.current] = message;
                 } else {
                     updatedMessages[messagesRef.current.length - 1] = message;
                 }
@@ -89,7 +89,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
         if (isMainContent && frame.type == "callFinish") {
             setGenerating(false);
-            latestBotMessageIndex.current = -1
+            latestAgentMessageIndex.current = -1
         }
     }, []);
 
@@ -105,14 +105,14 @@ const useChatSocket = (isEmpty?: boolean) => {
                 />
             );
 
-            if (latestBotMessageIndex.current !== -1) {
+            if (latestAgentMessageIndex.current !== -1) {
                 // Update the message content
-                updatedMessages[latestBotMessageIndex.current].message = frame.message;
-                updatedMessages[latestBotMessageIndex.current].component = form;
-                updatedMessages[latestBotMessageIndex.current].calls = state;
+                updatedMessages[latestAgentMessageIndex.current].message = frame.message;
+                updatedMessages[latestAgentMessageIndex.current].component = form;
+                updatedMessages[latestAgentMessageIndex.current].calls = state;
             } else {
                 // If there are no previous messages, create a new message
-                updatedMessages.push({ type: MessageType.Bot, message: frame.message, component: form, calls: state});
+                updatedMessages.push({ type: MessageType.Agent, message: frame.message, component: form, calls: state});
             }
             return updatedMessages;
         });
@@ -147,9 +147,9 @@ const useChatSocket = (isEmpty?: boolean) => {
             />
         );
 
-        let message: Message = { type: MessageType.Bot, name: frame.tool?.name, component: form, calls: state};
-        if (latestBotMessageIndex.current === -1) {
-            latestBotMessageIndex.current = messagesRef.current.length;
+        let message: Message = { type: MessageType.Agent, name: frame.tool?.name, component: form, calls: state};
+        if (latestAgentMessageIndex.current === -1) {
+            latestAgentMessageIndex.current = messagesRef.current.length;
             setMessages((prevMessages) => {
                 const updatedMessages = [...prevMessages];
                 updatedMessages.push(message);
@@ -158,8 +158,8 @@ const useChatSocket = (isEmpty?: boolean) => {
         } else {
             setMessages((prevMessages) => {
                 const updatedMessages = [...prevMessages];
-                if (latestBotMessageIndex.current !== -1) {
-                    updatedMessages[latestBotMessageIndex.current] = message;
+                if (latestAgentMessageIndex.current !== -1) {
+                    updatedMessages[latestAgentMessageIndex.current] = message;
                 } else {
                     updatedMessages[messagesRef.current.length - 1] = message;
                 }
@@ -225,7 +225,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         socket.off("disconnect")
         socket.off("progress");
         socket.off("error");
-        socket.off("botMessage");
+        socket.off("AgentMessage");
         socket.off("promptRequest");
         socket.off("confirmRequest");
 
@@ -239,6 +239,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         socket.on("error", (data: string) => handleError(data));
         socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
         socket.on("confirmRequest", (data: {frame: CallFrame, state: any}) => { handleConfirmRequest(data) });
+        socket.on("loaded", (data: Message[]) => {setMessages(data)});
 
         setSocket(socket);
     }
@@ -255,7 +256,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     const interrupt = useCallback(() => {
         if (!socket || !connected) return;
-        latestBotMessageIndex.current = -1
+        latestAgentMessageIndex.current = -1
         socket.emit("interrupt");
         setGenerating(false);
     }, [socket, connected]);
@@ -266,11 +267,11 @@ const useChatSocket = (isEmpty?: boolean) => {
                 { type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System" },
             ]
             if (!isEmpty) {
-                setGenerating(true);
-                initialMessages.push({ type: MessageType.Bot, message: "Waiting for model response..." });
-                latestBotMessageIndex.current = 1;
+                setGenerating(false);
+                initialMessages.push({ type: MessageType.Agent, message: "Waiting for model response..." });
+                latestAgentMessageIndex.current = 1;
             } else {
-                initialMessages.push({ type: MessageType.Bot, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!" });
+                initialMessages.push({ type: MessageType.Agent, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!" });
             }
             setMessages(initialMessages);
         }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import type { Tool } from "@gptscript-ai/gptscript";
-import Messages, { type Message, MessageType } from "@/components/script/messages";
+import Messages, { MessageType } from "@/components/script/messages";
 import ChatBar from "@/components/script/chatBar";
 import ToolForm from "@/components/script/form";
 import Loading from "@/components/loading";
@@ -10,15 +10,21 @@ import useChatSocket from '@/components/script/useChatSocket';
 import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
 import { getWorkspaceDir } from "@/actions/workspace";
+import { createThread, getThreads, Thread } from "@/actions/threads";
 import debounce from "lodash/debounce";
+import { set } from "lodash";
 
 interface ScriptProps {
     file: string;
+    thread?: string;
 	className?: string
 	messagesHeight?: string
+    enableThreads?: boolean
+    setThreads?: React.Dispatch<React.SetStateAction<Thread[]>>
+    setSelectedThreadId?: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-full' }) => {
+const Script: React.FC<ScriptProps> = ({ file, thread, setThreads, className, messagesHeight = 'h-full', enableThreads, setSelectedThreadId }) => {
 	const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -36,6 +42,10 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
         setIsEmpty(!tool.instructions);
 	}, [tool]);
 
+    useEffect(() => {
+        if(thread) restartScript();
+    }, [thread]);
+
 	useEffect(() => {
 		if (hasRun || !socket || !connected) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
@@ -44,10 +54,10 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                     const workspace = await getWorkspaceDir()
                     return { path, workspace}
                 })
-                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace) });
+                .then(({path, workspace}) => { socket.emit("run", path, tool.name, formValues, workspace, thread)});
 			setHasRun(true);
 		}
-	}, [tool, connected, file, formValues]);
+	}, [tool, connected, file, formValues, thread]);
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -61,10 +71,8 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
-		if (smallBody) {
-			smallBody.scrollTop = smallBody.scrollHeight;
-		}
-	}, [messages]);
+		if (smallBody) smallBody.scrollTop = smallBody.scrollHeight;
+	}, [messages, connected, running]);
 
 	const handleFormSubmit = () => {
 		setShowForm(false);
@@ -74,7 +82,7 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
                 const workspace = await getWorkspaceDir()
                 return { path, workspace}
             })
-            .then(({path, workspace}) => { socket?.emit("run", path, tool.name, formValues, workspace) });
+            .then(({path, workspace}) => { socket?.emit("run", path, tool.name, formValues, workspace, thread) });
 		setHasRun(true);
 	};
 
@@ -85,10 +93,19 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 		}));
 	};
 
-    const handleMessageSent = (message: string) => {
+    const handleMessageSent = async (message: string) => {
         if (!socket || !connected) return;
+
+        let threadId = "";
+        if (hasNoUserMessages() && enableThreads && !thread && setThreads && setSelectedThreadId) {
+            const newThread = await createThread(file)
+            threadId = newThread?.meta?.id;
+            setThreads( await getThreads());
+            setSelectedThreadId(threadId);
+        }
+
         setMessages((prevMessages) => [...prevMessages, { type: MessageType.User, message }]);
-        socket.emit("userMessage", message);
+        socket.emit("userMessage", message, threadId);
     };
 
     const restartScript = useCallback(
@@ -103,6 +120,8 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
         [file, restart]
     );
 
+    const hasNoUserMessages = useCallback(() => messages.filter((m) => m.type === MessageType.User).length === 0, [messages]);
+
 	return (
 		<div className={`h-full w-full ${className}`}>
 			{(connected && running)|| (showForm && hasParams)  ? (<>
@@ -112,9 +131,9 @@ const Script: React.FC<ScriptProps> = ({ file, className, messagesHeight = 'h-fu
 				>
 					{showForm && hasParams ? (
 						<ToolForm
-						tool={tool}
-						formValues={formValues}
-						handleInputChange={handleInputChange}
+                            tool={tool}
+                            formValues={formValues}
+                            handleInputChange={handleInputChange}
 						/>
 					) : (
 						<Messages restart={restartScript} messages={messages} />

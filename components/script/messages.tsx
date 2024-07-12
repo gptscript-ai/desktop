@@ -9,9 +9,9 @@ import Calls from "./messages/calls"
 import { GoIssueReopened } from "react-icons/go";
 
 export enum MessageType {
-	User,
-	Bot,
     Alert,
+	Agent,
+	User,
 }
 
 export type Message = {
@@ -39,7 +39,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                     </p>
                 </div>
             );
-        case MessageType.Bot:
+        case MessageType.Agent:
             return (
                 <div className="flex flex-col items-start mb-10">
                     <div className="flex gap-2 w-full">
@@ -62,7 +62,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                             </Tooltip>
                         )}
                         <div
-                            className={`w-[93%] rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${
+                            className={`w-full rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${
                                 message.error ? "border-danger dark:border-danger" : ""
                             }`}
                         >
@@ -78,7 +78,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                             {message.component}
                             {message.error && (
                                 <>
-                                    <p className="text-danger text-base pl-4 pb-6">{message.error}</p>
+                                    <p className="text-danger text-base pl-4 pb-6">{`${JSON.stringify(message.error)}`}</p>
                                     <Tooltip
                                         content="If you are no longer able to chat, click here to restart the script."
                                         closeDelay={0.5}

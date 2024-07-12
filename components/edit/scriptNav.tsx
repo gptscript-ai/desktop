@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { fetchScripts } from "@/actions/scripts/fetch";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Button} from "@nextui-org/react";
 import { IoMenu } from "react-icons/io5";
 import { FaRegFileCode } from "react-icons/fa";
@@ -12,9 +13,8 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className }) => {
     const [files, setFiles] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        fetch('/api/file')
-            .then(response => response.json())
-            .then(data => setFiles(data))
+        fetchScripts()
+            .then(scripts => setFiles(scripts))
             .catch(error => console.error(error));
     }, []);
 
@@ -32,6 +32,7 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className }) => {
             <DropdownMenu 
                 aria-label="edit" 
                 onAction={(key) => { window.location.href = `/edit?file=${key}`;}}
+                disabledKeys={['no-files']}
             >
                 <DropdownSection title="Actions" showDivider>
                     <DropdownItem startContent={<VscNewFile />} key="new">
