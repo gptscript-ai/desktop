@@ -108,6 +108,15 @@ export async function deleteThread(id: string) {
     await fs.rm(threadPath, { recursive: true });
 }
 
+export async function renameThread(id: string, name: string) {
+    const threadsDir = THREADS_DIR();
+    const threadPath = path.join(threadsDir,id);
+    const meta = await fs.readFile(path.join(threadPath, META_FILE), "utf-8");
+    const threadMeta = JSON.parse(meta) as ThreadMeta;
+    threadMeta.name = name;
+    await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
+}
+
 export async function updateThread(id: string, thread: Thread) {
     const threadsDir = THREADS_DIR();
     const threadPath = path.join(threadsDir,id);

@@ -1,4 +1,4 @@
-import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection, Tooltip} from "@nextui-org/react";
+import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection, Input} from "@nextui-org/react";
 import { createThread, Thread } from '@/actions/threads';
 import { fetchScripts } from '@/actions/scripts/fetch';
 import { useEffect, useState } from 'react';
