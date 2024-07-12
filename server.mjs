@@ -119,7 +119,12 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
 
 
     // If the user sends a message, we continue and setup the next chat's event listeners
-    socket.on('userMessage', async (message) => {
+    socket.on('userMessage', async (message, newThreadId) => {
+        if (newThreadId) {
+            threadID = newThreadId;
+            statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
+        }
+
         // Remove any previous promptResponse or confirmResponse listeners
         socket.removeAllListeners("promptResponse");
         socket.removeAllListeners("confirmResponse");

@@ -38,7 +38,7 @@ const NewThread = ({ className, setThread, setSelectedThreadId, setScript, setTh
             </PopoverTrigger>
             <PopoverContent className="flex flex-col space-y-3 p-4">
                 <Menu aria-label="my-scripts">
-                    <MenuSection aria-label={"my-scripts"} title="My Scripts">
+                    <MenuSection aria-label={"my-scripts"} title="Select a script">
                         {Object.keys(scripts).map((script,i) => (
                             <MenuItem aria-label={script} key={i} color="primary" className="py-2 truncate max-w-[200px]" content={script} onClick={() => { handleCreateThread(script); setIsOpen(false)}}>
                                 {script}
