@@ -97,7 +97,7 @@ const Script: React.FC<ScriptProps> = ({ file, thread, setThreads, className, me
         if (!socket || !connected) return;
 
         let threadId = "";
-        if (hasNoUserMessages() && enableThreads && setThreads && setSelectedThreadId) {
+        if (hasNoUserMessages() && enableThreads && !thread && setThreads && setSelectedThreadId) {
             const newThread = await createThread(file)
             threadId = newThread?.meta?.id;
             setThreads( await getThreads());
