@@ -9,6 +9,8 @@ import {
     Tooltip,
     Button,
     Switch,
+    Select,
+    SelectItem,
 } from "@nextui-org/react";
 import { EditContext } from "@/contexts/edit";
 import { GoTrash } from "react-icons/go";
@@ -19,14 +21,15 @@ interface ConfigureProps {
     file: string;
     tool: Tool;
     className?: string;
+    models: string[];
 }
 
-const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
+const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
     const [name, setName] = useState<string>('');
     const [chat, setChat] = useState<boolean>(false);
     const { setRoot, setTools} = useContext(EditContext)
-    
+
     useEffect(() => { setCustomTool(tool); setName(tool.name || '') }, []);
 
     useEffect(() => {
@@ -63,6 +66,10 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
             return updatedTools;
         });
     }, [name])
+
+    const setModel = useCallback((newModel: string) => {
+        setCustomTool({...customTool, modelName: newModel});
+    }, [customTool]);
 
     const setCustomToolTools = useCallback((newTools: string[]) => {
         setCustomTool({...customTool, tools: newTools});
@@ -117,7 +124,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
                         size="md" 
                         name={abbreviate(name || 'Main')} 
                         className="mx-auto mt-4"
-                        classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
+                        classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-800"}}
                     />
                 </Tooltip>
                 <Tooltip 
@@ -163,6 +170,19 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, tool }) => {
                     value={customTool.instructions}
                     onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
                 />
+                <Select 
+                    label="Model"
+                    placeholder="gpt-4o" 
+                    variant="bordered"
+                    selectedKeys={[customTool.modelName || '']}
+                    onChange={(e) => setModel(e.target.value)}
+                >
+                    {models.map((model) => (
+                        <SelectItem key={model}>
+                            {model}
+                        </SelectItem>
+                    ))}
+                </Select>
                 <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams} />
                 <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
                 <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts} label={"Context Tool"}/>
