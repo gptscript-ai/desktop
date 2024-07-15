@@ -1,10 +1,11 @@
-import { createServer } from "node:http";
+import {createServer} from "node:http";
 import next from "next";
-import { Server } from "socket.io";
-import { GPTScript, RunEventType, RunState } from '@gptscript-ai/gptscript';
+import {Server} from "socket.io";
+import {GPTScript, RunEventType, RunState} from '@gptscript-ai/gptscript';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import open from 'open';
 
 dotenv.config({path: ['.env', '.env.local']});
 
@@ -16,21 +17,22 @@ const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
 const port = parseInt(process.env.GPTSCRIPT_PORT || "3000");
-const app = next({ dev, hostname, port });
+const runFile = process.env.UI_RUN_FILE
+const app = next({dev, hostname, port});
 const handler = app.getRequestHandler();
 
 let THREADS_DIR = process.env.THREADS_DIR || "";
 let runningScript = null;
 
 app.prepare().then(() => {
-	const httpServer = createServer(handler);
+    const httpServer = createServer(handler);
 
-	const io = new Server(httpServer);
-	const gptscript = new GPTScript()
+    const io = new Server(httpServer);
+    const gptscript = new GPTScript()
 
-	io.on("connection", (socket) => {
-		io.emit("message", "connected");
-		socket.on("run", async (file, tool, args, workspace, threadID) => {
+    io.on("connection", (socket) => {
+        io.emit("message", "connected");
+        socket.on("run", async (file, tool, args, workspace, threadID) => {
             if (runningScript) {
                 await runningScript.close();
                 runningScript = null;
@@ -41,29 +43,43 @@ app.prepare().then(() => {
             } catch (e) {
                 socket.emit("error", e);
             }
-		});
-	});
+        });
+    });
 
-	httpServer
-		.once("error", (err) => {
-			console.error(err);
-			process.exit(1);
-		})
-		.listen(port, () => {
-			console.log(`> Socket server is ready at http://${hostname}:${port}`);
-		});
+    httpServer
+        .once("error", (err) => {
+            console.error(err);
+            process.exit(1);
+        })
+        .listen(port, () => {
+            console.log(`> Socket server is ready at http://${hostname}:${port}`);
+        });
+
+    // Open the landing page in the browser
+    let landingPage = `http://${hostname}:${port}`
+    if (runFile) {
+        // `--file` was provided, change the landing page URL to run the given script
+        landingPage = `${landingPage}/run?file=${runFile}`
+    }
+
+    open(landingPage).then(() => {
+        console.log(`${landingPage} opened!`)
+    }).catch((err) => {
+        console.error(`Failed to open landing page ${landingPage}: ${err.message}`)
+    })
+
 });
 
 const mount = async (file, tool, args, workspace, socket, threadID, gptscript) => {
-	const opts = {
-		input: JSON.stringify(args || {}),
-		disableCache: DISABLE_CACHE,
+    const opts = {
+        input: JSON.stringify(args || {}),
+        disableCache: DISABLE_CACHE,
         workspace: workspace,
-		prompt: true,
-		confirm: true,
-	};
+        prompt: true,
+        confirm: true,
+    };
 
-	if (tool) opts.subTool = tool;
+    if (tool) opts.subTool = tool;
 
     let state = {};
     let statePath = ''
@@ -75,24 +91,39 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
             opts.chatState = state.chatState;
             socket.emit("loaded", state.messages);
         }
-    } catch (e) {}
+    } catch (e) {
+    }
 
     // Start the script
     let runningScript = null;
-    socket.on("interrupt", async() => { if (runningScript) runningScript.close() });
-    socket.on('disconnect', () => { if (runningScript) runningScript.close(); runningScript = null; });
+    socket.on("interrupt", async () => {
+        if (runningScript) runningScript.close()
+    });
+    socket.on('disconnect', () => {
+        if (runningScript) runningScript.close();
+        runningScript = null;
+    });
 
     if (!threadID || !state.chatState) {
         runningScript = await gptscript.run(file, opts)
         socket.emit("running");
 
         // Handle initial runningScript events
-        runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
-        runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
-        runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
+        runningScript.on(RunEventType.Event, data => socket.emit('progress', {
+            frame: data,
+            state: runningScript.calls
+        }));
+        runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {
+            frame: data,
+            state: runningScript.calls
+        }));
+        runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {
+            frame: data,
+            state: runningScript.calls
+        }));
         socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
         socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
-        
+
 
         // Wait for the run to finish and emit any errors that occur. Specifically look for the "Run has been aborted" error
         // as this is a marker of an interrupt.
@@ -106,12 +137,14 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
 
                 if (threadID) {
                     fs.writeFile(statePath, JSON.stringify(state), (err) => {
-                        if (err) { socket.emit("error", err)} 
+                        if (err) {
+                            socket.emit("error", err)
+                        }
                     });
                 }
             })
             .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e))
-            
+
     } else {
         socket.emit("running"); // temp
         socket.emit("resuming");
@@ -138,9 +171,18 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
             runningScript = runningScript.nextChat(message);
         }
 
-        runningScript.on(RunEventType.Event, data => socket.emit('progress', {frame: data, state: runningScript.calls}));
-        runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {frame: data, state: runningScript.calls}));
-        runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {frame: data, state: runningScript.calls}));
+        runningScript.on(RunEventType.Event, data => socket.emit('progress', {
+            frame: data,
+            state: runningScript.calls
+        }));
+        runningScript.on(RunEventType.Prompt, async (data) => socket.emit("promptRequest", {
+            frame: data,
+            state: runningScript.calls
+        }));
+        runningScript.on(RunEventType.CallConfirm, (data) => socket.emit("confirmRequest", {
+            frame: data,
+            state: runningScript.calls
+        }));
         socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
         socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
@@ -153,12 +195,14 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
                     {type: USER, message: message},
                     {type: AGENT, message: output}
                 )
-                
+
                 state.chatState = runningScript.currentChatState();
-                
+
                 if (threadID) {
                     fs.writeFile(statePath, JSON.stringify(state), (err) => {
-                        if (err) { socket.emit("error", err)} 
+                        if (err) {
+                            socket.emit("error", err)
+                        }
                     });
                 }
             })
