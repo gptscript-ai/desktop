@@ -1,6 +1,7 @@
 "use server"
 
 import { THREADS_DIR } from "@/config/env";
+import { gpt } from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
 
@@ -74,7 +75,14 @@ async function newThreadName(): Promise<string> {
     return `New Thread${threads.length ? ' ' + (threads.length+1): '' }`;
 }
 
-export async function createThread(script: string): Promise<Thread> {
+export async function generateThreadName(firstMessage: string): Promise<string> {
+    const summary = await gpt().evaluate({
+        instructions: `Summarize the following message with a descriptive but brief thread name: ${firstMessage}`
+    })
+    return summary.text();
+}
+
+export async function createThread(script: string, firstMessage?: string): Promise<Thread> {
     const threadsDir = THREADS_DIR();
     script = script.replace('.gpt', '');
 
@@ -95,6 +103,11 @@ export async function createThread(script: string): Promise<Thread> {
 
     await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
     await fs.writeFile(path.join(threadPath, STATE_FILE), '');
+
+    if (firstMessage) {
+        const generatedThreadName = await generateThreadName(firstMessage)
+        renameThread(id, generatedThreadName);
+    }
 
     return {
         state: threadState,

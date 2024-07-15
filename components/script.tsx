@@ -10,9 +10,8 @@ import useChatSocket from '@/components/script/useChatSocket';
 import { Button } from "@nextui-org/react";
 import { fetchScript, path } from "@/actions/scripts/fetch";
 import { getWorkspaceDir } from "@/actions/workspace";
-import { createThread, getThreads, Thread } from "@/actions/threads";
+import { createThread, getThreads, generateThreadName, renameThread, Thread } from "@/actions/threads";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
 
 interface ScriptProps {
     file: string;
@@ -36,6 +35,12 @@ const Script: React.FC<ScriptProps> = ({ file, thread, setThreads, className, me
     const { 
         socket, connected, running, messages, setMessages, restart, interrupt, generating, error
     } = useChatSocket(isEmpty);
+
+    const fetchThreads = async () => {
+        if (!setThreads) return;
+        const threads = await getThreads();
+        setThreads(threads);
+    };
 
 	useEffect(() => {
 		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
@@ -98,14 +103,21 @@ const Script: React.FC<ScriptProps> = ({ file, thread, setThreads, className, me
 
         let threadId = "";
         if (hasNoUserMessages() && enableThreads && !thread && setThreads && setSelectedThreadId) {
-            const newThread = await createThread(file)
+            const newThread = await createThread(file, message)
             threadId = newThread?.meta?.id;
             setThreads( await getThreads());
             setSelectedThreadId(threadId);
         }
 
+        
         setMessages((prevMessages) => [...prevMessages, { type: MessageType.User, message }]);
         socket.emit("userMessage", message, threadId);
+        
+        if (hasNoUserMessages() && thread) {
+            renameThread(thread, await generateThreadName(message));
+            fetchThreads();
+        }
+
     };
 
     const restartScript = useCallback(

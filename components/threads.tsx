@@ -34,7 +34,7 @@ const Threads: React.FC<ThreadsProps> = ({ className, setThread, threads, setThr
     const isSelected = (id: string) => id === selectedThreadId;
 
     return (
-        <div className={`relative p-4 ${isCollapsed ? "border-none" : "border-r-1 dark:border-r-zinc-800"}`}>
+        <div className={`relative p-4 overflow-y-auto ${isCollapsed ? "border-none" : "border-r-1 dark:border-r-zinc-800"}`}>
             <div className={`flex justify-between items-center mb-2`}>
                 <Tooltip content={isCollapsed ? "Expand threads" : "Collapse threads"} placement="top" closeDelay={0.5} radius='full'>
                     <Button 
