@@ -172,7 +172,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                 />
                 <Select 
                     label="Model"
-                    placeholder="gpt-4o" 
+                    placeholder="Select a non-default model..."
                     variant="bordered"
                     selectedKeys={[customTool.modelName || '']}
                     onChange={(e) => setModel(e.target.value)}
