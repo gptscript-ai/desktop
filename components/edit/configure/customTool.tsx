@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import { Tool, Property } from "@gptscript-ai/gptscript";
 import Imports from "@/components/edit/configure/imports";
 import Params from "@/components/edit/configure/params";
+import Models from "@/components/edit/configure/models";
 import {
     Textarea,
     Input,
@@ -9,8 +10,6 @@ import {
     Tooltip,
     Button,
     Switch,
-    Select,
-    SelectItem,
 } from "@nextui-org/react";
 import { EditContext } from "@/contexts/edit";
 import { GoTrash } from "react-icons/go";
@@ -26,11 +25,12 @@ interface ConfigureProps {
 
 const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
-    const [name, setName] = useState<string>('');
+    const [name, setName] = useState<string>(tool.name || '');
     const [chat, setChat] = useState<boolean>(false);
+    const [model, setModel] = useState<string | undefined>(tool.modelName);
     const { setRoot, setTools} = useContext(EditContext)
 
-    useEffect(() => { setCustomTool(tool); setName(tool.name || '') }, []);
+    useEffect(() => { setCustomTool(tool)}, []);
 
     useEffect(() => {
         setChat(customTool.chat || false);
@@ -66,10 +66,6 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
             return updatedTools;
         });
     }, [name])
-
-    const setModel = useCallback((newModel: string) => {
-        setCustomTool({...customTool, modelName: newModel});
-    }, [customTool]);
 
     const setCustomToolTools = useCallback((newTools: string[]) => {
         setCustomTool({...customTool, tools: newTools});
@@ -170,19 +166,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                     value={customTool.instructions}
                     onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
                 />
-                <Select 
-                    label="Model"
-                    placeholder="Select a non-default model..."
-                    variant="bordered"
-                    selectedKeys={[customTool.modelName || '']}
-                    onChange={(e) => setModel(e.target.value)}
-                >
-                    {models.map((model) => (
-                        <SelectItem key={model}>
-                            {model}
-                        </SelectItem>
-                    ))}
-                </Select>
+                <Models options={models} defaultValue={model} onChange={(model) => {setCustomTool({...customTool, modelName: model})}} />
                 <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams} />
                 <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
                 <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts} label={"Context Tool"}/>

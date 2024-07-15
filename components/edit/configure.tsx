@@ -3,6 +3,7 @@ import { Tool } from "@gptscript-ai/gptscript";
 import Imports from "@/components/edit/configure/imports";
 import Loading from "@/components/loading";
 import CustomTool from "@/components/edit/configure/customTool";
+import Models from "@/components/edit/configure/models";
 import { EditContext } from "@/contexts/edit";
 import {
     Textarea,
@@ -12,8 +13,8 @@ import {
     Button,
     Accordion,
     AccordionItem,
-    Select,
-    SelectItem,
+    Autocomplete,
+    AutocompleteItem,
 
 } from "@nextui-org/react";
 import { getModels } from "@/actions/models";
@@ -31,22 +32,17 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
         root, setRoot,
         tools, setTools,
         loading, setLoading,
-        update,
         newestToolName,
     } = useContext(EditContext);
     const [models, setModels] = useState<string[]>([]);
 
-    useEffect(() => { getModels().then((m) => { console.log(m);setModels(m) })}, []);
+    useEffect(() => { getModels().then((m) => { setModels(m) }) }, []);
 
     const abbreviate = (name: string) => {
         const words = name.split(/(?=[A-Z])|[\s_-]/);
         const firstLetters = words.map(word => word[0]);
         return firstLetters.slice(0, 2).join('').toUpperCase();
     }
-
-    const setModel = useCallback((newModel: string) => {
-        setRoot({...root, modelName: newModel});
-    }, [root]);
 
     const setRootTools = useCallback((newTools: string[]) => {
         setRoot({...root, tools: newTools});
@@ -102,19 +98,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
                 defaultValue={root.instructions}
                 onChange={(e) => setRoot({...root, instructions: e.target.value})}
             />
-            <Select 
-                label="Model"
-                placeholder="Select a non-default model..."
-                variant="bordered"
-                selectedKeys={[root.modelName || '']}
-                onChange={(e) => setModel(e.target.value)}
-            >
-                {models.map((model) => (
-                <SelectItem key={model} className="bg-blue">
-                    {model}
-                </SelectItem>
-                ))}
-            </Select>
+            <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />
             <Imports className="py-2" tools={root.tools} setTools={setRootTools} label={"Basic tool"}/>
             <Imports className="py-2" tools={root.context} setTools={setRootContexts} label={"context Tool"}/>
             <Imports className="py-2" tools={root.agents} setTools={setRootAgents} label={"agent Tool"}/>
