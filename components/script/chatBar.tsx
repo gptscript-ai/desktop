@@ -71,6 +71,7 @@ const ChatBar = ({
             </Tooltip>
             <Upload disabled={disabled} onRestart={onRestart}/>
             <Textarea
+                color="primary"
                 isDisabled={disabled}
                 id="chatInput"
                 autoComplete="off"
@@ -79,7 +80,6 @@ const ChatBar = ({
                 radius="full"
                 minRows={1}
                 variant="bordered"
-                color="primary"
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
                     if (event.key === "Enter" && !event.shiftKey) {

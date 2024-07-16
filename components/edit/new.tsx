@@ -25,6 +25,7 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
         <form className={`flex flex-col gap-4 ${className}`} onSubmit={handleSubmit}>
             <h1 className="text-lg">Create a new chat bot</h1>
             <Input
+                color="primary"
                 label="Filename"
                 type="text"
                 variant="bordered"
@@ -35,6 +36,7 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
                 onChange={(e) => setFilename(e.target.value)}
             />
             <Input
+                color="primary"
                 label="Chat Bot Name"
                 variant="bordered"
                 type="text"
@@ -42,6 +44,7 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
                 onChange={(e) => setName(e.target.value)}
             />
             <Textarea
+                color="primary"
                 label="Instructions"
                 variant="bordered"
                 type="text"

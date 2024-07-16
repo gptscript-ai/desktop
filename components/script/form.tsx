@@ -21,6 +21,7 @@ const ToolForm = ({
         <Divider className="my-6"/>
         {tool.arguments?.properties && Object.entries(tool.arguments.properties).map(([argName, arg]) => (
             <Input
+                color="primary"
                 key={argName}
                 className="mb-6"
                 size="lg"

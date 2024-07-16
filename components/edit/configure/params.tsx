@@ -53,6 +53,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
             {params && Object.keys(params).map((param) => (
                 <div key={param} className="flex space-x-2 mt-2">
                     <Input
+                        color="primary"
                         size="sm"
                         placeholder="Name..."
                         className="w-1/3"
@@ -67,6 +68,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                         }}
                     />
                     <Input
+                        color="primary"
                         size="sm"
                         placeholder="Description..."
                         variant="bordered"
@@ -92,6 +94,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
             ))}
             <div className="flex space-x-2 mt-2">
                 <Input
+                    color="primary"
                     size="sm"
                     placeholder="Name..."
                     className="w-1/3"
@@ -103,6 +106,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                     onKeyDown={handleKeyDown}
                 />
                 <Input
+                    color="primary"
                     size="sm"
                     placeholder="Description..."
                     variant="bordered"
