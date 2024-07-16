@@ -71,6 +71,7 @@ const Models: React.FC<ModelsProps> = ({ options, onChange, defaultValue }) => {
     return (
         <div className="relative">
             <Input
+                color='primary'
                 label="Model"
                 placeholder="Select a non-default model..."
                 type="text"
@@ -94,14 +95,14 @@ const Models: React.FC<ModelsProps> = ({ options, onChange, defaultValue }) => {
                 />
             )}
             {showDropdown && filteredOptions.length > 0 && (
-                <div className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white border w-full shadow-2xl py-2">
+                <div className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 border-2 border-primary w-full shadow-2xl py-2">
                     {filteredOptions.map((option, index) => (
                         <h1
                             aria-label={option}
                             key={index}
                             role="button"
                             onMouseDown={() => handleOptionSelect(option)}
-                            className={`cursor-pointer p-2 mx-2 my-1 hover:bg-gray-200 rounded-xl ${option === selectedOption ? 'bg-gray-200' : ''}`}
+                            className={`cursor-pointer text-sm p-2 mx-2 my-1 hover:bg-gray-200 dark:hover:bg-zinc-600 rounded-xl ${option === selectedOption ? 'bg-gray-300 dark:bg-zinc-700' : ''}`}
                         >
                             {option}
                         </h1>

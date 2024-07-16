@@ -33,6 +33,7 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
     return (
         <div className="flex w-full space-x-4">
             <Input 
+                color="primary"
                 variant="bordered"
                 placeholder="Set your workspace folder..."
                 label="Workspace folder"

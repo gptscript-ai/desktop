@@ -82,6 +82,7 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
             )}
             <div className="flex w-full h-full space-x-2">
                 <Input
+                    color="primary"
                     size="sm"
                     variant="bordered"
                     id="toolInput"

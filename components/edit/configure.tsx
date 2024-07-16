@@ -76,6 +76,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
         </div>
         <div className="px-2 flex flex-col space-y-4 mb-6">
             <Input
+                color="primary"
                 variant="bordered"
                 label="Name"
                 placeholder="Give your chat bot a name..."
@@ -83,6 +84,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
                 onChange={(e) => setRoot({...root, name: e.target.value})}
             />
             <Textarea
+                color="primary"
                 fullWidth
                 variant="bordered"
                 label="Description"
@@ -91,6 +93,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom }) => {
                 onChange={(e) => setRoot({...root, description: e.target.value})}
             />
             <Textarea
+                color="primary"
                 fullWidth
                 variant="bordered"
                 label="Instructions"

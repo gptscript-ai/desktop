@@ -33,7 +33,8 @@ const ModalTextArea = (props: ModalTextAreaProps) => {
                 >
                     <GrExpand className="text-zinc-500"/>
                 </Button>
-                <Textarea 
+                <Textarea
+                    color="primary"
                     value={props.defaultValue}
                     onChange={(e) => props.setText(e.target.value)}
                     placeholder={props.placeholder}

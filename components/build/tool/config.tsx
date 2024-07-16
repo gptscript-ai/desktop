@@ -70,6 +70,7 @@ const Custom = () => {
                             </Switch>
 
                             <Textarea
+                                color="primary"
                                 fullWidth
                                 label="Description"
                                 placeholder="Describe your tool..."

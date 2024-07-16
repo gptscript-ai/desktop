@@ -144,6 +144,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
             </div>
             <div className="px-2 flex flex-col space-y-4 mb-6">
                 <Input
+                    color="primary"
                     variant="bordered"
                     label="Name"
                     placeholder="Give your chat bot a name"
@@ -151,6 +152,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                     onChange={(e) => setName(e.target.value)}
                 />
                 <Textarea
+                    color="primary"
                     fullWidth
                     variant="bordered"
                     label="Description"
@@ -159,6 +161,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                     onChange={(e) => setCustomTool({...customTool, description: e.target.value})}
                 />
                 <Textarea
+                    color="primary"
                     fullWidth
                     variant="bordered"
                     label="Instructions"
