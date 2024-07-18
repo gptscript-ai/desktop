@@ -106,7 +106,7 @@ export async function createThread(script: string, firstMessage?: string): Promi
 
     if (firstMessage) {
         const generatedThreadName = await generateThreadName(firstMessage)
-        renameThread(id, generatedThreadName);
+        await renameThread(id, generatedThreadName);
     }
 
     return {
@@ -128,16 +128,4 @@ export async function renameThread(id: string, name: string) {
     const threadMeta = JSON.parse(meta) as ThreadMeta;
     threadMeta.name = name;
     await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
-}
-
-export async function updateThread(id: string, thread: Thread) {
-    const threadsDir = THREADS_DIR();
-    const threadPath = path.join(threadsDir,id);
-
-    if (thread.state) await fs.writeFile(path.join(threadPath, STATE_FILE), thread.state);
-    if (thread.meta) {
-        const existingMeta = await fs.readFile(path.join(threadPath, META_FILE), "utf-8");
-        const mergedMeta = { ...JSON.parse(existingMeta), ...thread.meta };
-        await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(mergedMeta));
-    }
 }

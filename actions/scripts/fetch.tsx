@@ -1,5 +1,5 @@
 "use server"
-import { Tool, GPTScript, Block } from '@gptscript-ai/gptscript';
+import { Tool, Block } from '@gptscript-ai/gptscript';
 import { SCRIPTS_PATH, gpt } from '@/config/env';
 import fs from 'fs/promises';
 
