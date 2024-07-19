@@ -25,6 +25,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     useEffect(() => {
         messagesRef.current = messages
     }, [messages]);
+
     useEffect(() => {
         socketRef.current = socket
     }, [socket]);

@@ -22,6 +22,7 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
     useEffect(() => {
         getWorkspaceDir().then((wd) => setActingWorkspace(wd))
     }, []);
+
     useEffect(() => {
         setWorkspace(actingWorkspace)
     }, [actingWorkspace]);

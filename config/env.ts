@@ -12,8 +12,7 @@ let gptscript: GPTScript | null = null;
 
 export function gpt() {
     if (!gptscript) {
-        gptscript = new GPTScript()
+        gptscript = new GPTScript();
     }
-    ;
     return gptscript;
 }
