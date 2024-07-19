@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import {useState, useContext, useEffect} from "react";
 import {
     Table,
     TableHeader,
@@ -10,13 +10,13 @@ import {
     Button,
     Divider,
 } from "@nextui-org/react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { ToolContext } from "@/components/build/tool";
+import {FaPlus, FaTrash} from "react-icons/fa";
+import {ToolContext} from "@/components/build/tool";
 
 export const IsValidContext = (tool: string) => {
-    if (tool.includes("from")){
+    if (tool.includes("from")) {
         const parsedTool = tool.split(" ");
-        if (parsedTool.length !== 3){
+        if (parsedTool.length !== 3) {
             return false;
         }
         tool = parsedTool[2];
@@ -32,7 +32,7 @@ export const IsValidContext = (tool: string) => {
 }
 
 const External = () => {
-    const { context, setContext } = useContext(ToolContext);
+    const {context, setContext} = useContext(ToolContext);
     const [error, setError] = useState<string | null>(null);
 
     const handleDeleteContext = (tool: string) => {
@@ -51,7 +51,7 @@ const External = () => {
                         </TableHeader>
                         <TableBody>
                             {context.map((c) => (
-                                <TableRow key={c} >
+                                <TableRow key={c}>
                                     <TableCell>
                                         <p className="overflow-x-scroll truncate">{c}</p>
                                     </TableCell>
@@ -60,7 +60,7 @@ const External = () => {
                                             size="sm"
                                             color="danger"
                                             isIconOnly
-                                            startContent={<FaTrash />}
+                                            startContent={<FaTrash/>}
                                             onPress={() => handleDeleteContext(c)}
                                         />
                                     </TableCell>
@@ -68,7 +68,7 @@ const External = () => {
                             ))}
                         </TableBody>
                     </Table>
-                    <Divider className="my-4" />
+                    <Divider className="my-4"/>
                 </>
             )}
             <div className="flex w-full h-full">

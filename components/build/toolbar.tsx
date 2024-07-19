@@ -1,15 +1,15 @@
-import { useState, useContext } from "react";
-import { Tabs, Tab, Card, CardBody, Button } from "@nextui-org/react";
-import { IoTerminalOutline, IoFolderOpenOutline } from "react-icons/io5";
-import { GoArrowUpRight, GoArrowDownLeft, GoDash } from "react-icons/go";
-import { GoTerminal } from "react-icons/go";
-import { GraphContext } from "@/contexts/graph";
+import {useState, useContext} from "react";
+import {Tabs, Tab, Card, CardBody, Button} from "@nextui-org/react";
+import {IoTerminalOutline, IoFolderOpenOutline} from "react-icons/io5";
+import {GoArrowUpRight, GoArrowDownLeft, GoDash} from "react-icons/go";
+import {GoTerminal} from "react-icons/go";
+import {GraphContext} from "@/contexts/graph";
 import StackTrace from "@/components/script/messages/calls/stackTrace";
 
 export default function Toolbar() {
     const [collapsed, setCollapsed] = useState(true);
     const [large, setLarge] = useState(false);
-    const { calls } = useContext(GraphContext);
+    const {calls} = useContext(GraphContext);
 
     const handleToggleCollapse = () => {
         setCollapsed(!collapsed);
@@ -32,9 +32,9 @@ export default function Toolbar() {
     );
 
     const expanded = (
-        <Card 
+        <Card
             className={"w-[60vw] xl:w-[60vw] 2xl:w-[67vw]"}
-            style = {{height: large ? `calc(96vh - 64px)` : `25vh`}}
+            style={{height: large ? `calc(96vh - 64px)` : `25vh`}}
         >
             <CardBody>
                 <Button
@@ -55,7 +55,7 @@ export default function Toolbar() {
                     color="primary"
                     className="absolute right-5"
                 >
-                    { large ? <GoArrowDownLeft className="text-lg"/> : <GoArrowUpRight className="text-lg"/> }
+                    {large ? <GoArrowDownLeft className="text-lg"/> : <GoArrowUpRight className="text-lg"/>}
                 </Button>
                 <Tabs size="lg" color="primary" aria-label="Options">
                     <Tab
@@ -63,7 +63,7 @@ export default function Toolbar() {
                         className="overflow-y-scroll h-full"
                         title={
                             <div className="flex items-center space-x-2">
-                                <IoTerminalOutline />
+                                <IoTerminalOutline/>
                                 <span>Logs</span>
                             </div>
                         }
@@ -75,7 +75,7 @@ export default function Toolbar() {
                         className="overflow-y-scroll h-full"
                         title={
                             <div className="flex items-center space-x-2">
-                                <IoFolderOpenOutline />
+                                <IoFolderOpenOutline/>
                                 <span>Workspace</span>
                             </div>
                         }

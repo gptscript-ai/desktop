@@ -1,7 +1,7 @@
 "use server"
 
-import { THREADS_DIR } from "@/config/env";
-import { gpt } from "@/config/env";
+import {THREADS_DIR} from "@/config/env";
+import {gpt} from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
 
@@ -27,14 +27,14 @@ export async function init() {
     try {
         await fs.access(threadsDir);
     } catch (error) {
-        await fs.mkdir(threadsDir, { recursive: true });
+        await fs.mkdir(threadsDir, {recursive: true});
     }
 }
 
 export async function getThreads() {
     const threads: Thread[] = [];
     const threadsDir = THREADS_DIR();
-    
+
     let threadDirs: void | string[] = [];
     try {
         threadDirs = await fs.readdir(threadsDir);
@@ -44,7 +44,7 @@ export async function getThreads() {
 
     if (!threadDirs) return [];
 
-    for(let threadDir of threadDirs) {
+    for (let threadDir of threadDirs) {
         const threadPath = path.join(threadsDir, threadDir);
         const files = await fs.readdir(threadPath);
 
@@ -72,7 +72,7 @@ export async function getThread(id: string) {
 
 async function newThreadName(): Promise<string> {
     const threads = await getThreads();
-    return `New Thread${threads.length ? ' ' + (threads.length+1): '' }`;
+    return `New Thread${threads.length ? ' ' + (threads.length + 1) : ''}`;
 }
 
 export async function generateThreadName(firstMessage: string): Promise<string> {
@@ -89,7 +89,7 @@ export async function createThread(script: string, firstMessage?: string): Promi
     // will probably want something else for this
     const id = Math.random().toString(36).substring(7);
     const threadPath = path.join(threadsDir, id);
-    await fs.mkdir(threadPath, { recursive: true });
+    await fs.mkdir(threadPath, {recursive: true});
 
     const threadMeta = {
         name: await newThreadName(),
@@ -117,13 +117,13 @@ export async function createThread(script: string, firstMessage?: string): Promi
 
 export async function deleteThread(id: string) {
     const threadsDir = THREADS_DIR();
-    const threadPath = path.join(threadsDir,id);
-    await fs.rm(threadPath, { recursive: true });
+    const threadPath = path.join(threadsDir, id);
+    await fs.rm(threadPath, {recursive: true});
 }
 
 export async function renameThread(id: string, name: string) {
     const threadsDir = THREADS_DIR();
-    const threadPath = path.join(threadsDir,id);
+    const threadPath = path.join(threadsDir, id);
     const meta = await fs.readFile(path.join(threadPath, META_FILE), "utf-8");
     const threadMeta = JSON.parse(meta) as ThreadMeta;
     threadMeta.name = name;

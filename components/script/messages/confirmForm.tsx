@@ -1,7 +1,7 @@
-import React, { useState, useEffect} from "react";
-import { GoCheckCircle, GoXCircle, GoCheckCircleFill} from "react-icons/go";
-import type { AuthResponse } from "@gptscript-ai/gptscript";
-import { Button, Code, Tooltip } from "@nextui-org/react";
+import React, {useState, useEffect} from "react";
+import {GoCheckCircle, GoXCircle, GoCheckCircleFill} from "react-icons/go";
+import type {AuthResponse} from "@gptscript-ai/gptscript";
+import {Button, Code, Tooltip} from "@nextui-org/react";
 import Markdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 
@@ -15,14 +15,16 @@ type ConfirmFormProps = {
 };
 
 
-const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: ConfirmFormProps) => {
+const ConfirmForm = ({id, onSubmit, tool, addTrusted, message, command}: ConfirmFormProps) => {
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => { setLoading(false) }, [id]);
-    
+    useEffect(() => {
+        setLoading(false)
+    }, [id]);
+
     const onSubmitForm = (accept: boolean) => {
         setLoading(true);
-        onSubmit({ id, message: `denied by user`, accept })
+        onSubmit({id, message: `denied by user`, accept})
     };
 
     if (loading) {
@@ -31,10 +33,12 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: Confir
 
     return (
         <form>
-            <Markdown className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg" remarkPlugins={[remarkGfm]}>
+            <Markdown
+                className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg"
+                remarkPlugins={[remarkGfm]}>
                 {message}
             </Markdown>
-            {command && 
+            {command &&
                 <Code className="ml-4">
                     {command.startsWith("Running") ?
                         command.replace("Running", "").replace(/`/g, "") :
@@ -45,7 +49,7 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: Confir
             <div className="flex justify-between mt-4 mx-4">
                 <Tooltip content="Allow this command to be executed" closeDelay={0.5} placement="top">
                     <Button
-                        startContent={!loading && <GoCheckCircle />}
+                        startContent={!loading && <GoCheckCircle/>}
                         onClick={() => onSubmitForm(true)}
                         className="mb-6 w-1/2 mr-2"
                         size="lg"
@@ -57,7 +61,7 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: Confir
                 </Tooltip>
                 <Tooltip content="Allow all future command runs from this tool" closeDelay={0.5} placement="top">
                     <Button
-                        startContent={!loading && <GoCheckCircleFill />}
+                        startContent={!loading && <GoCheckCircleFill/>}
                         onClick={() => {
                             addTrusted()
                             onSubmitForm(true)
@@ -70,7 +74,7 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: Confir
                     </Button>
                 </Tooltip>
                 <Button
-                    startContent={!loading && <GoXCircle />}
+                    startContent={!loading && <GoXCircle/>}
                     onClick={() => onSubmitForm(false)}
                     className="mb-6 w-1/2 ml-2"
                     size="lg"
@@ -78,7 +82,7 @@ const ConfirmForm = ({ id, onSubmit, tool, addTrusted, message, command}: Confir
                 >
                     Deny
                 </Button>
-               
+
             </div>
         </form>
     );

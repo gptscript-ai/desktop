@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
-import { IoMdSend } from "react-icons/io";
-import { subtitle } from "@/components/primitives";
-import { IoCloseSharp } from "react-icons/io5";
-import { GraphContext } from "@/contexts/graph";
-import { FaBackward } from "react-icons/fa";
-import { GrExpand, } from "react-icons/gr";
-import { BsArrowsFullscreen } from "react-icons/bs";
-import { HiOutlineArrowsPointingIn } from "react-icons/hi2";
-import { type Property, type CallFrame } from "@gptscript-ai/gptscript";
+import React, {useState, useEffect, useContext} from "react";
+import {IoMdSend} from "react-icons/io";
+import {subtitle} from "@/components/primitives";
+import {IoCloseSharp} from "react-icons/io5";
+import {GraphContext} from "@/contexts/graph";
+import {FaBackward} from "react-icons/fa";
+import {GrExpand,} from "react-icons/gr";
+import {BsArrowsFullscreen} from "react-icons/bs";
+import {HiOutlineArrowsPointingIn} from "react-icons/hi2";
+import {type Property, type CallFrame} from "@gptscript-ai/gptscript";
 import useChatSocket from "@/components/script/useChatSocket";
 import Messages from "@/components/script/messages";
-import { path } from "@/actions/scripts/fetch";
+import {path} from "@/actions/scripts/fetch";
 import {
     Card,
     CardHeader,
@@ -43,13 +43,13 @@ interface ChatProps {
     params: Record<string, Property> | undefined;
 }
 
-export default function Chat({ name, file, params, chat }: ChatProps) {
-    const { setChatPanel, setCalls } = useContext(GraphContext);
+export default function Chat({name, file, params, chat}: ChatProps) {
+    const {setChatPanel, setCalls} = useContext(GraphContext);
     const [showForm, setShowForm] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [showModal, setShowModal] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
-    const { socket, connected, messages, setMessages} = useChatSocket();
+    const {socket, connected, messages, setMessages} = useChatSocket();
 
     useEffect(() => {
         const smallBody = document.getElementById("small-message");
@@ -64,7 +64,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
 
     useEffect(() => {
         if (!connected) return;
-        socket!.on("progress", (data: {_: any, state: Record<string, CallFrame>}) => setCalls(data.state) );
+        socket!.on("progress", (data: { _: any, state: Record<string, CallFrame> }) => setCalls(data.state));
     }, [connected])
 
     const handleFormSubmit = () => {
@@ -84,6 +84,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
 
     const handleMessageSent = (message: Message) => {
         if (!socket || !connected) return;
+        // @ts-ignore
         setMessages((prevMessages) => [...prevMessages, message]);
         socket.emit("userMessage", message.message);
     };
@@ -109,7 +110,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                     }}
                 />
                 <Button
-                    startContent={<IoMdSend />}
+                    startContent={<IoMdSend/>}
                     isIconOnly
                     radius="full"
                     className="ml-2 my-auto text-lg"
@@ -126,9 +127,9 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                     }}
                 />
             </>
-        ): (
+        ) : (
             <Button
-                startContent={<FaBackward />}
+                startContent={<FaBackward/>}
                 isIconOnly
                 radius="full"
                 className="mr-2 my-auto text-lg w-full"
@@ -143,7 +144,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
 
     return (
         <>
-            <Card className="h-full" style={{ height: "100%" }}>
+            <Card className="h-full" style={{height: "100%"}}>
                 <CardHeader className="flex flex-col gap-1 py-2 px-4">
                     <div className="w-full flex justify-between">
                         <h1 className={subtitle()}>
@@ -162,7 +163,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                             color="primary"
                             onPress={(_) => setChatPanel(<></>)}
                         >
-                            <IoCloseSharp />
+                            <IoCloseSharp/>
                         </Button>
                         <Button
                             radius="full"
@@ -172,11 +173,11 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                             className="ml-2"
                             onPress={(_) => setShowModal(true)}
                         >
-                            <GrExpand />
+                            <GrExpand/>
                         </Button>
                     </div>
                 </CardHeader>
-                <Divider />
+                <Divider/>
                 <CardBody
                     id="small-message"
                     className="shadow px-6 pt-6 overflow-y-scroll h-[300px]"
@@ -215,7 +216,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                             {chat ? "Start chat" : "Run tool"}
                         </Button>
                     ) : (
-                        <ChatBar />
+                        <ChatBar/>
                     )}
                 </CardFooter>
             </Card>
@@ -225,7 +226,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                 hideCloseButton={true}
                 size={fullscreen ? "full" : "3xl"}
                 className={fullscreen ? "" : "h-4/5"}
-                
+
             >
                 <ModalContent>
                     <ModalHeader>
@@ -245,7 +246,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                             color="primary"
                             onPress={(_) => setShowModal(false)}
                         >
-                            <IoCloseSharp />
+                            <IoCloseSharp/>
                         </Button>
                         <Button
                             radius="full"
@@ -255,7 +256,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                             className="ml-2"
                             onPress={(_) => setFullscreen(!fullscreen)}
                         >
-                            { fullscreen ? <HiOutlineArrowsPointingIn className="text-lg"/> : <BsArrowsFullscreen />}
+                            {fullscreen ? <HiOutlineArrowsPointingIn className="text-lg"/> : <BsArrowsFullscreen/>}
                         </Button>
                     </ModalHeader>
                     <ModalBody
@@ -265,7 +266,7 @@ export default function Chat({ name, file, params, chat }: ChatProps) {
                         <Messages messages={messages}/>
                     </ModalBody>
                     <ModalFooter>
-                        <ChatBar />
+                        <ChatBar/>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

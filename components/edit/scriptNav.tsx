@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { fetchScripts } from "@/actions/scripts/fetch";
+import React, {useState, useEffect} from "react";
+import {fetchScripts} from "@/actions/scripts/fetch";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Button} from "@nextui-org/react";
-import { IoMenu } from "react-icons/io5";
-import { FaRegFileCode } from "react-icons/fa";
-import { VscNewFile } from "react-icons/vsc";
+import {IoMenu} from "react-icons/io5";
+import {FaRegFileCode} from "react-icons/fa";
+import {VscNewFile} from "react-icons/vsc";
 
 interface ScriptNavProps {
     className?: string;
 }
 
-const ScriptNav: React.FC<ScriptNavProps> = ({className }) => {
+const ScriptNav: React.FC<ScriptNavProps> = ({className}) => {
     const [files, setFiles] = useState<Record<string, string>>({});
 
     useEffect(() => {
@@ -26,23 +26,25 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className }) => {
         <Dropdown className={className}>
             <DropdownTrigger>
                 <Button size="lg" variant="shadow" color="primary" isIconOnly radius="full">
-                    <IoMenu />
+                    <IoMenu/>
                 </Button>
             </DropdownTrigger>
-            <DropdownMenu 
-                aria-label="edit" 
-                onAction={(key) => { window.location.href = `/edit?file=${key}`;}}
+            <DropdownMenu
+                aria-label="edit"
+                onAction={(key) => {
+                    window.location.href = `/edit?file=${key}`;
+                }}
                 disabledKeys={['no-files']}
             >
                 <DropdownSection title="Actions" showDivider>
-                    <DropdownItem startContent={<VscNewFile />} key="new">
+                    <DropdownItem startContent={<VscNewFile/>} key="new">
                         New script
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection title="Scripts">
                     {ScriptItems}
                 </DropdownSection>
-               
+
             </DropdownMenu>
         </Dropdown>
     );

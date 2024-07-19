@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { GrExpand } from "react-icons/gr";
+import {useState} from 'react';
+import {GrExpand} from "react-icons/gr";
 import {
     Textarea,
     Modal,
@@ -23,7 +23,7 @@ const ModalTextArea = (props: ModalTextAreaProps) => {
     return (
         <div className={props.className}>
             <div>
-                <Button 
+                <Button
                     onPress={() => setIsModalOpen(true)}
                     size="sm"
                     variant="light"
@@ -53,7 +53,7 @@ const ModalTextArea = (props: ModalTextAreaProps) => {
                         <h1 className="text-2xl my-4">{props.header}</h1>
                     </ModalHeader>
                     <ModalBody className='mb-4'>
-                        <textarea 
+                        <textarea
                             defaultValue={props.defaultValue}
                             placeholder={props.placeholder}
                             onChange={(e) => props.setText(e.target.value)}

@@ -1,6 +1,6 @@
-import { useState, useEffect} from 'react';
-import { Card, CardHeader, CardBody, CardFooter, Button } from '@nextui-org/react';
-import { CiMenuKebab } from "react-icons/ci";
+import {useState, useEffect} from 'react';
+import {Card, CardHeader, CardBody, CardFooter, Button} from '@nextui-org/react';
+import {CiMenuKebab} from "react-icons/ci";
 
 
 interface SidebarProps {
@@ -8,8 +8,8 @@ interface SidebarProps {
     onChangeFile: (file: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ className, onChangeFile }) => {
-    const [files, setFiles] = useState<Record<string,string>>({});
+const Sidebar: React.FC<SidebarProps> = ({className, onChangeFile}) => {
+    const [files, setFiles] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -31,14 +31,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onChangeFile }) => {
     };
 
     return (
-        <Card 
+        <Card
             shadow="none"
             className={`m-4 p-4 transition-all duration-300 ${className} border dark:border-slate-700 dark:bg-opacity-0`}
         >
             <CardBody className="flex flex-col space-y-2">
-                { loading && <p>Loading...</p> }
-                { !loading && Object.keys(files).length === 0 && <p>No scripts found</p> }
-                { !loading && Object.keys(files).map((file) => (
+                {loading && <p>Loading...</p>}
+                {!loading && Object.keys(files).length === 0 && <p>No scripts found</p>}
+                {!loading && Object.keys(files).map((file) => (
                     <div className="flex space-x-2 items-center">
                         <Button
                             className="w-full"

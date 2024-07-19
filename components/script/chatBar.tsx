@@ -1,26 +1,26 @@
 "use client"
 
-import React, { useState } from "react";
-import { IoMdSend } from "react-icons/io";
-import { FaBackward } from "react-icons/fa";
+import React, {useState} from "react";
+import {IoMdSend} from "react-icons/io";
+import {FaBackward} from "react-icons/fa";
 import {
-	Button,
+    Button,
     Textarea,
     Tooltip,
 } from "@nextui-org/react";
 import Upload from "./chatBar/upload";
-import { GoIssueReopened, GoSquare, GoSquareFill } from "react-icons/go";
+import {GoIssueReopened, GoSquare, GoSquareFill} from "react-icons/go";
 
 const ChatBar = ({
-    generating,
-    disabled = false,
-    onBack,
-    noChat,
-    onInterrupt,
-    onMessageSent,
-    backButton,
-    onRestart,
-}: {
+                     generating,
+                     disabled = false,
+                     onBack,
+                     noChat,
+                     onInterrupt,
+                     onMessageSent,
+                     backButton,
+                     onRestart,
+                 }: {
     generating: boolean;
     disabled?: boolean;
     onBack: () => void;
@@ -40,7 +40,7 @@ const ChatBar = ({
     if (noChat) {
         if (backButton) return (
             <Button
-                startContent={<FaBackward />}
+                startContent={<FaBackward/>}
                 className="mr-2 my-auto text-lg w-full"
                 onPress={onBack}
             >
@@ -53,7 +53,7 @@ const ChatBar = ({
     return (
         <div className="flex px-4 w-full">
             {backButton && <Button
-                startContent={<FaBackward />}
+                startContent={<FaBackward/>}
                 isIconOnly
                 radius="full"
                 className="mr-2 my-auto text-lg"
@@ -91,15 +91,15 @@ const ChatBar = ({
             />
             {generating ?
                 <Button
-                    startContent={<GoSquareFill className="mr-[1px] text-xl" />}
+                    startContent={<GoSquareFill className="mr-[1px] text-xl"/>}
                     isIconOnly
                     radius="full"
                     isDisabled={disabled}
                     className="ml-2 my-auto text-lg"
                     onPress={onInterrupt}
-                /> : 
+                /> :
                 <Button
-                    startContent={<IoMdSend />}
+                    startContent={<IoMdSend/>}
                     isDisabled={disabled}
                     isIconOnly
                     radius="full"

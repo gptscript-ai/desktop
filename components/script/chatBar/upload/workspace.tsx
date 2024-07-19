@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { getWorkspaceDir, setWorkspaceDir } from '@/actions/workspace';
-import { 
+import {useState, useCallback, useRef, useEffect} from 'react';
+import {getWorkspaceDir, setWorkspaceDir} from '@/actions/workspace';
+import {
     Modal,
     ModalContent,
     ModalHeader,
@@ -19,8 +19,12 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
     const [workspace, setWorkspace] = useState<string>('');
     const [actingWorkspace, setActingWorkspace] = useState<string>('');
 
-    useEffect(() => { getWorkspaceDir().then((wd) => setActingWorkspace(wd)) }, []);
-    useEffect(() => { setWorkspace(actingWorkspace) }, [actingWorkspace]);
+    useEffect(() => {
+        getWorkspaceDir().then((wd) => setActingWorkspace(wd))
+    }, []);
+    useEffect(() => {
+        setWorkspace(actingWorkspace)
+    }, [actingWorkspace]);
 
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false);
@@ -32,19 +36,19 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
 
     return (
         <div className="flex w-full space-x-4">
-            <Input 
+            <Input
                 color="primary"
                 variant="bordered"
                 placeholder="Set your workspace folder..."
                 label="Workspace folder"
                 value={workspace}
                 onKeyDown={(event) => event.key === 'Enter' && actingWorkspace != workspace && handleConfirm()}
-                onChange={(event) => setWorkspace(event.target.value) }
+                onChange={(event) => setWorkspace(event.target.value)}
             />
-            { workspace != actingWorkspace &&
-                <Button 
-                    className="absolute right-8 mt-2" 
-                    color="danger" 
+            {workspace != actingWorkspace &&
+                <Button
+                    className="absolute right-8 mt-2"
+                    color="danger"
                     onPress={handleOpen}
                 >
                     Update
@@ -65,7 +69,7 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
                         <p>Changing the workspace for this script requires it to restart.</p>
                     </ModalBody>
                     <ModalFooter className="flex justify-between">
-                        <Button 
+                        <Button
                             color="danger"
                             className="w-1/2"
                             onPress={handleConfirm}

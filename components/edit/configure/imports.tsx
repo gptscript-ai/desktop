@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import {
     Input,
     Button,
     input,
 } from "@nextui-org/react";
-import { debounce, set } from "lodash"
-import { GoPlus, GoTrash } from "react-icons/go";
+import {debounce, set} from "lodash"
+import {GoPlus, GoTrash} from "react-icons/go";
 
 interface ExternalProps {
     tools: string[] | undefined;
@@ -60,7 +60,7 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
 
     return (
         <div className={`${className}`}>
-            <h1 className="mb-2 capitalize">{label+'s'}</h1>
+            <h1 className="mb-2 capitalize">{label + 's'}</h1>
             <h2>{description}</h2>
             {tools && tools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
@@ -91,14 +91,17 @@ const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, de
                     isInvalid={error !== null}
                     errorMessage={error}
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => {setError(null); setInput(e.currentTarget.value)}}
+                    onChange={(e) => {
+                        setError(null);
+                        setInput(e.currentTarget.value)
+                    }}
                     value={input}
                 />
-                 <Button
+                <Button
                     variant="bordered"
                     isIconOnly
                     size="sm"
-                    startContent={<GoPlus />}
+                    startContent={<GoPlus/>}
                     onPress={handleAddTool}
                 />
             </div>

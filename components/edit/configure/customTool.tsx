@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, useCallback } from "react";
-import { Tool, Property } from "@gptscript-ai/gptscript";
+import {useState, useEffect, useContext, useCallback} from "react";
+import {Tool, Property} from "@gptscript-ai/gptscript";
 import Imports from "@/components/edit/configure/imports";
 import Params from "@/components/edit/configure/params";
 import Models from "@/components/edit/configure/models";
@@ -11,9 +11,9 @@ import {
     Button,
     Switch,
 } from "@nextui-org/react";
-import { EditContext } from "@/contexts/edit";
-import { GoTrash } from "react-icons/go";
-import { LuWrench, LuMessageSquare } from "react-icons/lu";
+import {EditContext} from "@/contexts/edit";
+import {GoTrash} from "react-icons/go";
+import {LuWrench, LuMessageSquare} from "react-icons/lu";
 
 
 interface ConfigureProps {
@@ -23,14 +23,16 @@ interface ConfigureProps {
     models: string[];
 }
 
-const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) => {
+const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
     const [name, setName] = useState<string>(tool.name || '');
     const [chat, setChat] = useState<boolean>(false);
     const [model, setModel] = useState<string | undefined>(tool.modelName);
-    const { setRoot, setTools} = useContext(EditContext)
+    const {setRoot, setTools} = useContext(EditContext)
 
-    useEffect(() => { setCustomTool(tool)}, []);
+    useEffect(() => {
+        setCustomTool(tool)
+    }, []);
 
     useEffect(() => {
         setChat(customTool.chat || false);
@@ -43,7 +45,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
             });
         });
     }, [customTool]);
-    
+
     useEffect(() => {
         setRoot((prevRoot) => {
             if (!prevRoot.tools) return prevRoot;
@@ -108,22 +110,22 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
         });
     }
 
-    return customTool && 
+    return customTool &&
         <div>
             <div className="w-full flex flex-col justify-center space-y-4 mb-6">
-                <Tooltip 
+                <Tooltip
                     content={`${name || "Main"}`}
                     placement="bottom"
                     closeDelay={0.5}
                 >
-                    <Avatar 
-                        size="md" 
-                        name={abbreviate(name || 'Main')} 
+                    <Avatar
+                        size="md"
+                        name={abbreviate(name || 'Main')}
                         className="mx-auto mt-4"
                         classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-800"}}
                     />
                 </Tooltip>
-                <Tooltip 
+                <Tooltip
                     content={`${customTool.chat ? "Disable" : "Enable"} chat for this tool`}
                     placement="bottom"
                     closeDelay={0.5}
@@ -132,11 +134,11 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                         className="mx-auto pl-2"
                         isSelected={chat}
                         onChange={(e) => setCustomTool({...customTool, chat: e.target.checked})}
-                        thumbIcon={({ isSelected, className }) =>
+                        thumbIcon={({isSelected, className}) =>
                             isSelected ? (
-                            <LuMessageSquare className={className} />
+                                <LuMessageSquare className={className}/>
                             ) : (
-                            <LuWrench className={className} />
+                                <LuWrench className={className}/>
                             )
                         }
                     />
@@ -169,12 +171,17 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool }) 
                     value={customTool.instructions}
                     onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
                 />
-                <Models options={models} defaultValue={model} onChange={(model) => {setCustomTool({...customTool, modelName: model})}} />
-                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams} />
+                <Models options={models} defaultValue={model} onChange={(model) => {
+                    setCustomTool({...customTool, modelName: model})
+                }}/>
+                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams}/>
                 <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
-                <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts} label={"Context Tool"}/>
-                <Imports className="py-2" tools={customTool.agents} setTools={setCustomToolAgents} label={"Agent Tool"}/>
-                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>} className="w-full">Delete Tool</Button>
+                <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts}
+                         label={"Context Tool"}/>
+                <Imports className="py-2" tools={customTool.agents} setTools={setCustomToolAgents}
+                         label={"Agent Tool"}/>
+                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>}
+                        className="w-full">Delete Tool</Button>
             </div>
         </div>
 };

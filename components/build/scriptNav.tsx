@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Button} from "@nextui-org/react";
-import { IoMenu } from "react-icons/io5";
-import { FaRegFileCode } from "react-icons/fa";
-import { VscNewFile } from "react-icons/vsc";
+import {IoMenu} from "react-icons/io5";
+import {FaRegFileCode} from "react-icons/fa";
+import {VscNewFile} from "react-icons/vsc";
 
 export default function App() {
     const [files, setFiles] = useState<Record<string, string>>({});
@@ -22,22 +22,24 @@ export default function App() {
         <Dropdown>
             <DropdownTrigger>
                 <Button size="lg" variant="shadow" color="primary" isIconOnly radius="full">
-                    <IoMenu />
+                    <IoMenu/>
                 </Button>
             </DropdownTrigger>
-            <DropdownMenu 
-                aria-label="Action event example" 
-                onAction={(key) => { window.location.href = `/edit?file=${key}`;}}
+            <DropdownMenu
+                aria-label="Action event example"
+                onAction={(key) => {
+                    window.location.href = `/edit?file=${key}`;
+                }}
             >
                 <DropdownSection title="Actions" showDivider>
-                    <DropdownItem startContent={<VscNewFile />} key="new">
+                    <DropdownItem startContent={<VscNewFile/>} key="new">
                         New script
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection title="Scripts">
                     {ScriptItems}
                 </DropdownSection>
-               
+
             </DropdownMenu>
         </Dropdown>
     );

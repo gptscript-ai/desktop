@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import {useState, useEffect, useContext} from "react";
 import {
     Table,
     TableHeader,
@@ -10,14 +10,14 @@ import {
     Button,
     Divider,
 } from "@nextui-org/react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { debounce } from "lodash"
-import { ToolContext } from "@/components/build/tool";
+import {FaPlus, FaTrash} from "react-icons/fa";
+import {debounce} from "lodash"
+import {ToolContext} from "@/components/build/tool";
 
 export const IsExternalTool = (tool: string) => {
-    if (tool.includes("from")){
+    if (tool.includes("from")) {
         const parsedTool = tool.split(" ");
-        if (parsedTool.length !== 3){
+        if (parsedTool.length !== 3) {
             return false;
         }
         tool = parsedTool[2];
@@ -35,9 +35,9 @@ const External = () => {
     const [results, setResults] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [externalTools, setExternalTools] = useState<string[]>([]);
-    const { tools, setTools } = useContext(ToolContext);
+    const {tools, setTools} = useContext(ToolContext);
     const [error, setError] = useState<string | null>(null);
-    
+
     const search = debounce((query: string) => {
         setLoading(true);
         fetch(`https://tools.gptscript.ai/api/search?q=${query}&limit=50`)
@@ -74,7 +74,7 @@ const External = () => {
                         </TableHeader>
                         <TableBody>
                             {externalTools.map((tool) => (
-                                <TableRow key={tool} >
+                                <TableRow key={tool}>
                                     <TableCell>
                                         <p className="w-[390px] overflow-x-scroll truncate">{tool}</p>
                                     </TableCell>
@@ -83,7 +83,7 @@ const External = () => {
                                             size="sm"
                                             color="danger"
                                             isIconOnly
-                                            startContent={<FaTrash />}
+                                            startContent={<FaTrash/>}
                                             onPress={() => handleDeleteTool(tool)}
                                         />
                                     </TableCell>
@@ -91,7 +91,7 @@ const External = () => {
                             ))}
                         </TableBody>
                     </Table>
-                    <Divider className="my-4" />
+                    <Divider className="my-4"/>
                 </>
             )}
             <div className="flex w-full h-full">

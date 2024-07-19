@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { Property } from "@gptscript-ai/gptscript";
+import {useState, useEffect} from "react";
+import {Property} from "@gptscript-ai/gptscript";
 import {
     Input,
     Button,
     input,
 } from "@nextui-org/react";
-import { debounce, set } from "lodash"
-import { GoPlus, GoTrash } from "react-icons/go";
+import {debounce, set} from "lodash"
+import {GoPlus, GoTrash} from "react-icons/go";
 
 interface ExternalProps {
     params: Record<string, Property> | undefined;
@@ -21,7 +21,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
     const [inputDescription, setInputDescription] = useState<string>("");
 
     const handleDeleteParam = (param: string) => {
-        const updatedParams = { ...params };
+        const updatedParams = {...params};
         delete updatedParams[param];
         setParams(updatedParams);
     }
@@ -61,7 +61,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                         defaultValue={param}
                         onBlur={(e) => {
                             const target = e.target as HTMLInputElement;
-                            const updatedParams = { ...params };
+                            const updatedParams = {...params};
                             updatedParams[target.value] = updatedParams[param];
                             delete updatedParams[param];
                             setParams(updatedParams);
@@ -88,7 +88,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                         size="sm"
                         onClick={() => handleDeleteParam(param)}
                         isIconOnly
-                        startContent={<GoTrash />}
+                        startContent={<GoTrash/>}
                     />
                 </div>
             ))}
@@ -100,7 +100,10 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                     className="w-1/3"
                     variant="bordered"
                     value={input}
-                    onChange={(e) => { setError(null); setInput(e.target.value)}}
+                    onChange={(e) => {
+                        setError(null);
+                        setInput(e.target.value)
+                    }}
                     errorMessage={error}
                     isInvalid={!!error}
                     onKeyDown={handleKeyDown}
@@ -119,7 +122,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                     size="sm"
                     onClick={handleAddParam}
                     isIconOnly
-                    startContent={<GoPlus />}
+                    startContent={<GoPlus/>}
                 />
             </div>
         </div>

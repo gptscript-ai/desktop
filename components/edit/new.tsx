@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Input, Textarea, Button } from '@nextui-org/react';
-import { newFile } from '@/actions/scripts/new';
-import { GoCheckCircle } from 'react-icons/go';
+import React, {useState} from 'react';
+import {Input, Textarea, Button} from '@nextui-org/react';
+import {newFile} from '@/actions/scripts/new';
+import {GoCheckCircle} from 'react-icons/go';
 
 interface NewFormProps {
     className?: string;
@@ -51,7 +51,8 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
                 placeholder="Initial instructions for the chat bot"
                 onChange={(e) => setInstructions(e.target.value)}
             />
-            <Button type="submit" color="primary" startContent={<GoCheckCircle className="text-lg"/>}>Create my new chat bot</Button>
+            <Button type="submit" color="primary" startContent={<GoCheckCircle className="text-lg"/>}>Create my new chat
+                bot</Button>
         </form>
     );
 };
