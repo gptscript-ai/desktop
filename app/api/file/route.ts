@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic' // defaults to auto
-import { GPTScript } from '@gptscript-ai/gptscript'
 import { promises as fs } from 'fs';
+import { NextResponse } from 'next/server';
 import { SCRIPTS_PATH, gpt } from '@/config/env';
 
 export async function GET() {
@@ -9,7 +9,7 @@ export async function GET() {
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
         
         if (gptFiles.length === 0) 
-            return Response.json({ error: 'no .gpt files found' }, { status: 404 });
+            return NextResponse.json({ error: 'no .gpt files found' }, { status: 404 });
 
         const scripts: Record<string, string> = {};
         for (const file of gptFiles) {
@@ -23,20 +23,23 @@ export async function GET() {
             scripts[file] = description || '';
         }
 
-        return Response.json(scripts);
+        return NextResponse.json(scripts);
     } catch (e) {
         const error = e as NodeJS.ErrnoException;
         if (error.code === 'ENOENT'){
-            return Response.json({ error: 'no .gpt files found' }, { status: 404 });
+            return NextResponse.json({ error: 'no .gpt files found' }, { status: 404 });
         }
         console.error(e)
-        return Response.json({ error: e }, { status: 500 });
+        return NextResponse.json({ error: e }, { status: 500 });
     }    
 }
 
 export async function POST(_req: Request) {
     try {
-        const files = await fs.readdir(SCRIPTS_PATH());
+        const scriptsPath = SCRIPTS_PATH()
+        await fs.mkdir(scriptsPath, { recursive: true })
+
+        const files = await fs.readdir(scriptsPath);
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
 
         let id = 0;
@@ -45,9 +48,9 @@ export async function POST(_req: Request) {
             id++;
             newFileName = `new-file-${id}.gpt`;
         }
-        await fs.writeFile(`${SCRIPTS_PATH()}/${newFileName}`, '---\nname: main');
-        return Response.json({ file: newFileName });
+        await fs.writeFile(`${scriptsPath}/${newFileName}`, '---\nname: main');
+        return NextResponse.json({ file: newFileName });
     } catch (e) {
-        return Response.json({ error: e }, { status: 500 });
+        return NextResponse.json({ error: e }, { status: 500 });
     }
 }

@@ -1,7 +1,7 @@
 import {createServer} from "node:http";
 import next from "next";
 import {Server} from "socket.io";
-import {GPTScript, RunEventType, RunState} from '@gptscript-ai/gptscript';
+import {GPTScript, RunEventType} from '@gptscript-ai/gptscript';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
