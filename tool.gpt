@@ -1,1 +1,1 @@
-#!sys.daemon (path=/api/readyz) /usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} dev
+#!sys.daemon (path=/api/readyz) /usr/bin/env npm run --prefix ${GPTSCRIPT_TOOL_DIR} start
