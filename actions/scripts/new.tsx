@@ -1,6 +1,6 @@
 "use server"
 
-import { SCRIPTS_PATH } from '@/config/env';
+import {SCRIPTS_PATH} from '@/config/env';
 import fs from 'fs/promises';
 
 export async function newFile(name: string, instructions: string, fileName: string) {
@@ -9,7 +9,6 @@ export async function newFile(name: string, instructions: string, fileName: stri
 
     const files = await fs.readdir(scriptsPath);
     const gptFiles = files.filter(file => file.endsWith('.gpt'));
-
     if (gptFiles.includes(fileName)) throw new Error('file already exists');
     if (!fileName.endsWith('.gpt')) {
         throw new Error('file cannot be empty and must end with .gpt');

@@ -1,21 +1,26 @@
-import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
-import { Tool, Text, Block } from '@gptscript-ai/gptscript';
-import { fetchFullScript } from '@/actions/scripts/fetch';
-import { updateScript } from '@/actions/scripts/update';
+import React, {createContext, useState, useEffect, useCallback, useRef} from 'react';
+import {Tool, Text, Block} from '@gptscript-ai/gptscript';
+import {fetchFullScript} from '@/actions/scripts/fetch';
+import {updateScript} from '@/actions/scripts/update';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 
-interface EditContextProps{
+interface EditContextProps {
     file: string,
     children: React.ReactNode
 }
 
 interface EditContextState {
-    loading: boolean; setLoading: (loading: boolean) => void;
-    root: Tool; setRoot: React.Dispatch<React.SetStateAction<Tool>>;
-    tools: Tool[]; setTools: React.Dispatch<React.SetStateAction<Tool[]>>;
-    texts: Text[]; setTexts: React.Dispatch<React.SetStateAction<Text[]>>;
-    script: Block[]; setScript: React.Dispatch<React.SetStateAction<Block[]>>;
+    loading: boolean;
+    setLoading: (loading: boolean) => void;
+    root: Tool;
+    setRoot: React.Dispatch<React.SetStateAction<Tool>>;
+    tools: Tool[];
+    setTools: React.Dispatch<React.SetStateAction<Tool[]>>;
+    texts: Text[];
+    setTexts: React.Dispatch<React.SetStateAction<Text[]>>;
+    script: Block[];
+    setScript: React.Dispatch<React.SetStateAction<Block[]>>;
 
     // actions
     update: () => Promise<void>;
@@ -24,7 +29,7 @@ interface EditContextState {
 
 // EditContext is managing the state of the script editor.
 const EditContext = createContext<EditContextState>({} as EditContextState);
-const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => {
+const EditContextProvider: React.FC<EditContextProps> = ({file, children}) => {
     const [loading, setLoading] = useState(true);
     const [root, setRoot] = useState<Tool>({} as Tool);
     const [tools, setTools] = useState<Tool[]>([]);
@@ -45,10 +50,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
     const findTools = useCallback((script: Block[]): Tool[] => {
         let withoutRoot = [...script];
         for (let i = 0; i < withoutRoot.length; i++) {
-            if(withoutRoot[i].type === 'text') continue;
+            if (withoutRoot[i].type === 'text') continue;
             withoutRoot.splice(i, 1);
             break;
-        }        
+        }
         return withoutRoot.filter((block) => block.type === 'tool') as Tool[];
     }, [root])
 
@@ -58,9 +63,18 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
 
     useEffect(() => {
         fetchFullScript(file)
-            .then((script: Block[]) => { setScript(script); return script })
-            .then((script: Block[]) => { setRoot(findRoot(script)); return script})
-            .then((script: Block[]) => { setTools(findTools(script)); return script })
+            .then((script: Block[]) => {
+                setScript(script);
+                return script
+            })
+            .then((script: Block[]) => {
+                setRoot(findRoot(script));
+                return script
+            })
+            .then((script: Block[]) => {
+                setTools(findTools(script));
+                return script
+            })
             .then((script: Block[]) => setTexts(findTexts(script)))
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
@@ -90,10 +104,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
 
     // Provide the context value to the children components
     return (
-        <EditContext.Provider 
-            value={{ 
-                loading, setLoading, 
-                root, setRoot, 
+        <EditContext.Provider
+            value={{
+                loading, setLoading,
+                root, setRoot,
                 tools, setTools,
                 texts, setTexts,
                 script, setScript,
@@ -106,4 +120,4 @@ const EditContextProvider: React.FC<EditContextProps> = ({ file, children }) => 
     );
 };
 
-export { EditContext, EditContextProvider };
+export {EditContext, EditContextProvider};

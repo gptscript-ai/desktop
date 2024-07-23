@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Tooltip } from '@nextui-org/react';
-import type { CallFrame } from '@gptscript-ai/gptscript';
-import { GoArrowDown, GoArrowUp } from 'react-icons/go';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, Tooltip} from '@nextui-org/react';
+import type {CallFrame} from '@gptscript-ai/gptscript';
+import {GoArrowDown, GoArrowUp} from 'react-icons/go';
+import {AiOutlineLoading3Quarters} from 'react-icons/ai';
 
-const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
+const StackTrace = ({calls}: { calls: Record<string, CallFrame> | null }) => {
     if (!calls) return null;
 
     const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +18,7 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
         )
     }
 
-    const Summary = ({call}: {call: CallFrame}) => {
+    const Summary = ({call}: { call: CallFrame }) => {
         const name = call.tool?.name || call.tool?.source?.repo || call.tool?.source?.location || "main";
         const category = call.toolCategory
         if (call.tool?.chat) {
@@ -30,9 +30,9 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
         return (
             <summary>
                 {call.type !== "callFinish" ?
-                    category ? `Loading ${category} from ${name}` + "..." : `Running ${name}` :  
+                    category ? `Loading ${category} from ${name}` + "..." : `Running ${name}` :
                     category ? `Loaded ${category} from ${name}` : `Ran ${name}`
-                } 
+                }
                 {call?.type !== "callFinish" && <AiOutlineLoading3Quarters className="ml-2 animate-spin inline"/>}
             </summary>
         )
@@ -58,7 +58,7 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
                     {Array.from(logs.entries()).map(([key, call]) => (
                         <div key={key}>
                             <details open={allOpen} className="cursor-pointer">
-                                <Summary call={call} />
+                                <Summary call={call}/>
                                 <div className='ml-10'>
                                     <details open={allOpen} className="cursor-pointer">
                                         <summary>Input</summary>
@@ -69,19 +69,19 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
 
                                         <div className="">
                                             <ul className="ml-10 list-disc">
-                                                {call.output && call.output.map((output, key) => output.content &&(
+                                                {call.output && call.output.map((output, key) => output.content && (
                                                     <li key={key}>
-                                                        <p>{ output.content && output.content}</p>
+                                                        <p>{output.content && output.content}</p>
                                                     </li>
-                                                ))} 
+                                                ))}
                                             </ul>
                                         </div>
                                     </details>
-                                    { callMap.get(call.id) && (
-                                        <details open={allOpen}className="cursor-pointer">
+                                    {callMap.get(call.id) && (
+                                        <details open={allOpen} className="cursor-pointer">
                                             <summary>Calls</summary>
                                             {renderLogsRecursive(call.id)}
-                                        </details> 
+                                        </details>
                                     )}
                                 </div>
                             </details>
@@ -95,22 +95,26 @@ const StackTrace = ({calls}: {calls: Record<string, CallFrame> | null}) => {
     }
 
     return (
-        <div className="h-full overflow-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white" ref={logsContainerRef}>
-            <Tooltip 
-                content={allOpen ? 'Collapse all' : 'Expand all'} 
+        <div
+            className="h-full overflow-scroll p-4 rounded-2xl border-2 shadow-lg border-primary border-lg bg-black text-white"
+            ref={logsContainerRef}>
+            <Tooltip
+                content={allOpen ? 'Collapse all' : 'Expand all'}
                 closeDelay={0}
             >
                 <Button
-                    onPress={()=> {setAllOpen(!allOpen)}}
+                    onPress={() => {
+                        setAllOpen(!allOpen)
+                    }}
                     className="absolute right-8"
                     isIconOnly
                     radius='full'
                     color="primary"
                 >
-                    { allOpen ? <GoArrowUp/> : <GoArrowDown /> }
+                    {allOpen ? <GoArrowUp/> : <GoArrowDown/>}
                 </Button>
             </Tooltip>
-            {calls ? <RenderLogs /> : <EmptyLogs />}
+            {calls ? <RenderLogs/> : <EmptyLogs/>}
         </div>
     );
 };

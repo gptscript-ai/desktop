@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { GoTrash, GoFile } from 'react-icons/go';
-import { Table, TableBody, TableHeader, TableRow, TableCell, TableColumn, Button } from '@nextui-org/react'; // Replace 'next-ui' with the actual package name
-import { deleteFile, lsWorkspaceFiles } from '@/actions/upload';
-import { Dirent } from 'fs';
+import {useEffect} from 'react';
+import {GoTrash, GoFile} from 'react-icons/go';
+import {Table, TableBody, TableHeader, TableRow, TableCell, TableColumn, Button} from '@nextui-org/react'; // Replace 'next-ui' with the actual package name
+import {deleteFile, lsWorkspaceFiles} from '@/actions/upload';
+import {Dirent} from 'fs';
 import path from 'path';
 
 interface FilesProps {
@@ -10,7 +10,7 @@ interface FilesProps {
     setFiles: React.Dispatch<React.SetStateAction<Dirent[]>>;
 }
 
-const Files: React.FC<FilesProps> = ({ files, setFiles }) => {
+const Files: React.FC<FilesProps> = ({files, setFiles}) => {
     useEffect(() => fetchFiles(), []);
 
     const fetchFiles = () => {
@@ -31,12 +31,12 @@ const Files: React.FC<FilesProps> = ({ files, setFiles }) => {
                         <TableCell className="w-4/5">{file.name}</TableCell>
                         <TableCell>
                             <div className="flex space-x-4">
-                                <Button 
-                                    startContent={<GoFile />} isIconOnly color="primary" radius="full"
+                                <Button
+                                    startContent={<GoFile/>} isIconOnly color="primary" radius="full"
                                     onPress={async () => window.alert("Coming soon, we promise! This will open your file.")}
                                 />
                                 <Button
-                                    startContent={<GoTrash />} isIconOnly color="danger" radius="full"
+                                    startContent={<GoTrash/>} isIconOnly color="danger" radius="full"
                                     onPress={async () => {
                                         deleteFile(path.join(file.path, file.name))
                                             .catch((error) => console.error('Error deleting file:', error))

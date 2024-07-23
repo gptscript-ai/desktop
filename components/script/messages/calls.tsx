@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { GoNote } from "react-icons/go";
+import {useState} from 'react';
+import {GoNote} from "react-icons/go";
 import StackTrace from './calls/stackTrace';
-import type { CallFrame } from '@gptscript-ai/gptscript';
-import { IoCloseSharp } from 'react-icons/io5';
-import { BsArrowsFullscreen } from 'react-icons/bs';
-import { HiOutlineArrowsPointingIn } from 'react-icons/hi2';
+import type {CallFrame} from '@gptscript-ai/gptscript';
+import {IoCloseSharp} from 'react-icons/io5';
+import {BsArrowsFullscreen} from 'react-icons/bs';
+import {HiOutlineArrowsPointingIn} from 'react-icons/hi2';
 import {
     Modal,
     ModalContent,
@@ -14,19 +14,19 @@ import {
     Tooltip,
 } from "@nextui-org/react";
 
-const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
+const Calls = ({calls}: { calls: Record<string, CallFrame> }) => {
     const [showModal, setShowModal] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
 
     return (
         <div>
             <Tooltip content="View stack trace" closeDelay={0.5}>
-                <Button 
+                <Button
                     onPress={() => setShowModal(true)}
                     isIconOnly
                     radius='full'
                 >
-                    <GoNote />
+                    <GoNote/>
                 </Button>
             </Tooltip>
             <Modal
@@ -40,7 +40,8 @@ const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
                     <ModalHeader className="flex justify-between">
                         <div>
                             <h1 className="text-2xl my-4">Stack Trace</h1>
-                            <h2 className="text-base text-zinc-500">Below you can see what this call is doing or has done.</h2>
+                            <h2 className="text-base text-zinc-500">Below you can see what this call is doing or has
+                                done.</h2>
                         </div>
                         <div>
                             <Button
@@ -50,7 +51,7 @@ const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
                                 color="primary"
                                 onPress={(_) => setShowModal(false)}
                             >
-                                <IoCloseSharp />
+                                <IoCloseSharp/>
                             </Button>
                             <Button
                                 radius="full"
@@ -60,7 +61,7 @@ const Calls = ({calls}: {calls: Record<string, CallFrame>}) => {
                                 className="ml-2"
                                 onPress={(_) => setFullscreen(!fullscreen)}
                             >
-                                { fullscreen ? <HiOutlineArrowsPointingIn className="text-lg"/> : <BsArrowsFullscreen />}
+                                {fullscreen ? <HiOutlineArrowsPointingIn className="text-lg"/> : <BsArrowsFullscreen/>}
                             </Button>
                         </div>
                     </ModalHeader>

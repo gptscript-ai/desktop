@@ -1,6 +1,7 @@
 "use server"
-import { Tool, Block } from '@gptscript-ai/gptscript';
-import { SCRIPTS_PATH, gpt } from '@/config/env';
+
+import {Tool, Block} from '@gptscript-ai/gptscript';
+import {SCRIPTS_PATH, gpt} from '@/config/env';
 import fs from 'fs/promises';
 
 const external = (file: string): boolean => {
@@ -33,9 +34,9 @@ export const fetchScript = async (file: string): Promise<Tool> => {
         }
         return {} as Tool;
     } catch (e) {
-        if (`${e}`.includes('no such file')){
+        if (`${e}`.includes('no such file')) {
             return {} as Tool;
-        } 
+        }
         throw e;
     }
 }
@@ -44,7 +45,7 @@ export const fetchScripts = async (): Promise<Record<string, string>> => {
     try {
         const files = await fs.readdir(SCRIPTS_PATH());
         const gptFiles = files.filter(file => file.endsWith('.gpt'));
-        
+
         if (gptFiles.length === 0) return {} as Record<string, string>;
 
         const scripts: Record<string, string> = {};

@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef, useCallback, use } from 'react';
-import { io, Socket } from 'socket.io-client';
-import type { CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptscript-ai/gptscript';
-import { Message, MessageType } from './messages';
+import {useEffect, useState, useRef, useCallback, use} from 'react';
+import {io, Socket} from 'socket.io-client';
+import type {CallFrame, PromptFrame, PromptResponse, AuthResponse} from '@gptscript-ai/gptscript';
+import {Message, MessageType} from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
 
@@ -22,8 +22,13 @@ const useChatSocket = (isEmpty?: boolean) => {
     const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
 
     // update the refs as the state changes
-    useEffect(() => { messagesRef.current = messages }, [messages]);
-    useEffect(() => { socketRef.current = socket }, [socket]);
+    useEffect(() => {
+        messagesRef.current = messages
+    }, [messages]);
+
+    useEffect(() => {
+        socketRef.current = socket
+    }, [socket]);
 
     const handleError = useCallback((error: string) => {
         setGenerating(false);
@@ -37,9 +42,9 @@ const useChatSocket = (isEmpty?: boolean) => {
                 // If there are no previous messages, create a new error message
                 updatedMessages.push(
                     {
-                        type: MessageType.Agent, 
-                        message: "The script encountered an error. You can either restart the script or try to continue chatting.", 
-                        error 
+                        type: MessageType.Agent,
+                        message: "The script encountered an error. You can either restart the script or try to continue chatting.",
+                        error
                     }
                 );
             }
@@ -48,16 +53,16 @@ const useChatSocket = (isEmpty?: boolean) => {
     }, []);
 
     // handles progress being recieved from the server (callProgress style frames).
-    const handleProgress = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
+    const handleProgress = useCallback(({frame, state}: { frame: CallFrame, state: Record<string, CallFrame> }) => {
         const isMainContent = frame.output &&
             frame.output.length > 0 &&
             (!frame.parentID || frame.tool?.chat) &&
             !frame.output[frame.output.length - 1].subCalls
 
-        let content = isMainContent ? frame.output[frame.output.length -1].content || "" : ""
+        let content = isMainContent ? frame.output[frame.output.length - 1].content || "" : ""
         if (!content) return;
         setGenerating(true);
-        if ( content === "Waiting for model response..." &&
+        if (content === "Waiting for model response..." &&
             latestAgentMessageIndex.current !== -1 &&
             messagesRef.current[latestAgentMessageIndex.current]?.message
         ) return;
@@ -67,7 +72,7 @@ const useChatSocket = (isEmpty?: boolean) => {
             content = `Calling tool ${parsedToolCall.tool}...`;
         }
 
-        let message: Message = { type: MessageType.Agent, message: content, calls: state, name: frame.tool?.name };
+        let message: Message = {type: MessageType.Agent, message: content, calls: state, name: frame.tool?.name};
         if (latestAgentMessageIndex.current === -1) {
             latestAgentMessageIndex.current = messagesRef.current.length;
             setMessages((prevMessages) => {
@@ -93,14 +98,14 @@ const useChatSocket = (isEmpty?: boolean) => {
         }
     }, []);
 
-    const handlePromptRequest = useCallback(({frame, state}: {frame: PromptFrame, state: Record<string, CallFrame>}) => {
+    const handlePromptRequest = useCallback(({frame, state}: { frame: PromptFrame, state: Record<string, CallFrame> }) => {
         setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
             const form = (
-                <PromptForm 
-                    frame={frame} 
-                    onSubmit={(response: PromptResponse) => { 
-                        socketRef.current?.emit("promptResponse", response) 
+                <PromptForm
+                    frame={frame}
+                    onSubmit={(response: PromptResponse) => {
+                        socketRef.current?.emit("promptResponse", response)
                     }}
                 />
             );
@@ -112,24 +117,24 @@ const useChatSocket = (isEmpty?: boolean) => {
                 updatedMessages[latestAgentMessageIndex.current].calls = state;
             } else {
                 // If there are no previous messages, create a new message
-                updatedMessages.push({ type: MessageType.Agent, message: frame.message, component: form, calls: state});
+                updatedMessages.push({type: MessageType.Agent, message: frame.message, component: form, calls: state});
             }
             return updatedMessages;
         });
     }, []);
 
-    const handleConfirmRequest = useCallback(({frame, state}: {frame: CallFrame, state: Record<string, CallFrame>}) => {
+    const handleConfirmRequest = useCallback(({frame, state}: { frame: CallFrame, state: Record<string, CallFrame> }) => {
         if (!frame.tool) return;
 
         if (alreadyAllowed(frame)) {
-            socketRef.current?.emit("confirmResponse", { id: frame.id, accept: true});
+            socketRef.current?.emit("confirmResponse", {id: frame.id, accept: true});
             return;
         }
 
         let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
         if (frame.displayText) {
             const tool = frame.tool?.name?.replace('sys.', '')
-            confirmMessage = frame.tool?.source?.repo ? 
+            confirmMessage = frame.tool?.source?.repo ?
                 `Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?` :
                 `Proceed with running the following (or allow all **${tool}** calls)?`
         }
@@ -147,7 +152,7 @@ const useChatSocket = (isEmpty?: boolean) => {
             />
         );
 
-        let message: Message = { type: MessageType.Agent, name: frame.tool?.name, component: form, calls: state};
+        let message: Message = {type: MessageType.Agent, name: frame.tool?.name, component: form, calls: state};
         if (latestAgentMessageIndex.current === -1) {
             latestAgentMessageIndex.current = messagesRef.current.length;
             setMessages((prevMessages) => {
@@ -168,9 +173,9 @@ const useChatSocket = (isEmpty?: boolean) => {
         }
     }, []);
 
-    const parseToolCall = (toolCall: string): {tool: string, params: string} => {
+    const parseToolCall = (toolCall: string): { tool: string, params: string } => {
         const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
-        return { tool, params };
+        return {tool, params};
     }
 
     const trimRepo = (repo: string): string => {
@@ -205,9 +210,10 @@ const useChatSocket = (isEmpty?: boolean) => {
     }
 
     const addTrustedFor = (frame: CallFrame) => {
-        if (!frame.tool) return () => {};
+        if (!frame.tool) return () => {
+        };
 
-        return frame.tool.source?.repo ? 
+        return frame.tool.source?.repo ?
             () => {
                 const repo = frame.tool!.source?.repo!.Root;
                 const trimmedRepo = trimRepo(repo || "");
@@ -235,16 +241,24 @@ const useChatSocket = (isEmpty?: boolean) => {
         socket.on("connect", () => setConnected(true));
         socket.on("disconnect", () => setConnected(false));
         socket.on("running", () => setRunning(true));
-        socket.on("progress", (data: {frame: CallFrame, state: any}) => handleProgress(data));
+        socket.on("progress", (data: { frame: CallFrame, state: any }) => handleProgress(data));
         socket.on("error", (data: string) => handleError(data));
-        socket.on("promptRequest", (data: {frame: PromptFrame, state: any }) => { handlePromptRequest(data) });
-        socket.on("confirmRequest", (data: {frame: CallFrame, state: any}) => { handleConfirmRequest(data) });
-        socket.on("loaded", (data: Message[]) => {setMessages(data)});
+        socket.on("promptRequest", (data: { frame: PromptFrame, state: any }) => {
+            handlePromptRequest(data)
+        });
+        socket.on("confirmRequest", (data: { frame: CallFrame, state: any }) => {
+            handleConfirmRequest(data)
+        });
+        socket.on("loaded", (data: Message[]) => {
+            setMessages(data)
+        });
 
         setSocket(socket);
     }
 
-    useEffect(() => { loadSocket() }, []);
+    useEffect(() => {
+        loadSocket()
+    }, []);
     const restart = useCallback(() => {
         trustedRef.current = {};
         setRunning(false);
@@ -263,28 +277,28 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     useEffect(() => {
         if (running && messages.length === 0) {
-            const initialMessages: Array<Message>= [
-                { type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System" },
+            const initialMessages: Array<Message> = [
+                {type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System"},
             ]
             if (!isEmpty) {
                 setGenerating(false);
-                initialMessages.push({ type: MessageType.Agent, message: "Waiting for model response..." });
+                initialMessages.push({type: MessageType.Agent, message: "Waiting for model response..."});
                 latestAgentMessageIndex.current = 1;
             } else {
-                initialMessages.push({ type: MessageType.Agent, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!" });
+                initialMessages.push({type: MessageType.Agent, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!"});
             }
             setMessages(initialMessages);
         }
     }, [running, messages, isEmpty]);
 
-    return { 
+    return {
         error,
-        socket, setSocket, 
-        connected, setConnected, 
-        messages, setMessages, 
-        restart, 
-        interrupt, 
-        generating, 
+        socket, setSocket,
+        connected, setConnected,
+        messages, setMessages,
+        restart,
+        interrupt,
+        generating,
         running,
     };
 };

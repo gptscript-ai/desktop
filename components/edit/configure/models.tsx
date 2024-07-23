@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
-import { Button, Input } from '@nextui-org/react';
-import { GoTrash } from 'react-icons/go';
+import {useEffect, useState, useRef} from 'react';
+import {Button, Input} from '@nextui-org/react';
+import {GoTrash} from 'react-icons/go';
 
 interface ModelsProps {
     options: string[];
@@ -8,13 +8,15 @@ interface ModelsProps {
     defaultValue?: string;
 }
 
-const Models: React.FC<ModelsProps> = ({ options, onChange, defaultValue }) => {
+const Models: React.FC<ModelsProps> = ({options, onChange, defaultValue}) => {
     const [selectedOption, setSelectedOption] = useState<string | undefined>(defaultValue);
     const [filteredOptions, setFilteredOptions] = useState<string[]>(options);
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => { onChange(selectedOption) }, [selectedOption]);
+    useEffect(() => {
+        onChange(selectedOption)
+    }, [selectedOption]);
 
     const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setShowDropdown(true);
@@ -95,7 +97,8 @@ const Models: React.FC<ModelsProps> = ({ options, onChange, defaultValue }) => {
                 />
             )}
             {showDropdown && filteredOptions.length > 0 && (
-                <div className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 border-2 border-primary w-full shadow-2xl py-2">
+                <div
+                    className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 border-2 border-primary w-full shadow-2xl py-2">
                     {filteredOptions.map((option, index) => (
                         <h1
                             aria-label={option}

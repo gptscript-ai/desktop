@@ -1,16 +1,16 @@
 "use client";
 
-import { useSearchParams } from 'next/navigation';
+import {useSearchParams} from 'next/navigation';
 import 'reactflow/dist/style.css';
-import React, { useCallback, useRef, useEffect, useContext, memo } from 'react';
-import ReactFlow, { addEdge, useReactFlow, Panel,Background } from 'reactflow';
-import type { Node as RFNode, Edge as RFEdge } from 'reactflow';
-import type { Tool } from '@gptscript-ai/gptscript';
-import type { } from 'reactflow';
+import React, {useCallback, useRef, useEffect, useContext, memo} from 'react';
+import ReactFlow, {addEdge, useReactFlow, Panel, Background} from 'reactflow';
+import type {Node as RFNode, Edge as RFEdge} from 'reactflow';
+import type {Tool} from '@gptscript-ai/gptscript';
+import type {} from 'reactflow';
 import ScriptNav from '@/components/build/scriptNav';
 import CustomTool from '@/components/build/tool';
 import ToolBar from '@/components/build/toolbar';
-import { GraphContext } from '@/contexts/graph';
+import {GraphContext} from '@/contexts/graph';
 
 const nodeTypes = {
     customTool: CustomTool,
@@ -18,9 +18,9 @@ const nodeTypes = {
 
 export default memo(() => {
     const file = useSearchParams().get('file');
-    const connectingNode = useRef({id:'', handleId:''});
-    const { screenToFlowPosition } = useReactFlow();
-    const { 
+    const connectingNode = useRef({id: '', handleId: ''});
+    const {screenToFlowPosition} = useReactFlow();
+    const {
         nodes, setNodes, onNodesChange,
         edges, setEdges, onEdgesChange,
         chatPanel,
@@ -34,7 +34,7 @@ export default memo(() => {
     useEffect(() => {
         if (!file) return;
         if (file === 'new') {
-            fetch(`/api/file`, { method: 'POST' })
+            fetch(`/api/file`, {method: 'POST'})
                 .then((response) => response.json())
                 .then((data: any) => {
                     window.location.href = `/build?file=${data.file.replace('.gpt', '')}`;
@@ -46,7 +46,7 @@ export default memo(() => {
     // Create a new file if the file param is 'new'
     useEffect(() => {
         if (file === 'new') {
-            fetch(`/api/file`, { method: 'POST' })
+            fetch(`/api/file`, {method: 'POST'})
                 .then((response) => response.json())
                 .then((data: any) => {
                     window.location.href = `/build?file=${data.file.replace('.gpt', '')}`;
@@ -77,13 +77,13 @@ export default memo(() => {
     const onConnect = useCallback(
         (params: any) => {
             params.animated = true;
-            connectingNode.current = {id:'', handleId:''};
+            connectingNode.current = {id: '', handleId: ''};
 
             const sourceNode = nodes.find((node) => node.id === params.source)?.data as Tool;
             const targetNode = nodes.find((node) => node.id === params.target)?.data as Tool;
 
             if (!sourceNode?.tools) sourceNode.tools = [];
-            if (!sourceNode?.tools?.includes(targetNode.name)) {
+            if (targetNode.name && !sourceNode?.tools?.includes(targetNode.name)) {
                 sourceNode.tools.push(targetNode.name);
             }
             setNodes((nds) => {
@@ -105,7 +105,7 @@ export default memo(() => {
         removedEdges.forEach((removedEdge) => {
             const sourceNode = nodes.find((node) => node.id === removedEdge.source)?.data as Tool;
             const targetNode = nodes.find((node) => node.id === removedEdge.target)?.data as Tool;
-            if (sourceNode?.tools) {
+            if (sourceNode?.tools && targetNode?.name) {
                 const index = sourceNode.tools.indexOf(targetNode?.name);
                 if (index !== -1) {
                     sourceNode.tools.splice(index, 1);
@@ -127,7 +127,7 @@ export default memo(() => {
     }, [nodes]);
 
     // When a connection is started we want to store the id of the node that is being connected
-    const onConnectStart = useCallback((_: any, { nodeId, handleId }: any) => {
+    const onConnectStart = useCallback((_: any, {nodeId, handleId}: any) => {
         connectingNode.current = {id: nodeId, handleId};
     }, []);
 
@@ -147,21 +147,24 @@ export default memo(() => {
                 id,
                 type: 'customTool',
                 position: screenToFlowPosition({x: event.clientX, y: event.clientY,}),
-                data: { name: id, type: 'tool'},
+                data: {name: id, type: 'tool'},
                 origin: [0.0, 0.0],
             };
 
             setNodes((nds) => {
                 const newNodes = nds.concat(newNode);
-                
+
                 // Update the source node with the new tool
                 newNodes.forEach((node) => {
-                    if (node.id === connectingNode.current.id) {
-                        if (!(sourceNode?.data as Tool)?.tools) (sourceNode?.data as Tool).tools = [];
-                        if (!(sourceNode?.data as Tool)?.tools?.includes(newNode.id)) {
-                            (sourceNode?.data as Tool).tools.push(newNode.id);
+                    if (node.id === connectingNode.current.id && sourceNode && sourceNode.data) {
+                        const toolData = sourceNode.data as Tool;
+
+                        if (!toolData.tools) toolData.tools = []
+                        if (!toolData.tools.includes(newNode.id)) {
+                            toolData.tools.push(newNode.id)
                         }
-                        node.data = sourceNode?.data;
+
+                        node.data = sourceNode.data;
                     }
                 });
 
@@ -219,10 +222,10 @@ export default memo(() => {
             minZoom={0.1}
         >
             <Panel position="top-left">
-                <ScriptNav />
+                <ScriptNav/>
             </Panel>
             <Panel position="bottom-left" className="max-w-3/4 max-h-3/4">
-                <ToolBar />
+                <ToolBar/>
             </Panel>
             <Panel position="top-right">
                 {configPanel}
@@ -230,7 +233,7 @@ export default memo(() => {
             <Panel position="bottom-right">
                 {chatPanel}
             </Panel>
-            <Background />
+            <Background/>
         </ReactFlow>
     );
 });

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, ChangeEvent } from "react";
+import React, {useCallback, useContext, ChangeEvent} from "react";
 import {
     Table,
     TableHeader,
@@ -9,28 +9,28 @@ import {
     Button,
     getKeyValue
 } from "@nextui-org/react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { debounce } from 'lodash';
-import type { Property } from "@gptscript-ai/gptscript";
-import { ToolContext } from "@/components/build/tool";
+import {FaPlus, FaTrash} from "react-icons/fa";
+import {debounce} from 'lodash';
+import type {Property} from "@gptscript-ai/gptscript";
+import {ToolContext} from "@/components/build/tool";
 
 const columns = [
-  {
-    key: "name",
-    label: "Name",
-  },
-  {
-    key: "description",
-    label: "Description",
-  },
-  {
-    key: "actions",
-    label: "Actions",
-  },
+    {
+        key: "name",
+        label: "Name",
+    },
+    {
+        key: "description",
+        label: "Description",
+    },
+    {
+        key: "actions",
+        label: "Actions",
+    },
 ];
 
 export default function ParamsTable() {
-    const { params, setParams } = useContext(ToolContext);
+    const {params, setParams} = useContext(ToolContext);
 
     const addParam = useCallback(() => {
         let newParamKey = "new-param";
@@ -54,7 +54,7 @@ export default function ParamsTable() {
 
     const handleNameChange = useCallback(
         debounce((e: ChangeEvent<HTMLSpanElement>, key: string) => {
-            let newParams = { ...params };
+            let newParams = {...params};
             if (!newParams) newParams = {};
 
             const oldParam = newParams[key];
@@ -68,11 +68,11 @@ export default function ParamsTable() {
 
     const handleDescriptionChange = useCallback(
         debounce((e: ChangeEvent<HTMLSpanElement>, key: string) => {
-            let newParams = { ...params };
+            let newParams = {...params};
             if (!newParams) newParams = {};
 
             const oldParam = newParams[key];
-            newParams[key] = { ...oldParam, description: e.target.innerText };
+            newParams[key] = {...oldParam, description: e.target.innerText};
 
             setParams(newParams);
         }, 1000),
@@ -80,14 +80,14 @@ export default function ParamsTable() {
     );
 
     const handleDeleteParam = useCallback((key: string) => {
-        const newParams = { ...params };
+        const newParams = {...params};
         delete newParams[key];
         setParams(newParams);
     }, [params]);
 
     return (<>
         {params && Object.keys(params).length !== 0 && (
-            <Table 
+            <Table
                 removeWrapper
                 className="overflow-x-scroll"
                 aria-label="Tool parameters"
@@ -124,7 +124,7 @@ export default function ParamsTable() {
                                     size="sm"
                                     color="danger"
                                     isIconOnly
-                                    startContent={<FaTrash />}
+                                    startContent={<FaTrash/>}
                                     className="ml-2"
                                     onClick={() => handleDeleteParam(key)}
                                 />
@@ -134,6 +134,7 @@ export default function ParamsTable() {
                 </TableBody>
             </Table>
         )}
-        <Button startContent={<FaPlus />} size="sm" variant="bordered" className="w-full mt-2" onPress={addParam}>Add parameter</Button>
+        <Button startContent={<FaPlus/>} size="sm" variant="bordered" className="w-full mt-2" onPress={addParam}>Add
+            parameter</Button>
     </>);
 }

@@ -1,6 +1,6 @@
-import { useContext } from "react";
-import { FaWrench } from "react-icons/fa";
-import { IoIosChatboxes } from "react-icons/io";
+import {useContext} from "react";
+import {FaWrench} from "react-icons/fa";
+import {IoIosChatboxes} from "react-icons/io";
 import {
     Textarea,
     Slider,
@@ -15,17 +15,17 @@ import {
     AccordionItem,
 } from "@nextui-org/react";
 import Context from "./config/context";
-import { ToolContext } from "../tool";
-import { subtitle } from "@/components/primitives";
-import { GraphContext } from "@/contexts/graph";
-import { IoCloseSharp } from "react-icons/io5";
+import {ToolContext} from "../tool";
+import {subtitle} from "@/components/primitives";
+import {GraphContext} from "@/contexts/graph";
+import {IoCloseSharp} from "react-icons/io5";
 
 const Custom = () => {
-    const { 
+    const {
         name,
-        isChat, setIsChat, 
-        description, setDescription, 
-        temperature, setTemperature, 
+        isChat, setIsChat,
+        description, setDescription,
+        temperature, setTemperature,
         jsonResponse, setJsonResponse,
         internalPrompt, setInternalPrompt,
         modelName, setModelName,
@@ -45,24 +45,24 @@ const Custom = () => {
                         color="primary"
                         onPress={(_) => setConfigPanel(<></>)}
                     >
-                        <IoCloseSharp />
+                        <IoCloseSharp/>
                     </Button>
                 </div>
             </CardHeader>
-            <Divider />
+            <Divider/>
             <CardBody className="flex flex-col space-y-6 p-6 pt-2 h-full overflow-y-scroll">
-                <Accordion defaultExpandedKeys={["basic","parameters"]} selectionMode="multiple">
+                <Accordion defaultExpandedKeys={["basic", "parameters"]} selectionMode="multiple">
                     <AccordionItem key="basic" aria-label="Basic" title="Basic" subtitle="Define core behavior">
                         <div className="px-2 flex flex-col space-y-6 mb-6">
                             <Switch
                                 className="h-full"
                                 isSelected={isChat}
                                 onValueChange={setIsChat}
-                                thumbIcon={({ isSelected, className }) =>
+                                thumbIcon={({isSelected, className}) =>
                                     isSelected ? (
-                                        <IoIosChatboxes className={className} />
+                                        <IoIosChatboxes className={className}/>
                                     ) : (
-                                        <FaWrench className={className} />
+                                        <FaWrench className={className}/>
                                     )
                                 }
                             >
@@ -79,17 +79,22 @@ const Custom = () => {
                             />
                         </div>
                     </AccordionItem>
-                    <AccordionItem key="context" aria-label="Contexts" title="Contexts" subtitle="Add contexts from a file or tool">
-                        <div className="mb-6 px-2" >
-                            <Context />
+                    <AccordionItem key="context" aria-label="Contexts" title="Contexts"
+                                   subtitle="Add contexts from a file or tool">
+                        <div className="mb-6 px-2">
+                            <Context/>
                         </div>
                     </AccordionItem>
-                    <AccordionItem key="advanced" aria-label="Advanced" title="Advanced" subtitle="Tweak advanced configuration for this tool">
+                    <AccordionItem key="advanced" aria-label="Advanced" title="Advanced"
+                                   subtitle="Tweak advanced configuration for this tool">
                         <div className="px-2 flex flex-col space-y-6 mb-6">
                             <Switch isSelected={jsonResponse} onValueChange={setJsonResponse}>JSON Response</Switch>
-                            <Switch isSelected={internalPrompt} onValueChange={setInternalPrompt}>Internal Prompt</Switch>
-                            <Input defaultValue={modelName} onChange={(e) => setModelName(e.target.value)} label="Model name"/>
-                            <Input type="number" defaultValue={`${maxTokens}`} onChange={(e) => setMaxTokens(parseInt(e.target.value))} label="Max tokens"/>
+                            <Switch isSelected={internalPrompt} onValueChange={setInternalPrompt}>Internal
+                                Prompt</Switch>
+                            <Input defaultValue={modelName} onChange={(e) => setModelName(e.target.value)}
+                                   label="Model name"/>
+                            <Input type="number" defaultValue={`${maxTokens}`}
+                                   onChange={(e) => setMaxTokens(parseInt(e.target.value))} label="Max tokens"/>
                             <Slider
                                 label="Creativity"
                                 step={0.01}

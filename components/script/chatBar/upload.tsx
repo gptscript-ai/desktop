@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import { GoFileDirectory, GoUpload, GoFile, GoX } from 'react-icons/go';
+import {useState, useRef, useEffect} from 'react';
+import {GoFileDirectory, GoUpload, GoFile, GoX} from 'react-icons/go';
 import Files from './upload/files';
-import { uploadFile, lsWorkspaceFiles } from '@/actions/upload';
-import { Dirent } from 'fs';
+import {uploadFile, lsWorkspaceFiles} from '@/actions/upload';
+import {Dirent} from 'fs';
 import Workspace from '@/components/script/chatBar/upload/workspace';
-import { 
+import {
     Modal,
     ModalContent,
     ModalHeader,
@@ -27,7 +27,9 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
     const [files, setFiles] = useState<Dirent[]>([]);
     const selectedFileRef = useRef(selectedFile);
 
-    useEffect(() => { selectedFileRef.current = selectedFile }, [selectedFile]);
+    useEffect(() => {
+        selectedFileRef.current = selectedFile
+    }, [selectedFile]);
     useEffect(() => fetchFiles(), []);
 
     const fetchFiles = () => {
@@ -62,7 +64,7 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
             <Tooltip content="View and manage your workspace" closeDelay={0.5} placement="top">
                 <Button
                     isDisabled={disabled}
-                    startContent={<GoFileDirectory />}
+                    startContent={<GoFileDirectory/>}
                     isIconOnly
                     radius="full"
                     className="mr-2 my-auto text-xl"
@@ -84,14 +86,15 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
                     <ModalBody className="max-h-[900px] overflow-y-scroll">
                         <Workspace onRestart={onRestart}/>
                         <ScrollShadow>
-                            <Files files={files} setFiles={setFiles} />
+                            <Files files={files} setFiles={setFiles}/>
                         </ScrollShadow>
-                        <Divider />
+                        <Divider/>
                     </ModalBody>
                     <ModalFooter>
                         <form onSubmit={handleSubmit} className="w-full">
-                            <input disabled={selectedFile != null} type="file" id="fileUpload" name="file" hidden onChange={handleFileChange} />
-                            <label 
+                            <input disabled={selectedFile != null} type="file" id="fileUpload" name="file" hidden
+                                   onChange={handleFileChange}/>
+                            <label
                                 htmlFor="fileUpload"
                                 className={`
                                     flex items-center justify-center w-full drop-shadow-xl rounded-xl p-2 text-center
@@ -101,10 +104,12 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
                                 <GoFile className="mr-4"/>
                                 {selectedFile ? selectedFile.name : 'Add a new file'}
                             </label>
-                            { selectedFile &&
+                            {selectedFile &&
                                 <div className="flex space-x-4 my-4">
-                                    <Button startContent={<GoUpload />} color="primary" className="w-1/2" type="submit">Upload</Button>
-                                    <Button startContent={<GoX />}  color="danger" className="w-1/2" onPress={handleCancel}>Cancel</Button>
+                                    <Button startContent={<GoUpload/>} color="primary" className="w-1/2"
+                                            type="submit">Upload</Button>
+                                    <Button startContent={<GoX/>} color="danger" className="w-1/2"
+                                            onPress={handleCancel}>Cancel</Button>
                                 </div>
                             }
                         </form>

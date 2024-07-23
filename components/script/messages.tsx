@@ -1,35 +1,35 @@
-import { ReactNode } from "react";
-import { IoCopyOutline } from "react-icons/io5";
+import {ReactNode} from "react";
+import {IoCopyOutline} from "react-icons/io5";
 import Markdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 import rehypeExternalLinks from 'rehype-external-links'
-import { Avatar, Button, Tooltip } from "@nextui-org/react";
-import type { CallFrame } from "@gptscript-ai/gptscript";
+import {Avatar, Button, Tooltip} from "@nextui-org/react";
+import type {CallFrame} from "@gptscript-ai/gptscript";
 import Calls from "./messages/calls"
-import { GoIssueReopened } from "react-icons/go";
+import {GoIssueReopened} from "react-icons/go";
 
 export enum MessageType {
     Alert,
-	Agent,
-	User,
+    Agent,
+    User,
 }
 
 export type Message = {
     type: MessageType;
     message?: string;
     error?: string;
-	name?: string;
+    name?: string;
     calls?: Record<string, CallFrame>;
     component?: ReactNode;
 };
 
 const abbreviate = (name: string) => {
-	const words = name.split(/(?=[A-Z])|[\s_-]/);
-	const firstLetters = words.map(word => word[0]);
-	return firstLetters.slice(0, 2).join('').toUpperCase();
+    const words = name.split(/(?=[A-Z])|[\s_-]/);
+    const firstLetters = words.map(word => word[0]);
+    return firstLetters.slice(0, 2).join('').toUpperCase();
 }
 
-const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: boolean, restart: () => void }) => {
+const Message = ({message, noAvatar, restart}: { message: Message, noAvatar?: boolean, restart?: () => void }) => {
     switch (message.type) {
         case MessageType.User:
             return (
@@ -70,7 +70,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                                 <Markdown
                                     className={`!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg`}
                                     remarkPlugins={[remarkGfm]}
-                                    rehypePlugins={[[rehypeExternalLinks, { target: "_blank" }]]}
+                                    rehypePlugins={[[rehypeExternalLinks, {target: "_blank"}]]}
                                 >
                                     {message.message}
                                 </Markdown>
@@ -86,7 +86,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                                         color="danger"
                                     >
                                         <Button
-                                            startContent={<GoIssueReopened className="text-lg" />}
+                                            startContent={<GoIssueReopened className="text-lg"/>}
                                             color="danger"
                                             className="ml-4 mb-6"
                                             onPress={restart}
@@ -103,7 +103,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                             <Button
                                 isIconOnly
                                 radius="full"
-                                startContent={<IoCopyOutline className="text-lg" />}
+                                startContent={<IoCopyOutline className="text-lg"/>}
                                 className="ml-2"
                                 onPress={() => {
                                     navigator.clipboard.writeText(message.message || '');
@@ -111,7 +111,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
                             />
                         </Tooltip>
                         {message.calls && (
-                            <Calls calls={message.calls} />
+                            <Calls calls={message.calls}/>
                         )}
                     </div>
                 </div>
@@ -120,7 +120,7 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
             return (
                 <div className="flex flex-col items-start mb-10">
                     <div className="flex gap-2 w-full">
-                        <div 
+                        <div
                             className="w-full flex justify-center space-x-2 rounded-2xl text-black text-sm bg-gray-50 shadow text-center py-2 px-4 dark:text-white dark:border-zinc-800 dark:border dark:bg-black"
                         >
                             <div className="w-2 h-2 my-auto bg-green-500 rounded-full"></div>
@@ -132,12 +132,12 @@ const Message = ({ message, noAvatar, restart }: { message: Message ,noAvatar?: 
     }
 };
 
-const Messages = ({ messages, noAvatar, restart }: { messages: Message[], noAvatar?: boolean, restart: () => void}) => (
-	<div>
-		{messages.map((message, index) => 
-			<Message key={index} restart={restart} message={message} noAvatar={noAvatar} />
-		)}
-	</div>
+const Messages = ({messages, noAvatar, restart}: { messages: Message[], noAvatar?: boolean, restart?: () => void }) => (
+    <div>
+        {messages.map((message, index) =>
+            <Message key={index} restart={restart} message={message} noAvatar={noAvatar}/>
+        )}
+    </div>
 );
 
 export default Messages;
