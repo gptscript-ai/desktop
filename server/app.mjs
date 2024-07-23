@@ -13,7 +13,6 @@ const AGENT = 1;
 const USER = 2;
 const STATE_FILE = "state.json";
 const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
-let THREADS_DIR = process.env.THREADS_DIR || "";
 let runningScript = null;
 let serverRunning = false;
 
@@ -85,6 +84,7 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
 
     let state = {};
     let statePath = '';
+    let THREADS_DIR = process.env.THREADS_DIR
     if (!THREADS_DIR) THREADS_DIR = path.join(workspace, "threads");
     if (threadID) statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
     try {
