@@ -2,19 +2,16 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import {revalidatePath} from "next/cache";
-import {WORKSPACE_DIR} from '@/config/env';
-import {Dirent} from 'fs';
+import { revalidatePath } from "next/cache";
+import { Dirent } from 'fs';
 
-export async function uploadFile(formData: FormData) {
-    const workspaceDir = WORKSPACE_DIR()
-    await fs.mkdir(workspaceDir, {recursive: true})
-
+export async function uploadFile(workspace: string, formData: FormData) {
     const file = formData.get("file") as File;
+    await fs.mkdir(workspace, { recursive: true })
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
-    await fs.writeFile(path.join(workspaceDir, file.name), buffer);
-
+    await fs.writeFile(path.join(workspace,file.name), buffer);
     revalidatePath("/");
 }
 
@@ -27,10 +24,10 @@ export async function deleteFile(path: string) {
     }
 }
 
-export async function lsWorkspaceFiles(): Promise<string> {
+export async function lsFiles(dir: string): Promise<string> {
     let files: Dirent[] = []
     try {
-        const dirents = await fs.readdir(WORKSPACE_DIR(), {withFileTypes: true});
+        const dirents = await fs.readdir(dir, { withFileTypes: true });
         files = dirents.filter((dirent: Dirent) => !dirent.isDirectory());
     } catch (e) {
         if ((e as NodeJS.ErrnoException).code !== 'ENOENT') {

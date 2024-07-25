@@ -42,14 +42,14 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
 
             io.on("connection", (socket) => {
                 io.emit("message", "connected");
-                socket.on("run", async (file, tool, args, workspace, threadID) => {
+                socket.on("run", async (file, tool, args, scriptWorkspace, threadID) => {
                     if (runningScript) {
                         await runningScript.close();
                         runningScript = null;
                     }
                     try {
                         dismount(socket);
-                        await mount(file, tool, args, workspace, socket, threadID, gptscript);
+                        await mount(file, tool, args, scriptWorkspace, socket, threadID, gptscript);
                     } catch (e) {
                         socket.emit("error", e);
                     }
@@ -71,21 +71,22 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
     });
 };
 
-const mount = async (file, tool, args, workspace, socket, threadID, gptscript) => {
+const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscript) => {
+    const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
+    const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
+
     const opts = {
         input: JSON.stringify(args || {}),
         disableCache: DISABLE_CACHE,
-        workspace: workspace,
+        workspace: scriptWorkspace,
         prompt: true,
         confirm: true,
     };
-
+    
     if (tool) opts.subTool = tool;
-
+    
     let state = {};
     let statePath = '';
-    let THREADS_DIR = process.env.THREADS_DIR
-    if (!THREADS_DIR) THREADS_DIR = path.join(workspace, "threads");
     if (threadID) statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
     try {
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
@@ -180,7 +181,8 @@ const mount = async (file, tool, args, workspace, socket, threadID, gptscript) =
         runningScript.text()
             .then((output) => {
                 if (!runningScript) return;
-                if (!state.messages) state.messages.push(
+                if (!state.messages) state.messages = [];
+                state.messages.push(
                     {type: USER, message: message},
                     {type: AGENT, message: output}
                 );

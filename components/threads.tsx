@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import New from './threads/new';
 import Menu from './threads/menu';
 import {getThreads, Thread} from '@/actions/threads';
 import {Button, Divider, Tooltip} from '@nextui-org/react';
 import {GoSidebarExpand, GoSidebarCollapse} from 'react-icons/go';
+import {ScriptContext} from '@/contexts/script';
 
 interface ThreadsProps {
     className?: string;
@@ -15,17 +16,15 @@ interface ThreadsProps {
     setScript: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Threads: React.FC<ThreadsProps> = ({className, setThread, threads, setThreads, setScript, selectedThreadId, setSelectedThreadId}) => {
+const Threads: React.FC<ThreadsProps> = ({className}) => {
+    const {
+        setScript,
+        setThread, 
+        threads,
+        selectedThreadId,
+        setSelectedThreadId,
+    } = useContext(ScriptContext);
     const [isCollapsed, setIsCollapsed] = useState(false);
-
-    useEffect(() => {
-        fetchThreads()
-    }, []);
-
-    const fetchThreads = async () => {
-        const threads = await getThreads();
-        setThreads(threads);
-    };
 
     const handleRun = async (script: string, id: string) => {
         setScript(script);
@@ -49,8 +48,7 @@ const Threads: React.FC<ThreadsProps> = ({className, setThread, threads, setThre
                         isIconOnly
                     />
                 </Tooltip>
-                <New setSelectedThreadId={setSelectedThreadId} setThread={setThread} setThreads={setThreads}
-                     setScript={setScript}/>
+                <New />
             </div>
             <div style={{width: isCollapsed ? '50px' : '250px', transition: 'width 0.3s ease-in-out'}}>
                 <Divider className="mb-4" style={{opacity: isCollapsed ? 0 : 1, transition: 'opacity 0.2s 0.2s'}}/>
@@ -70,8 +68,7 @@ const Threads: React.FC<ThreadsProps> = ({className, setThread, threads, setThre
                                     >
                                         <div className="flex justify-between items-center">
                                             <h2 className="text-sm truncate">{thread.meta.name}</h2>
-                                            <Menu className={isSelected(thread.meta.id) ? 'text-white' : ''}
-                                                  setThreads={setThreads} threadId={thread.meta.id}/>
+                                            <Menu threadId={thread.meta.id}/>
                                         </div>
                                     </div>
                                 </Tooltip>
