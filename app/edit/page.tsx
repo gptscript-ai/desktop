@@ -5,7 +5,6 @@ import {useSearchParams} from "next/navigation";
 import Script from "@/components/script";
 import Configure from "@/components/edit/configure";
 import {EditContextProvider} from "@/contexts/edit";
-import { ScriptContextProvider } from "@/contexts/script";
 import New from "@/components/edit/new";
 import ScriptNav from "@/components/edit/scriptNav";
 
@@ -26,17 +25,15 @@ function EditFile() {
 
     return (
         <EditContextProvider file={file}>
-            <ScriptContextProvider initialScript={file} initialThread="">
-                <div className="w-full h-full grid grid-cols-2">
-                    <div className="absolute left-6 top-6">
-                        <ScriptNav/>
-                    </div>
-                    <div className="h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6">
-                        <Configure file={file}/>
-                    </div>
-                    <Script messagesHeight='h-[93%]' className="p-6 overflow-auto" file={file}/>
+            <div className="w-full h-full grid grid-cols-2">
+                <div className="absolute left-6 top-6">
+                    <ScriptNav/>
                 </div>
-            </ScriptContextProvider>
+                <div className="h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6">
+                    <Configure file={file}/>
+                </div>
+                <Script messagesHeight='h-[93%]' className="p-6 overflow-auto" file={file}/>
+            </div>
         </EditContextProvider>
     );
 }

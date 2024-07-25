@@ -13,6 +13,9 @@ import {
     Button,
     Accordion,
     AccordionItem,
+    Autocomplete,
+    AutocompleteItem,
+
 } from "@nextui-org/react";
 import {getModels} from "@/actions/models";
 import {FaPlus} from "react-icons/fa";
@@ -26,11 +29,9 @@ interface ConfigureProps {
 
 const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
     const {
-        root, 
-        setRoot,
-        tools,
-        setTools,
-        loading,
+        root, setRoot,
+        tools, setTools,
+        loading, setLoading,
         newestToolName,
     } = useContext(EditContext);
     const [models, setModels] = useState<string[]>([]);
@@ -69,9 +70,9 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
                     placement="bottom"
                     closeDelay={0.5}
                 >
-                    <Avatar 
-                        size="md" 
-                        name={abbreviate(root.name || 'Main')} 
+                    <Avatar
+                        size="md"
+                        name={abbreviate(root.name || 'Main')}
                         className="mx-auto mb-6 mt-4"
                         classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
                     />
@@ -104,7 +105,8 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
                     defaultValue={root.instructions}
                     onChange={(e) => setRoot({...root, instructions: e.target.value})}
                 />
-                <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />
+                <Models options={models} defaultValue={root.modelName}
+                        onChange={(model) => setRoot({...root, modelName: model})}/>
                 <Imports className="py-2" tools={root.tools} setTools={setRootTools} label={"Basic tool"}/>
                 <Imports className="py-2" tools={root.context} setTools={setRootContexts} label={"context Tool"}/>
                 <Imports className="py-2" tools={root.agents} setTools={setRootAgents} label={"agent Tool"}/>

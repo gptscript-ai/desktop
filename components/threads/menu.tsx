@@ -1,35 +1,32 @@
-import {useState, useContext} from "react";
+import {useState} from "react";
 import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem} from "@nextui-org/react";
 import {deleteThread, renameThread, Thread} from '@/actions/threads';
 import {GoPencil, GoTrash, GoKebabHorizontal} from "react-icons/go";
-import {ScriptContext} from '@/contexts/script';
 
 interface NewThreadProps {
     className?: string;
     threadId: string;
+    setThreads: React.Dispatch<React.SetStateAction<Thread[]>>;
 }
 
-const NewThread = ({className, }: NewThreadProps) => {
+const NewThread = ({className, threadId, setThreads}: NewThreadProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const {
-        thread, setThreads,
-    } = useContext(ScriptContext);
 
     const handleDeleteThread = () => {
-        deleteThread(thread).then(() => {
-            setThreads((threads: Thread[]) => threads.filter((t: Thread) => t.meta.id !== thread));
+        deleteThread(threadId).then(() => {
+            setThreads((threads: Thread[]) => threads.filter((thread: Thread) => thread.meta.id !== threadId));
         });
     };
 
     const handleRenameThread = () => {
         const newName = prompt("Enter a new name for the thread");
         if (newName) {
-            renameThread(thread, newName).then(() => {
-                setThreads((threads: Thread[]) => threads.map((t: Thread) => {
-                    if (t.meta.id === thread) {
-                        return { ...t, meta: { ...t.meta, name: newName } };
+            renameThread(threadId, newName).then(() => {
+                setThreads((threads: Thread[]) => threads.map((thread: Thread) => {
+                    if (thread.meta.id === threadId) {
+                        return {...thread, meta: {...thread.meta, name: newName}};
                     }
-                    return t;
+                    return thread;
                 }));
             });
         }

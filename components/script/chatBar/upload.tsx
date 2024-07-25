@@ -1,11 +1,10 @@
-import {useState, useRef, useEffect, useCallback, useContext} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import {GoFileDirectory, GoUpload, GoFile, GoX} from 'react-icons/go';
 import Files from './upload/files';
-import {uploadFile, lsFiles} from '@/actions/upload';
+import {uploadFile, lsWorkspaceFiles} from '@/actions/upload';
 import {Dirent} from 'fs';
 import Workspace from '@/components/script/chatBar/upload/workspace';
-import {ScriptContext} from '@/contexts/script';
-import { 
+import {
     Modal,
     ModalContent,
     ModalHeader,
@@ -27,18 +26,17 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [files, setFiles] = useState<Dirent[]>([]);
     const selectedFileRef = useRef(selectedFile);
-    const {workspace} = useContext(ScriptContext);
 
     useEffect(() => {
         selectedFileRef.current = selectedFile
     }, [selectedFile]);
     useEffect(() => fetchFiles(), []);
 
-    const fetchFiles = useCallback(() => {
-        lsFiles(workspace)
+    const fetchFiles = () => {
+        lsWorkspaceFiles()
             .then((data: string) => setFiles(JSON.parse(data) as Dirent[]))
             .catch((error) => console.error('Error fetching files:', error));
-    }, [workspace]);
+    }
 
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false);
@@ -49,7 +47,7 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
         if (selectedFileRef.current) {
             const formData = new FormData();
             formData.append('file', selectedFileRef.current);
-            uploadFile(workspace, formData);
+            uploadFile(formData);
         }
         fetchFiles();
         handleCancel();
