@@ -1,6 +1,6 @@
 "use server"
 
-import {THREADS_DIR} from "@/config/env";
+import {THREADS_DIR, WORKSPACE_DIR} from "@/config/env";
 import {gpt} from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
@@ -20,6 +20,7 @@ export type ThreadMeta = {
     updated: Date;
     id: string;
     script: string;
+    workspace: string;
 }
 
 export async function init() {
@@ -67,7 +68,11 @@ export async function getThreads() {
 
 export async function getThread(id: string) {
     const threads = await getThreads();
-    return threads.find(thread => thread.meta.id === id);
+    const thread = threads.find(thread => thread.meta.id === id);
+    if (!thread) return null;
+    // falsy check for workspace to account for old threads that don't have a workspace
+    if (thread.meta.workspace == undefined) thread.meta.workspace = WORKSPACE_DIR();
+    return thread;
 }
 
 async function newThreadName(): Promise<string> {
@@ -96,8 +101,9 @@ export async function createThread(script: string, firstMessage?: string): Promi
         description: '',
         created: new Date(),
         updated: new Date(),
+        workspace: WORKSPACE_DIR(),
         id,
-        script
+        script,
     }
     const threadState = '';
 
@@ -127,5 +133,14 @@ export async function renameThread(id: string, name: string) {
     const meta = await fs.readFile(path.join(threadPath, META_FILE), "utf-8");
     const threadMeta = JSON.parse(meta) as ThreadMeta;
     threadMeta.name = name;
+    await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
+}
+
+export async function updateThreadWorkspace(id: string, workspace: string) {
+    const threadsDir = THREADS_DIR();
+    const threadPath = path.join(threadsDir,id);
+    const meta = await fs.readFile(path.join(threadPath, META_FILE), "utf-8");
+    const threadMeta = JSON.parse(meta) as ThreadMeta;
+    threadMeta.workspace = workspace;
     await fs.writeFile(path.join(threadPath, META_FILE), JSON.stringify(threadMeta));
 }

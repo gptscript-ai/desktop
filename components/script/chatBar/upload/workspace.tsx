@@ -1,6 +1,6 @@
-import {useState, useCallback, useRef, useEffect} from 'react';
-import {getWorkspaceDir, setWorkspaceDir} from '@/actions/workspace';
-import {
+import {useState, useCallback, useContext, useEffect} from 'react';
+import {ScriptContext} from '@/contexts/script';
+import { 
     Modal,
     ModalContent,
     ModalHeader,
@@ -9,6 +9,7 @@ import {
     Button,
     Input,
 } from '@nextui-org/react';
+import { updateThreadWorkspace } from '@/actions/threads';
 
 interface WorkspaceProps {
     onRestart: () => void;
@@ -16,40 +17,38 @@ interface WorkspaceProps {
 
 const Workspace = ({onRestart}: WorkspaceProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [workspace, setWorkspace] = useState<string>('');
-    const [actingWorkspace, setActingWorkspace] = useState<string>('');
+    const {workspace, setWorkspace, thread} = useContext(ScriptContext);
+    const [workspaceInput, setWorkspaceInput] = useState<string>('');
 
     useEffect(() => {
-        getWorkspaceDir().then((wd) => setActingWorkspace(wd))
-    }, []);
-
-    useEffect(() => {
-        setWorkspace(actingWorkspace)
-    }, [actingWorkspace]);
+        setWorkspaceInput(workspace)
+    }, [workspace]);
 
     const handleOpen = () => setIsOpen(true)
     const handleClose = () => setIsOpen(false);
     const handleConfirm = useCallback(() => {
-        setWorkspaceDir(workspace);
+        setWorkspace(workspaceInput);
         setIsOpen(false);
+        updateThreadWorkspace(thread, workspaceInput);
         onRestart();
-    }, [workspace]);
+    }, [workspaceInput]);
 
     return (
         <div className="flex w-full space-x-4">
             <Input
+                spellCheck={false}
                 color="primary"
                 variant="bordered"
                 placeholder="Set your workspace folder..."
                 label="Workspace folder"
-                value={workspace}
-                onKeyDown={(event) => event.key === 'Enter' && actingWorkspace != workspace && handleConfirm()}
-                onChange={(event) => setWorkspace(event.target.value)}
+                value={workspaceInput}
+                onKeyDown={(event) => event.key === 'Enter' && workspaceInput != workspace && handleConfirm()}
+                onChange={(event) => setWorkspaceInput(event.target.value) }
             />
-            {workspace != actingWorkspace &&
-                <Button
-                    className="absolute right-8 mt-2"
-                    color="danger"
+            { workspace != workspaceInput &&
+                <Button 
+                    className="absolute right-8 mt-2" 
+                    color="danger" 
                     onPress={handleOpen}
                 >
                     Update

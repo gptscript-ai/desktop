@@ -5,7 +5,7 @@ import { Tool } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
 import { Thread } from '@/actions/threads';
 import {fetchScript, path} from "@/actions/scripts/fetch";
-import { getThreads } from '@/actions/threads';
+import { getThreads, getThread } from '@/actions/threads';
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir } from '@/actions/workspace';
 
@@ -17,6 +17,8 @@ interface ScriptContextProps{
 
 interface ScriptContextState {
     script: string;
+    workspace: string;
+    setWorkspace: React.Dispatch<React.SetStateAction<string>>;
     setScript: React.Dispatch<React.SetStateAction<string>>;
     tool: Tool;
     setTool: React.Dispatch<React.SetStateAction<Tool>>;
@@ -56,6 +58,7 @@ interface ScriptContextState {
 const ScriptContext = createContext<ScriptContextState>({} as ScriptContextState);
 const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialScript, initialThread}) => {
     const [script, setScript] = useState<string>(initialScript);
+    const [workspace, setWorkspace] = useState('');
     const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -79,6 +82,14 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     //     });
 	// }, [script]);
 
+    // need to initialize the workspace from the env variable with serves
+    // as the default.
+    useEffect(() => {
+        getWorkspaceDir().then((workspace) => {
+            setWorkspace(workspace);
+        });
+    }, [])
+
     useEffect(() => {
         fetchScript(script)
             .then((data) => {
@@ -91,6 +102,16 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
         setIsEmpty(!tool.instructions);
     }, [tool]);
+
+    useEffect(() => {
+        if(thread) {
+            getThread(thread)
+                .then((thread) => {
+                    if(thread) setWorkspace(thread.meta.workspace);
+                });
+            restartScript();
+        }
+    }, [thread]);
 
     useEffect(() => {
         if(thread) restartScript();
@@ -137,6 +158,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         <ScriptContext.Provider 
             value={{
                 script, setScript,
+                workspace, setWorkspace,
                 tool, setTool,
                 showForm, setShowForm,
                 formValues, setFormValues,

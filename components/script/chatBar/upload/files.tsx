@@ -1,8 +1,9 @@
-import {useEffect} from 'react';
+import {useEffect, useContext, useCallback} from 'react';
 import {GoTrash, GoFile} from 'react-icons/go';
-import {Table, TableBody, TableHeader, TableRow, TableCell, TableColumn, Button} from '@nextui-org/react'; // Replace 'next-ui' with the actual package name
-import {deleteFile, lsWorkspaceFiles} from '@/actions/upload';
+import {Table, TableBody, TableHeader, TableRow, TableCell, TableColumn, Button} from '@nextui-org/react';
+import {deleteFile, lsFiles} from '@/actions/upload';
 import {Dirent} from 'fs';
+import {ScriptContext} from '@/contexts/script';
 import path from 'path';
 
 interface FilesProps {
@@ -12,12 +13,13 @@ interface FilesProps {
 
 const Files: React.FC<FilesProps> = ({files, setFiles}) => {
     useEffect(() => fetchFiles(), []);
+    const {workspace} = useContext(ScriptContext);
 
-    const fetchFiles = () => {
-        lsWorkspaceFiles()
+    const fetchFiles = useCallback(() => {
+        lsFiles(workspace)
             .then((data: string) => setFiles(JSON.parse(data) as Dirent[]))
             .catch((error) => console.error('Error fetching files:', error));
-    }
+    }, [workspace]);
 
     return (
         <Table removeWrapper aria-label="files">
