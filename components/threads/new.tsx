@@ -1,20 +1,23 @@
-import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection, Input} from "@nextui-org/react";
+import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection} from "@nextui-org/react";
 import {createThread, Thread} from '@/actions/threads';
 import {fetchScripts} from '@/actions/scripts/fetch';
-import {useEffect, useState} from 'react';
-import {GoPencil, GoPersonFill, GoPlus} from "react-icons/go";
+import {useEffect, useState, useContext} from 'react';
+import {GoPlus} from "react-icons/go";
+import {ScriptContext} from '@/contexts/script';
 
 interface NewThreadProps {
     className?: string;
-    setSelectedThreadId: React.Dispatch<React.SetStateAction<string | null>>;
-    setThread: React.Dispatch<React.SetStateAction<string>>;
-    setScript: React.Dispatch<React.SetStateAction<string>>;
-    setThreads: React.Dispatch<React.SetStateAction<Thread[]>>;
 }
 
-const NewThread = ({className, setThread, setSelectedThreadId, setScript, setThreads}: NewThreadProps) => {
+const NewThread = ({className}: NewThreadProps) => {
     const [scripts, setScripts] = useState<Record<string, string>>({});
     const [isOpen, setIsOpen] = useState(false);
+    const {
+        setThread, 
+        setSelectedThreadId, 
+        setScript, 
+        setThreads,
+    } = useContext(ScriptContext);
 
     useEffect(() => {
         fetchScripts().then((data) => {
