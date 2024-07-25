@@ -21,16 +21,10 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
         setScript,
         setThread, 
         threads,
-        setThreads,
         selectedThreadId,
         setSelectedThreadId,
-        fetchThreads,
     } = useContext(ScriptContext);
     const [isCollapsed, setIsCollapsed] = useState(false);
-
-    useEffect(() => {
-        fetchThreads()
-    }, []);
 
     const handleRun = async (script: string, id: string) => {
         setScript(script);

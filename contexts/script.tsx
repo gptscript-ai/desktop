@@ -75,16 +75,10 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         socket, connected, running, messages, setMessages, restart, interrupt, generating, error
     } = useChatSocket(isEmpty);
 
-    // useEffect(() => {
-    //     getScriptContent(script).then(async (content) => {
-    //         setTool(await rootTool(content))
-    //         setInitialFetch(true);
-    //     });
-	// }, [script]);
-
     // need to initialize the workspace from the env variable with serves
     // as the default.
     useEffect(() => {
+        fetchThreads();
         getWorkspaceDir().then((workspace) => {
             setWorkspace(workspace);
         });
@@ -114,23 +108,15 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     }, [thread]);
 
     useEffect(() => {
-        if(thread) restartScript();
-    }, [thread]);
-
-    useEffect(() => {
         if (hasRun || !socket || !connected) return;
         if (!tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0) {
             path(script)
-                .then(async (path) => {
-                    const workspace = await getWorkspaceDir()
-                    return {path, workspace}
-                })
-                .then(({path, workspace}) => {
+                .then((path) => {
                     socket.emit("run", path, tool.name, formValues, workspace, thread)
                 });
             setHasRun(true);
         }
-    }, [tool, connected, script, formValues, thread]);
+    }, [tool, connected, script, formValues, thread, workspace]);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");

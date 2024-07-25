@@ -7,6 +7,8 @@ import { Dirent } from 'fs';
 
 export async function uploadFile(workspace: string, formData: FormData) {
     const file = formData.get("file") as File;
+    await fs.mkdir(workspace, { recursive: true })
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
     await fs.writeFile(path.join(workspace,file.name), buffer);
