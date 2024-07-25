@@ -72,8 +72,7 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
 };
 
 const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscript) => {
-    // The environment variables that are set at an app level.
-    const WORKSPACE_DIR = process.env.GPTSCRIPT_WORKSPACE_DIR ?? process.env.WORKSPACE_DIR;
+    const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
     const opts = {
