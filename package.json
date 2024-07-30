@@ -17,7 +17,7 @@
     "dev-install": "npm install --ignore-scripts"
   },
   "dependencies": {
-    "@gptscript-ai/gptscript": "^0.9.2",
+    "@gptscript-ai/gptscript": "^0.9.3",
     "@nextui-org/button": "2.0.32",
     "@nextui-org/code": "2.0.28",
     "@nextui-org/dropdown": "2.1.24",
