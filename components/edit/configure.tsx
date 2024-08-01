@@ -4,18 +4,23 @@ import Imports from "@/components/edit/configure/imports";
 import Loading from "@/components/loading";
 import CustomTool from "@/components/edit/configure/customTool";
 import Models from "@/components/edit/configure/models";
+import Visibility from "@/components/edit/configure/visibility";
 import {EditContext} from "@/contexts/edit";
+import { ScriptContext } from "@/contexts/script";
 import {
     Textarea,
     Input,
     Avatar,
     Tooltip,
     Button,
-    Accordion,
-    AccordionItem,
+    Select,
+    SelectItem,
+    Card,
+    CardBody,
 } from "@nextui-org/react";
 import {getModels} from "@/actions/models";
-import {FaPlus} from "react-icons/fa";
+import { GoCode, GoPencil, GoPlay } from "react-icons/go";
+import Code from "@/components/edit/configure/code";
 
 interface ConfigureProps {
     file: string;
@@ -32,8 +37,12 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
         setTools,
         loading,
         newestToolName,
+        visibility,
+        setVisibility,
     } = useContext(EditContext);
+    const { setSubTool } = useContext(ScriptContext);
     const [models, setModels] = useState<string[]>([]);
+    const [instructionsType, setInstructionsType] = useState<string>("prompt");
 
     useEffect(() => {
         getModels().then((m) => {
@@ -78,6 +87,7 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
                 </Tooltip>
             </div>
             <div className="px-2 flex flex-col space-y-4 mb-6">
+                <Visibility visibility={visibility} setVisibility={setVisibility} />
                 <Input
                     color="primary"
                     variant="bordered"
@@ -95,54 +105,73 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
                     defaultValue={root.description}
                     onChange={(e) => setRoot({...root, description: e.target.value})}
                 />
-                <Textarea
+                <Select
                     color="primary"
-                    fullWidth
+                    label="Instructions Type"
                     variant="bordered"
-                    label="Instructions"
-                    placeholder="Describe your how your script should behave..."
-                    defaultValue={root.instructions}
-                    onChange={(e) => setRoot({...root, instructions: e.target.value})}
-                />
-                <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />
-                <Imports className="py-2" tools={root.tools} setTools={setRootTools} label={"Basic tool"}/>
-                <Imports className="py-2" tools={root.context} setTools={setRootContexts} label={"context Tool"}/>
-                <Imports className="py-2" tools={root.agents} setTools={setRootAgents} label={"agent Tool"}/>
-            </div>
-            {!custom &&
-                <div className="w-full">
-                    <h1 className="mb-2 px-2">Custom Tools</h1>
-                    <Button
-                        className="w-[98.7%] ml-2 mb-2 shadow-md"
-                        size="md"
-                        color="primary"
-                        startContent={<FaPlus className="text-xl font-bolder"/>}
-                        onPress={() => {
-                            const id = Math.random().toString(36).substring(7)
-                            const newTool: Tool = {
-                                id,
-                                type: 'tool',
-                                name: newestToolName(),
-                            }
-                            setRoot({...root, tools: [...(root.tools || []), newTool.name!]});
-                            setTools([...(tools || []), newTool]);
-                        }}
-                    >
-                        Add a new custom tool
-                    </Button>
-                    <div>
-                        {tools &&
-                            <Accordion variant="splitted" className="w-full" isCompact>
-                                {tools.map((customTool, i) => (
-                                    <AccordionItem key={i} title={customTool.name || 'main'}>
-                                        <CustomTool file={file} tool={customTool} models={models}/>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
+                    defaultSelectedKeys={["prompt"]}
+                    onChange={(e) => setInstructionsType(e.target.value)}
+                >
+                    <SelectItem key="prompt" value="prompt" textValue="Prompt" startContent={<GoPencil />}>
+                        <h1>Prompt</h1>
+                        <p className="text-default-500 text-tiny">Standard - Describe behavior using natural language.</p>
+                    </SelectItem>
+                    <SelectItem key="code" value="code" startContent={<GoCode />} textValue="Code">
+                        <h1>Code</h1>
+                        <p className="text-default-500 text-tiny">Advanced - Describe behavior using proramming languages.</p>
+                    </SelectItem>
+                </Select>
+                {(instructionsType !== "code") && 
+                    <>
+                        <Textarea
+                            color="primary"
+                            fullWidth
+                            variant="bordered"
+                            label="Instructions"
+                            placeholder="Describe your how your script should behave..."
+                            defaultValue={root.instructions}
+                            onChange={(e) => setRoot({...root, instructions: e.target.value})}
+                        />
+                        <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />
+                        <Imports className="py-2" 
+                            tools={root.tools}
+                            contexts={root.context}
+                            agents={root.agents}
+                            setAgents={setRootAgents} 
+                            setContexts={setRootContexts}
+                            setTools={setRootTools} label={"Tool"}
+                        />
+                        {!custom && tools && tools.length > 0 &&
+                            <Card className="w-full pt-2 pb-6" shadow="sm">
+                                <CardBody>
+                                    <h1 className="mb-4 px-2 text-lg">Local Tools</h1>
+                                    <div className="flex flex-col space-y-2 px-2">
+                                        {tools && tools.map((customTool, i) => (
+                                            <div className="flex space-x-2 ">
+                                                <CustomTool tool={customTool} file={file} models={models}/>
+                                                <Button 
+                                                    startContent={<GoPlay />}
+                                                    color="primary" variant="flat"
+                                                    size="sm"
+                                                    className="text-sm"
+                                                    isIconOnly
+                                                    onPress={() => setSubTool(customTool.name || '')}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardBody>
+                            </Card>
                         }
-                    </div>
-                </div>
-            }
+                    </>
+                }
+                {(instructionsType === "code") &&
+                    <Code
+                        code={root.instructions || ''}
+                        onChange={(code) => setRoot({...root, instructions: code || ''})}
+                    />
+                }
+            </div>
         </>
     );
 };

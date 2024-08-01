@@ -1,36 +1,44 @@
 import {Popover, PopoverTrigger, PopoverContent, Button, Menu, MenuItem, MenuSection} from "@nextui-org/react";
 import {createThread, Thread} from '@/actions/threads';
-import {fetchScripts} from '@/actions/scripts/fetch';
 import {useEffect, useState, useContext} from 'react';
-import {GoPlus} from "react-icons/go";
 import {ScriptContext} from '@/contexts/script';
+import {GoPlus } from "react-icons/go";
+import {getScripts, Script} from "@/actions/me/scripts";
 
 interface NewThreadProps {
     className?: string;
 }
 
 const NewThread = ({className}: NewThreadProps) => {
-    const [scripts, setScripts] = useState<Record<string, string>>({});
+    const [scripts, setScripts] = useState<Script[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
     const {
+        workspace,
         setThread, 
         setSelectedThreadId, 
         setScript, 
         setThreads,
+        scriptId,
     } = useContext(ScriptContext);
 
-    useEffect(() => {
-        fetchScripts().then((data) => {
-            setScripts(data);
-        });
-    }, []);
+    const fetchScripts = async () => {
+        setScripts([]);
+        const resp = await getScripts();
+        setLoading(false);
+        setScripts(resp.scripts || []);
+    }
+
+    useEffect(() => { fetchScripts() }, []);
+    useEffect(() => { fetchScripts() }, [isOpen]);
 
     const handleCreateThread = (script: string) => {
         createThread(script).then((newThread) => {
             setThreads((threads: Thread[]) => [newThread, ...threads]);
-            setScript(script.replace('.gpt', ''));
+            setScript(script);
             setThread(newThread.meta.id);
             setSelectedThreadId(newThread.meta.id);
+            setLoading(false);
         });
     };
 
@@ -42,13 +50,17 @@ const NewThread = ({className}: NewThreadProps) => {
             <PopoverContent className="flex flex-col space-y-3 p-4">
                 <Menu aria-label="my-scripts">
                     <MenuSection aria-label={"my-scripts"} title="Select a script">
-                        {Object.keys(scripts).map((script, i) => (
-                            <MenuItem aria-label={script} key={i} color="primary"
-                                      className="py-2 truncate max-w-[200px]" content={script} onClick={() => {
-                                handleCreateThread(script);
-                                setIsOpen(false)
-                            }}>
-                                {script}
+                        {scripts.map((script, i) => (
+                            <MenuItem 
+                                aria-label={script.displayName} 
+                                key={i} color="primary"
+                                className="py-2 truncate max-w-[200px]" 
+                                content={script.displayName} 
+                                onClick={() => { 
+                                    handleCreateThread(script.publicURL!); setIsOpen(false)
+                                }}
+                            >
+                                {script.displayName}
                             </MenuItem>
                         ))}
                     </MenuSection>

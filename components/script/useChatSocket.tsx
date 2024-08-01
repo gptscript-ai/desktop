@@ -54,7 +54,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     // handles progress being recieved from the server (callProgress style frames).
     const handleProgress = useCallback(({frame, state}: { frame: CallFrame, state: Record<string, CallFrame> }) => {
-        const isMainContent = frame.output &&
+        const isMainContent = frame?.output &&
             frame.output.length > 0 &&
             (!frame.parentID || frame.tool?.chat) &&
             !frame.output[frame.output.length - 1].subCalls
@@ -259,6 +259,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     useEffect(() => {
         loadSocket()
     }, []);
+
     const restart = useCallback(() => {
         trustedRef.current = {};
         setRunning(false);

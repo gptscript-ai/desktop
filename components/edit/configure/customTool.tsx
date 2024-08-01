@@ -10,10 +10,16 @@ import {
     Tooltip,
     Button,
     Switch,
+    Modal,
+    ModalBody,
+    ModalContent,
 } from "@nextui-org/react";
 import {EditContext} from "@/contexts/edit";
 import {GoTrash} from "react-icons/go";
 import {LuWrench, LuMessageSquare} from "react-icons/lu";
+import { ScriptContextProvider } from "@/contexts/script";
+import Script from "@/components/script";
+import {ScriptContext} from "@/contexts/script";
 
 
 interface ConfigureProps {
@@ -28,7 +34,9 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
     const [name, setName] = useState<string>(tool.name || '');
     const [chat, setChat] = useState<boolean>(false);
     const [model, setModel] = useState<string | undefined>(tool.modelName);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const {setRoot, setTools} = useContext(EditContext)
+    const {setSubTool} = useContext(ScriptContext);
 
     useEffect(() => {
         setCustomTool(tool)
@@ -111,79 +119,105 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
     }
 
     return customTool &&
-        <div>
-            <div className="w-full flex flex-col justify-center space-y-4 mb-6">
-                <Tooltip
-                    content={`${name || "Main"}`}
-                    placement="bottom"
-                    closeDelay={0.5}
-                >
-                    <Avatar
-                        size="md"
-                        name={abbreviate(name || 'Main')}
-                        className="mx-auto mt-4"
-                        classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-800"}}
-                    />
-                </Tooltip>
-                <Tooltip
-                    content={`${customTool.chat ? "Disable" : "Enable"} chat for this tool`}
-                    placement="bottom"
-                    closeDelay={0.5}
-                >
-                    <Switch
-                        className="mx-auto pl-2"
-                        isSelected={chat}
-                        onChange={(e) => setCustomTool({...customTool, chat: e.target.checked})}
-                        thumbIcon={({isSelected, className}) =>
-                            isSelected ? (
-                                <LuMessageSquare className={className}/>
-                            ) : (
-                                <LuWrench className={className}/>
-                            )
-                        }
-                    />
-                </Tooltip>
-            </div>
-            <div className="px-2 flex flex-col space-y-4 mb-6">
-                <Input
-                    color="primary"
-                    variant="bordered"
-                    label="Name"
-                    placeholder="Give your chat bot a name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-                <Textarea
-                    color="primary"
-                    fullWidth
-                    variant="bordered"
-                    label="Description"
-                    placeholder="Describe your script..."
-                    value={customTool.description}
-                    onChange={(e) => setCustomTool({...customTool, description: e.target.value})}
-                />
-                <Textarea
-                    color="primary"
-                    fullWidth
-                    variant="bordered"
-                    label="Instructions"
-                    placeholder="Describe your how your script should behave..."
-                    value={customTool.instructions}
-                    onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
-                />
-                <Models options={models} defaultValue={model} onChange={(model) => {
-                    setCustomTool({...customTool, modelName: model})
-                }}/>
-                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams}/>
-                <Imports className="py-2" tools={customTool.tools} setTools={setCustomToolTools} label={"Basic Tool"}/>
-                <Imports className="py-2" tools={customTool.context} setTools={setCustomToolContexts}
-                         label={"Context Tool"}/>
-                <Imports className="py-2" tools={customTool.agents} setTools={setCustomToolAgents}
-                         label={"Agent Tool"}/>
-                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>}
-                        className="w-full">Delete Tool</Button>
-            </div>
-        </div>
+        <>
+            <Button onClick={() => setIsModalOpen(true)} className="w-full text-sm" size="sm" color="primary" variant="flat">{name || "Main"}</Button>
+            <Modal
+                isOpen={isModalOpen}
+                onOpenChange={setIsModalOpen}
+                size="5xl"
+                className="dark:bg-zinc-950 dark:border-2 dark:border-zinc-800"
+                scrollBehavior="inside"
+                classNames={{base:"w-[95%] max-w-none h-[95%] max-h-none", wrapper: "overflow-hidden"}}
+            >
+                <ModalContent>
+                    <ModalBody className="grid grid-cols-2">
+                        <div className="border-r-2 dark:border-zinc-700 pr-6 h-full overflow-y-auto">
+                            <div className="w-full flex flex-col justify-center space-y-4 mb-6">
+                                <Tooltip
+                                    content={`${name || "Main"}`}
+                                    placement="bottom"
+                                    closeDelay={0.5}
+                                >
+                                    <Avatar
+                                        size="md"
+                                        name={abbreviate(name || 'Main')}
+                                        className="mx-auto mt-4"
+                                        classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
+                                    />
+                                </Tooltip>
+                                <Tooltip
+                                    content={`${customTool.chat ? "Disable" : "Enable"} chat for this tool`}
+                                    placement="bottom"
+                                    closeDelay={0.5}
+                                >
+                                    <Switch
+                                        className="mx-auto pl-2"
+                                        isSelected={chat}
+                                        onChange={(e) => setCustomTool({...customTool, chat: e.target.checked})}
+                                        thumbIcon={({isSelected, className}) =>
+                                            isSelected ? (
+                                                <LuMessageSquare className={className}/>
+                                            ) : (
+                                                <LuWrench className={className}/>
+                                            )
+                                        }
+                                    />
+                                </Tooltip>
+                            </div>
+                            <div className="px-2 flex flex-col space-y-4 mb-6">
+                                <Input
+                                    color="primary"
+                                    variant="bordered"
+                                    label="Name"
+                                    placeholder="Give your chat bot a name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                                <Textarea
+                                    color="primary"
+                                    fullWidth
+                                    variant="bordered"
+                                    label="Description"
+                                    placeholder="Describe your script..."
+                                    value={customTool.description}
+                                    onChange={(e) => setCustomTool({...customTool, description: e.target.value})}
+                                />
+                                <Textarea
+                                    color="primary"
+                                    fullWidth
+                                    variant="bordered"
+                                    label="Instructions"
+                                    placeholder="Describe your how your script should behave..."
+                                    value={customTool.instructions}
+                                    onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
+                                />
+                                <Models options={models} defaultValue={model} onChange={(model) => {
+                                    setCustomTool({...customTool, modelName: model})
+                                }}/>
+                                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams}/>
+                                <Imports 
+                                    className="py-2" 
+                                    tools={customTool.tools}
+                                    setTools={setCustomToolTools}
+                                    contexts={customTool.context}
+                                    setContexts={setCustomToolContexts}
+                                    agents={customTool.agents}
+                                    setAgents={setCustomToolAgents}
+                                    label={"Tool"}
+                                />
+                                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>}
+                                        className="w-full">Delete Tool</Button>
+                            </div>
+                        </div>
+                        <div className="h-full overflow-y-auto">
+                            <ScriptContextProvider initialScript={file} initialThread="" initialSubTool={customTool.name}>
+                                <Script file={file} messagesHeight="h-[93%]"/>
+                            </ScriptContextProvider>
+                        </div>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+        </>
 };
 
 export default CustomTool;

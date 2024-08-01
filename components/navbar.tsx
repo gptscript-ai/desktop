@@ -12,6 +12,7 @@ import {link as linkStyles} from "@nextui-org/theme";
 import {siteConfig} from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
+import Me from "@/components/navbar/me";
 import {ThemeSwitch} from "@/components/theme-switch";
 import {
     TwitterIcon,
@@ -66,6 +67,7 @@ export const Navbar = () => {
                         <GithubIcon className="text-default-500"/>
                     </Link>
                     <ThemeSwitch/>
+                    <Me />
                 </NavbarItem>
                 <NavbarItem className="hidden md:flex">
                 </NavbarItem>

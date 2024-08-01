@@ -100,7 +100,7 @@ const UploadModal = ({onRestart, disabled}: UploadModalProps) => {
                                 htmlFor="fileUpload"
                                 className={`
                                     flex items-center justify-center w-full drop-shadow-xl rounded-xl p-2 text-center
-                                    ${selectedFile ? 'text-primary border-2' : 'border-white border-2 bg-primary cursor-pointer text-white'}
+                                    ${selectedFile ? 'text-primary border-2 border-primary' : 'bg-primary cursor-pointer text-white'}
                                 `}
                             >
                                 <GoFile className="mr-4"/>

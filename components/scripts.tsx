@@ -1,11 +1,12 @@
 "use client";
 
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect, useCallback, useContext} from "react";
 import {FaRegFileCode} from "react-icons/fa";
 import {VscNewFile} from "react-icons/vsc";
 import {GoTrash, GoPaperAirplane, GoPencil} from "react-icons/go";
 import Loading from "@/components/loading";
-import {fetchScripts} from "@/actions/scripts/fetch";
+import {getScripts, deleteScript, ParsedScript} from '@/actions/me/scripts';
+import {AuthContext} from "@/contexts/auth";
 import {
     Card,
     CardHeader,
@@ -14,32 +15,28 @@ import {
 } from "@nextui-org/react";
 
 export default function Scripts() {
-    const [files, setFiles] = useState<Record<string, string>>({});
+    const [scripts, setScripts] = useState<ParsedScript[]>([]);
     const [loading, setLoading] = useState(true);
+    const {authenticated, me} = useContext(AuthContext);
 
-    const deleteFile = useCallback((file: string) => {
-        fetch(`/api/file/${file}`, {
-            method: "DELETE",
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    const newFiles = {...files};
-                    delete newFiles[file + ".gpt"];
-                    setFiles(newFiles);
-                }
-            })
-            .catch((error) => console.error(error))
-    }, [files]);
-
-    useEffect(() => {
-        fetchScripts()
-            .then((files) => setFiles(files))
+    const refresh = () => {
+        getScripts({owner: me?.username})
+            .then((resp) => setScripts(resp.scripts || []))
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
+    }
+
+    const handleDelete = useCallback((script: ParsedScript) => {
+        deleteScript(script)
+            .then(() => {
+                setScripts((scripts) => scripts.filter((currScript) => currScript.id !== script.id));
+            })
+            .catch((error) => console.error(error));
     }, []);
 
-    const ScriptItems = () => files && Object.keys(files) ? (
+    useEffect(() => { refresh() }, [authenticated, me]);
+
+    const ScriptItems = () => authenticated ? (
         <div className="grid grid-cols-2 gap-6">
             <Button
                 size="lg"
@@ -54,49 +51,42 @@ export default function Scripts() {
             >
                 Create a new script
             </Button>
-            {!loading && Object.keys(files).length === 0 &&
+            {!loading && !scripts.length &&
                 <Card className="col-span-2 p-4 text-center">
-                    <CardHeader>
-                        <h1 className="font-bold">No scripts found</h1>
-                    </CardHeader>
                     <CardBody className="flex gap-3">
-                        Create a new script in the folder you started the UI in to see it here!
+                        Create a new script with the button above to get started!
                     </CardBody>
                 </Card>
             }
-            {Object.keys(files).map((file) => (
-                <Card key={file.replace(".gpt", "")} className="p-4">
+            {scripts.map((script) => (
+                <Card key={script.agentName ? script.agentName : script.displayName} className="p-4">
                     <CardHeader className="flex justify-between">
                         <div className="flex gap-3 items-center">
-                            <FaRegFileCode/>
-                            {file.replace('.gpt', '')}
+                            <FaRegFileCode />
+                            {script.agentName ? script.agentName : script.displayName}
                         </div>
                         <div className="flex-col flex absolute bottom-1 right-4">
-                            <Button startContent={<GoPaperAirplane/>} onPress={() => {
-                                {
-                                    window.location.href = `/run?file=${file.replace('.gpt', '')}`;
-                                }
+                            <Button startContent={<GoPaperAirplane />} onPress={() => {
+                                window.location.href = `/run?file=${script.publicURL}&id=${script.id}`;
                             }} radius="full" variant="light" isIconOnly/>
-                            <Button startContent={<GoPencil/>} onPress={() => {
-                                {
-                                    window.location.href = `/edit?file=${file.replace('.gpt', '')}`;
-                                }
-                            }} radius="full" variant="light" isIconOnly/>
-                            <Button startContent={<GoTrash/>} onPress={() => {
-                                deleteFile(file.replace('.gpt', ''))
-                            }} radius="full" variant="light" isIconOnly/>
+                            { me?.username === script.owner && <Button startContent={<GoPencil />} onPress={() => {
+                                window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`;
+                            }} radius="full" variant="light" isIconOnly/>}
+                            { me?.username === script.owner && <Button startContent={<GoTrash />} onPress={() => {
+                                handleDelete(script)
+                            }} radius="full" variant="light" isIconOnly/> }
                         </div>
                     </CardHeader>
                     <CardBody>
-                        <p className="truncate w-4/5 text-zinc-500">{files[file] ? files[file] : "No description provided"}</p>
+                        <p className="truncate w-4/5 text-zinc-500">{script.description ? script.description : "No description provided"}</p>
                     </CardBody>
                 </Card>
             ))}
         </div>
     ) : (
         <Card>
-            <CardBody className="flex gap-3">
-                <p>No files found</p>
+            <CardBody className="flex items-center h-full my-10">
+                <p>Login to create your own files!</p>
             </CardBody>
         </Card>
     );

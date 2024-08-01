@@ -56,7 +56,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                         color="primary"
                         size="sm"
                         placeholder="Name..."
-                        className="w-1/3"
+                        className="w-1/5"
                         variant="bordered"
                         defaultValue={param}
                         onBlur={(e) => {
@@ -97,7 +97,7 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
                     color="primary"
                     size="sm"
                     placeholder="Name..."
-                    className="w-1/3"
+                    className="w-1/5"
                     variant="bordered"
                     value={input}
                     onChange={(e) => {

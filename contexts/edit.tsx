@@ -1,12 +1,14 @@
 import React, {createContext, useState, useEffect, useCallback, useRef} from 'react';
 import {Tool, Text, Block} from '@gptscript-ai/gptscript';
-import {fetchFullScript} from '@/actions/scripts/fetch';
-import {updateScript} from '@/actions/scripts/update';
+import {getScript, updateScript} from '@/actions/me/scripts';
+import { parse, stringify} from '@/actions/gptscript';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 
+export type ToolType = "tool" | "context" | "agent";
+
 interface EditContextProps {
-    file: string,
+    scriptPath: string,
     children: React.ReactNode
 }
 
@@ -21,20 +23,25 @@ interface EditContextState {
     setTexts: React.Dispatch<React.SetStateAction<Text[]>>;
     script: Block[];
     setScript: React.Dispatch<React.SetStateAction<Block[]>>;
+    visibility: 'public' | 'private' | 'protected';
+    setVisibility: React.Dispatch<React.SetStateAction<'public' | 'private' | 'protected'>>;
 
     // actions
     update: () => Promise<void>;
     newestToolName: () => string;
+    addNewTool: (toolType: ToolType) => void;
 }
 
 // EditContext is managing the state of the script editor.
 const EditContext = createContext<EditContextState>({} as EditContextState);
-const EditContextProvider: React.FC<EditContextProps> = ({file, children}) => {
+const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children}) => {
     const [loading, setLoading] = useState(true);
     const [root, setRoot] = useState<Tool>({} as Tool);
     const [tools, setTools] = useState<Tool[]>([]);
     const [texts, setTexts] = useState<Text[]>([]);
     const [script, setScript] = useState<Block[]>([]);
+    const [scriptId, setScriptId] = useState<number>(-1);
+    const [visibility, setVisibility] = useState<'public' | 'private' | 'protected'>('private');
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
     // The first tool in the script is not always the root tool, so we find it
@@ -62,37 +69,38 @@ const EditContextProvider: React.FC<EditContextProps> = ({file, children}) => {
     }
 
     useEffect(() => {
-        fetchFullScript(file)
-            .then((script: Block[]) => {
-                setScript(script);
-                return script
+        getScript(scriptPath)
+            .then(async (script) => {
+                const parsedScript = await parse(script.content || '')
+                setScript(parsedScript);
+                setRoot(findRoot(parsedScript));
+                setTools(findTools(parsedScript));
+                setTexts(findTexts(parsedScript));
+                setVisibility(script.visibility as 'public' | 'private' | 'protected');
+                setScriptId(script.id!);
             })
-            .then((script: Block[]) => {
-                setRoot(findRoot(script));
-                return script
-            })
-            .then((script: Block[]) => {
-                setTools(findTools(script));
-                return script
-            })
-            .then((script: Block[]) => setTexts(findTexts(script)))
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
     }, []);
 
     // note: The update function is debounced to prevent too many requests. The
     //       lodash debounce function was not used because it was causing issues.
+    //       It is also worth noting that this deletes text tools.
     const update = useCallback(async () => {
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(async () => {
-            await updateScript(file, [root, ...tools]).catch((error) => console.error(error));
+            await updateScript({
+                visibility: visibility,
+                content: await stringify([root, ...tools]),
+                id: scriptId,
+            }).catch((error) => console.error(error));
         }, DEBOUNCE_TIME);
-    }, [file, root, tools]);
+    }, [scriptId, root, tools, visibility]);
 
     useEffect(() => {
         if (loading) return;
         update();
-    }, [root, tools])
+    }, [root, tools, visibility])
 
     const newestToolName = useCallback(() => {
         let num = 1
@@ -101,6 +109,29 @@ const EditContextProvider: React.FC<EditContextProps> = ({file, children}) => {
         }
         return `new-tool-${num}`;
     }, [root, tools]);
+
+    const addNewTool = (toolType: ToolType) => {
+        const id = Math.random().toString(36).substring(7)
+        const newTool: Tool = {
+            id,
+            type: 'tool',
+            name: newestToolName(),
+        }
+        setTools([...(tools || []), newTool]);
+        console.log(toolType)
+        if (!toolType) toolType = "tool"
+        switch(toolType) {
+            case 'tool':
+                setRoot({...root, tools: [...(root.tools || []), newTool.name!]});
+                break;
+            case 'context':
+                setRoot({...root, context: [...(root.context || []), newTool.name!]});
+                break;
+            case 'agent':
+                setRoot({...root, agents: [...(root.agents || []), newTool.name!]});
+                break;
+        }
+    }
 
     // Provide the context value to the children components
     return (
@@ -111,8 +142,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({file, children}) => {
                 tools, setTools,
                 texts, setTexts,
                 script, setScript,
+                visibility, setVisibility,
                 update,
                 newestToolName,
+                addNewTool,
             }}
         >
             {children}

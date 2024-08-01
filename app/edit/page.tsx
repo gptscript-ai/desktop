@@ -1,43 +1,44 @@
 "use client"
 
-import {useState, Suspense} from "react";
+import {useEffect, useState, useCallback, Suspense} from "react";
 import {useSearchParams} from "next/navigation";
 import Script from "@/components/script";
 import Configure from "@/components/edit/configure";
 import {EditContextProvider} from "@/contexts/edit";
-import { ScriptContextProvider } from "@/contexts/script";
+import {ScriptContextProvider} from "@/contexts/script";
 import New from "@/components/edit/new";
 import ScriptNav from "@/components/edit/scriptNav";
+import { Card, CardBody } from "@nextui-org/react";
 
 function EditFile() {
-    const [file, setFile] = useState<string>(useSearchParams().get('file') ?? '');
+    const [file, setFile] = useState<string>(useSearchParams().get('file') || '');
+    const [scriptId, setScriptId] = useState<string>(useSearchParams().get('id') || '');
+    const [collapsed, setCollapsed] = useState(false);
 
-    if (!file || file === 'new') return (
+    return (!file || file === 'new') ? (
         <div className="w-full h-full flex items-center justify-center align-center">
             <div className="absolute left-2 top-2">
-                <ScriptNav/>
+                <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed}/>
             </div>
-            <New
+            <New 
                 className="w-1/2"
                 setFile={setFile}
             />
         </div>
-    )
-
-    return (
-        <EditContextProvider file={file}>
-            <ScriptContextProvider initialScript={file} initialThread="">
-                <div className="w-full h-full grid grid-cols-2">
+    ) : (
+        <ScriptContextProvider initialScript={file} initialScriptId={scriptId} initialThread="">
+            <EditContextProvider scriptPath={file}>
+                <div className={`w-full h-full grid ${collapsed ? 'grid-cols-4' : 'grid-cols-2'}`}>
                     <div className="absolute left-6 top-6">
-                        <ScriptNav/>
+                        <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed}/>
                     </div>
                     <div className="h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6">
-                        <Configure file={file}/>
+                        <Configure file={file} />
                     </div>
-                    <Script messagesHeight='h-[93%]' className="p-6 overflow-auto" file={file}/>
+                    <Script messagesHeight='h-[93%]' className={`p-6 overflow-auto ${collapsed ? 'col-span-3 px-32' : '' }`} />
                 </div>
-            </ScriptContextProvider>
-        </EditContextProvider>
+            </EditContextProvider>
+        </ScriptContextProvider>
     );
 }
 
