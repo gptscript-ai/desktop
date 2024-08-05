@@ -1,8 +1,10 @@
 import {useState, useEffect, useContext, useCallback} from "react";
 import {Tool, Property} from "@gptscript-ai/gptscript";
-import Imports from "@/components/edit/configure/imports";
 import Params from "@/components/edit/configure/params";
 import Models from "@/components/edit/configure/models";
+import Imports from "@/components/edit/configure/imports";
+import Script from "@/components/script";
+import Code from "@/components/edit/configure/code";
 import {
     Textarea,
     Input,
@@ -12,35 +14,49 @@ import {
     Switch,
     Modal,
     ModalBody,
+    Select,
+    SelectItem,
     ModalContent,
+    Accordion,
+    AccordionItem,
 } from "@nextui-org/react";
 import {EditContext} from "@/contexts/edit";
-import {GoTrash} from "react-icons/go";
+import {GoCode, GoPencil, GoPlay, GoTools, GoTrash} from "react-icons/go";
 import {LuWrench, LuMessageSquare} from "react-icons/lu";
 import { ScriptContextProvider } from "@/contexts/script";
-import Script from "@/components/script";
-import {ScriptContext} from "@/contexts/script";
+import { HiCog } from "react-icons/hi2";
 
 
 interface ConfigureProps {
-    file: string;
-    tool: Tool;
+    tool: string;
     className?: string;
-    models: string[];
 }
 
-const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) => {
+const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
     const [customTool, setCustomTool] = useState<Tool>({} as Tool);
-    const [name, setName] = useState<string>(tool.name || '');
+    const [name, setName] = useState<string>('');
     const [chat, setChat] = useState<boolean>(false);
-    const [model, setModel] = useState<string | undefined>(tool.modelName);
+    const [model, setModel] = useState<string | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const {setRoot, setTools} = useContext(EditContext)
-    const {setSubTool} = useContext(ScriptContext);
+    const [initialLoad, setInitialLoad] = useState(false);
+    const [instructionsType, setInstructionsType] = useState<string>("prompt");
+    const {
+        setRoot,
+        setTools,
+        tools,
+        scriptPath,
+        models
+    } = useContext(EditContext)
 
     useEffect(() => {
-        setCustomTool(tool)
-    }, []);
+        if (initialLoad) return;
+        const toolMatch = tools.find((t: Tool) => t.name === tool);
+        setCustomTool(toolMatch || {} as Tool);
+        setName(toolMatch?.name || '');
+        setChat(toolMatch?.chat || false);
+        setModel(toolMatch?.modelName);
+        setInitialLoad(true);
+    }, [tools]);
 
     useEffect(() => {
         setChat(customTool.chat || false);
@@ -52,6 +68,13 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
                 return tool;
             });
         });
+        if (
+            customTool.instructions?.startsWith("#!node") ||
+            customTool.instructions?.startsWith("#!python") ||
+            customTool.instructions?.startsWith("#!bash")
+        ) {
+            setInstructionsType("code");
+        }
     }, [customTool]);
 
     useEffect(() => {
@@ -79,14 +102,6 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
 
     const setCustomToolTools = useCallback((newTools: string[]) => {
         setCustomTool({...customTool, tools: newTools});
-    }, [customTool]);
-
-    const setCustomToolContexts = useCallback((newContexts: string[]) => {
-        setCustomTool({...customTool, context: newContexts});
-    }, [customTool]);
-
-    const setCustomToolAgents = useCallback((newAgents: string[]) => {
-        setCustomTool({...customTool, context: newAgents});
     }, [customTool]);
 
     const setParams = useCallback((newParams: Record<string, Property>) => {
@@ -120,7 +135,13 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
 
     return customTool &&
         <>
-            <Button onClick={() => setIsModalOpen(true)} className="w-full text-sm" size="sm" color="primary" variant="flat">{name || "Main"}</Button>
+            <Button
+                onClick={() => setIsModalOpen(true)}
+                size="sm" 
+                variant="light"
+                isIconOnly
+                startContent={<GoPencil/>}
+            />
             <Modal
                 isOpen={isModalOpen}
                 onOpenChange={setIsModalOpen}
@@ -169,7 +190,7 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
                                     color="primary"
                                     variant="bordered"
                                     label="Name"
-                                    placeholder="Give your chat bot a name"
+                                    placeholder="Give your tool a name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
@@ -178,40 +199,87 @@ const CustomTool: React.FC<ConfigureProps> = ({file, className, models, tool}) =
                                     fullWidth
                                     variant="bordered"
                                     label="Description"
-                                    placeholder="Describe your script..."
+                                    placeholder="Describe your tool..."
                                     value={customTool.description}
                                     onChange={(e) => setCustomTool({...customTool, description: e.target.value})}
                                 />
-                                <Textarea
+                                <Select
                                     color="primary"
-                                    fullWidth
+                                    label="Instructions Type"
                                     variant="bordered"
-                                    label="Instructions"
-                                    placeholder="Describe your how your script should behave..."
-                                    value={customTool.instructions}
-                                    onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
-                                />
-                                <Models options={models} defaultValue={model} onChange={(model) => {
-                                    setCustomTool({...customTool, modelName: model})
-                                }}/>
-                                <Params className="py-2" params={customTool.arguments?.properties} setParams={setParams}/>
-                                <Imports 
-                                    className="py-2" 
-                                    tools={customTool.tools}
-                                    setTools={setCustomToolTools}
-                                    contexts={customTool.context}
-                                    setContexts={setCustomToolContexts}
-                                    agents={customTool.agents}
-                                    setAgents={setCustomToolAgents}
-                                    label={"Tool"}
-                                />
-                                <Button onClick={handleDelete} color="danger" variant="bordered" startContent={<GoTrash/>}
-                                        className="w-full">Delete Tool</Button>
+                                    defaultSelectedKeys={["prompt"]}
+                                    onChange={(e) => setInstructionsType(e.target.value)}
+                                >
+                                    <SelectItem key="prompt" value="prompt" textValue="Prompt" startContent={<GoPencil />}>
+                                        <h1>Prompt</h1>
+                                        <p className="text-default-500 text-tiny">Standard - Describe behavior using natural language.</p>
+                                    </SelectItem>
+                                    <SelectItem key="code" value="code" startContent={<GoCode />} textValue="Code">
+                                        <h1>Code</h1>
+                                        <p className="text-default-500 text-tiny">Advanced - Describe behavior using proramming languages.</p>
+                                    </SelectItem>
+                                </Select>
+                                {instructionsType !== "code" &&
+                                    <>
+                                        <Textarea
+                                            color="primary"
+                                            fullWidth
+                                            variant="bordered"
+                                            label="Instructions"
+                                            placeholder="Describe your how your tool should behave..."
+                                            value={customTool.instructions}
+                                            onChange={(e) => setCustomTool({...customTool, instructions: e.target.value})}
+                                        />
+                                        <Accordion isCompact fullWidth selectionMode="multiple">
+                                            <AccordionItem
+                                                aria-label="Parameters"
+                                                title={<h1>Parameters</h1>}
+                                                startContent={<LuWrench />}
+                                                classNames={{content: "p-10 pt-6"}}
+                                            >
+                                                <Params params={customTool.arguments?.properties} setParams={setParams}/>
+                                            </AccordionItem>
+                                            <AccordionItem
+                                                aria-label="tools"
+                                                title={<h1>Tools</h1>}
+                                                startContent={<GoTools />}
+                                                classNames={{content: "p-10 pt-6"}}
+                                            >
+                                                <Imports enableLocal={false} tools={customTool.tools || []} setTools={setCustomToolTools}/>
+                                            </AccordionItem>
+                                            <AccordionItem
+                                                aria-label="Advanced"
+                                                title={<h1>Advanced</h1>}
+                                                startContent={<HiCog />}
+                                                classNames={{content: "px-10 pt-6 h-[500px] space-y-4"}}
+                                                >
+                                                <Models options={models} defaultValue={model} onChange={(model) => {
+                                                    setCustomTool({...customTool, modelName: model})
+                                                }}/>
+                                                <Button 
+                                                    onClick={handleDelete}
+                                                    color="danger"
+                                                    variant="flat"
+                                                    startContent={<GoTrash/>}
+                                                    className="w-full"
+                                                >
+                                                    Delete Tool
+                                                </Button>
+                                            </AccordionItem>
+                                        </Accordion>
+                                    </>
+                                }
+                                {instructionsType === "code" &&
+                                    <>
+                                        <Code code={customTool.instructions || ''} onChange={(e) => setCustomTool({...customTool, instructions: e})}
+ />
+                                    </>
+                                }
                             </div>
                         </div>
                         <div className="h-full overflow-y-auto">
-                            <ScriptContextProvider initialScript={file} initialThread="" initialSubTool={customTool.name}>
-                                <Script file={file} messagesHeight="h-[93%]"/>
+                            <ScriptContextProvider initialScript={scriptPath} initialThread="" initialSubTool={customTool.name}>
+                                <Script messagesHeight="h-[93%]" />
                             </ScriptContextProvider>
                         </div>
                     </ModalBody>

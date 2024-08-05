@@ -1,54 +1,39 @@
-import {useState, useEffect, useCallback, useContext} from "react";
-import {Tool} from "@gptscript-ai/gptscript";
-import Imports from "@/components/edit/configure/imports";
+import {useCallback, useContext, useEffect} from "react";
+import RemoteImports from "@/components/edit/configure/imports";
 import Loading from "@/components/loading";
-import CustomTool from "@/components/edit/configure/customTool";
 import Models from "@/components/edit/configure/models";
 import Visibility from "@/components/edit/configure/visibility";
+import Code from "@/components/edit/configure/code";
 import {EditContext} from "@/contexts/edit";
-import { ScriptContext } from "@/contexts/script";
+import { GoLightBulb, GoPlus, GoTools } from "react-icons/go";
+import { HiCog, HiOutlinePlus } from "react-icons/hi2";
+import { LuCircuitBoard } from "react-icons/lu";
 import {
     Textarea,
     Input,
     Avatar,
     Tooltip,
-    Button,
-    Select,
-    SelectItem,
-    Card,
-    CardBody,
+    Accordion,
+    AccordionItem,
 } from "@nextui-org/react";
-import {getModels} from "@/actions/models";
-import { GoCode, GoPencil, GoPlay } from "react-icons/go";
-import Code from "@/components/edit/configure/code";
+import { PiToolboxBold } from "react-icons/pi";
 
 interface ConfigureProps {
-    file: string;
-    tool?: Tool;
+    collapsed?: boolean;
     className?: string;
-    custom?: boolean;
 }
 
-const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
+const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
     const {
         root, 
         setRoot,
-        tools,
-        setTools,
+        models,
         loading,
-        newestToolName,
         visibility,
         setVisibility,
+        dynamicInstructions,
+        setDynamicInstructions,
     } = useContext(EditContext);
-    const { setSubTool } = useContext(ScriptContext);
-    const [models, setModels] = useState<string[]>([]);
-    const [instructionsType, setInstructionsType] = useState<string>("prompt");
-
-    useEffect(() => {
-        getModels().then((m) => {
-            setModels(m)
-        })
-    }, []);
 
     const abbreviate = (name: string) => {
         const words = name.split(/(?=[A-Z])|[\s_-]/);
@@ -60,117 +45,94 @@ const Configure: React.FC<ConfigureProps> = ({file, className, custom}) => {
         setRoot({...root, tools: newTools});
     }, [root]);
 
-    const setRootContexts = useCallback((newContexts: string[]) => {
-        setRoot({...root, context: newContexts});
-    }, [root]);
-
-    const setRootAgents = useCallback((newAgents: string[]) => {
-        setRoot({...root, agents: newAgents});
-    }, [root]);
-
-    if (loading) return <Loading>Loading your script's details...</Loading>;
+    if (loading) return <Loading>Loading your assistant's details...</Loading>;
 
     return (
         <>
-            <div className="w-full">
+            <div className="flex flex-col w-full justify-center items-center space-y-2 mb-6 mt-10">
                 <Tooltip
-                    content={`${root.name || "Main"}`}
-                    placement="bottom"
+                    content={"Upload a profile picture for your assistant."}
+                    placement="top"
                     closeDelay={0.5}
                 >
                     <Avatar 
-                        size="md" 
-                        name={abbreviate(root.name || 'Main')} 
-                        className="mx-auto mb-6 mt-4"
+                        size="lg"
+                        icon={<HiOutlinePlus className="text-xl" />}
+                        className="block cursor-pointer mb-6"
                         classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
                     />
                 </Tooltip>
             </div>
             <div className="px-2 flex flex-col space-y-4 mb-6">
-                <Visibility visibility={visibility} setVisibility={setVisibility} />
-                <Input
-                    color="primary"
-                    variant="bordered"
-                    label="Name"
-                    placeholder="Give your chat bot a name..."
-                    defaultValue={root.name}
-                    onChange={(e) => setRoot({...root, name: e.target.value})}
-                />
+                <div className="relative">
+                    <div className="absolute top-3 right-0 z-40">
+                        <Visibility visibility={visibility} setVisibility={setVisibility} />
+                    </div>
+                    <Input
+                        color="primary"
+                        variant="bordered"
+                        label="Name"
+                        placeholder="Give your assistant a name..."
+                        defaultValue={root.name}
+                        onChange={(e) => setRoot({...root, name: e.target.value})}
+                    />
+                </div>
                 <Textarea
                     color="primary"
                     fullWidth
                     variant="bordered"
                     label="Description"
-                    placeholder="Describe your script..."
+                    placeholder="Describe what your assistant does..."
                     defaultValue={root.description}
                     onChange={(e) => setRoot({...root, description: e.target.value})}
                 />
-                <Select
+                <Textarea
                     color="primary"
-                    label="Instructions Type"
+                    fullWidth
                     variant="bordered"
-                    defaultSelectedKeys={["prompt"]}
-                    onChange={(e) => setInstructionsType(e.target.value)}
-                >
-                    <SelectItem key="prompt" value="prompt" textValue="Prompt" startContent={<GoPencil />}>
-                        <h1>Prompt</h1>
-                        <p className="text-default-500 text-tiny">Standard - Describe behavior using natural language.</p>
-                    </SelectItem>
-                    <SelectItem key="code" value="code" startContent={<GoCode />} textValue="Code">
-                        <h1>Code</h1>
-                        <p className="text-default-500 text-tiny">Advanced - Describe behavior using proramming languages.</p>
-                    </SelectItem>
-                </Select>
-                {(instructionsType !== "code") && 
-                    <>
-                        <Textarea
-                            color="primary"
-                            fullWidth
-                            variant="bordered"
-                            label="Instructions"
-                            placeholder="Describe your how your script should behave..."
-                            defaultValue={root.instructions}
-                            onChange={(e) => setRoot({...root, instructions: e.target.value})}
-                        />
-                        <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />
-                        <Imports className="py-2" 
+                    label="Instructions"
+                    placeholder="Give your assistant instructions on how to behave..."
+                    defaultValue={root.instructions}
+                    onChange={(e) => setRoot({...root, instructions: e.target.value})}
+                />
+                <Accordion isCompact fullWidth selectionMode="multiple">
+                    <AccordionItem
+                        aria-label="dynamic-instructions" 
+                        title={<h1>Dynamic Instructions</h1>}
+                        startContent={<LuCircuitBoard />}
+                        classNames={{content: "p-10 pt-6"}}
+                    >
+                        <div className="flex bg-primary-50 rounded-xl p-4 mb-4 text-tiny italic text-primary-500 items-center space-x-4">
+                            <GoLightBulb className={`inline mb-1 text-sm ${collapsed ? 'w-[200px] ': 'w-fit'} `}/>
+                            <p>
+                                Augment your instructions with code that can pull information from local or remote systems.
+                            </p>
+                        </div>
+                        <Code label="Code" code={dynamicInstructions} onChange={setDynamicInstructions} />
+                        {/* <div className="my-4"/>
+                        <Code label="Dependencies" code={'// package.json'} onChange={(code) => {}} /> */}
+                    </AccordionItem>
+                    <AccordionItem
+                        aria-label="remote-tools"
+                        title={<h1>Tools</h1>}
+                        startContent={<PiToolboxBold />}
+                        classNames={{content: "p-10 pt-6"}}
+                    >
+                        <RemoteImports
                             tools={root.tools}
-                            contexts={root.context}
-                            agents={root.agents}
-                            setAgents={setRootAgents} 
-                            setContexts={setRootContexts}
-                            setTools={setRootTools} label={"Tool"}
+                            setTools={setRootTools}
+                            collapsed={collapsed}
                         />
-                        {!custom && tools && tools.length > 0 &&
-                            <Card className="w-full pt-2 pb-6" shadow="sm">
-                                <CardBody>
-                                    <h1 className="mb-4 px-2 text-lg">Local Tools</h1>
-                                    <div className="flex flex-col space-y-2 px-2">
-                                        {tools && tools.map((customTool, i) => (
-                                            <div className="flex space-x-2 ">
-                                                <CustomTool tool={customTool} file={file} models={models}/>
-                                                <Button 
-                                                    startContent={<GoPlay />}
-                                                    color="primary" variant="flat"
-                                                    size="sm"
-                                                    className="text-sm"
-                                                    isIconOnly
-                                                    onPress={() => setSubTool(customTool.name || '')}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardBody>
-                            </Card>
-                        }
-                    </>
-                }
-                {(instructionsType === "code") &&
-                    <Code
-                        code={root.instructions || ''}
-                        onChange={(code) => setRoot({...root, instructions: code || ''})}
-                    />
-                }
+                    </AccordionItem>
+                    <AccordionItem
+                        aria-label="advanced"
+                        title={<h1>Advanced</h1>}
+                        startContent={<HiCog />}
+                        classNames={{content: "p-10 pt-6 h-[500px]"}}
+                    >
+                        <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />       
+                    </AccordionItem>
+                </Accordion>
             </div>
         </>
     );

@@ -28,7 +28,6 @@ const NewForm: React.FC<NewFormProps> = ({className, setFile}) => {
             content: `Name: ${name}\nChat: true\n\n${instructions}`
         })
             .then((script) => {
-                console.log(script)
                 setFile(script.publicURL!)
                 return;
             })

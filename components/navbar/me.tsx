@@ -38,6 +38,7 @@ const Me = ({ className }: MeProps) => {
                     radius="full"
                     startContent={<GoPersonFill />} 
                     className={`${className}`}
+                    variant="flat"
                     color={authenticated ? 'primary' : 'default'}
                     isIconOnly
                 />

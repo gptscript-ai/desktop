@@ -24,7 +24,6 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
     const {
         script,
         tool,
-        workspace,
         showForm,
         setShowForm,
         formValues,
@@ -39,7 +38,6 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         socket,
         connected,
         running,
-        generating,
         restartScript,
         interrupt,
         fetchThreads,
@@ -126,18 +124,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
                             {tool.chat ? "Start chat" : "Run script"}
                         </Button>
                     ) : (
-                        <ChatBar
-                            backButton={hasParams}
-                            noChat={!tool.chat}
-                            onRestart={restartScript}
-                            onInterrupt={interrupt}
-                            generating={generating}
-                            onBack={() => {
-                                setMessages([]);
-                                setShowForm(true);
-                            }}
-                            onMessageSent={handleMessageSent}
-                        />
+                        <ChatBar onMessageSent={handleMessageSent} />
                     )}
                 </div>
             </>) : (

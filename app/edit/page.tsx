@@ -32,8 +32,8 @@ function EditFile() {
                     <div className="absolute left-6 top-6">
                         <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed}/>
                     </div>
-                    <div className="h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6">
-                        <Configure file={file} />
+                    <div className={`h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6 ${collapsed ? '' : 'xl:px-20' }`}>
+                        <Configure collapsed={collapsed}/>
                     </div>
                     <Script messagesHeight='h-[93%]' className={`p-6 overflow-auto ${collapsed ? 'col-span-3 px-32' : '' }`} />
                 </div>

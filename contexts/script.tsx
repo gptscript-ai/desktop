@@ -130,8 +130,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         setIsEmpty(!tool.instructions);
 		if (hasRun || !socket || !connected || !initialFetch) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
-            console.log(scriptContent)
-            socket.emit("run", scriptContent ? scriptContent : script, tool.name, formValues, workspace, thread)
+            socket.emit("run", script, subTool ? subTool : tool.name, formValues, workspace, thread)
 			setHasRun(true);
 		}
 	}, [tool, connected, scriptContent, formValues, workspace, thread]);

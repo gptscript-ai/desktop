@@ -75,9 +75,11 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
     const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
+    console.log( process.env.DISABLE_CACHE === "true" ? "Cache is disabled" : "Cache is enabled");
+
     const opts = {
         input: JSON.stringify(args || {}),
-        disableCache: DISABLE_CACHE,
+        disableCache: process.env.DISABLE_CACHE === "true",
         workspace: scriptWorkspace,
         prompt: true,
         confirm: true,

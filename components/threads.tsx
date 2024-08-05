@@ -21,7 +21,6 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const handleRun = async (script: string, id: string) => {
-        console.log(script)
         setScript(script);
         setThread(id);
         setSelectedThreadId(id);

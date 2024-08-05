@@ -3,7 +3,7 @@
 import React, {useState, useEffect, useCallback, useContext} from "react";
 import {FaRegFileCode} from "react-icons/fa";
 import {VscNewFile} from "react-icons/vsc";
-import {GoTrash, GoPaperAirplane, GoPencil} from "react-icons/go";
+import {GoTrash, GoPaperAirplane, GoPencil, GoPerson} from "react-icons/go";
 import Loading from "@/components/loading";
 import {getScripts, deleteScript, ParsedScript} from '@/actions/me/scripts';
 import {AuthContext} from "@/contexts/auth";
@@ -13,6 +13,7 @@ import {
     CardBody,
     Button,
 } from "@nextui-org/react";
+import { LuMessageSquare } from "react-icons/lu";
 
 export default function Scripts() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
@@ -38,23 +39,38 @@ export default function Scripts() {
 
     const ScriptItems = () => authenticated ? (
         <div className="grid grid-cols-2 gap-6">
-            <Button
-                size="lg"
-                startContent={<VscNewFile/>}
-                color="primary"
-                className="col-span-2"
-                onPress={() => {
-                    {
-                        window.location.href = '/edit'
-                    }
-                }}
-            >
-                Create a new script
-            </Button>
+            <div className="grid grid-cols-2 gap-4 col-span-2">
+                <Button
+                    size="lg"
+                    startContent={<LuMessageSquare/>}
+                    color="primary"
+                    variant="flat"
+                    onPress={() => {
+                        {
+                            window.location.href = '/run?file=github.com/gptscript-ai/llm-basics-demo'
+                        }
+                    }}
+                >
+                    Start chatting with Clicky!
+                </Button>
+                <Button
+                    size="lg"
+                    startContent={<VscNewFile/>}
+                    color="primary"
+                    variant="flat"
+                    onPress={() => {
+                        {
+                            window.location.href = '/edit'
+                        }
+                    }}
+                >
+                    Create a new assistant
+                </Button>
+            </div>
             {!loading && !scripts.length &&
                 <Card className="col-span-2 p-4 text-center">
                     <CardBody className="flex gap-3">
-                        Create a new script with the button above to get started!
+                        Create a new assistant with the button above to get started!
                     </CardBody>
                 </Card>
             }

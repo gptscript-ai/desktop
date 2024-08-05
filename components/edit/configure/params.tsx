@@ -12,10 +12,9 @@ interface ExternalProps {
     params: Record<string, Property> | undefined;
     setParams: (params: Record<string, Property>) => void;
     className?: string;
-    description?: string;
 }
 
-const Imports: React.FC<ExternalProps> = ({params, setParams, className, description}) => {
+const Imports: React.FC<ExternalProps> = ({params, setParams, className}) => {
     const [error, setError] = useState<string | null>(null);
     const [input, setInput] = useState<string>("");
     const [inputDescription, setInputDescription] = useState<string>("");
@@ -48,10 +47,8 @@ const Imports: React.FC<ExternalProps> = ({params, setParams, className, descrip
 
     return (
         <div className={className}>
-            <h1>Parameters</h1>
-            <div>{description}</div>
             {params && Object.keys(params).map((param) => (
-                <div key={param} className="flex space-x-2 mt-2">
+                <div key={param} className="flex space-x-2">
                     <Input
                         color="primary"
                         size="sm"

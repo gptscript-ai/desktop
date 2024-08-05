@@ -1,179 +1,136 @@
-import {useState, useEffect} from "react";
-import {
-    Button,
-    input,
-    Select,
-    SelectItem,
-} from "@nextui-org/react";
-import {debounce, set} from "lodash"
-import {GoBook, GoPeople, GoPlus, GoTools, GoTrash} from "react-icons/go";
-import Input from "@/components/edit/configure/imports/input";
-import { ToolType } from "@/contexts/edit";
-import { Tool } from "@gptscript-ai/gptscript";
+import {useState, useEffect, useContext} from "react";
+import {Button} from "@nextui-org/react";
+import {GoBook, GoBrowser, GoFileDirectory, GoGlobe, GoPencil, GoTools, GoTrash} from "react-icons/go";
+import ToolCatalogModal from "@/components/edit/configure/imports/toolCatalogModal";
+import { AiOutlineKubernetes, AiOutlineSlack } from "react-icons/ai";
+import { FaGithub } from "react-icons/fa";
+import { PiMicrosoftOutlookLogoDuotone } from "react-icons/pi";
+import { RiNotionFill } from "react-icons/ri";
+import { EditContext } from "@/contexts/edit";
+import CustomTool from "@/components/edit/configure/customTool";
 
-interface ExternalProps {
+interface ImportsProps {
     tools: string[] | undefined;
-    agents: string[] | undefined;
-    contexts: string[] | undefined;
     setTools: (tools: string[]) => void;
-    setAgents: (agents: string[]) => void;
-    setContexts: (contexts: string[]) => void;
-    label: string;
+    enableLocal?: boolean;
     className?: string;
-    description?: string;
+    collapsed?: boolean;
 }
 
-const Imports: React.FC<ExternalProps> = ({tools, setTools, contexts, setContexts, agents, setAgents, label, className, description}) => {
-    const [results, setResults] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [input, setInput] = useState<string>("");
-    const [inputType, setInputType] = useState<string>("tool");
+const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed, enableLocal = "true"}) => {
+    const [remoteTools, setRemoteTools] = useState<string[]>([]);
+    const [localTools, setLocalTools] = useState<string[]>([]);
+    const {createNewTool, deleteLocalTool} = useContext(EditContext);
 
-    const search = debounce((query: string) => {
-        setLoading(true);
-        fetch(`https://tools.gptscript.ai/api/search?q=${query}&limit=50`)
-            .then(response => response.json())
-            .then((result: any) => {
-                setResults(Object.keys(result.tools));
-            })
-            .then(() => setLoading(false))
-            .catch(err => console.error(err));
-    }, 500);
+    useEffect(() => {
+        if (tools) {
+            setLocalTools(tools.filter((t) => !(
+                t.startsWith("https://")  ||
+                t.startsWith("http://")   ||
+                t.startsWith("github.com")
+            )));
+            setRemoteTools(tools.filter((t) => 
+                t.startsWith("https://")  ||
+                t.startsWith("http://")   ||
+                t.startsWith("github.com")
+            ));
+        }
+    }, [tools])
 
-    useEffect(() => search("gptscript-ai"), [])
+    const iconForTool = (tool: string) => {
+        switch (tool.split("/").pop()?.replace(/-/g, " ")) {
+            case "slack":
+                return <AiOutlineSlack className="text-md"/>;
+            case "github":
+                return <FaGithub className="text-md"/>;
+            case "outlook":
+                return <PiMicrosoftOutlookLogoDuotone className="text-md"/>;
+            case "knowledge":
+                return <GoBook className="text-md"/>;
+            case "notion":
+                return <RiNotionFill className="text-md"/>;
+            case "kubernetes":
+                return <AiOutlineKubernetes className="text-md"/>;
+            case "browser":
+                return <GoBrowser className="text-md"/>;
+            case "workspace":
+                return <GoFileDirectory className="text-md"/>;
+            case "answers from the internet":
+                return <GoGlobe className="text-md"/>;
+            default:
+                return <GoTools/>;
+        }
+    }
 
     const handleDeleteTool = (tool: string) => {
         setTools(tools!.filter((t) => t !== tool));
     }
-    const handleDeleteAgent = (agent: string) => {
-        setAgents(agents!.filter((a) => a !== agent));
-    }
-    const handleDeleteContext = (context: string) => {
-        setContexts(contexts!.filter((c) => c !== context));
-    }
-
-    const handleAddTool = () => {
-        if (tools?.includes(input)) {
-            setError(`Tool ${input} has already been imported`);
-            return;
-        }
-        if (!input) {
-            setError("Tool cannot be empty");
-            return;
-        }
-        console.log(inputType);
-        switch (inputType) {
-            case 'tool':
-                setTools([...tools || [], input]);
-                break;
-            case 'context':
-                setContexts([...contexts || [], input]);
-                break;
-            case 'agent':
-                setAgents([...agents || [], input]);
-                break;
-        }
-        setInput("");
-    };
 
     return (
         <div className={`${className}`}>
-            <h1 className="mb-2 capitalize">{label + 's'}</h1>
-            <h2>{description}</h2>
-            {tools && tools.length > 0 && (
+            {remoteTools && remoteTools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                    {tools.map((tool, i) => (
+                    {remoteTools.map((tool, i) => (
                         <div key={i} className="flex space-x-2">
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg w-1/5 flex">
-                                <GoTools className="mt-[3px] mr-2"/> Tool
-                            </p>
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg">
-                                {tool}
-                            </p>
-                            <Button
-                                variant="bordered"
-                                isIconOnly
-                                size="sm"
-                                startContent={<GoTrash/>}
-                                onPress={() => handleDeleteTool(tool)}
-                            />
+                            <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                                <div className="flex items-center space-x-2">
+                                    {iconForTool(tool)}
+                                    <p className="capitalize">{tool.split("/").pop()?.replace(/-/g, " ")}</p>
+                                </div>
+                                <Button
+                                    variant="light"
+                                    isIconOnly
+                                    size="sm"
+                                    startContent={<GoTrash/>}
+                                    onPress={() => handleDeleteTool(tool)}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
-            {contexts && contexts.length > 0 && (
+            {localTools && localTools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                    {contexts.map((tool, i) => (
+                    {localTools.map((tool, i) => (
                         <div key={i} className="flex space-x-2">
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg w-1/5 flex">
-                                <GoBook className="mt-[3px] mr-2"/> Context
-                            </p>
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg">
-                                {tool}
-                            </p>
-                            <Button
-                                variant="bordered"
-                                isIconOnly
-                                size="sm"
-                                startContent={<GoTrash/>}
-                                onPress={() => handleDeleteContext(tool)}
-                            />
+                            <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                                <div className="flex items-center space-x-2">
+                                    <GoTools />
+                                    <p className="">{tool}</p>
+                                </div>
+                                <div>
+                                    <CustomTool tool={tool} />
+                                    <Button
+                                        variant="light"
+                                        isIconOnly
+                                        size="sm"
+                                        startContent={<GoTrash/>}
+                                        onPress={() => deleteLocalTool(tool)}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
-            {agents && agents.length > 0 && (
-                <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                    {agents.map((tool, i) => (
-                        <div key={i} className="flex space-x-2">
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg w-1/5 flex">
-                                <GoPeople className="mt-[3px] mr-2"/> Agent
-                            </p>
-                            <p className="truncate w-full border-2 dark:border-zinc-700 text-sm pt-1 pl-2 rounded-lg">
-                                {tool}
-                            </p>
-                            <Button
-                                variant="bordered"
-                                isIconOnly
-                                size="sm"
-                                startContent={<GoTrash/>}
-                                onPress={() => handleDeleteAgent(tool)}
-                            />
-                        </div>
-                    ))}
-                </div>
-            )}
-            <div className="flex w-full h-full space-x-2">
-                <Select
-                    color="primary"
-                    aria-label="tool-type"
-                    size="sm"
-                    className="w-1/5"
-                    classNames={{popoverContent: 'w-[150px]'}}
-                    variant="bordered"
-                    placeholder="Type"
-                    onChange={(e) => setInputType(e.target.value)}
-                >
-                    <SelectItem key="tool" value="basic" startContent={<GoTools />}>Tool</SelectItem>
-                    <SelectItem key="context" value="context" startContent={<GoBook />}>Context</SelectItem>
-                    <SelectItem key="agent" value="agent" startContent={<GoPeople />}>Agent</SelectItem>
-                </Select>
-
-                <Input
-                    options={[...tools || [], ...agents || [], ...contexts || []]}
-                    onChange={(e) => setInput(e || '')}
-                    toolType={inputType as ToolType}
-                    onEnter={handleAddTool}
+            <div className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${tools?.length ? 'pt-4' : ''}`}>
+                <ToolCatalogModal 
+                    tools={tools}
+                    addTool={(tool) => setTools([...tools!, tool])}
+                    removeTool={(tool) => setTools(tools!.filter((t) => t !== tool))}
                 />
-
-                <Button
-                    variant="bordered"
-                    isIconOnly
-                    size="sm"
-                    startContent={<GoPlus/>}
-                    onPress={handleAddTool}
-                />
+                { enableLocal && 
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        className="w-full"
+                        color="primary"
+                        startContent={<GoPencil/>}
+                        onPress={() => createNewTool()}
+                    >
+                        Create a tool
+                    </Button>
+                }
             </div>
         </div>
     );
