@@ -142,7 +142,7 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                 <Divider/>
             </div>
             
-            <div className="h-full w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-10 overflow-y-auto p-10">
+            <div className="h-full w-full grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4 gap-x-10 overflow-y-auto p-10">
                 <Card className="h-[275px] p-4">
                         <GoLink className="text-7xl"/>
                         <div className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-xl mt-4">
@@ -155,7 +155,9 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                                     color="primary"
                                     variant="flat"
                                     value={url}
-                                    onChange={(e) => setUrl(e.target.value)}
+                                    onChange={(e) => {
+                                        setUrl(e.target.value.replace("https://github.com", "github.com"))
+                                    }}
                                 />
                                 <Button
                                     size="sm"
