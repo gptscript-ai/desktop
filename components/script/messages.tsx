@@ -103,8 +103,10 @@ const Message = ({message, noAvatar, restart}: { message: Message, noAvatar?: bo
                             <Button
                                 isIconOnly
                                 radius="full"
-                                startContent={<IoCopyOutline className="text-lg"/>}
+                                startContent={<IoCopyOutline className="text-md"/>}
                                 className="ml-2"
+                                variant='flat'
+                                color='primary'
                                 onPress={() => {
                                     navigator.clipboard.writeText(message.message || '');
                                 }}

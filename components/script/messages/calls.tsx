@@ -1,10 +1,10 @@
 import {useState} from 'react';
-import {GoNote} from "react-icons/go";
 import StackTrace from './calls/stackTrace';
 import type {CallFrame} from '@gptscript-ai/gptscript';
 import {IoCloseSharp} from 'react-icons/io5';
 import {BsArrowsFullscreen} from 'react-icons/bs';
 import {HiOutlineArrowsPointingIn} from 'react-icons/hi2';
+import { GoProjectRoadmap } from 'react-icons/go';
 import {
     Modal,
     ModalContent,
@@ -25,8 +25,10 @@ const Calls = ({calls}: { calls: Record<string, CallFrame> }) => {
                     onPress={() => setShowModal(true)}
                     isIconOnly
                     radius='full'
+                    variant='flat'
+                    color='primary'
                 >
-                    <GoNote/>
+                    <GoProjectRoadmap />
                 </Button>
             </Tooltip>
             <Modal
