@@ -116,8 +116,8 @@ const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed,
             <div className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${tools?.length ? 'pt-4' : ''}`}>
                 <ToolCatalogModal 
                     tools={tools}
-                    addTool={(tool) => setTools([...tools!, tool])}
-                    removeTool={(tool) => setTools(tools!.filter((t) => t !== tool))}
+                    addTool={(tool) => setTools([...tools || [], tool])}
+                    removeTool={(tool) => setTools(tools?.filter((t) => t !== tool) || [])}
                 />
                 { enableLocal && 
                     <Button
