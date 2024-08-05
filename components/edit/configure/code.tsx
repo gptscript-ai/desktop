@@ -6,9 +6,16 @@ import { Divider, Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-or
 import {useTheme} from "next-themes";
 
 export enum Language {
-    Javascript = "javascript",
+    Node = "node",
     Python = "python",
-    Bash = "shell",
+    Bash = "bash",
+}
+
+const LanguageSyntax = {
+    [Language.Node]: "javascript",
+    [Language.Python]: "python",
+    [Language.Bash]: "shell",
+
 }
 
 interface CodeProps {
@@ -19,8 +26,28 @@ interface CodeProps {
 
 const Code = ({code, onChange, label = "Code"}: CodeProps) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [language, setLanguage] = useState<Language>(Language.Javascript);
+    const [language, setLanguage] = useState<Language>(Language.Node);
     const {theme, setTheme} = useTheme();
+
+    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setLanguage(e.target.value as Language);
+        
+        if (code.startsWith("#!")) {
+            const codeLines = code.split("\n");
+            codeLines[0] = `#!${e.target.value}`;
+            onChange(codeLines.join("\n"));
+        }
+    }
+
+    useEffect(() => {
+        if(code.startsWith("#!node")) {
+            setLanguage(Language.Node)
+        } else if(code.startsWith("#!python")) {
+            setLanguage(Language.Python)
+        } else if(code.startsWith("#!bash")) {
+            setLanguage(Language.Bash)
+        }
+    }, [code])
 
     return (
         <div className="border-2 dark:border-zinc-700 rounded-xl">
@@ -32,10 +59,11 @@ const Code = ({code, onChange, label = "Code"}: CodeProps) => {
                             <Divider orientation="vertical" className="h-4 ml-2"/>
                         </>
                     }
-                    <select className="pl-2 dark:bg-black text-tiny capitalize" 
-                        onChange={((e) => {setLanguage(e.target.value as Language)})}
+                    <select className="pl-2 dark:bg-black text-tiny capitalize"
+                        value={language.toString()}
+                        onChange={handleLanguageChange}
                     >
-                        <option>{Language.Javascript}</option>
+                        <option>{Language.Node}</option>
                         <option>{Language.Python}</option>
                         <option>{Language.Bash}</option>
                     </select>                
@@ -51,7 +79,7 @@ const Code = ({code, onChange, label = "Code"}: CodeProps) => {
             <div className="pb-1 border-t-1 dark:border-t-zinc-700">
                 <Editor
                     height="35vh"
-                    language={language}
+                    language={LanguageSyntax[language]}
                     theme={theme === "dark" ? "hc-black" : "vs-light"}
                     value={code}
                     onChange={(code) => {onChange(code || '')}}
@@ -73,10 +101,10 @@ const Code = ({code, onChange, label = "Code"}: CodeProps) => {
                     <ModalHeader>
                         <h1 className="">You're writing in 
                             <select className="text-primary dark:bg-zinc-900 capitalize" 
-                                value={language}
+                                value={language.toString()}
                                 onChange={((e) => {setLanguage(e.target.value as Language)})}
                             >
-                                <option>{Language.Javascript}</option>
+                                <option>{Language.Node}</option>
                                 <option>{Language.Python}</option>
                                 <option>{Language.Bash}</option>
                             </select>
@@ -86,7 +114,7 @@ const Code = ({code, onChange, label = "Code"}: CodeProps) => {
                         <Editor
                             height="100%"
                             width="100%"
-                            language={language}
+                            language={LanguageSyntax[language]}
                             theme={theme === "dark" ? "hc-black" : "vs-light"}
                             value={code}
                             onChange={(code) => {onChange(code || '')}}
