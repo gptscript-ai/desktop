@@ -6,13 +6,13 @@ import {ScriptContext} from '@/contexts/script';
 
 interface NewThreadProps {
     className?: string;
-    threadId: string;
+    thread: string;
 }
 
-const NewThread = ({className, }: NewThreadProps) => {
+const NewThread = ({className, thread}: NewThreadProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const {
-        thread, setThreads,
+        setThreads,
     } = useContext(ScriptContext);
 
     const handleDeleteThread = () => {

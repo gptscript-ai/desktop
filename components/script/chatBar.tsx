@@ -1,48 +1,47 @@
 "use client"
 
-import React, {useState} from "react";
+import React, {useState, useContext} from "react";
 import {IoMdSend} from "react-icons/io";
 import {FaBackward} from "react-icons/fa";
 import {
     Button,
+    Menu,
+    MenuItem,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
     Textarea,
     Tooltip,
 } from "@nextui-org/react";
 import Upload from "./chatBar/upload";
-import {GoIssueReopened, GoSquare, GoSquareFill} from "react-icons/go";
+import {GoFile, GoInbox, GoIssueReopened, GoKebabHorizontal, GoSquare, GoSquareFill, GoTools} from "react-icons/go";
+import { PiToolbox } from "react-icons/pi";
+import { ScriptContext } from "@/contexts/script";
 
-const ChatBar = ({
-                     generating,
-                     disabled = false,
-                     onBack,
-                     noChat,
-                     onInterrupt,
-                     onMessageSent,
-                     backButton,
-                     onRestart,
-                 }: {
-    generating: boolean;
+interface ChatBarProps {
     disabled?: boolean;
-    onBack: () => void;
-    onInterrupt: () => void;
     onMessageSent: (message: string) => void;
-    backButton: boolean;
-    onRestart: () => void;
-    noChat?: boolean;
-}) => {
+}
+
+const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
     const [inputValue, setInputValue] = useState('');
+    const {generating, restartScript, interrupt, hasParams, tool, setShowForm, setMessages} = useContext(ScriptContext);
+
 
     const handleSend = () => {
         onMessageSent(inputValue);
         setInputValue(''); // Clear the input field after sending the message
     };
 
-    if (noChat) {
-        if (backButton) return (
+    if (!tool.chat) {
+        if (hasParams) return (
             <Button
                 startContent={<FaBackward/>}
                 className="mr-2 my-auto text-lg w-full"
-                onPress={onBack}
+                onPress={() => {
+                    setMessages([]);
+                    setShowForm(true);
+                }}
             >
                 Change options
             </Button>
@@ -52,24 +51,60 @@ const ChatBar = ({
 
     return (
         <div className="flex px-4 w-full">
-            {backButton && <Button
-                startContent={<FaBackward/>}
-                isIconOnly
-                radius="full"
-                className="mr-2 my-auto text-lg"
-                onPress={onBack}
-            />}
-            <Tooltip content="Restart the chat">
-                <Button
-                    radius="full"
-                    className="mr-2"
-                    color="primary"
-                    isIconOnly
-                    startContent={<GoIssueReopened className="text-lg"/>}
-                    onPress={onRestart}
-                />
-            </Tooltip>
-            <Upload disabled={disabled} onRestart={onRestart}/>
+            <Popover>
+                <PopoverTrigger>
+                    <Button
+                        startContent={<GoKebabHorizontal className="text-xl"/>}
+                        isIconOnly
+                        color="primary"
+                        radius="full"
+                        className="my-auto text-lg mr-2"
+                    />
+                </PopoverTrigger>
+                <PopoverContent>
+                    <Menu>
+                        {/* <MenuItem>
+                            {backButton && <Button
+                                startContent={<FaBackward/>}
+                                isIconOnly
+                                radius="full"
+                                className="mr-2 my-auto text-lg"
+                                onPress={onBack}
+                            />}
+                        </MenuItem> */}
+                        <MenuItem
+                            startContent={<GoTools/>}
+                            onPress={() => {}}
+                        >
+                            Add tools
+                            {/* <Upload disabled={disabled} onRestart={onRestart}/> */}
+                        </MenuItem>
+                        <MenuItem
+                            startContent={<GoInbox/>}
+                        >
+                            Manage workspace
+                            {/* <Upload disabled={disabled} onRestart={onRestart}/> */}
+                        </MenuItem>
+                        <MenuItem
+                            startContent={<GoIssueReopened />}
+                            onPress={() => {restartScript()}}
+                        >
+                            Restart chat
+                            {/* <Tooltip content="Restart the chat">
+                                <Button
+                                    radius="full"
+                                    className="mr-2"
+                                    color="primary"
+                                    isIconOnly
+                                    startContent={<GoIssueReopened className="text-lg"/>}
+                                    onPress={onRestart}
+                                />
+                            </Tooltip> */}
+                        </MenuItem>
+                       
+                    </Menu>
+                </PopoverContent>
+            </Popover>
             <Textarea
                 color="primary"
                 isDisabled={disabled}
@@ -96,7 +131,7 @@ const ChatBar = ({
                     radius="full"
                     isDisabled={disabled}
                     className="ml-2 my-auto text-lg"
-                    onPress={onInterrupt}
+                    onPress={interrupt}
                 /> :
                 <Button
                     startContent={<IoMdSend/>}

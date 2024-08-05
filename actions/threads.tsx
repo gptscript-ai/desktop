@@ -1,6 +1,6 @@
 "use server"
 
-import {THREADS_DIR, WORKSPACE_DIR} from "@/config/env";
+import {GATEWAY_URL, THREADS_DIR, WORKSPACE_DIR} from "@/config/env";
 import {gpt} from "@/config/env";
 import fs from "fs/promises";
 import path from 'path';
@@ -19,6 +19,7 @@ export type ThreadMeta = {
     created: Date;
     updated: Date;
     id: string;
+    scriptId?: string;
     script: string;
     workspace: string;
 }
@@ -87,9 +88,8 @@ export async function generateThreadName(firstMessage: string): Promise<string> 
     return summary.text();
 }
 
-export async function createThread(script: string, firstMessage?: string): Promise<Thread> {
+export async function createThread(script: string, firstMessage?: string, scriptId?: string): Promise<Thread> {
     const threadsDir = THREADS_DIR();
-    script = script.replace('.gpt', '');
 
     // will probably want something else for this
     const id = Math.random().toString(36).substring(7);
@@ -103,6 +103,7 @@ export async function createThread(script: string, firstMessage?: string): Promi
         updated: new Date(),
         workspace: WORKSPACE_DIR(),
         id,
+        scriptId: scriptId || '',
         script,
     }
     const threadState = '';

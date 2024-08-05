@@ -4,39 +4,50 @@ import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, 
 import {IoMenu} from "react-icons/io5";
 import {FaRegFileCode} from "react-icons/fa";
 import {VscNewFile} from "react-icons/vsc";
+import {GoSidebarCollapse, GoSidebarExpand} from "react-icons/go";
+import {Script, getScripts} from "@/actions/me/scripts";
 
 interface ScriptNavProps {
     className?: string;
+    collapsed: boolean;
+    setCollapsed?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ScriptNav: React.FC<ScriptNavProps> = ({className}) => {
-    const [files, setFiles] = useState<Record<string, string>>({});
+const ScriptNav: React.FC<ScriptNavProps> = ({className, collapsed, setCollapsed}) => {
+    const [scripts, setScripts] = useState<Script[]>([]);
 
     useEffect(() => {
-        fetchScripts()
-            .then(scripts => setFiles(scripts))
+        getScripts()
+            .then(resp => setScripts(resp.scripts || []))
             .catch(error => console.error(error));
     }, []);
 
-    const ScriptItems = files && Object.keys(files).length ? Object.keys(files).map((file) => (
-        <DropdownItem startContent={<FaRegFileCode/>} key={file.replace('.gpt', '')}>{file}</DropdownItem>
+    const ScriptItems = scripts && scripts.length ? scripts.map((script) => (
+        <DropdownItem startContent={<FaRegFileCode/>} key={script.publicURL}>{script.displayName}</DropdownItem>
     )) : <DropdownItem key={'no-files'} isReadOnly>No files found</DropdownItem>;
 
     return (
-        <Dropdown className={className}>
+        <Dropdown>
             <DropdownTrigger>
-                <Button size="lg" variant="shadow" color="primary" isIconOnly radius="full">
+                <Button size="lg" variant="solid" color="primary" isIconOnly radius="full">
                     <IoMenu/>
                 </Button>
             </DropdownTrigger>
-            <DropdownMenu
-                aria-label="edit"
-                onAction={(key) => {
-                    window.location.href = `/edit?file=${key}`;
+            <DropdownMenu 
+                aria-label="edit" 
+                onAction={(key) => { 
+                    if (key === 'collapse') {
+                        setCollapsed && setCollapsed(!collapsed);
+                    } else {
+                        window.location.href = `/edit?file=${key}`;
+                    }
                 }}
                 disabledKeys={['no-files']}
             >
                 <DropdownSection title="Actions" showDivider>
+                    <DropdownItem startContent={collapsed ? <GoSidebarCollapse/> : <GoSidebarExpand/> } key="collapse">
+                        {collapsed ? 'Expand' : 'Collapse'} editor
+                    </DropdownItem>
                     <DropdownItem startContent={<VscNewFile/>} key="new">
                         New script
                     </DropdownItem>

@@ -1,6 +1,8 @@
 import {useEffect, useState, useRef} from 'react';
 import {Button, Input} from '@nextui-org/react';
 import {GoTrash} from 'react-icons/go';
+import { AiOutlineOpenAI } from "react-icons/ai";
+import { PiCircuitry } from "react-icons/pi";
 
 interface ModelsProps {
     options: string[];
@@ -75,10 +77,9 @@ const Models: React.FC<ModelsProps> = ({options, onChange, defaultValue}) => {
             <Input
                 color='primary'
                 label="Model"
-                placeholder="Select a non-default model..."
+                placeholder="Default"
                 type="text"
                 variant="bordered"
-                size="sm"
                 value={selectedOption || ''}
                 onChange={handleOptionChange}
                 onFocus={() => setShowDropdown(true)}
@@ -98,15 +99,16 @@ const Models: React.FC<ModelsProps> = ({options, onChange, defaultValue}) => {
             )}
             {showDropdown && filteredOptions.length > 0 && (
                 <div
-                    className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 border-2 border-primary w-full shadow-2xl py-2">
+                    className="absolute top-full left-0 z-50 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-900 border-1 mt-1 dark:border-zinc-800 w-full shadow-2xl py-2">
                     {filteredOptions.map((option, index) => (
                         <h1
                             aria-label={option}
                             key={index}
                             role="button"
                             onMouseDown={() => handleOptionSelect(option)}
-                            className={`cursor-pointer text-sm p-2 mx-2 my-1 hover:bg-gray-200 dark:hover:bg-zinc-600 rounded-xl ${option === selectedOption ? 'bg-gray-300 dark:bg-zinc-700' : ''}`}
+                            className={`cursor-pointer flex items-center text-sm p-2 mx-2 my-1 hover:bg-gray-200 dark:hover:bg-zinc-600 rounded-xl ${option === selectedOption ? 'bg-gray-300 dark:bg-zinc-700' : ''}`}
                         >
+                            <AiOutlineOpenAI className="mr-2 text-lg" /> 
                             {option}
                         </h1>
                     ))}

@@ -1,29 +1,26 @@
 "use client"
 
-import React, {useEffect, useContext, useCallback, useRef} from "react";
+import {useContext, useCallback, useEffect, useState, useRef} from "react";
 import Messages, {MessageType} from "@/components/script/messages";
 import ChatBar from "@/components/script/chatBar";
 import ToolForm from "@/components/script/form";
 import Loading from "@/components/loading";
 import {Button} from "@nextui-org/react";
 import {getWorkspaceDir} from "@/actions/workspace";
-import {createThread, getThreads, generateThreadName, renameThread, Thread} from "@/actions/threads";
-import { ScriptContext } from "@/contexts/script";
-import {fetchScript, path} from "@/actions/scripts/fetch";
+import {createThread, getThreads, generateThreadName, renameThread} from "@/actions/threads";
+import {type Script} from "@/actions/me/scripts";
+import {getGatewayUrl} from "@/actions/gateway";
+import {ScriptContext} from "@/contexts/script";
 
 interface ScriptProps {
-    file: string;
-    thread?: string;
-    className?: string
-    messagesHeight?: string
+	className?: string
+	messagesHeight?: string
     enableThreads?: boolean
-    setThreads?: React.Dispatch<React.SetStateAction<Thread[]>>
-    setSelectedThreadId?: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const Script: React.FC<ScriptProps> = ({className, messagesHeight = 'h-full', enableThreads}) => {
+const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', enableThreads }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [inputValue, setInputValue] = React.useState<string>("");
+    const [inputValue, setInputValue] = useState<string>("");
     const {
         script,
         tool,
@@ -41,7 +38,6 @@ const Script: React.FC<ScriptProps> = ({className, messagesHeight = 'h-full', en
         socket,
         connected,
         running,
-        generating,
         restartScript,
         interrupt,
         fetchThreads,
@@ -59,18 +55,14 @@ const Script: React.FC<ScriptProps> = ({className, messagesHeight = 'h-full', en
     }, [messages, connected, running]);
 
     const handleFormSubmit = () => {
-        setShowForm(false);
-        setMessages([]);
-        path(script)
-            .then(async (path) => {
-                const workspace = await getWorkspaceDir()
-                return {path, workspace}
-            })
-            .then(({path, workspace}) => {
-                socket?.emit("run", path, tool.name, formValues, workspace, thread)
+		setShowForm(false);
+		setMessages([]);
+        getWorkspaceDir()
+            .then(async (workspace) => {
+                socket?.emit("run", `${await getGatewayUrl()}/${script}`, tool.name, formValues, workspace, thread)
             });
         setHasRun(true);
-    };
+	};
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues((prevValues) => ({
@@ -98,7 +90,6 @@ const Script: React.FC<ScriptProps> = ({className, messagesHeight = 'h-full', en
             renameThread(thread, await generateThreadName(message));
             fetchThreads();
         }
-
     };
 
     const hasNoUserMessages = useCallback(() => messages.filter((m) => m.type === MessageType.User).length === 0, [messages]);
@@ -133,18 +124,7 @@ const Script: React.FC<ScriptProps> = ({className, messagesHeight = 'h-full', en
                             {tool.chat ? "Start chat" : "Run script"}
                         </Button>
                     ) : (
-                        <ChatBar
-                            backButton={hasParams}
-                            noChat={!tool.chat}
-                            onRestart={restartScript}
-                            onInterrupt={interrupt}
-                            generating={generating}
-                            onBack={() => {
-                                setMessages([]);
-                                setShowForm(true);
-                            }}
-                            onMessageSent={handleMessageSent}
-                        />
+                        <ChatBar onMessageSent={handleMessageSent} />
                     )}
                 </div>
             </>) : (

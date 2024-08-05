@@ -1,13 +1,17 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-    name: "Chat Builder",
-    description: "Quickly prototype your GPTSscript chat bots.",
+    name: "Assistant Studio",
+    description: "Run and build GPTSscripts.",
     navItems: [
         {
             label: "Home",
             href: "/",
         },
+        {
+			label: "Explore",
+			href: "/explore",
+		},
         {
             label: "Docs",
             href: "https://docs.gptscript.ai",
@@ -20,6 +24,10 @@ export const siteConfig = {
             label: "Home",
             href: "/",
         },
+        {
+			label: "Explore",
+			href: "/explore",
+		},
         {
             label: "Docs",
             href: "https://docs.gptscript.ai",

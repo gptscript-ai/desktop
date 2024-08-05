@@ -1,19 +1,12 @@
-import React, {useState, useEffect, useContext} from 'react';
+import {useState, useContext} from 'react';
 import New from './threads/new';
 import Menu from './threads/menu';
-import {getThreads, Thread} from '@/actions/threads';
 import {Button, Divider, Tooltip} from '@nextui-org/react';
 import {GoSidebarExpand, GoSidebarCollapse} from 'react-icons/go';
 import {ScriptContext} from '@/contexts/script';
 
 interface ThreadsProps {
     className?: string;
-    setThread: React.Dispatch<React.SetStateAction<string>>;
-    threads: Thread[];
-    selectedThreadId: string | null;
-    setSelectedThreadId: React.Dispatch<React.SetStateAction<string | null>>;
-    setThreads: React.Dispatch<React.SetStateAction<Thread[]>>;
-    setScript: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Threads: React.FC<ThreadsProps> = ({className}) => {
@@ -24,6 +17,7 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
         selectedThreadId,
         setSelectedThreadId,
     } = useContext(ScriptContext);
+
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const handleRun = async (script: string, id: string) => {
@@ -68,7 +62,7 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <h2 className="text-sm truncate">{thread.meta.name}</h2>
-                                            <Menu threadId={thread.meta.id}/>
+                                            <Menu thread={thread.meta.id}/>
                                         </div>
                                     </div>
                                 </Tooltip>

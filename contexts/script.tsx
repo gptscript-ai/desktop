@@ -1,24 +1,30 @@
 import { createContext, useState, useRef, useEffect, useCallback } from 'react';
 import useChatSocket from '@/components/script/useChatSocket'
 import { Message } from '@/components/script/messages';
-import { Tool } from '@gptscript-ai/gptscript';
+import { Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
-import { Thread } from '@/actions/threads';
-import {fetchScript, path} from "@/actions/scripts/fetch";
-import { getThreads, getThread } from '@/actions/threads';
+import { getThreads, getThread, Thread } from '@/actions/threads';
+import { getScript, getScriptContent, type Script } from "@/actions/me/scripts";
+import { rootTool } from "@/actions/gptscript";
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir } from '@/actions/workspace';
 
 interface ScriptContextProps{
     children: React.ReactNode
     initialScript: string
+    initialSubTool?: string
     initialThread: string
+    initialScriptId?: string
 }
 
 interface ScriptContextState {
     script: string;
+    scriptId?: string;
+    scriptContent: ToolDef[] | null;
     workspace: string;
     setWorkspace: React.Dispatch<React.SetStateAction<string>>;
+    subTool: string;
+    setSubTool: React.Dispatch<React.SetStateAction<string>>;
     setScript: React.Dispatch<React.SetStateAction<string>>;
     tool: Tool;
     setTool: React.Dispatch<React.SetStateAction<Tool>>;
@@ -26,7 +32,6 @@ interface ScriptContextState {
     setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
     formValues: Record<string, string>;
     setFormValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-    inputRef: React.RefObject<HTMLInputElement>;
     hasRun: boolean;
     setHasRun: React.Dispatch<React.SetStateAction<boolean>>;
     hasParams: boolean;
@@ -56,13 +61,14 @@ interface ScriptContextState {
 }
 
 const ScriptContext = createContext<ScriptContextState>({} as ScriptContextState);
-const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialScript, initialThread}) => {
+const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialScript, initialThread, initialSubTool, initialScriptId}) => {
     const [script, setScript] = useState<string>(initialScript);
     const [workspace, setWorkspace] = useState('');
     const [tool, setTool] = useState<Tool>({} as Tool);
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
-	const inputRef = useRef<HTMLInputElement>(null);
+    const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
+    const [scriptContent, setScriptContent] = useState<ToolDef[] | null>(null);
 	const [hasRun, setHasRun] = useState(false);
 	const [hasParams, setHasParams] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
@@ -71,6 +77,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [threads, setThreads] = useState<Thread[]>([]);
     const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
     const [initialFetch, setInitialFetch] = useState(false);
+    const [subTool, setSubTool] = useState(initialSubTool || '');
     const { 
         socket, connected, running, messages, setMessages, restart, interrupt, generating, error
     } = useChatSocket(isEmpty);
@@ -85,38 +92,48 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     }, [])
 
     useEffect(() => {
-        fetchScript(script)
-            .then((data) => {
-                setTool(data);
+        if(scriptId) {
+            getScript(scriptId).then(async (script) => {
+                setTool(await rootTool(script.content || ''));
+                setScriptContent(script.script as ToolDef[]);
                 setInitialFetch(true);
             });
-    }, [script]);
+        } else {
+            getScriptContent(script).then(async (content) => {
+                setTool(await rootTool(content))
+                setInitialFetch(true);
+            });
+        }
+	}, [script]);
 
     useEffect(() => {
-        setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
-        setIsEmpty(!tool.instructions);
-    }, [tool]);
+		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
+	}, [tool]);
 
     useEffect(() => {
         if(thread) {
-            getThread(thread)
-                .then((thread) => {
-                    if(thread) setWorkspace(thread.meta.workspace);
-                });
+            getThread(thread).then((thread) => {
+                if(thread) {
+                    setWorkspace(thread.meta.workspace);
+                    setScriptId(thread.meta.scriptId);
+                }
+            });
             restartScript();
         }
     }, [thread]);
 
     useEffect(() => {
-        if (hasRun || !socket || !connected) return;
-        if (!tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0) {
-            path(script)
-                .then((path) => {
-                    socket.emit("run", path, tool.name, formValues, workspace, thread)
-                });
-            setHasRun(true);
-        }
-    }, [tool, connected, script, formValues, thread, workspace]);
+        if(hasRun) restartScript();
+    }, [subTool])
+
+	useEffect(() => {
+        setIsEmpty(!tool.instructions);
+		if (hasRun || !socket || !connected || !initialFetch) return;
+		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
+            socket.emit("run", script, subTool ? subTool : tool.name, formValues, workspace, thread)
+			setHasRun(true);
+		}
+	}, [tool, connected, scriptContent, formValues, workspace, thread]);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
@@ -124,7 +141,6 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 	}, [messages, connected, running]);
 
     const fetchThreads = async () => {
-        if (!setThreads) return;
         const threads = await getThreads();
         setThreads(threads);
     };
@@ -134,21 +150,25 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         // conditions. In particular, the restart may not be processed correctly and can
         // get the user into a state where no run has been sent to the server.
         debounce(async () => {
-            setTool(await fetchScript(script));
+            const scriptContent = await getScriptContent(script);
+            setTool(await rootTool(scriptContent));
             restart();
             setHasRun(false);
         }, 200),
-    [script, restart]);
+        [script, restart]
+    );
 
     return (
         <ScriptContext.Provider 
             value={{
+                scriptContent,
+                scriptId,
                 script, setScript,
                 workspace, setWorkspace,
                 tool, setTool,
+                subTool, setSubTool,
                 showForm, setShowForm,
                 formValues, setFormValues,
-                inputRef,
                 hasRun, setHasRun,
                 hasParams, setHasParams,
                 isEmpty, setIsEmpty,
@@ -173,4 +193,4 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     );
 };
 
-export { ScriptContext, ScriptContextProvider };
+export {ScriptContext, ScriptContextProvider};

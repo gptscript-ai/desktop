@@ -1,109 +1,136 @@
-import {useState, useEffect} from "react";
-import {
-    Input,
-    Button,
-    input,
-} from "@nextui-org/react";
-import {debounce, set} from "lodash"
-import {GoPlus, GoTrash} from "react-icons/go";
+import {useState, useEffect, useContext} from "react";
+import {Button} from "@nextui-org/react";
+import {GoBook, GoBrowser, GoFileDirectory, GoGlobe, GoPencil, GoTools, GoTrash} from "react-icons/go";
+import ToolCatalogModal from "@/components/edit/configure/imports/toolCatalogModal";
+import { AiOutlineKubernetes, AiOutlineSlack } from "react-icons/ai";
+import { FaGithub } from "react-icons/fa";
+import { PiMicrosoftOutlookLogoDuotone } from "react-icons/pi";
+import { RiNotionFill } from "react-icons/ri";
+import { EditContext } from "@/contexts/edit";
+import CustomTool from "@/components/edit/configure/customTool";
 
-interface ExternalProps {
+interface ImportsProps {
     tools: string[] | undefined;
     setTools: (tools: string[]) => void;
-    label: string;
+    enableLocal?: boolean;
     className?: string;
-    description?: string;
+    collapsed?: boolean;
 }
 
-const Imports: React.FC<ExternalProps> = ({tools, setTools, label, className, description}) => {
-    const [results, setResults] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [input, setInput] = useState<string>("");
+const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed, enableLocal = "true"}) => {
+    const [remoteTools, setRemoteTools] = useState<string[]>([]);
+    const [localTools, setLocalTools] = useState<string[]>([]);
+    const {createNewTool, deleteLocalTool} = useContext(EditContext);
 
-    const search = debounce((query: string) => {
-        setLoading(true);
-        fetch(`https://tools.gptscript.ai/api/search?q=${query}&limit=50`)
-            .then(response => response.json())
-            .then((result: any) => {
-                setResults(Object.keys(result.tools));
-            })
-            .then(() => setLoading(false))
-            .catch(err => console.error(err));
-    }, 500);
+    useEffect(() => {
+        if (tools) {
+            setLocalTools(tools.filter((t) => !(
+                t.startsWith("https://")  ||
+                t.startsWith("http://")   ||
+                t.startsWith("github.com")
+            )));
+            setRemoteTools(tools.filter((t) => 
+                t.startsWith("https://")  ||
+                t.startsWith("http://")   ||
+                t.startsWith("github.com")
+            ));
+        }
+    }, [tools])
 
-    useEffect(() => search("gptscript-ai"), [])
-
-    const handleDeleteTool = (tool: string) => {
-        const updatedTools = tools!.filter((t) => t !== tool);
-        setTools(updatedTools);
+    const iconForTool = (tool: string) => {
+        switch (tool.split("/").pop()?.replace(/-/g, " ")) {
+            case "slack":
+                return <AiOutlineSlack className="text-md"/>;
+            case "github":
+                return <FaGithub className="text-md"/>;
+            case "outlook":
+                return <PiMicrosoftOutlookLogoDuotone className="text-md"/>;
+            case "knowledge":
+                return <GoBook className="text-md"/>;
+            case "notion":
+                return <RiNotionFill className="text-md"/>;
+            case "kubernetes":
+                return <AiOutlineKubernetes className="text-md"/>;
+            case "browser":
+                return <GoBrowser className="text-md"/>;
+            case "workspace":
+                return <GoFileDirectory className="text-md"/>;
+            case "answers from the internet":
+                return <GoGlobe className="text-md"/>;
+            default:
+                return <GoTools/>;
+        }
     }
 
-    const handleAddTool = () => {
-        if (tools?.includes(input)) {
-            setError(`Tool ${input} has already been imported`);
-            return;
-        }
-        if (!input) {
-            setError("Tool cannot be empty");
-            return;
-        }
-        setTools([...tools || [], input]);
-        setInput("");
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleAddTool();
-        }
-    };
+    const handleDeleteTool = (tool: string) => {
+        setTools(tools!.filter((t) => t !== tool));
+    }
 
     return (
         <div className={`${className}`}>
-            <h1 className="mb-2 capitalize">{label + 's'}</h1>
-            <h2>{description}</h2>
-            {tools && tools.length > 0 && (
+            {remoteTools && remoteTools.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                    {tools.map((tool, i) => (
+                    {remoteTools.map((tool, i) => (
                         <div key={i} className="flex space-x-2">
-                            <p className="truncate w-full border-2 dark:border-zinc-800 text-sm pt-1 pl-2 rounded-lg">
-                                {tool}
-                            </p>
-                            <Button
-                                variant="bordered"
-                                isIconOnly
-                                size="sm"
-                                startContent={<GoTrash/>}
-                                onPress={() => handleDeleteTool(tool)}
-                            />
+                            <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                                <div className="flex items-center space-x-2">
+                                    {iconForTool(tool)}
+                                    <p className="capitalize">{tool.split("/").pop()?.replace(/-/g, " ")}</p>
+                                </div>
+                                <Button
+                                    variant="light"
+                                    isIconOnly
+                                    size="sm"
+                                    startContent={<GoTrash/>}
+                                    onPress={() => handleDeleteTool(tool)}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
-            <div className="flex w-full h-full space-x-2">
-                <Input
-                    color="primary"
-                    size="sm"
-                    variant="bordered"
-                    id="toolInput"
-                    autoComplete='off'
-                    placeholder={`Enter a URL or custom tool...`}
-                    isInvalid={error !== null}
-                    errorMessage={error}
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => {
-                        setError(null);
-                        setInput(e.currentTarget.value)
-                    }}
-                    value={input}
+            {localTools && localTools.length > 0 && (
+                <div className="grid grid-cols-1 gap-2 w-full mb-2">
+                    {localTools.map((tool, i) => (
+                        <div key={i} className="flex space-x-2">
+                            <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                                <div className="flex items-center space-x-2">
+                                    <GoTools />
+                                    <p className="">{tool}</p>
+                                </div>
+                                <div>
+                                    <CustomTool tool={tool} />
+                                    <Button
+                                        variant="light"
+                                        isIconOnly
+                                        size="sm"
+                                        startContent={<GoTrash/>}
+                                        onPress={() => deleteLocalTool(tool)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            <div className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${tools?.length ? 'pt-4' : ''}`}>
+                <ToolCatalogModal 
+                    tools={tools}
+                    addTool={(tool) => setTools([...tools!, tool])}
+                    removeTool={(tool) => setTools(tools!.filter((t) => t !== tool))}
                 />
-                <Button
-                    variant="bordered"
-                    isIconOnly
-                    size="sm"
-                    startContent={<GoPlus/>}
-                    onPress={handleAddTool}
-                />
+                { enableLocal && 
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        className="w-full"
+                        color="primary"
+                        startContent={<GoPencil/>}
+                        onPress={() => createNewTool()}
+                    >
+                        Create a tool
+                    </Button>
+                }
             </div>
         </div>
     );

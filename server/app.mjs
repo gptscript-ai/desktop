@@ -75,9 +75,11 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
     const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
+    console.log( process.env.DISABLE_CACHE === "true" ? "Cache is disabled" : "Cache is enabled");
+
     const opts = {
         input: JSON.stringify(args || {}),
-        disableCache: DISABLE_CACHE,
+        disableCache: process.env.DISABLE_CACHE === "true",
         workspace: scriptWorkspace,
         prompt: true,
         confirm: true,
@@ -97,6 +99,8 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
     } catch (e) {
     }
 
+    // Start the script
+    let runningScript = null;
     socket.on("interrupt", async () => {
         if (runningScript) runningScript.close();
     });
@@ -106,7 +110,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
     });
 
     if (!threadID || !state.chatState) {
-        runningScript = await gptscript.run(file, opts);
+        runningScript = await gptscript.evaluate(file, opts)
         socket.emit("running");
 
         runningScript.on(RunEventType.Event, (data) => socket.emit('progress', {
@@ -124,6 +128,8 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
         socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
         socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
+        // Wait for the run to finish and emit any errors that occur. Specifically look for the "Run has been aborted" error
+        // as this is a marker of an interrupt.
         runningScript.text()
             .then((output) => {
                 if (!runningScript) return;
@@ -135,30 +141,34 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
                 if (threadID) {
                     fs.writeFile(statePath, JSON.stringify(state), (err) => {
                         if (err) {
-                            socket.emit("error", err);
+                            socket.emit("error", err)
                         }
                     });
                 }
             })
-            .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
+            .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e))
 
     } else {
         socket.emit("running"); // temp
         socket.emit("resuming");
     }
 
+    // If the user sends a message, we continue and setup the next chat's event listeners
     socket.on('userMessage', async (message, newThreadId) => {
         if (newThreadId) {
             threadID = newThreadId;
             statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
         }
 
+        // Remove any previous promptResponse or confirmResponse listeners
         socket.removeAllListeners("promptResponse");
         socket.removeAllListeners("confirmResponse");
 
+        // If there is not a running script, that means we're loading a thread and have been waiting
+        // for the user to send a message.
         if (!runningScript) {
             opts.input = message;
-            runningScript = await gptscript.run(file, opts);
+            runningScript = await gptscript.evaluate(file, opts);
         } else {
             runningScript = runningScript.nextChat(message);
         }
@@ -178,6 +188,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
         socket.on("promptResponse", async (data) => await gptscript.promptResponse(data));
         socket.on("confirmResponse", async (data) => await gptscript.confirm(data));
 
+        // Wait for the run to finish and emit any errors that occur
         runningScript.text()
             .then((output) => {
                 if (!runningScript) return;
@@ -185,7 +196,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
                 state.messages.push(
                     {type: USER, message: message},
                     {type: AGENT, message: output}
-                );
+                )
 
                 state.chatState = runningScript.currentChatState();
 
@@ -199,12 +210,14 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
             })
             .catch((e) => e && e != "Run has been aborted" && socket.emit("error", e));
     });
-};
 
-// Function to dismount listeners
+}
+
+// Only one script is allowed to run at a time in this system. This function is to dismount and
+// previously mounted listeners.
 const dismount = (socket) => {
     socket.removeAllListeners("promptResponse");
     socket.removeAllListeners("confirmResponse");
     socket.removeAllListeners("userMessage");
     socket.removeAllListeners("disconnect");
-};
+}
