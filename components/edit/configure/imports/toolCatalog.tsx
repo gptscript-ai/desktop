@@ -13,7 +13,6 @@ import {AiOutlineKubernetes, AiOutlineSlack} from "react-icons/ai";
 import {PiMicrosoftOutlookLogoDuotone} from "react-icons/pi";
 import {RiNotionFill} from "react-icons/ri";
 import {FaGithub} from "react-icons/fa";
-import {EditContext} from "@/contexts/edit";
 
 const priorityTools = [
     {

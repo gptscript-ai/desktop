@@ -1,21 +1,14 @@
 "use client"
 
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import {IoMdSend} from "react-icons/io";
 import {FaBackward} from "react-icons/fa";
 import {
     Button,
-    Menu,
-    MenuItem,
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
     Textarea,
-    Tooltip,
 } from "@nextui-org/react";
-import Upload from "./chatBar/upload";
-import {GoFile, GoInbox, GoIssueReopened, GoKebabHorizontal, GoSquare, GoSquareFill, GoTools} from "react-icons/go";
-import { PiToolbox } from "react-icons/pi";
+import Commands from "@/components/script/chatBar/commands";
+import {GoSquareFill} from "react-icons/go";
 import { ScriptContext } from "@/contexts/script";
 
 interface ChatBarProps {
@@ -25,13 +18,26 @@ interface ChatBarProps {
 
 const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
     const [inputValue, setInputValue] = useState('');
-    const {generating, restartScript, interrupt, hasParams, tool, setShowForm, setMessages} = useContext(ScriptContext);
-
+    const [commandsOpen, setCommandsOpen] = useState(false);
+    const [locked, setLocked] = useState(false);
+    const {generating, interrupt, hasParams, tool, setShowForm, setMessages} = useContext(ScriptContext);
 
     const handleSend = () => {
+        setLocked(true);
         onMessageSent(inputValue);
         setInputValue(''); // Clear the input field after sending the message
     };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // if the user started the message with /, we assume they are trying to run a command
+        // so we don't update the input value and instead open the command modal
+        setCommandsOpen(event.target.value.startsWith('/'));
+        setInputValue(event.target.value);
+    }
+
+    useEffect(() => {
+        if (generating) setLocked(false);
+    }, [generating]);
 
     if (!tool.chat) {
         if (hasParams) return (
@@ -51,79 +57,40 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
 
     return (
         <div className="flex px-4 w-full">
-            <Popover>
-                <PopoverTrigger>
-                    <Button
-                        startContent={<GoKebabHorizontal className="text-xl"/>}
-                        isIconOnly
+            <div className="w-full relative">
+                <Commands text={inputValue} setText={setInputValue} isOpen={commandsOpen} setIsOpen={setCommandsOpen}>
+                    <Textarea
                         color="primary"
+                        isDisabled={disabled}
+                        id="chatInput"
+                        autoComplete="off"
+                        placeholder="Start chatting or type / for more options "
+                        value={inputValue}
                         radius="full"
-                        className="my-auto text-lg mr-2"
+                        minRows={1}
+                        variant="bordered"
+                        onChange={handleChange}
+                        onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                            if (event.key === "Enter" && !event.shiftKey) {
+                                event.preventDefault();
+                                if (inputValue === '') return;
+                                if (commandsOpen) setInputValue('');
+                                if (generating || commandsOpen || locked) return;
+                                handleSend();
+                            }
+                            if (event.key === "Escape") {
+                                setCommandsOpen(false);
+                            }
+                            if (event.key === "ArrowUp") {
+                                if (commandsOpen) {
+                                    event.preventDefault();
+                                    document.getElementById("command-0")?.focus();
+                                }
+                            }
+                        }}
                     />
-                </PopoverTrigger>
-                <PopoverContent>
-                    <Menu>
-                        {/* <MenuItem>
-                            {backButton && <Button
-                                startContent={<FaBackward/>}
-                                isIconOnly
-                                radius="full"
-                                className="mr-2 my-auto text-lg"
-                                onPress={onBack}
-                            />}
-                        </MenuItem> */}
-                        <MenuItem
-                            startContent={<GoTools/>}
-                            onPress={() => {}}
-                        >
-                            Add tools
-                            {/* <Upload disabled={disabled} onRestart={onRestart}/> */}
-                        </MenuItem>
-                        <MenuItem
-                            startContent={<GoInbox/>}
-                        >
-                            Manage workspace
-                            {/* <Upload disabled={disabled} onRestart={onRestart}/> */}
-                        </MenuItem>
-                        <MenuItem
-                            startContent={<GoIssueReopened />}
-                            onPress={() => {restartScript()}}
-                        >
-                            Restart chat
-                            {/* <Tooltip content="Restart the chat">
-                                <Button
-                                    radius="full"
-                                    className="mr-2"
-                                    color="primary"
-                                    isIconOnly
-                                    startContent={<GoIssueReopened className="text-lg"/>}
-                                    onPress={onRestart}
-                                />
-                            </Tooltip> */}
-                        </MenuItem>
-                       
-                    </Menu>
-                </PopoverContent>
-            </Popover>
-            <Textarea
-                color="primary"
-                isDisabled={disabled}
-                id="chatInput"
-                autoComplete="off"
-                placeholder="Ask the chat bot something..."
-                value={inputValue}
-                radius="full"
-                minRows={1}
-                variant="bordered"
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                        if (generating) return;
-                        event.preventDefault();
-                        handleSend();
-                    }
-                }}
-            />
+                </Commands>
+            </div>
             {generating ?
                 <Button
                     startContent={<GoSquareFill className="mr-[1px] text-xl"/>}

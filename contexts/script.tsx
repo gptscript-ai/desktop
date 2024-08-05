@@ -79,7 +79,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [initialFetch, setInitialFetch] = useState(false);
     const [subTool, setSubTool] = useState(initialSubTool || '');
     const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating, error
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning
     } = useChatSocket(isEmpty);
 
     // need to initialize the workspace from the env variable with serves
@@ -150,10 +150,11 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         // conditions. In particular, the restart may not be processed correctly and can
         // get the user into a state where no run has been sent to the server.
         debounce(async () => {
+            setRunning(false);
+            setHasRun(false);
             const scriptContent = await getScriptContent(script);
             setTool(await rootTool(scriptContent));
             restart();
-            setHasRun(false);
         }, 200),
         [script, restart]
     );

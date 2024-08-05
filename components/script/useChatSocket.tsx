@@ -301,6 +301,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         interrupt,
         generating,
         running,
+        setRunning,
     };
 };
 
