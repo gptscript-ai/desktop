@@ -25,7 +25,7 @@ const UploadModal = ({isOpen, setIsOpen}: UploadModalProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [files, setFiles] = useState<Dirent[]>([]);
     const selectedFileRef = useRef(selectedFile);
-    const {workspace, restart} = useContext(ScriptContext);
+    const {workspace, restartScript} = useContext(ScriptContext);
 
     useEffect(() => {
         selectedFileRef.current = selectedFile
@@ -64,18 +64,16 @@ const UploadModal = ({isOpen, setIsOpen}: UploadModalProps) => {
             isOpen={isOpen}
             onClose={handleClose}
             title="Upload Modal"
-            size="3xl"
-            className="h-3/4"
+            scrollBehavior="inside"
+            classNames={{base:"w-[95%] max-w-none h-[95%] max-h-none", wrapper: "overflow-hidden"}}
         >
             <ModalContent>
-                <ModalHeader>
+                <ModalHeader className="flex flex-col space-y-2">
                     <h1>Your workspace</h1>
+                    <Workspace onRestart={restartScript}/>
                 </ModalHeader>
                 <ModalBody className="max-h-[900px] overflow-y-scroll">
-                    <Workspace onRestart={restart}/>
-                    <ScrollShadow>
-                        <Files files={files} setFiles={setFiles}/>
-                    </ScrollShadow>
+                    <Files files={files} setFiles={setFiles}/>
                     <Divider/>
                 </ModalBody>
                 <ModalFooter>

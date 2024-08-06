@@ -30,7 +30,7 @@ const Files: React.FC<FilesProps> = ({files, setFiles}) => {
             <TableBody>
                 {files.map((file) => (
                     <TableRow key={file.name}>
-                        <TableCell className="w-4/5">{file.name}</TableCell>
+                        <TableCell className="w-[90%]">{file.name}</TableCell>
                         <TableCell>
                             <div className="flex space-x-4">
                                 <Button
