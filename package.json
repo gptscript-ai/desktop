@@ -1,21 +1,26 @@
 {
-  "name": "gptscript-ui",
-  "displayName": "GPTScript UI",
+  "name": "assistant-studio",
+  "displayName": "Assistant Studio",
   "author": {
     "name": "Acorn Labs, Inc.",
     "email": "info@acorn.io",
     "url": "https://acorn.io"
   },
-  "version": "0.0.1",
+  "private": true,
+  "version": "v0.9.4",
   "scripts": {
-    "dev": "node server.mjs",
     "build": "next build --no-lint",
-    "lint": "next lint",
+    "build:electron": "next build --no-lint && node electron/build.mjs",
+    "pkg": "node electron/build.mjs",
     "debug": "node --inspect server.mjs",
+    "dev": "node server.mjs",
+    "dev:electron": "electron .",
+    "lint": "next lint",
     "start": "cross-env NODE_ENV='production' node server.mjs",
     "postinstall": "cross-env NODE_ENV='production' npm run build",
     "dev-install": "npm install --ignore-scripts"
   },
+  "main": "electron/main.mjs",
   "dependencies": {
     "@gptscript-ai/gptscript": "^0.9.2",
     "@monaco-editor/react": "^4.6.0",
@@ -42,7 +47,9 @@
     "dotenv": "^16.4.5",
     "eslint": "8.56.0",
     "eslint-config-next": "14.2.1",
+    "fix-path": "^4.0.0",
     "framer-motion": "^11.1.1",
+    "get-port-please": "^3.1.2",
     "intl-messageformat": "^10.5.0",
     "lodash": "^4.17.21",
     "next": "14.2.1",
@@ -64,7 +71,10 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
     "eslint": "^8.57.0"
   }
 }
