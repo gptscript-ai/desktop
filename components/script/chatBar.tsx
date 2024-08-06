@@ -22,6 +22,20 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
     const [locked, setLocked] = useState(false);
     const {generating, interrupt, hasParams, tool, setShowForm, setMessages} = useContext(ScriptContext);
 
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.ctrlKey && e.key === "t" ) {
+                e.preventDefault();
+                document.getElementById("chatInput")?.focus();
+            } 
+        }
+    
+        document.addEventListener("keydown", handleKeyDown);
+        return function cleanup() {
+          document.removeEventListener("keydown", handleKeyDown);
+        };
+      }, []);
+
     const handleSend = () => {
         setLocked(true);
         onMessageSent(inputValue);

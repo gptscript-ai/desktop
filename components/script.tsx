@@ -39,7 +39,6 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         connected,
         running,
         restartScript,
-        interrupt,
         fetchThreads,
     } = useContext(ScriptContext);
 
