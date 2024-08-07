@@ -207,7 +207,7 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
                                     color="primary"
                                     label="Instructions Type"
                                     variant="bordered"
-                                    defaultSelectedKeys={["prompt"]}
+                                    defaultSelectedKeys={[customTool.instructions?.startsWith('#!') ? "code" : "prompt"]}
                                     onChange={(e) => setInstructionsType(e.target.value)}
                                 >
                                     <SelectItem key="prompt" value="prompt" textValue="Prompt" startContent={<GoPencil />}>
