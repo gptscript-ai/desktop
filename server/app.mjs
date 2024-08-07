@@ -12,7 +12,6 @@ dotenv.config({path: ['../.env', '../.env.local']});
 const AGENT = 1;
 const USER = 2;
 const STATE_FILE = "state.json";
-const DISABLE_CACHE = process.env.DISABLE_CACHE === "true";
 let runningScript = null;
 let serverRunning = false;
 

@@ -2,21 +2,17 @@ import { app, BrowserWindow } from "electron";
 import { getPort } from 'get-port-please';
 import { startAppServer } from '../server/app.mjs';
 import { join, dirname } from "path";
-import { homedir } from "os";
 import { existsSync, mkdirSync } from "fs";
 import fixPath from "fix-path";
 
-const appName = 'assistant-studio'; // Replace with your app's name
+const appName = 'Assistant Studio';
 const gatewayUrl = process.env.GATEWAY_URL || 'https://gateway-api.gptscript.ai';
 const resourcesDir = dirname(app.getAppPath());
-const cacheDir = getCacheDir(appName);
+const dataDir = getDataDir(appName);
 
-function getCacheDir(appName) {
-  const platform = process.platform;
-  const baseDir = platform === 'win32' ? process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local') :
-                  platform === 'darwin' ? join(homedir(), 'Library', 'Caches') :
-                  process.env.XDG_CACHE_HOME || join(homedir(), '.cache');
-  return join(baseDir, appName);
+function getDataDir(appName) {
+  const userDataPath = app.getPath('userData');
+  return join(userDataPath, appName);
 }
 
 function ensureDirExists(dir) {
@@ -28,9 +24,12 @@ async function startServer(isPackaged) {
   const gptscriptBin = join(isPackaged ? resourcesDir : "", "node_modules", "@gptscript-ai", "gptscript", "bin", `gptscript${process.platform === "win32" ? ".exe" : ""}`);
 
   process.env.GPTSCRIPT_BIN = process.env.GPTSCRIPT_BIN || gptscriptBin;
-  process.env.THREADS_DIR = process.env.THREADS_DIR || join(cacheDir, "threads");
-  process.env.WORKSPACE_DIR = process.env.WORKSPACE_DIR || join(cacheDir, "workspace");
+  process.env.THREADS_DIR = process.env.THREADS_DIR || join(dataDir, "threads");
+  process.env.WORKSPACE_DIR = process.env.WORKSPACE_DIR || join(dataDir, "workspace");
   process.env.GATEWAY_URL = process.env.GATEWAY_URL || gatewayUrl;
+  process.env.DISABLE_CACHE = "true"; // TODO: Remove after https://github.com/gptscript-ai/gptscript/issues/713 is addressed
+
+  console.log(`Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`);
 
   try {
     const url = await startAppServer({ dev: !isPackaged, hostname: 'localhost', port, dir: app.getAppPath() });
@@ -62,7 +61,7 @@ function createWindow(url) {
 
 app.on("ready", () => {
   fixPath();
-  ensureDirExists(cacheDir);
+  ensureDirExists(dataDir);
   startServer(app.isPackaged);
 });
 
