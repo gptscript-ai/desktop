@@ -21,7 +21,14 @@ function ensureDirExists(dir) {
 
 async function startServer(isPackaged) {
   const port = isPackaged ? await getPort({ portRange: [30000, 40000] }) : 3000;
-  const gptscriptBin = join(isPackaged ? resourcesDir : "", "node_modules", "@gptscript-ai", "gptscript", "bin", `gptscript${process.platform === "win32" ? ".exe" : ""}`);
+  const gptscriptBin = join(
+      isPackaged ? join(resourcesDir, "app.asar.unpacked") : "",
+      "node_modules",
+      "@gptscript-ai",
+      "gptscript",
+      "bin",
+      `gptscript${process.platform === "win32" ? ".exe" : ""}`
+  );
 
   process.env.GPTSCRIPT_BIN = process.env.GPTSCRIPT_BIN || gptscriptBin;
   process.env.THREADS_DIR = process.env.THREADS_DIR || join(dataDir, "threads");
