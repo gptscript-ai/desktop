@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-13]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Decode and save APPLE_API_KEY
+        run: echo "${{ secrets.ELECTRON_APPLE_API_KEY }}" | base64 --decode > /tmp/apikey.p8
+
+      - name: Build Electron app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_API_KEY: /tmp/apikey.p8
+          APPLE_API_KEY_ID: ${{ secrets.ELECTRON_APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.ELECTRON_APPLE_API_ISSUER }}
+          CSC_LINK: ${{ secrets.ELECTRON_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.ELECTRON_CSC_KEY_PASSWORD }}
+        run: |
+          npm run build:electron

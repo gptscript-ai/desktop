@@ -59,14 +59,15 @@ const options = {
     nodeGypRebuild: false,
     buildDependenciesFromSource: false,
     directories: {
-        // app: 'gptscript-ui',
         output: 'electron-dist'
     },
     nsis: {deleteAppDataOnUninstall: true},
-   publish: {
+    publish: {
         provider: "github",
         publishAutoUpdate: false,
-   }
+        releaseType: "release",
+        vPrefixedTagName: true
+    }
 };
 
 function go() {
@@ -93,6 +94,7 @@ function go() {
         .build({
             targets: Platform[targetPlatform.toUpperCase()].createTarget(),
             config: options,
+            publish: 'always',
         })
         .then((result) => {
             console.info('----------------------------');
