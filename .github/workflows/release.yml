@@ -34,6 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EP_GH_IGNORE_TIME: true
+          EP_DRAFT: false
           APPLE_API_KEY: /tmp/apikey.p8
           APPLE_API_KEY_ID: ${{ secrets.ELECTRON_APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.ELECTRON_APPLE_API_ISSUER }}
