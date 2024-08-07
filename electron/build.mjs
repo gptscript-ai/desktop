@@ -90,11 +90,15 @@ function go() {
     }
     console.log(`targetPlatform: ${targetPlatform}`)
 
+    // Only publish when the GH_TOKEN is set.
+    // This indicates the intent to publish the build to a release.
+    const publishOption = process.env.GH_TOKEN ? 'always' : 'never';
+
     builder
         .build({
             targets: Platform[targetPlatform.toUpperCase()].createTarget(),
             config: options,
-            publish: 'always',
+            publish: publishOption,
         })
         .then((result) => {
             console.info('----------------------------');
