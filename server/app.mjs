@@ -37,18 +37,18 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
         app.prepare().then(() => {
             const httpServer = createServer(handler);
             const io = new Server(httpServer);
-            const gptscript = new GPTScript();
+            const gptscript = new GPTScript({disableCache: process.env.DISABLE_CACHE === "true"});
 
             io.on("connection", (socket) => {
                 io.emit("message", "connected");
-                socket.on("run", async (file, tool, args, scriptWorkspace, threadID) => {
+                socket.on("run", async (location, tool, args, scriptWorkspace, threadID) => {
                     if (runningScript) {
                         await runningScript.close();
                         runningScript = null;
                     }
                     try {
                         dismount(socket);
-                        await mount(file, tool, args, scriptWorkspace, socket, threadID, gptscript);
+                        await mount(location, tool, args, scriptWorkspace, socket, threadID, gptscript);
                     } catch (e) {
                         socket.emit("error", e);
                     }
@@ -70,11 +70,11 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
     });
 };
 
-const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscript) => {
+const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gptscript) => {
     const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
-    console.log( process.env.DISABLE_CACHE === "true" ? "Cache is disabled" : "Cache is enabled");
+    const script = await gptscript.parse(location);
 
     const opts = {
         input: JSON.stringify(args || {}),
@@ -93,7 +93,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
         if (state && state.chatState) {
             opts.chatState = state.chatState;
-            socket.emit("loaded", state.messages);
+            socket.emit("loaded", {messages: state.messages, tools: state.tools || []});
         }
     } catch (e) {
     }
@@ -109,7 +109,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
     });
 
     if (!threadID || !state.chatState) {
-        runningScript = await gptscript.evaluate(file, opts)
+        runningScript = await gptscript.evaluate(location, opts) // todo - revert back to script
         socket.emit("running");
 
         runningScript.on(RunEventType.Event, (data) => socket.emit('progress', {
@@ -152,6 +152,111 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
         socket.emit("resuming");
     }
 
+    socket.on("addTool", async (tool) => {
+        if (runningScript) {
+            await runningScript.close();
+            runningScript = null;
+        }
+        
+        // find the root tool and then add the new tool
+        for (let block of script) {
+            if (block.type === "tool") {
+                if (!block.tools) block.tools = [];
+                block.tools = [...new Set([...block.tools || [], tool])];
+                break;
+            }
+        }
+
+        /* 
+            note(tylerslaton)
+
+            this is a hacky way to add a tool to the chat state. When GPTScript does a run, it will
+            automatically map all of the needed tools. These maps will also be in the chatState object.
+            However, we cannot build these mappings unless we run the script.
+
+            Why do we need to do this? Because the chatState of the current script has all of the past
+            messages and tools used for this chat. As such, we need to merge the current tools/messages
+            with the new tool mappings for the added tool. If you're reading this and think its bad like
+            I do but have a better solution please please please throw a PR up.
+        */
+        socket.emit("addingTool");
+
+        const currentState = JSON.parse(state.chatState);
+        
+        opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
+        const newStateRun = await gptscript.evaluate(script, opts)
+        await newStateRun.text();
+
+        const newState = JSON.parse(newStateRun.currentChatState());
+        currentState.continuation.state.completion.tools = newState.continuation.state.completion.tools;
+
+        opts.chatState = JSON.stringify(currentState);
+        state.tools = [...new Set([...state.tools || [], tool])];
+        
+        if (threadID) {
+            fs.writeFile(statePath, JSON.stringify(state), (err) => {
+                if (err) {
+                    socket.emit("error", err);
+                }
+            });
+        }
+
+        socket.emit("toolAdded", state.tools);
+    });
+
+    socket.on("removeTool", async (tool) => {
+        if (runningScript) {
+            await runningScript.close();
+            runningScript = null;
+        }
+        
+        // find the root tool and then remove the tool
+        for (let block of script) {
+            if (block.type === "tool") {
+                if (!block.tools) break;
+                const stateTools = (state.tools || []).filter(t => t !== tool);
+                block.tools = [...new Set(block.tools, ...stateTools)];
+                break;
+            }
+        }
+
+        /* 
+            note(tylerslaton)
+
+            this is a hacky way to remove a tool from the chat state. When GPTScript does a run, it will
+            automatically map all of the needed tools. These maps will also be in the chatState object.
+            However, we cannot build these mappings unless we run the script.
+
+            Why do we need to do this? Because the chatState of the current script has all of the past
+            messages and tools used for this chat. As such, we need to merge the current tools/messages
+            with the new tool mappings for the removed tool. If you're reading this and think its bad like
+            I do but have a better solution please please please throw a PR up.
+        */
+        socket.emit("removingTool");
+
+        const currentState = JSON.parse(state.chatState);
+        
+        opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
+        const newStateRun = await gptscript.evaluate(script, opts)
+        await newStateRun.text();
+
+        const newState = JSON.parse(newStateRun.currentChatState());
+        currentState.continuation.state.completion.tools = newState.continuation.state.completion.tools;
+
+        opts.chatState = JSON.stringify(currentState);
+        state.tools = state.tools.filter(t => t !== tool);
+        
+        if (threadID) {
+            fs.writeFile(statePath, JSON.stringify(state), (err) => {
+                if (err) {
+                    socket.emit("error", err);
+                }
+            });
+        }
+
+        socket.emit("toolRemoved", state.tools);
+    });
+
     // If the user sends a message, we continue and setup the next chat's event listeners
     socket.on('userMessage', async (message, newThreadId) => {
         if (newThreadId) {
@@ -167,7 +272,7 @@ const mount = async (file, tool, args, scriptWorkspace, socket, threadID, gptscr
         // for the user to send a message.
         if (!runningScript) {
             opts.input = message;
-            runningScript = await gptscript.evaluate(file, opts);
+            runningScript = await gptscript.evaluate(location, opts); // todo - revert back to script
         } else {
             runningScript = runningScript.nextChat(message);
         }

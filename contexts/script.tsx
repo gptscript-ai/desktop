@@ -22,6 +22,8 @@ interface ScriptContextState {
     scriptId?: string;
     scriptContent: ToolDef[] | null;
     workspace: string;
+    tools: string[];
+    setTools: React.Dispatch<React.SetStateAction<string[]>>;
     setWorkspace: React.Dispatch<React.SetStateAction<string>>;
     subTool: string;
     setSubTool: React.Dispatch<React.SetStateAction<string>>;
@@ -79,7 +81,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [initialFetch, setInitialFetch] = useState(false);
     const [subTool, setSubTool] = useState(initialSubTool || '');
     const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools
     } = useChatSocket(isEmpty);
 
     // need to initialize the workspace from the env variable with serves
@@ -187,6 +189,8 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
                 interrupt,
                 fetchThreads,
                 restartScript,
+                tools,
+                setTools,
             }}
         >
             {children}

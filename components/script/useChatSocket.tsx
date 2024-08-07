@@ -13,6 +13,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const [generating, setGenerating] = useState(false);
     const [running, setRunning] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [tools, setTools] = useState<string[]>([]);
 
     // Refs
     const socketRef = useRef<Socket | null>(null);
@@ -173,6 +174,18 @@ const useChatSocket = (isEmpty?: boolean) => {
         }
     }, []);
 
+    const handleAddingTool = () => setRunning(false);
+    const handleToolAdded = (tools: string[]) => {
+        setTools(tools);
+        setRunning(true);
+    }
+
+    const handleRemovingTool = () => setRunning(false);
+    const handleToolRemoved = (tools: string[]) => {
+        setTools(tools);
+        setRunning(true);
+    }
+
     const parseToolCall = (toolCall: string): { tool: string, params: string } => {
         const [tool, params] = toolCall.replace('<tool call> ', '').split(' -> ');
         return {tool, params};
@@ -243,16 +256,17 @@ const useChatSocket = (isEmpty?: boolean) => {
         socket.on("running", () => setRunning(true));
         socket.on("progress", (data: { frame: CallFrame, state: any }) => handleProgress(data));
         socket.on("error", (data: string) => handleError(data));
-        socket.on("promptRequest", (data: { frame: PromptFrame, state: any }) => {
-            handlePromptRequest(data)
+        socket.on("promptRequest", (data: { frame: PromptFrame, state: any }) => handlePromptRequest(data));
+        socket.on("confirmRequest", (data: { frame: CallFrame, state: any }) => handleConfirmRequest(data));
+        socket.on("toolAdded", handleToolAdded);
+        socket.on("addingTool", handleAddingTool);
+        socket.on("toolRemoved", handleToolRemoved);
+        socket.on("removingTool", handleRemovingTool);
+        socket.on("loaded", (data: {messages: Message[], tools: string[]},) => {
+            setMessages(data.messages);
+            setTools(data.tools);
         });
-        socket.on("confirmRequest", (data: { frame: CallFrame, state: any }) => {
-            handleConfirmRequest(data)
-        });
-        socket.on("loaded", (data: Message[]) => {
-            setMessages(data)
-        });
-
+        
         setSocket(socket);
     }
 
@@ -294,14 +308,19 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     return {
         error,
-        socket, setSocket,
-        connected, setConnected,
-        messages, setMessages,
+        socket, 
+        setSocket,
+        connected,
+        setConnected,
+        messages,
+        setMessages,
         restart,
         interrupt,
         generating,
         running,
         setRunning,
+        tools,
+        setTools,
     };
 };
 

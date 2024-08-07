@@ -1,10 +1,11 @@
 import { Card, Listbox, ListboxItem, Menu } from "@nextui-org/react";
 import React, { useEffect, useContext } from "react";
-import { GoInbox, GoIssueReopened } from "react-icons/go";
+import { GoInbox, GoIssueReopened, GoTools } from "react-icons/go";
 import { PiToolbox } from "react-icons/pi";
 import { ScriptContext } from "@/contexts/script";
 import Upload from "@/components/script/chatBar/upload";
 import ToolCatalog from "@/components/script/chatBar/toolCatalog";
+import { MessageType } from "@/components/script/messages";
 
 /*
     note(tylerslaton):
@@ -56,7 +57,7 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
     const [filteredOptions, setFilteredOptions] = React.useState<typeof options>(options);
     const [uploadOpen, setUploadOpen] = React.useState(false);
     const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
-    const {restartScript} = useContext(ScriptContext);
+    const {restartScript, socket, setMessages, tools} = useContext(ScriptContext);
 
     useEffect(() => {
         if (!text.startsWith("/")) {
@@ -90,7 +91,37 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
     return (
         <div className="relative w-full command-options">
             <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen}/>
-            <ToolCatalog tools={[]} addTool={() => {}} removeTool={() => {}} isOpen={toolCatalogOpen} setIsOpen={setToolCatalogOpen}/>
+            <ToolCatalog 
+                tools={tools}
+                addTool={(tool) => {
+                    socket?.emit("addTool", tool);
+                    setMessages((prev) => [
+                        ...prev, 
+                        {
+                            type: MessageType.Alert,
+                            icon: <GoTools className="mt-1"/>,
+                            message: `Added ${
+                                tool.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                            }`
+                        }
+                    ]);
+                }}
+                removeTool={(tool) => {
+                    socket?.emit("removeTool", tool);
+                    setMessages((prev) => [
+                        ...prev, 
+                        {
+                            type: MessageType.Alert,
+                            icon: <GoTools className="mt-1"/>,
+                            message: `Removed ${
+                                tool.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                            }`
+                        }
+                    ]);
+                }}
+                isOpen={toolCatalogOpen}
+                setIsOpen={setToolCatalogOpen}
+            />
             {isOpen && !!filteredOptions.length && (
                 <Card className="absolute bottom-14 w-full p-4">
                     <Listbox aria-label="commands">

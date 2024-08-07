@@ -8,6 +8,11 @@ const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = "dynamic-instructions";
 
 export type ToolType = "tool" | "context" | "agent";
+export type DependencyBlock = {
+    content: string;
+    forTool: string;
+    type: string;
+}
 
 interface EditContextProps {
     scriptPath: string,
@@ -18,6 +23,7 @@ interface EditContextState {
     loading: boolean;
     setLoading: (loading: boolean) => void;
     root: Tool;
+    dependencies: DependencyBlock[]; setDependencies: React.Dispatch<React.SetStateAction<DependencyBlock[]>>;
     models: string[], setModels: React.Dispatch<React.SetStateAction<string[]>>;
     setRoot: React.Dispatch<React.SetStateAction<Tool>>;
     tools: Tool[];
@@ -52,11 +58,15 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     const [visibility, setVisibility] = useState<'public' | 'private' | 'protected'>('private');
     const [models, setModels] = useState<string[]>([]);
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
+    
     // Dynamic instructions are simply a text tool with the name "dynamic-instructions" that is 
     // imported as a context in the root tool. This field is used to store the instructions for
     // that tool.
     const [dynamicInstructions, setDynamicInstructions] = useState<string>('');
+
+    // Dependencies are special text tools that reference a tool, type, and content. They are used
+    // to store requirements.txt and package.json files for the script.
+    const [dependencies, setDependencies] = useState<DependencyBlock[]>([]);
 
     useEffect(() => {
         getModels().then((m) => {
@@ -85,7 +95,25 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     useEffect(() => {
         if (loading) return;
         update();
-    }, [root, tools, visibility])
+    }, [root, tools, dependencies, visibility])
+
+    useEffect(() => {
+        setTools((prevTools) => {
+            return [
+                ...prevTools.filter((t) => t.name !== DYNAMIC_INSTRUCTIONS),
+                {name: DYNAMIC_INSTRUCTIONS, type: 'tool', instructions: dynamicInstructions}
+            ] as Tool[];
+        });
+
+        setRoot((prevRoot) => {
+            if (prevRoot.context?.includes(DYNAMIC_INSTRUCTIONS)) return prevRoot;
+            return {...prevRoot, context: [...(prevRoot.context || []), DYNAMIC_INSTRUCTIONS]};
+        });
+    }, [dynamicInstructions]);
+
+    useEffect(() => {
+
+    }, [dependencies])
 
     // The first tool in the script is not always the root tool, so we find it
     // by finding the first non-text tool in the script.
@@ -119,11 +147,11 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         debounceTimer.current = setTimeout(async () => {
             await updateScript({
                 visibility: visibility,
-                content: await stringify([root, ...tools]),
+                content: await stringify([root, ...tools, ...dependenciesToText(dependencies)]),
                 id: scriptId,
             }).catch((error) => console.error(error));
         }, DEBOUNCE_TIME);
-    }, [scriptId, root, tools, visibility]);
+    }, [scriptId, root, tools, dependencies, visibility]);
 
     const newestToolName = useCallback(() => {
         let num = 1
@@ -171,25 +199,26 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         });
     }
 
-    useEffect(() => {
-        setTools((prevTools) => {
-            return [
-                ...prevTools.filter((t) => t.name !== DYNAMIC_INSTRUCTIONS),
-                {name: DYNAMIC_INSTRUCTIONS, type: 'tool', instructions: dynamicInstructions}
-            ] as Tool[];
-        });
-
-        setRoot((prevRoot) => {
-            if (prevRoot.context?.includes(DYNAMIC_INSTRUCTIONS)) return prevRoot;
-            return {...prevRoot, context: [...(prevRoot.context || []), DYNAMIC_INSTRUCTIONS]};
-        });
-    }, [dynamicInstructions])
+    const dependenciesToText = (dependencies: DependencyBlock[]): Text[] => {
+        return dependencies
+            .filter((dep) => dep.content.trim() !== '') // Filter out empty dependencies
+            .map((dep) => {
+                return {
+                    id: `${dep.forTool}-${dep.type}`,
+                    format: `metadata:${dep.forTool}:${dep.type}`,
+                    type: 'text',
+                    content: dep.content,
+                    name: dep.forTool,
+                }
+            });
+    }
 
     // Provide the context value to the children components
     return (
         <EditContext.Provider
             value={{
                 scriptPath,
+                dependencies, setDependencies,
                 dynamicInstructions, setDynamicInstructions,
                 models, setModels,
                 loading, setLoading,

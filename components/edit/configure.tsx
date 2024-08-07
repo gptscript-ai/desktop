@@ -33,6 +33,8 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
         setVisibility,
         dynamicInstructions,
         setDynamicInstructions,
+        dependencies,
+        setDependencies,
     } = useContext(EditContext);
 
     const abbreviate = (name: string) => {
@@ -108,7 +110,12 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
                                 Augment your instructions with code that can pull information from local or remote systems.
                             </p>
                         </div>
-                        <Code label="Code" code={dynamicInstructions} onChange={setDynamicInstructions} />
+                        <Code 
+                            code={dynamicInstructions}
+                            onChange={setDynamicInstructions}
+                            dependencies={dependencies.find((d) => d.forTool === 'dynamic-instructions')?.content || ''}
+                            onDependenciesChange={(code, type) => setDependencies([...dependencies.filter((d) => d.forTool !== 'dynamic-instructions'), {forTool: 'dynamic-instructions', content: code, type: type}])}
+                        />
                         {/* <div className="my-4"/>
                         <Code label="Dependencies" code={'// package.json'} onChange={(code) => {}} /> */}
                     </AccordionItem>

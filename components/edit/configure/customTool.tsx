@@ -45,7 +45,9 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
         setTools,
         tools,
         scriptPath,
-        models
+        models,
+        dependencies,
+        setDependencies,
     } = useContext(EditContext)
 
     useEffect(() => {
@@ -89,6 +91,15 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
             return prevRoot;
         });
 
+        setDependencies((prevDeps) => {
+            return prevDeps.map((dep) => {
+                if (dep.forTool === customTool.name) {
+                    dep.forTool = name;
+                }
+                return dep;
+            });
+        });
+
         setTools((prevTools) => {
             let updatedTools = prevTools.map((t: Tool) => {
                 // replace all instances of the old name with the new name
@@ -98,6 +109,7 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
             });
             return updatedTools;
         });
+
     }, [name])
 
     const setCustomToolTools = useCallback((newTools: string[]) => {
@@ -271,8 +283,12 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
                                 }
                                 {instructionsType === "code" &&
                                     <>
-                                        <Code code={customTool.instructions || ''} onChange={(e) => setCustomTool({...customTool, instructions: e})}
- />
+                                        <Code 
+                                            code={customTool.instructions || ''}
+                                            onChange={(e) => setCustomTool({...customTool, instructions: e})}
+                                            dependencies={dependencies.find((d) => d.forTool === customTool.name)?.content || ''}
+                                            onDependenciesChange={(code, type) => setDependencies([...dependencies.filter((d) => d.forTool !== customTool.name), {forTool: customTool.name ||'', content: code, type: type}])}
+                                        />
                                     </>
                                 }
                             </div>

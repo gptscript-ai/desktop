@@ -16,6 +16,7 @@ export enum MessageType {
 
 export type Message = {
     type: MessageType;
+    icon?: ReactNode;
     message?: string;
     error?: string;
     name?: string;
@@ -123,10 +124,16 @@ const Message = ({message, noAvatar, restart}: { message: Message, noAvatar?: bo
                 <div className="flex flex-col items-start mb-10">
                     <div className="flex gap-2 w-full">
                         <div
-                            className="w-full flex justify-center space-x-2 rounded-2xl text-black text-sm bg-gray-50 shadow text-center py-2 px-4 dark:text-white dark:border-zinc-800 dark:border dark:bg-black"
+                            className="w-full flex justify-center space-x-2 rounded-2xl text-black text-sm bg-zinc-50 shadow text-center py-2 px-4 dark:text-white dark:border-zinc-800 dark:border dark:bg-black"
                         >
-                            <div className="w-2 h-2 my-auto bg-green-500 rounded-full"></div>
-                            <p>{message.message}</p>
+                            {message.icon ? message.icon : <div className="w-2 h-2 my-auto bg-green-500 rounded-full"/>}
+                            <Markdown
+                                    className={`!text-wrap prose overflow-x-auto dark:prose-invert prose-thead:text-left prose-p:text-sm prose-img:rounded-xl prose-img:shadow-lg`}
+                                    remarkPlugins={[remarkGfm]}
+                                    rehypePlugins={[[rehypeExternalLinks, {target: "_blank"}]]}
+                            >
+                                {message.message}
+                            </Markdown>
                         </div>
                     </div>
                 </div>

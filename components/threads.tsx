@@ -62,7 +62,7 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
                                     >
                                         <div className="flex justify-between items-center">
                                             <h2 className="text-sm truncate">{thread.meta.name}</h2>
-                                            <Menu thread={thread.meta.id}/>
+                                            <Menu thread={thread.meta.id} className={isSelected(thread.meta.id) ? 'text-white' : ''}/>
                                         </div>
                                     </div>
                                 </Tooltip>
