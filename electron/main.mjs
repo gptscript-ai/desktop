@@ -62,6 +62,8 @@ function createWindow(url) {
     }
   });
 
+  win.setWindowButtonVisibility(true)
+
   win.loadURL(url);
   win.webContents.on("did-fail-load", () => win.webContents.reloadIgnoringCache());
 }

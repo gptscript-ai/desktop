@@ -76,7 +76,7 @@ export default function Explore() {
     useEffect(() => { refresh() }, [authenticated]);
 
     return (
-        <div className="w-full h-full">
+        <div className="w-3/4 px-10 h-full overflow-y-scroll mx-auto pt-10">
             <div>
                 <div className="flex space-x-4 mb-4">
                     <Select radius="lg" label="Owners" color="primary" isDisabled={!owners.length} size="sm" aria-label="owners" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
