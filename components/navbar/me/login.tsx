@@ -1,15 +1,16 @@
 "use client"
 
 import React, { useContext, useEffect, useState } from "react"
-import { AuthProvider, createTokenRequest, getAuthProviders, pollForToken, setCookie } from "@/actions/auth/auth"
+import { AuthProvider, getAuthProviders, loginThroughTool} from "@/actions/auth/auth"
 import { Button } from "@nextui-org/react";
 import { AuthContext } from "@/contexts/auth";
+import { getMe } from "@/actions/me/me";
 
 
 export default function Login() {
     const [authProviders, setAuthProviders] = useState<AuthProvider[] | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string>("")
-    const { setAuthenticated } = useContext(AuthContext);
+    const {setMe} = useContext(AuthContext);
 
     useEffect(() => {
         getAuthProviders().then(aps => {
@@ -22,17 +23,9 @@ export default function Login() {
 
     function handleLogin(e: React.MouseEvent<HTMLButtonElement>, key: string) {
         e.preventDefault()
-        const id = crypto.randomUUID()
-        createTokenRequest(id, key).then((url: string) => {
-            window.open(url, "_blank")
-            pollForToken(id).then((token: string) => {
-                setCookie(token).then(() => {
-                    setAuthenticated(true)
-                })
-            })
-        }).catch((reason: Error) => {
-            setErrorMessage(`failed to create token: ${reason}`)
-        })
+        loginThroughTool()
+            .then(() => getMe().then(me => setMe(me)) )
+            .catch((reason) => setErrorMessage(`failed to login: ${reason}`) );
     }
 
     if (authProviders === undefined) {

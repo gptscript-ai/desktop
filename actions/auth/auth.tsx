@@ -2,6 +2,25 @@
 
 import {cookies} from "next/headers"
 import {create, get, list } from "@/actions/common"
+import { gpt } from "@/config/env"
+import { Block, RunEventType, ToolDef } from "@gptscript-ai/gptscript"
+
+
+const tokenRequestToolInstructions = `
+Credential: github.com/thedadams/gateway-creds
+
+#!python3
+
+import os
+import json
+
+output = {
+    "token": os.getenv("GPTSCRIPT_GATEWAY_API_KEY", ""),
+    "expiresAt": os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""),
+}
+
+print(json.dumps(output), end="")
+`;
 
 export interface AuthProvider {
     id?: string
@@ -17,8 +36,9 @@ export interface AuthProvider {
     disabled?: boolean
 }
 
-export async function setCookie(token: string): Promise<void> {
+export async function setCookies(token: string, expiresAt: string): Promise<void> {
     cookies().set("gateway_token", token, {domain: "localhost"})
+    cookies().set("expires_at", expiresAt, {domain: "localhost"})
 }
 
 export async function logout(): Promise<void> {
@@ -31,6 +51,16 @@ export async function getAuthProviders(): Promise<AuthProvider[]> {
 
 export async function createTokenRequest(id: string, oauthServiceName: string): Promise<string> {
     return (await create({id: id, serviceName: oauthServiceName} as any, "token-request"))["token-path"]
+}
+
+export async function loginThroughTool(): Promise<void> {
+    const run = await gpt().evaluate({instructions: tokenRequestToolInstructions}, {prompt: true})
+    run.on(RunEventType.Prompt, (data) => {
+        gpt().promptResponse({id: data.id, responses: {}})
+    })
+
+    const response = JSON.parse(await run.text()) as {token: string, expiresAt: string}
+    setCookies(response.token, response.expiresAt)
 }
 
 export async function pollForToken(id: string): Promise<string> {

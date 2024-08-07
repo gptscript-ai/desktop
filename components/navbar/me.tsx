@@ -1,12 +1,13 @@
 "use client"
 
-import {Popover, PopoverTrigger, PopoverContent, Button, User, Link, Modal, ModalContent, ModalBody, Divider} from "@nextui-org/react";
+import {Popover, PopoverTrigger, PopoverContent, Button, User, Divider} from "@nextui-org/react";
 import { useState, useEffect, useContext} from 'react';
 import { GoPersonFill } from "react-icons/go";
-import Login from "@/components/navbar/me/login"
 import Logout from "@/components/navbar/me/logout"
 import { AuthContext } from "@/contexts/auth";
-import { HiOutlineCog6Tooth } from "react-icons/hi2";
+import { loginThroughTool } from "@/actions/auth/auth";
+import { getMe } from "@/actions/me/me";
+import Loading from "@/components/loading";
 
 interface MeProps {
     className?: string;
@@ -14,24 +15,25 @@ interface MeProps {
 
 const Me = ({ className }: MeProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const { authenticated, me } = useContext(AuthContext);
+    const { authenticated, me, setMe, setAuthenticated } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         authenticated && setOpen(false);
     }, [authenticated])
 
-    const loginModal = () => (
-        <Modal size="3xl" className="h-3/4" isOpen={open} onClose={() => {setOpen(false)}}>
-            <ModalContent>
-                <ModalBody className="w-full">
-                    <Login />
-                </ModalBody>
-            </ModalContent>
-        </Modal>
-    )
+    function handleLogin() {
+        setLoading(true)
+        loginThroughTool()
+            .then(() => getMe().then((me) => {
+                setMe(me)
+                setAuthenticated(true)
+            }))
+            .finally(() => setLoading(false))
+    }
+
     return (<>
-        {loginModal()}
         <Popover placement="bottom-end" size="lg" isOpen={isOpen} onOpenChange={(open)=> setIsOpen(open)}>
             <PopoverTrigger>
                 <Button 
@@ -44,43 +46,52 @@ const Me = ({ className }: MeProps) => {
                 />
             </PopoverTrigger>
             <PopoverContent className="flex flex-col p-4">
-                {authenticated && 
-                    <>
-                        <User 
-                            classNames={{
-                                name: "max-w-[200px] truncate",
-                                description: "max-w-[200px] truncate"
-                            }}
-                            name={`${me?.username}`}
-                            description={`${me?.email}`}
-                        />
-                        <Divider className="my-2"/>
-                    </>
+                {loading && 
+                    <Loading textSize="text-tiny" wheelSize="text-lg" spaceY="4">
+                        Logging you in...
+                    </Loading>
                 }
-                {authenticated ? 
-                    <Logout /> :
-                    <Button 
-                        className="w-full"
-                        style={{justifyContent: "flex-start"}}
-                        onPress={() => { setOpen(true)}}
-                        startContent={<GoPersonFill />}
-                        variant="light"
-                    >
-                        Login
-                    </Button>
-                }
-                {authenticated && 
+                {!loading &&
                     <>
-                        {/* <Button 
-                            as={Link} 
-                            style={{justifyContent: "flex-start"}}
-                            href="/" 
-                            variant="light" 
-                            startContent={<HiOutlineCog6Tooth/>}
-                            className="w-full"
-                        >
-                            Settings
-                        </Button> */}
+                        {authenticated && 
+                            <>
+                                <User 
+                                    classNames={{
+                                        name: "max-w-[200px] truncate",
+                                        description: "max-w-[200px] truncate"
+                                    }}
+                                    name={`${me?.username}`}
+                                    description={`${me?.email}`}
+                                />
+                                <Divider className="my-2"/>
+                            </>
+                        }
+                        {authenticated ? 
+                            <Logout /> :
+                            <Button 
+                                className="w-full"
+                                style={{justifyContent: "flex-start"}}
+                                onPress={() => { handleLogin()}}
+                                startContent={<GoPersonFill />}
+                                variant="light"
+                            >
+                                Login
+                            </Button>
+                        }
+                        {authenticated && 
+                            <>
+                                {/* <Button 
+                                    as={Link} 
+                                    style={{justifyContent: "flex-start"}}
+                                    href="/" 
+                                    variant="light" 
+                                    startContent={<HiOutlineCog6Tooth/>}
+                                    className="w-full"
+                                >
+                                    Settings
+                                </Button> */}
+                            </>
+                        }
                     </>
                 }
             </PopoverContent>

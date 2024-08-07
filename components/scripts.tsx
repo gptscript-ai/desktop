@@ -1,7 +1,6 @@
 "use client";
 
 import React, {useState, useEffect, useCallback, useContext} from "react";
-import {FaRegFileCode} from "react-icons/fa";
 import {VscNewFile} from "react-icons/vsc";
 import {GoTrash, GoPaperAirplane, GoPencil, GoPerson} from "react-icons/go";
 import Loading from "@/components/loading";
@@ -78,7 +77,7 @@ export default function Scripts() {
                 <Card key={script.agentName ? script.agentName : script.displayName} className="p-4">
                     <CardHeader className="flex justify-between">
                         <div className="flex gap-3 items-center">
-                            <FaRegFileCode />
+                            <GoPerson className="mb-1 text-xl bg-gray-100 dark:bg-zinc-700 rounded-full text-primary-500 h-8 w-8 p-1.5"/>
                             {script.agentName ? script.agentName : script.displayName}
                         </div>
                         <div className="flex-col flex absolute bottom-1 right-4">
