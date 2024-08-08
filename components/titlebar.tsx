@@ -6,7 +6,7 @@ const TitleBar: React.FC = () => {
         document.getElementById("drag-bar")?.style.setProperty("-webkit-app-region", "drag");
     }, []);
 
-    return <div id="drag-bar" className="w-full h-10"/>
+    return <div id="drag-bar" className="w-full h-6 mb-4"/>
 };
 
 export default TitleBar;
