@@ -76,9 +76,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         getScript(scriptPath)
             .then(async (script) => {
                 const parsedScript = await parse(script.content || '')
+                const texts = findTexts(parsedScript);
                 setScript(parsedScript);
                 setRoot(findRoot(parsedScript));
-                setTexts(findTexts(parsedScript));
+                setTexts(texts);
                 setVisibility(script.visibility as 'public' | 'private' | 'protected');
                 setScriptId(script.id!);
 
@@ -86,6 +87,17 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
                 const tools = findTools(parsedScript);
                 setTools(tools);
                 setDynamicInstructions(tools.find((t) => t.name === DYNAMIC_INSTRUCTIONS)?.instructions || '');
+
+                const dependencies = texts.filter((t) => t.format?.includes('metadata:'));
+                setDependencies(dependencies.map((dep) => {
+                    console.log(dep)
+                    const split = dep.format?.split(':') || [];
+                    return {
+                        content: dep.content,
+                        forTool: split[1] || '',
+                        type: split[2] || '',
+                    }
+                }));
             })
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
@@ -111,10 +123,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         });
     }, [dynamicInstructions]);
 
-    useEffect(() => {
-
-    }, [dependencies])
-
     // The first tool in the script is not always the root tool, so we find it
     // by finding the first non-text tool in the script.
     const findRoot = (script: Block[]): Tool => {
@@ -136,6 +144,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     }, [root])
 
     const findTexts = (script: Block[]): Text[] => {
+        console.log(JSON.stringify(script, null, 2))
         return script.filter((block) => block.type === 'text') as Text[];
     }
 
@@ -167,7 +176,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
             id,
             type: 'tool',
             name: newestToolName(),
-        }
+        } as Tool
         setTools([...(tools || []), newTool]);
         setRoot({...root, tools: [...(root.tools || []), newTool.name!]});
     }

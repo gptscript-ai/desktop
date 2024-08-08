@@ -20,7 +20,7 @@ export default function Home() {
                     </h2>
                 </div>
 
-                <div className="w-full md:w-3/4 2xl:w-[70%] overflow-y-auto p-6">
+                <div className="w-full 2xl:w-[70%] overflow-y-auto p-6">
                     <Scripts/>
                 </div>
         </section>

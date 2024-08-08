@@ -16,7 +16,9 @@ export default function Login() {
             style={{justifyContent: "flex-start"}}
             startContent={<GoPersonFill />}
             variant="light"
-            onClick={() => logout().then(() => { setAuthenticated(false); window.location.href = '/'})}
+            onClick={() => logout().then(() => { 
+                setAuthenticated(false);
+            })}
         >
             Logout
         </Button>

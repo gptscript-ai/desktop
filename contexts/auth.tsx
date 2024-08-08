@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { Me, getMe } from '@/actions/me/me';
-import { handleTokenAge } from '@/actions/auth/auth';
+import { loginThroughTool } from '@/actions/auth/auth';
 
 interface AuthContextProps{
     children: React.ReactNode
@@ -16,19 +16,26 @@ const AuthContext = createContext<AuthContextState>({} as AuthContextState);
 const AuthContextProvider: React.FC<AuthContextProps> = ({children}) => {
     const [authenticated, setAuthenticated] = useState(false);
     const [me, setMe] = useState<Me | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
         setAuthenticated(document && document?.cookie?.includes('gateway_token'));
         if (document && document.cookie?.includes('gateway_token')) {
-            handleTokenAge()
+            getMe()
+            .then((me) => {
+                setMe(me);
+                setAuthenticated(true);
+            })
+            .finally(() => setLoading(false));
+        } else {
+            loginThroughTool()
                 .then(() => {
-                    getMe().then((me) => {setMe(me)})
+                    getMe().then((me) => {
+                        setMe(me);
+                        setAuthenticated(true);
+                    })
                 })
                 .finally(() => setLoading(false));
-        } else {
-            setLoading(false);
         }
     }, []);
 

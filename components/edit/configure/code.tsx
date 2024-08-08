@@ -7,7 +7,7 @@ import {useTheme} from "next-themes";
 
 export enum Language {
     Node = "node",
-    Python = "python",
+    Python = "python3",
     Bash = "bash",
     Prompt = "prompt",
 }
@@ -56,10 +56,10 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
             return;
         }
         
-        if (codeLines && codeLines[0] && !codeLines[0].startsWith("#!")) {
-            codeLines.unshift(`#!${e.target.value}`);
+        if (codeLines && codeLines[0] && !codeLines[0].startsWith("#!/usr/bin/env")) {
+            codeLines.unshift(`#!/usr/bin/env ${e.target.value}`);
         } else {
-            codeLines[0] = `#!${e.target.value}`;
+            codeLines[0] = `#!/usr/bin/env ${e.target.value}`;
         }
 
         onChange(codeLines.join("\n"));
@@ -77,11 +77,11 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
     }
 
     useEffect(() => {
-        if(code.startsWith("#!node")) {
+        if(code.startsWith("#!/usr/bin/env node")) {
             setLanguage(Language.Node)
-        } else if(code.startsWith("#!python")) {
+        } else if(code.startsWith("#!/usr/bin/env python3")) {
             setLanguage(Language.Python)
-        } else if(code.startsWith("#!bash")) {
+        } else if(code.startsWith("#!/usr/bin/env bash")) {
             setLanguage(Language.Bash)
         } else {
             setLanguage(Language.Prompt)

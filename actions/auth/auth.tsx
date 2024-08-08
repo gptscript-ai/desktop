@@ -7,7 +7,7 @@ import { Block, RunEventType, ToolDef } from "@gptscript-ai/gptscript"
 
 
 const tokenRequestToolInstructions = `
-Credential: github.com/thedadams/gateway-creds
+Credential: github.com/thedadams/gateway-creds as gateway-creds
 
 #!/usr/bin/env python3
 
@@ -53,26 +53,33 @@ export async function createTokenRequest(id: string, oauthServiceName: string): 
     return (await create({id: id, serviceName: oauthServiceName} as any, "token-request"))["token-path"]
 }
 
-export async function handleTokenAge(): Promise<boolean> {
-    const expiresAt = cookies().get("expires_at") || ""
-    if (!expiresAt || !expiresAt.value) return true
+/*
+    This function is used to login through a GPTScript tool. This is useful because GPTScript will handle the
+    storing of this token on our behalf as well as the OAuth flow.
 
-
-    if (new Date(expiresAt.value).getTime() - Date.now() < 1000 * 60 * 5) {
-        loginThroughTool();
-        return true
-    }
-    return false
-}
-
+    This loginTimeout is used to track the current logim timeout. If the token is about to expire, we will
+    automatically log in again. We have an in-memory timeout to prevent multiple expiration checks from
+    happening at the same time.
+    */
+let loginTimeout: NodeJS.Timeout | null = null;
 export async function loginThroughTool(): Promise<void> {
-    const run = await gpt().evaluate({instructions: tokenRequestToolInstructions}, {prompt: true})
+    if (loginTimeout) {
+        clearTimeout(loginTimeout);
+        loginTimeout = null;
+    }
+
+    const run = await gpt().evaluate({instructions: tokenRequestToolInstructions} as ToolDef, {prompt: true})
     run.on(RunEventType.Prompt, (data) => {
         gpt().promptResponse({id: data.id, responses: {}})
     })
 
     const response = JSON.parse(await run.text()) as {token: string, expiresAt: string}
-    setCookies(response.token, response.expiresAt)
+    setCookies(response.token, response.expiresAt);
+
+    loginTimeout = setTimeout(() => {
+        loginTimeout = null;
+        loginThroughTool();
+    }, new Date(response.expiresAt).getTime() - Date.now() - 1000 * 60 * 5)
 }
 
 export async function pollForToken(id: string): Promise<string> {
