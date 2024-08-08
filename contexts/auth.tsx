@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { Me, getMe } from '@/actions/me/me';
+import { handleTokenAge } from '@/actions/auth/auth';
 
 interface AuthContextProps{
     children: React.ReactNode
@@ -8,17 +9,26 @@ interface AuthContextProps{
 interface AuthContextState {
     authenticated: boolean; setAuthenticated: (authenticated: boolean) => void;
     me: Me | null; setMe: React.Dispatch<React.SetStateAction<Me | null>>;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextState>({} as AuthContextState);
 const AuthContextProvider: React.FC<AuthContextProps> = ({children}) => {
     const [authenticated, setAuthenticated] = useState(false);
     const [me, setMe] = useState<Me | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         setAuthenticated(document && document?.cookie?.includes('gateway_token'));
-        if (document && document?.cookie?.includes('gateway_token')) {
-            getMe().then((me) => {setMe(me)});
+        if (document && document.cookie?.includes('gateway_token')) {
+            handleTokenAge()
+                .then(() => {
+                    getMe().then((me) => {setMe(me)})
+                })
+                .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, []);
 
@@ -29,7 +39,8 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({children}) => {
 
     return (
         <AuthContext.Provider 
-            value={{ 
+            value={{
+                loading,
                 authenticated, setAuthenticated,
                 me, setMe
             }}

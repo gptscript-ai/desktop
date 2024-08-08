@@ -9,7 +9,7 @@ import { Block, RunEventType, ToolDef } from "@gptscript-ai/gptscript"
 const tokenRequestToolInstructions = `
 Credential: github.com/thedadams/gateway-creds
 
-#!python3
+#!/usr/bin/env python3
 
 import os
 import json
@@ -51,6 +51,18 @@ export async function getAuthProviders(): Promise<AuthProvider[]> {
 
 export async function createTokenRequest(id: string, oauthServiceName: string): Promise<string> {
     return (await create({id: id, serviceName: oauthServiceName} as any, "token-request"))["token-path"]
+}
+
+export async function handleTokenAge(): Promise<boolean> {
+    const expiresAt = cookies().get("expires_at") || ""
+    if (!expiresAt || !expiresAt.value) return true
+
+
+    if (new Date(expiresAt.value).getTime() - Date.now() < 1000 * 60 * 5) {
+        loginThroughTool();
+        return true
+    }
+    return false
 }
 
 export async function loginThroughTool(): Promise<void> {
