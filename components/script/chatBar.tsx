@@ -78,7 +78,7 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
                 className="text-lg"
                 color="primary"
                 onPress={() => setCommandsOpen(true)}
-                onBlur={() => setTimeout(() => setCommandsOpen(false), 100)} // super hacky but it does work
+                onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
             />
             <div className="w-full relative">
                 <Commands text={inputValue} setText={setInputValue} isOpen={commandsOpen} setIsOpen={setCommandsOpen}>
