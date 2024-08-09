@@ -38,10 +38,9 @@ const Me = ({ className }: MeProps) => {
             <PopoverTrigger>
                 <Button 
                     radius="full"
-                    startContent={<GoPersonFill />} 
+                    startContent={<GoPersonFill className="text-white" />} 
                     className={`${className}`}
                     variant="flat"
-                    color={authenticated ? 'primary' : 'default'}
                     isIconOnly
                 />
             </PopoverTrigger>

@@ -292,13 +292,11 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     useEffect(() => {
         if (running && messages.length === 0) {
-            const initialMessages: Array<Message> = [
-                {type: MessageType.Alert, message: `Connected and running your GPTScript!`, name: "System"},
-            ]
+            const initialMessages: Array<Message> = []
             if (!isEmpty) {
                 setGenerating(false);
                 initialMessages.push({type: MessageType.Agent, message: "Waiting for model response..."});
-                latestAgentMessageIndex.current = 1;
+                latestAgentMessageIndex.current = 0;
             } else {
                 initialMessages.push({type: MessageType.Agent, name: "System", message: "The chat bot is running but is waiting for you to talk to it. Say hello!"});
             }

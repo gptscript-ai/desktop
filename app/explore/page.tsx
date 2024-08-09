@@ -76,7 +76,7 @@ export default function Explore() {
     useEffect(() => { refresh() }, [authenticated]);
 
     return (
-        <div className="w-3/4 px-10 h-full overflow-y-scroll mx-auto pt-10">
+        <div className="w-full px-10 h-full overflow-y-scroll mx-auto pt-10">
             <div>
                 <div className="flex space-x-4 mb-4">
                     <Select radius="lg" label="Owners" color="primary" isDisabled={!owners.length} size="sm" aria-label="owners" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
@@ -121,7 +121,7 @@ export default function Explore() {
                 <Loading /> :
                 <div className={'pb-10'}>
                     <ScriptModal script={selectedScript} open={open} setOpen={setOpen} />
-                    <div className="grid gap-12 grid-cols-1 md:grid-cols-2 3xl:grid-cols-3">
+                    <div className="grid gap-12 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
                         {filteredScripts.map((script) => (
                             <div
                                 key={script.displayName}
@@ -168,7 +168,7 @@ export default function Explore() {
                                 isLoading={nextLoading}
                                 color="primary" 
                                 size="lg" 
-                                className="col-span-2"
+                                className="col-span-1 lg:col-span-2 2xl:col-span-3 3xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)
                                     getScripts({limit: 2, continue: next})

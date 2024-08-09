@@ -90,7 +90,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
 
                 const dependencies = texts.filter((t) => t.format?.includes('metadata:'));
                 setDependencies(dependencies.map((dep) => {
-                    console.log(dep)
                     const split = dep.format?.split(':') || [];
                     return {
                         content: dep.content,
@@ -144,7 +143,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     }, [root])
 
     const findTexts = (script: Block[]): Text[] => {
-        console.log(JSON.stringify(script, null, 2))
         return script.filter((block) => block.type === 'text') as Text[];
     }
 

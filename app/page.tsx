@@ -1,28 +1,39 @@
-"use client";
+"use client"
 
-import {useContext} from "react";
-import {AuthContext} from "@/contexts/auth";
-import {title, subtitle} from "@/components/primitives";
-import Scripts from "@/components/scripts";
-import Loading from "@/components/loading";
+import {useSearchParams} from 'next/navigation';
+import {Suspense, useState} from 'react';
+import Script from "@/components/script";
+import Threads from "@/components/threads";
+import { ScriptContextProvider } from '@/contexts/script';
 
-export default function Home() {
-    const {loading} = useContext(AuthContext);
-    if (loading) return <Loading/>;
+function RunFile() {
+    const [script, _setScript] = useState<string>(useSearchParams().get('file') ?? 'github.com/gptscript-ai/ui-assistant');
+    const [thread, _setThread] = useState<string>(useSearchParams().get('thread') ?? '')
+    const [scriptId, _scriptId] = useState<string>(useSearchParams().get('id') ?? '');
+
     return (
-        <section className="absolute left-0 top-[90px] flex flex-col items-center w-full gap-4 py-8 md:py-10" style={{width: `100vw`, height: `calc(100vh - 90px)`}}>
-                <div className="inline-block max-w-lg text-center justify-center pt-28">
-                    <h1 className={title() + ' drop-shadow-xl'}>
-                        My Assistants
-                    </h1>
-                    <h2 className={subtitle({class: "mt-4 mb-10"})}>
-                        Select an assistant below to interact with or edit.
-                    </h2>
+        <ScriptContextProvider initialScript={script} initialThread={thread} initialScriptId={scriptId}>
+            <section className="absolute left-0 top-[50px]">
+                <div className="border-t-1 dark:border-zinc-800" style={{width: `100vw`, height: `calc(100vh - 50px)`}}>
+                    <div className="w-full h-full flex pb-10">
+                        <Threads />
+                        <div className="mx-auto w-1/2">
+                            <Script 
+                                enableThreads 
+                                className="pb-10"
+                            />
+                        </div>
+                    </div>
                 </div>
-
-                <div className="w-full 2xl:w-[70%] overflow-y-auto p-6">
-                    <Scripts/>
-                </div>
-        </section>
+            </section>
+        </ScriptContextProvider>
     );
+}
+
+export default function Run() {
+    return (
+        <Suspense>
+            <RunFile/>
+        </Suspense>
+    )
 }

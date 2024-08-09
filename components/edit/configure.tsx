@@ -102,7 +102,7 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
                         aria-label="dynamic-instructions" 
                         title={<h1>Dynamic Instructions</h1>}
                         startContent={<LuCircuitBoard />}
-                        classNames={{content: "p-10 pt-6"}}
+                        classNames={{content: collapsed ? "pt-6 pb-10": "p-10 pt-6"}}
                     >
                         <div className="flex bg-primary-50 rounded-xl p-4 mb-4 text-tiny italic text-primary-500 items-center space-x-4">
                             <GoLightBulb className={`inline mb-1 text-sm ${collapsed ? 'w-[200px] ': 'w-fit'} `}/>
@@ -123,7 +123,7 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
                         aria-label="remote-tools"
                         title={<h1>Tools</h1>}
                         startContent={<PiToolboxBold />}
-                        classNames={{content: "p-10 pt-6"}}
+                        classNames={{content: collapsed ? "pt-6 pb-10": "p-10 pt-6"}}
                     >
                         <RemoteImports
                             tools={root.tools}
@@ -135,7 +135,7 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
                         aria-label="advanced"
                         title={<h1>Advanced</h1>}
                         startContent={<HiCog />}
-                        classNames={{content: "p-10 pt-6 h-[500px]"}}
+                        classNames={{content: collapsed ? "py-6 pt-10 h-[500px]": "p-10 pt-6 h-[500px]"}}
                     >
                         <Models options={models} defaultValue={root.modelName} onChange={(model) => setRoot({...root, modelName: model})} />       
                     </AccordionItem>

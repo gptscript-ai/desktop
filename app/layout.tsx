@@ -5,7 +5,6 @@ import {fontSans} from "@/config/fonts";
 import {Providers} from "./providers";
 import {Navbar} from "@/components/navbar";
 import clsx from "clsx";
-import TitleBar from "@/components/titlebar";
 
 export const metadata: Metadata = {
     title: {
@@ -37,7 +36,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         >
         <Providers themeProps={{attribute: "class", defaultTheme: "dark"}}>
             <div className="relative flex flex-col h-screen overflow-auto order-transparent">
-                <TitleBar/>
                 <Navbar/>
                 <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
                     {children}

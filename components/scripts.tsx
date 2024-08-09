@@ -38,20 +38,7 @@ export default function Scripts() {
 
     const ScriptItems = () => authenticated ? (
         <div className="grid grid-cols-2 gap-6">
-            <div className="grid grid-cols-2 gap-4 col-span-2">
-                <Button
-                    size="lg"
-                    startContent={<LuMessageSquare/>}
-                    color="primary"
-                    variant="flat"
-                    onPress={() => {
-                        {
-                            window.location.href = '/run?file=github.com/gptscript-ai/llm-basics-demo'
-                        }
-                    }}
-                >
-                    Start chatting with Clicky!
-                </Button>
+            <div className="grid grid-cols-1 gap-4 col-span-2">
                 <Button
                     size="lg"
                     startContent={<VscNewFile/>}

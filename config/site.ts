@@ -5,19 +5,17 @@ export const siteConfig = {
     description: "Run and build GPTSscripts.",
     navItems: [
         {
-            label: "Home",
+            label: "Chat",
             href: "/",
+        },
+        {
+            label: "Build",
+            href: "/build",
         },
         {
 			label: "Explore",
 			href: "/explore",
 		},
-        {
-            label: "Docs",
-            href: "https://docs.gptscript.ai",
-            external: true,
-        },
-
     ],
     navMenuItems: [
         {

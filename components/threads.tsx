@@ -57,7 +57,7 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
                                          className="max-w-[300px]" delay={1000} closeDelay={0.5}>
                                     <div
                                         key={key}
-                                        className={`border-1 border-gray-300 px-4 rounded-xl dark:border-zinc-800 dark:bg-zinc-800 transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:bg-[#006fee] text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer'} `}
+                                        className={`border-1 border-gray-300 px-4 rounded-xl transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:border-primary-50 dark:bg-primary-50 text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer dark:bg-zinc-800 dark:border-zinc-800'} `}
                                         onClick={() => handleRun(thread.meta.script, thread.meta.id)}
                                     >
                                         <div className="flex justify-between items-center">
