@@ -8,6 +8,11 @@ const PromptForm = ({frame, onSubmit}: { frame: PromptFrame, onSubmit: (data: Pr
     const {register, handleSubmit, getValues} = useForm<Record<string, string>>();
     const [submitted, setSubmitted] = useState(false);
 
+    const noFields = !frame.fields || frame.fields.length === 0;
+    if (noFields) {
+        frame.fields = [];
+    }
+
     const onSubmitForm = () => {
         setSubmitted(true);
         onSubmit({id: frame.id, responses: getValues()})
@@ -33,7 +38,7 @@ const PromptForm = ({frame, onSubmit}: { frame: PromptFrame, onSubmit: (data: Pr
                 color="primary"
                 isDisabled={submitted}
             >
-                {submitted ? "Submitted" : "Submit"}
+                {noFields ? "OK" : submitted ? "Submitted" : "Submit"}
             </Button>
         </form>
     );
