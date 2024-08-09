@@ -34,7 +34,6 @@ async function startServer(isPackaged) {
   process.env.THREADS_DIR = process.env.THREADS_DIR || join(dataDir, "threads");
   process.env.WORKSPACE_DIR = process.env.WORKSPACE_DIR || join(dataDir, "workspace");
   process.env.GATEWAY_URL = process.env.GATEWAY_URL || gatewayUrl;
-  process.env.DISABLE_CACHE = "true"; // TODO: Remove after https://github.com/gptscript-ai/gptscript/issues/713 is addressed
 
   console.log(`Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`);
 

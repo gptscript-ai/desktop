@@ -69,7 +69,7 @@ export default function Scripts() {
                         </div>
                         <div className="flex-col flex absolute bottom-1 right-4">
                             <Button startContent={<GoPaperAirplane />} onPress={() => {
-                                window.location.href = `/run?file=${script.publicURL}&id=${script.id}`;
+                                window.location.href = `/?file=${script.publicURL}&id=${script.id}`;
                             }} radius="full" variant="light" isIconOnly/>
                             { me?.username === script.owner && <Button startContent={<GoPencil />} onPress={() => {
                                 window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`;

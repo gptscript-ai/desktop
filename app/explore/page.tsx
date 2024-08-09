@@ -171,7 +171,7 @@ export default function Explore() {
                                 className="col-span-1 lg:col-span-2 2xl:col-span-3 3xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)
-                                    getScripts({limit: 2, continue: next})
+                                    getScripts({limit: 10, continue: next})
                                         .then((resp) => {
                                             if (resp.continue) setNext(resp.continue)
                                             else setNext(undefined)

@@ -37,7 +37,7 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
         app.prepare().then(() => {
             const httpServer = createServer(handler);
             const io = new Server(httpServer);
-            const gptscript = new GPTScript({disableCache: process.env.DISABLE_CACHE === "true"});
+            const gptscript = new GPTScript();
 
             io.on("connection", (socket) => {
                 io.emit("message", "connected");
@@ -74,7 +74,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
     const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
-    const script = await gptscript.parse(location);
+    const script = await gptscript.parse(location, true);
 
     const opts = {
         input: JSON.stringify(args || {}),
@@ -109,7 +109,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
     });
 
     if (!threadID || !state.chatState) {
-        runningScript = await gptscript.evaluate(location, opts) // todo - revert back to script
+        runningScript = await gptscript.evaluate(script, opts) // todo - revert back to script
         socket.emit("running");
 
         runningScript.on(RunEventType.Event, (data) => socket.emit('progress', {
@@ -272,7 +272,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
         // for the user to send a message.
         if (!runningScript) {
             opts.input = message;
-            runningScript = await gptscript.evaluate(location, opts); // todo - revert back to script
+            runningScript = await gptscript.evaluate(script, opts); // todo - revert back to script
         } else {
             runningScript = runningScript.nextChat(message);
         }

@@ -30,7 +30,7 @@ const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({tools, addTool, remo
                 startContent={<GoTools className="mr-2"/>}
                 onPress={() => setIsModalOpen(true)}
             >
-                Find more tools
+                Find tools
             </Button>
             <Modal
                 backdrop="blur"

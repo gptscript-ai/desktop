@@ -12,17 +12,7 @@ function RunFile() {
     const [scriptId, _scriptId] = useState<string>(useSearchParams().get('id') ?? '');
 
     return (
-        <ScriptContextProvider initialScript={script} initialThread={thread} initialScriptId={scriptId}>
-            <div className="w-full h-full flex pb-10">
-                <Threads />
-                <div className="mx-auto w-1/2">
-                    <Script 
-                        enableThreads 
-                        className="pb-10"
-                    />
-                </div>
-            </div>
-        </ScriptContextProvider>
+        <div></div>
     );
 }
 

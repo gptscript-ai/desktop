@@ -69,7 +69,7 @@ const ScriptModal = ({ className, script, open, setOpen }: ScriptModalProps) => 
                     </Accordion>
                 </ModalBody>
                 <ModalFooter className="flex justify-between space-x-2">
-                    <Button as={Link} href={`/run?file=${script.publicURL}&id=${script.id}`} color="primary" className="w-full" startContent={<GoPaperAirplane />}>Run</Button>
+                    <Button as={Link} href={`/?file=${script.publicURL}&id=${script.id}`} color="primary" className="w-full" startContent={<GoPaperAirplane />}>Run</Button>
                         {authenticated && me?.username === script.owner && 
                             <>
                                 <Button as={Link} href={`/edit?file=${script.publicURL}&id=${script.id}`} color="primary" className="w-full" startContent={<GoPencil />}>Edit</Button> 

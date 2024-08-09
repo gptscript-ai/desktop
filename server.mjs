@@ -14,7 +14,7 @@ const runFile = process.env.UI_RUN_FILE;
 startAppServer({dev, hostname, port, dir}).then((address) => {
     let landingPage = address
     if (runFile) {
-        landingPage = `${landingPage}/run?file=${runFile}`
+        landingPage = `${landingPage}/?file=${runFile}`
     }
 
     open(landingPage).then(() => {

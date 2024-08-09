@@ -8,7 +8,7 @@ import {
     Textarea,
 } from "@nextui-org/react";
 import Commands from "@/components/script/chatBar/commands";
-import {GoSquareFill} from "react-icons/go";
+import {GoKebabHorizontal, GoSquareFill} from "react-icons/go";
 import { ScriptContext } from "@/contexts/script";
 
 interface ChatBarProps {
@@ -70,7 +70,16 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
     }
 
     return (
-        <div className="flex px-4 w-full">
+        <div className="flex px-4 space-x-2 sw-full">
+            <Button
+                isIconOnly
+                startContent={<GoKebabHorizontal />}
+                radius="full"
+                className="text-lg"
+                color="primary"
+                onPress={() => setCommandsOpen(true)}
+                onBlur={() => setTimeout(() => setCommandsOpen(false), 100)} // super hacky but it does work
+            />
             <div className="w-full relative">
                 <Commands text={inputValue} setText={setInputValue} isOpen={commandsOpen} setIsOpen={setCommandsOpen}>
                     <Textarea
@@ -111,7 +120,7 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
                     isIconOnly
                     radius="full"
                     isDisabled={disabled}
-                    className="ml-2 my-auto text-lg"
+                    className="text-lg"
                     onPress={interrupt}
                 /> :
                 <Button
@@ -119,7 +128,7 @@ const ChatBar = ({ disabled = false, onMessageSent}: ChatBarProps) => {
                     isDisabled={disabled}
                     isIconOnly
                     radius="full"
-                    className="ml-2 my-auto text-lg"
+                    className="text-lg"
                     color="primary"
                     onPress={handleSend}
                 />
