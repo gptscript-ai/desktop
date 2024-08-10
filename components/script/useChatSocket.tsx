@@ -23,6 +23,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const trustedRepoPrefixesRef = useRef<string[]>([
         "github.com/gptscript-ai/context",
         "github.com/gptscript-ai/gateway-provider",
+        "github.com/gptscript-ai/gateway-creds"
     ]);
 
     // update the refs as the state changes
@@ -289,6 +290,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         trustedRepoPrefixesRef.current = [
             "github.com/gptscript-ai/context",
             "github.com/gptscript-ai/gateway-provider",
+            "github.com/gptscript-ai/gateway-creds"
         ];
         loadSocket();
     }, [socket]);
