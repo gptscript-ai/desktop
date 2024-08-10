@@ -2,27 +2,44 @@ import React from "react";
 import {Popover, PopoverTrigger, PopoverContent, Button, Input} from "@nextui-org/react";
 import { VscNewFile } from "react-icons/vsc";
 import { GoPaperAirplane } from "react-icons/go";
+import { createScript, getNewScriptName, getScript } from "@/actions/me/scripts";
+
+const newDefaultAssistant = (name: string): string => {
+    return `
+Name: ${name}
+Chat: true
+
+You are a helpful assistant named ${name}.
+`
+}
 
 export default function Create() {
-  return (
-    <Popover placement="top" showArrow offset={10} backdrop="blur">
-        <PopoverTrigger>
-                <Button
-                    size="lg"
-                    startContent={<VscNewFile/>}
-                    color="primary"
-                    variant="solid"
-                    onPress={() => {}}
-                >
-                    Create a new assistant
-            </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[400px]">
-            <div className="px-1 py-2 w-full flex space-x-2">
-                <Input placeholder="Give your assistant a name..." size="lg" variant="bordered" color="primary"/>
-                <Button isIconOnly startContent={<GoPaperAirplane/>} radius="full" variant="flat" color="primary" size="lg"/>
-            </div>
-        </PopoverContent>
-    </Popover>
-  );
+    const handleSubmit = async (e: any) => {
+        getNewScriptName()
+            .then((name) => {
+                createScript({
+                    displayName: name,
+                    visibility: 'public',
+                    content: newDefaultAssistant(name),
+                }).then((script) => {
+                    getScript(`${script.id}`)
+                        .then((script) =>
+                            window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`
+                        );
+                })
+            })
+    };
+
+  
+    return (
+        <Button
+            size="lg"
+            startContent={<VscNewFile/>}
+            color="primary"
+            variant="solid"
+            onPress={handleSubmit}
+        >
+            Create a new assistant
+        </Button>
+    );
 }

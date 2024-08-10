@@ -1,13 +1,16 @@
 "use client";
 
-import {useContext} from "react";
+import {useContext, useEffect} from "react";
 import {AuthContext} from "@/contexts/auth";
 import {title, subtitle} from "@/components/primitives";
 import Scripts from "@/components/scripts";
 import Loading from "@/components/loading";
+import { NavContext } from "@/contexts/nav";
 
 export default function Home() {
     const {loading} = useContext(AuthContext);
+    const {setCurrent} = useContext(NavContext);
+    useEffect(() => setCurrent('/build'), [])
     if (loading) return <Loading/>;
     return (
         <section className="flex flex-col items-center w-full gap-4 py-8 md:py-10" style={{width: `100vw`, height: `calc(100vh - 60px)`}}>

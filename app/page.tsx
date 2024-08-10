@@ -1,15 +1,19 @@
 "use client"
 
 import {useSearchParams} from 'next/navigation';
-import {Suspense, useState} from 'react';
+import {Suspense, useContext, useEffect, useState} from 'react';
 import Script from "@/components/script";
 import Threads from "@/components/threads";
 import { ScriptContextProvider } from '@/contexts/script';
+import { NavContext } from '@/contexts/nav';
 
 function RunFile() {
     const [script, _setScript] = useState<string>(useSearchParams().get('file') ?? 'github.com/gptscript-ai/ui-assistant');
     const [thread, _setThread] = useState<string>(useSearchParams().get('thread') ?? '')
     const [scriptId, _scriptId] = useState<string>(useSearchParams().get('id') ?? '');
+    const {setCurrent} = useContext(NavContext);
+
+    useEffect(() => setCurrent('/'), []);
 
     return (
         <ScriptContextProvider initialScript={script} initialThread={thread} initialScriptId={scriptId}>

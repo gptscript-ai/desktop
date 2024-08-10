@@ -24,7 +24,7 @@ import {
     GoTrash
 } from "react-icons/go";
 import {AiOutlineKubernetes, AiOutlineSlack} from "react-icons/ai";
-import {PiMicrosoftOutlookLogoDuotone} from "react-icons/pi";
+import {PiMicrosoftOutlookLogoDuotone, PiToolbox} from "react-icons/pi";
 import {RiNotionFill} from "react-icons/ri";
 import {SiAmazoneks, SiGooglecloud} from "react-icons/si";
 import {FaAws, FaDigitalOcean, FaGithub, FaMicrosoft} from "react-icons/fa";
@@ -55,14 +55,14 @@ const priorityTools = [
         icon: <VscAzure className="text-7xl"/>,
     },
     {
-        name: "Digitial Ocean",
+        name: "Digital Ocean",
         description: "Provides the ability to interact with Digital Ocean.",
-        url: "github.com/gptscript-ai/tools/clis/digital-ocean",
+        url: "github.com/gptscript-ai/tools/clis/digitalocean",
         tags: ["digital", "ocean", "cloud", "cli"],
         icon: <FaDigitalOcean className="text-7xl"/>,
     },
     {
-        name: "eksctl",
+        name: "Amazon EKS",
         description: "Provides the ability to interact with Amazon EKS Clusters.",
         url: "github.com/gptscript-ai/tools/clis/eksctl",
         tags: ["eksctl", "kubernetes", "aws", "cli", "eks", "amazon"],
@@ -78,7 +78,7 @@ const priorityTools = [
     {
         name: "Kubernetes",
         description: "Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs",
-        url: "github.com/gptscript-ai/tools/clis/kubernetes",
+        url: "github.com/gptscript-ai/tools/clis/k8s",
         tags: ["kubernetes", "containers", "ops", "cli"],
         icon: <AiOutlineKubernetes className="text-7xl"/>,
     },
@@ -179,7 +179,9 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
     return (
         <div>
             <div className="mt-24 mb-10 px-10 flex w-full justify-between items-center">
-                <h1 className="text-3xl font-bold text-primary lg:text-4xl">Tool catalog</h1>
+                <h1 className="text-3xl font-bold text-primary lg:text-4xl">
+                    <PiToolbox className="inline text-4xl lg:text-5xl mb-1"/> Tool catalog
+                </h1>
                 <div className="flex space-x-4 justify-end items-center w-4/6">
                     <Input
                         aria-label="Search on tools.gptscript.ai..."

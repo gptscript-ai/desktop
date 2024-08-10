@@ -1,6 +1,7 @@
 "use server"
 
 import {create, del, get, list, update} from "@/actions/common"
+import { getMe } from "@/actions/me/me"
 import { GATEWAY_URL, gpt } from "@/config/env"
 import { Block } from "@gptscript-ai/gptscript"
 
@@ -102,4 +103,17 @@ export async function deleteScript(script: Script) {
 export async function getScriptContent(scriptURL: string) {
     const script = await gpt().parse(scriptURL);
     return gpt().stringify(script);
+}
+
+export async function getNewScriptName() {
+    const me = await getMe();
+    const scripts = await getScripts({ owner: me.username, search: 'New Assistant' });
+    let smallestAssistant = Infinity;
+    for (let script of scripts.scripts || []) {
+        if (script.displayName?.includes('New Assistant')) {
+            const assistantNumber = parseInt(script.displayName?.split('New Assistant ')[1] || '1');
+            if (assistantNumber < smallestAssistant) smallestAssistant = assistantNumber;
+        }
+    }
+    return `New Assistant ${smallestAssistant === Infinity ? 1 : smallestAssistant - 1}`;
 }

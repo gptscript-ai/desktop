@@ -3,11 +3,13 @@ import {Button} from "@nextui-org/react";
 import {GoBook, GoBrowser, GoFileDirectory, GoGlobe, GoPencil, GoTools, GoTrash} from "react-icons/go";
 import ToolCatalogModal from "@/components/edit/configure/imports/toolCatalogModal";
 import { AiOutlineKubernetes, AiOutlineSlack } from "react-icons/ai";
-import { FaGithub } from "react-icons/fa";
+import { FaAws, FaDigitalOcean, FaGithub } from "react-icons/fa";
 import { PiMicrosoftOutlookLogoDuotone } from "react-icons/pi";
 import { RiNotionFill } from "react-icons/ri";
 import { EditContext } from "@/contexts/edit";
 import CustomTool from "@/components/edit/configure/customTool";
+import { SiAmazoneks, SiGooglecloud } from "react-icons/si";
+import { VscAzure } from "react-icons/vsc";
 
 interface ImportsProps {
     tools: string[] | undefined;
@@ -51,8 +53,18 @@ const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed,
                 return <GoBook className="text-md"/>;
             case "notion":
                 return <RiNotionFill className="text-md"/>;
-            case "kubernetes":
+            case "k8s":
                 return <AiOutlineKubernetes className="text-md"/>;
+            case "gcp":
+                <SiGooglecloud className="text-md"/>;
+            case "eksctl":
+                return <SiAmazoneks className="text-md"/>;
+            case "aws":
+                return <FaAws className="text-md"/>;
+            case "digitalocean":
+                return <FaDigitalOcean className="text-md"/>;
+            case "azure":
+                return <VscAzure className="text-md"/>;
             case "browser":
                 return <GoBrowser className="text-md"/>;
             case "workspace":

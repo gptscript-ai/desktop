@@ -13,6 +13,7 @@ import {
     Button,
 } from "@nextui-org/react";
 import { LuMessageSquare } from "react-icons/lu";
+import Create from "@/components/scripts/create";
 
 export default function Scripts() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
@@ -39,19 +40,7 @@ export default function Scripts() {
     const ScriptItems = () => authenticated ? (
         <div className="grid grid-cols-2 gap-6">
             <div className="grid grid-cols-1 gap-4 col-span-2">
-                <Button
-                    size="lg"
-                    startContent={<VscNewFile/>}
-                    color="primary"
-                    variant="flat"
-                    onPress={() => {
-                        {
-                            window.location.href = '/edit'
-                        }
-                    }}
-                >
-                    Create a new assistant
-                </Button>
+                <Create />
             </div>
             {!loading && !scripts.length &&
                 <Card className="col-span-2 p-4 text-center">

@@ -21,11 +21,11 @@ import {
     DiscordIcon,
     Logo,
 } from "@/components/icons";
-import { useEffect, useState } from "react";
-import { GoComment, GoGlobe, GoTools } from "react-icons/go";
+import { useContext, useEffect } from "react";
+import { NavContext } from "@/contexts/nav";
 
 export const Navbar = () => {
-    const [active, setActive] = useState("/")
+    const {current, setCurrent} = useContext(NavContext);
     useEffect(() => {
         document.getElementById("drag-bar")?.style.setProperty("-webkit-app-region", "drag");
         const noDrag = document.getElementsByClassName("no-drag");
@@ -44,23 +44,20 @@ export const Navbar = () => {
         >
             <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
                 <NavbarBrand as="li" className="gap-3 max-w-fit">
-                    <NextLink onClick={() => {setActive('/')}} className="flex justify-start items-center gap-1 no-drag" href="/">
+                    <NextLink onClick={() => {setCurrent('/')}} className="flex justify-start items-center gap-1 no-drag" href="/">
                         <Logo/>
                     </NextLink>
                 </NavbarBrand>
                 <ul className="hidden sm:flex gap-4 justify-start ml-2 no-drag">
                     {siteConfig.navItems.map((item) => (
-                        <NavbarItem key={item.href} isActive={active === item.href}>
+                        <NavbarItem key={item.href} isActive={current === item.href}>
                             <NextLink
-                                className={`text-white ${active === item.href ? 'border-b-2 pb-2 text-base' : ''}`}
-                                onClick={() => setActive(item.href)}
+                                className={`text-white ${current === item.href ? 'border-b-2 pb-2 text-base' : ''}`}
+                                onClick={() => setCurrent(item.href)}
                                 color="foreground"
                                 target={"_self"}
                                 href={item.href}
                             >
-                                {/* {item.label === "Chat" && <GoComment className="inline mb-1 mr-1"/>}
-                                {item.label === "Explore" && <GoGlobe className="inline mb-1 mr-1"/>}
-                                {item.label === "Build" && <GoTools className="inline mb-1 mr-1"/>} */}
                                 {item.label}
                             </NextLink>
                         </NavbarItem>

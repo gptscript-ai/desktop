@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useState, useCallback, Suspense} from "react";
+import {useEffect, useState, useCallback, Suspense, useContext} from "react";
 import {useSearchParams} from "next/navigation";
 import Script from "@/components/script";
 import Configure from "@/components/edit/configure";
@@ -8,12 +8,15 @@ import {EditContextProvider} from "@/contexts/edit";
 import {ScriptContextProvider} from "@/contexts/script";
 import New from "@/components/edit/new";
 import ScriptNav from "@/components/edit/scriptNav";
-import { Card, CardBody } from "@nextui-org/react";
+import { NavContext } from "@/contexts/nav";
 
 function EditFile() {
     const [file, setFile] = useState<string>(useSearchParams().get('file') || '');
     const [scriptId, setScriptId] = useState<string>(useSearchParams().get('id') || '');
     const [collapsed, setCollapsed] = useState(false);
+    
+    const {setCurrent} = useContext(NavContext);
+    useEffect(() => setCurrent('/build'), [])
 
     return (!file || file === 'new') ? (
         <div className="w-full h-full flex items-center justify-center align-center">

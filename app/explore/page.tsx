@@ -11,12 +11,14 @@ import {GoSearch} from "react-icons/go";
 import ScriptModal from "@/components/explore/scriptModal";
 import { debounce } from "lodash";
 import { MdOutlineTravelExplore } from "react-icons/md";
+import { NavContext } from "@/contexts/nav";
 
 export default function Explore() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
     const [filteredScripts, setFilteredScripts] = useState<ParsedScript[]>([]);
     const [loading, setLoading] = useState(true);
     const { authenticated } = useContext(AuthContext);
+    const {setCurrent} = useContext(NavContext)
     const [owners, setOwners] = useState<string[]>([]);
     const [tags, setTags] = useState<string[]>([]);
     const [open, setOpen] = useState(false);
@@ -72,8 +74,11 @@ export default function Explore() {
         setFilteredScripts(newFilteredScripts);
     }, [query, filteredOwners, filteredVisibility, filteredTags]);
 
-    useEffect(() => { refresh() }, []);
-    useEffect(() => { refresh() }, [authenticated]);
+    useEffect(() => { 
+        setCurrent('/explore')
+        refresh() 
+    }, []);
+    useEffect(() => { refresh() }, [authenticated]);;
 
     return (
         <div className="w-full px-20 h-full overflow-y-scroll mx-auto pt-10">
@@ -140,7 +145,7 @@ export default function Explore() {
                                     <CardHeader className="block">
                                         <div className="w-full">
                                             <h1 className="text-2xl font-medium truncate">{script.agentName ? script.agentName : script.displayName}</h1>
-                                            <p className="block truncate"><span className="text-primary">{script.owner}</span></p>
+                                            <p className="block truncate"><span className="text-primary text-sm">{script.owner}</span></p>
                                         </div>
                                         <div className="flex space-x-1 w-[90%] overflow-x-auto mt-4">
                                             {tags.map((tag) => script.tags?.includes(tag) ? 
