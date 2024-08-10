@@ -13,7 +13,7 @@ export const rootTool = async (toolContent: string): Promise<Tool> => {
 
 export const parse = async (toolContent: string): Promise<Tool[]> => {
     const parsedTool = await gpt().parseTool(toolContent);
-    return parsedTool.filter((block) => block.type === 'tool') as Tool[];
+    return parsedTool.filter((block) => block.type === 'tool' && !block.name?.startsWith("metadata")) as Tool[];
 }
 
 export const getTexts = async (toolContent: string): Promise<Text[]> => {
@@ -22,5 +22,5 @@ export const getTexts = async (toolContent: string): Promise<Text[]> => {
 }
 
 export const stringify = async (script: Block[]): Promise<string> => {
-    return gpt().stringify(script);
+    return await gpt().stringify(script);
 }
