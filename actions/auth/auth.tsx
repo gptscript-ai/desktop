@@ -8,6 +8,7 @@ import { Block, RunEventType, ToolDef } from "@gptscript-ai/gptscript"
 
 const tokenRequestToolInstructions = `
 Credential: github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway
+Name: getCreds
 
 #!/usr/bin/env python3
 
@@ -20,6 +21,11 @@ output = {
 }
 
 print(json.dumps(output), end="")
+
+---
+
+!metadata:getCreds:requirements.txt
+
 `;
 
 export interface AuthProvider {
