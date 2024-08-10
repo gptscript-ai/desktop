@@ -54,6 +54,16 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
                 });
         }
 
+        setInterval(() => {
+            updateGPTScriptConfig(gptscript)
+                .then(() => {
+                    console.log('GPTScript config updated');
+                })
+                .catch(err => {
+                    console.error('Error updating GPTScript config:', err);
+                });
+        }, 30 * 60 * 1000); // Pull the config from GitHub every 30 minutes
+
         Promise.resolve(gptscriptInitPromise).then(() => {
             app.prepare().then(() => {
                 const httpServer = createServer(handler);
@@ -104,9 +114,9 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
         prompt: true,
         confirm: true,
     };
-    
+
     if (tool) opts.subTool = tool;
-    
+
     let state = {};
     let statePath = '';
     if (threadID) statePath = path.join(THREADS_DIR, threadID, STATE_FILE);
@@ -178,7 +188,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
             await runningScript.close();
             runningScript = null;
         }
-        
+
         // find the root tool and then add the new tool
         for (let block of script) {
             if (block.type === "tool") {
@@ -188,7 +198,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
             }
         }
 
-        /* 
+        /*
             note(tylerslaton)
 
             this is a hacky way to add a tool to the chat state. When GPTScript does a run, it will
@@ -203,7 +213,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
         socket.emit("addingTool");
 
         const currentState = JSON.parse(state.chatState);
-        
+
         opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
         const newStateRun = await gptscript.evaluate(script, opts)
         await newStateRun.text();
@@ -213,7 +223,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
 
         opts.chatState = JSON.stringify(currentState);
         state.tools = [...new Set([...state.tools || [], tool])];
-        
+
         if (threadID) {
             fs.writeFile(statePath, JSON.stringify(state), (err) => {
                 if (err) {
@@ -230,7 +240,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
             await runningScript.close();
             runningScript = null;
         }
-        
+
         // find the root tool and then remove the tool
         for (let block of script) {
             if (block.type === "tool") {
@@ -241,7 +251,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
             }
         }
 
-        /* 
+        /*
             note(tylerslaton)
 
             this is a hacky way to remove a tool from the chat state. When GPTScript does a run, it will
@@ -256,7 +266,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
         socket.emit("removingTool");
 
         const currentState = JSON.parse(state.chatState);
-        
+
         opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
         const newStateRun = await gptscript.evaluate(script, opts)
         await newStateRun.text();
@@ -266,7 +276,7 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
 
         opts.chatState = JSON.stringify(currentState);
         state.tools = state.tools.filter(t => t !== tool);
-        
+
         if (threadID) {
             fs.writeFile(statePath, JSON.stringify(state), (err) => {
                 if (err) {
@@ -356,7 +366,7 @@ const initGPTScriptConfig = async (gptscript) => {
 
     const configPath = gptscriptConfigPath();
 
-    fs.readFile(configPath, 'utf8', (err, data) => {
+    fs.readFile(configPath, 'utf8', async (err, data) => {
         if (err) {
             console.error('Error reading config file:', err);
             return;
@@ -370,15 +380,8 @@ const initGPTScriptConfig = async (gptscript) => {
         }
 
         // Default values to add if they don't exist
-        const defaultConfig = {
-            gatewayURL: 'https://gateway-api.gptscript.ai',
-            integrations: {
-                microsoft365: 'microsoft365',
-                slack: 'slack',
-                notion: 'notion',
-                GitLab: 'gitlab'
-            }
-        };
+        const defaultConfigResult = await fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json");
+        const defaultConfig = await defaultConfigResult.json()
 
         // Update the config object with default values if they don't exist
         config = {
@@ -389,6 +392,42 @@ const initGPTScriptConfig = async (gptscript) => {
                 ...config.integrations
             }
         };
+
+        // Write the updated config back to the file
+        fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
+            if (writeErr) {
+                console.error('Error writing config file:', writeErr);
+                return;
+            }
+            console.log('Config file updated successfully');
+        });
+    });
+}
+
+async function updateGPTScriptConfig(gptscript) {
+    const configPath = gptscriptConfigPath();
+
+    fs.readFile(configPath, 'utf8', async (err, data) => {
+        if (err) {
+            console.error('Error reading config file:', err);
+            return;
+        }
+
+        let config;
+        try {
+            config = JSON.parse(data);
+        } catch (parseErr) {
+            throw new Error(`Error parsing config file: ${parseErr}`);
+        }
+
+        // Default values to add if they don't exist
+        const defaultConfigResult = await fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json");
+        const defaultConfig = await defaultConfigResult.json()
+
+        // Override the config with the integrations for the gateway if the URLs match
+        if (config.gatewayURL === defaultConfig.gatewayURL) {
+            config.integrations = defaultConfig.integrations
+        }
 
         // Write the updated config back to the file
         fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
