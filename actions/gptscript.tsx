@@ -18,7 +18,7 @@ export const parse = async (toolContent: string): Promise<Tool[]> => {
 
 export const getTexts = async (toolContent: string): Promise<Text[]> => {
     const parsedTool = await gpt().parseTool(toolContent);
-    return parsedTool.filter((block) => block.type === 'text');
+    return parsedTool.filter((block) => block.type === 'text') as Text[];
 }
 
 export const stringify = async (script: Block[]): Promise<string> => {
