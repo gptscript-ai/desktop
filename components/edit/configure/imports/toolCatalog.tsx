@@ -8,21 +8,79 @@ import {
     Select,
     SelectItem,
 } from "@nextui-org/react";
-import {GoBook, GoBrowser, GoCheck, GoFileDirectory, GoGlobe, GoLink, GoPerson, GoPlay, GoPlus, GoSearch, GoTerminal, GoTools, GoTrash} from "react-icons/go";
+import {
+    GoBook, 
+    GoBrowser, 
+    GoCheck, 
+    GoFileDirectory, 
+    GoGlobe, 
+    GoLink, 
+    GoPerson, 
+    GoPlay, 
+    GoPlus, 
+    GoSearch, 
+    GoTerminal, 
+    GoTools, 
+    GoTrash
+} from "react-icons/go";
 import {AiOutlineKubernetes, AiOutlineSlack} from "react-icons/ai";
 import {PiMicrosoftOutlookLogoDuotone} from "react-icons/pi";
 import {RiNotionFill} from "react-icons/ri";
-import {FaGithub} from "react-icons/fa";
+import {SiAmazoneks, SiGooglecloud} from "react-icons/si";
+import {FaAws, FaDigitalOcean, FaGithub, FaMicrosoft} from "react-icons/fa";
 import { Tool } from "@gptscript-ai/gptscript";
 import Loading from "@/components/loading";
+import { VscAzure } from "react-icons/vsc";
 
 const priorityTools = [
     {
         name: "Github",
-        description: "A command-line tool for GitHub.",
-        url: "github.com/gptscript-ai/github",
+        description: "Provides the ability to interact with GitHub.",
+        url: "github.com/gptscript-ai/tools/cli/github",
         tags: ["github", "cli"],
         icon: <FaGithub className="text-7xl"/>,
+    },
+    {
+        name: "Amazon Web Services",
+        description: "Provides the ability to interact with AWS.",
+        url: "github.com/gptscript-ai/tools/clis/aws",
+        tags: ["aws", "cloud", "amazon", "cli"],
+        icon: <FaAws className="text-7xl"/>,
+    },
+    {
+        name: "Azure",
+        description: "Provides the ability to interact with Azure.",
+        url: "github.com/gptscript-ai/tools/clis/azure",
+        tags: ["azure", "cloud", "microsoft", "cli"],
+        icon: <VscAzure className="text-7xl"/>,
+    },
+    {
+        name: "Digitial Ocean",
+        description: "Provides the ability to interact with Digital Ocean.",
+        url: "github.com/gptscript-ai/tools/clis/digital-ocean",
+        tags: ["digital", "ocean", "cloud", "cli"],
+        icon: <FaDigitalOcean className="text-7xl"/>,
+    },
+    {
+        name: "eksctl",
+        description: "Provides the ability to interact with Amazon EKS Clusters.",
+        url: "github.com/gptscript-ai/tools/clis/eksctl",
+        tags: ["eksctl", "kubernetes", "aws", "cli", "eks", "amazon"],
+        icon: <SiAmazoneks className="text-7xl"/>
+    },
+    {
+        name: "Google Cloud Platform",
+        description: "Provides the ability to interact with Google Cloud Platform.",
+        url: "github.com/gptscript-ai/tools/clis/gcp",
+        tags: ["gcp", "cloud", "google", "cli"],
+        icon: <SiGooglecloud className="text-7xl"/>,
+    },
+    {
+        name: "Kubernetes",
+        description: "Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs",
+        url: "github.com/gptscript-ai/tools/clis/kubernetes",
+        tags: ["kubernetes", "containers", "ops", "cli"],
+        icon: <AiOutlineKubernetes className="text-7xl"/>,
     },
     {
         name: "Outlook",
@@ -44,20 +102,6 @@ const priorityTools = [
         url: "github.com/gptscript-ai/answers-from-the-internet",
         tags: ["search", "web", "internet"],
         icon: <GoGlobe className="text-7xl"/>
-    },
-    {
-        name: "Notion",
-        description: "Allows the agent to use Notion as a datasource or interact with notes.",
-        url: "github.com/gptscript-ai/notion",
-        tags: ["notion", "notes", "collaboration", "service"],
-        icon: <RiNotionFill className="text-7xl"/>
-    },
-    {
-        name: "Kubernetes",
-        description: "Provides the agent with the ability to interact with Kubernetes.",
-        url: "github.com/gptscript-ai/kubernetes",
-        tags: ["kubernetes", "containers", "ops", "cli"],
-        icon: <AiOutlineKubernetes className="text-7xl"/>,
     },
     {
         name: "Browser",

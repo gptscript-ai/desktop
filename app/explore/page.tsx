@@ -128,34 +128,24 @@ export default function Explore() {
                                 }}
                             >
                                 <Card 
-                                    className="h-[220px] border-2 border-white dark:bg-zinc-900 p-6 dark:border-zinc-900 hover:border-primary hover:shadow-2xl dark:hover:border-primary cursor-pointer transition duration-300 ease-in-out transform hover:scale-105" 
+                                    className="h-[350px] border-2 border-white dark:bg-zinc-900 p-6 dark:border-zinc-900 hover:border-primary hover:shadow-2xl dark:hover:border-primary cursor-pointer transition duration-300 ease-in-out transform hover:scale-105" 
                                     key={script.displayName}
                                     shadow="md"
                                 >
                                     <CardHeader className="block">
-                                        <div className="flex justify-between">
-                                            <div className="w-[60%] flex space-x-2">
-                                                <div><Avatar size="sm"/></div>
-                                                <h1 className="text-2xl font-medium truncate">{script.agentName ? script.agentName : script.displayName}</h1>
-                                            </div>
-                                            <div className="text-sm text-right w-[30%]">
-                                                {script.createdAt && 
-                                                    <Tooltip content={new Date(script.createdAt).toLocaleString()} placement="top" delay={1000} closeDelay={0.5}>
-                                                        <p>{new Date(script.createdAt).toLocaleDateString()}</p>
-                                                    </Tooltip>
-                                                }
-                                                <p className="block truncate">By <span className="text-primary-500">{script.owner}</span></p>
-                                            </div>
+                                        <div className="w-full">
+                                            <h1 className="text-2xl font-medium truncate">{script.agentName ? script.agentName : script.displayName}</h1>
+                                            <p className="block truncate"><span className="text-primary">{script.owner}</span></p>
                                         </div>
-                                        <Divider className="mt-4"/>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <p className="truncate w-4/5 text-sm text-zinc-500">{script.description ? script.description : "No description provided"}</p>
                                         <div className="flex space-x-1 w-[90%] overflow-x-auto mt-4">
                                             {tags.map((tag) => script.tags?.includes(tag) ? 
                                                 <Chip size="sm" className="pb-0 mb-0" color="primary" key={tag}>{tag}</Chip> : null
                                             )}
                                         </div>
+                                        <Divider className="mt-4"/>
+                                    </CardHeader>
+                                    <CardBody>
+                                        <p className="text-wrap text-sm text-zinc-500">{script.description ? script.description : "No description provided"}</p>
                                     </CardBody>
                                 </Card>
                             </div>
