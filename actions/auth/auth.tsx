@@ -7,7 +7,7 @@ import { Block, RunEventType, ToolDef } from "@gptscript-ai/gptscript"
 
 
 const tokenRequestToolInstructions = `
-Credential: github.com/thedadams/gateway-creds as gateway-creds
+Credential: github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway
 
 #!/usr/bin/env python3
 
