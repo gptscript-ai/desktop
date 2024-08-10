@@ -210,9 +210,32 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
 
         const currentState = JSON.parse(state.chatState);
 
-        opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
-        const newStateRun = await gptscript.evaluate(script, opts)
+        opts.chatState = undefined; // Clear the chat state so that we can get the new tool mappings
+        opts.input = 'do nothing'; // Ensure the LLM doesn't try to call tools without input
+        const newStateRun = await gptscript.evaluate(script, opts);
+
+        newStateRun.on(RunEventType.CallConfirm, (frame) => {
+            let response;
+            if (!frame.error && frame.toolCategory === "provider") {
+                // Auto-confirm gateway provider
+                response = {
+                    id: frame.id,
+                    accept: true,
+                };
+            } else {
+                // Deny all other tool run requests
+                response = {
+                    id: frame.id,
+                    accept: false,
+                    message: 'do nothing'
+                };
+            }
+
+            gptscript.confirm(response);
+        });
+
         await newStateRun.text();
+        await newStateRun.close()
 
         const newState = JSON.parse(newStateRun.currentChatState());
         currentState.continuation.state.completion.tools = newState.continuation.state.completion.tools;
@@ -263,9 +286,32 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
 
         const currentState = JSON.parse(state.chatState);
 
-        opts.chatState = undefined; // clear the chat state so we can get the new tool mappings
-        const newStateRun = await gptscript.evaluate(script, opts)
+        opts.chatState = undefined; // Clear the chat state so that we can get the new tool mappings
+        opts.input = 'do nothing'; // Ensure the LLM doesn't try to call tools without input
+        const newStateRun = await gptscript.evaluate(script, opts);
+
+        newStateRun.on(RunEventType.CallConfirm, (frame) => {
+            let response;
+            if (!frame.error && frame.toolCategory === "provider") {
+                // Auto-confirm gateway provider
+                response = {
+                    id: frame.id,
+                    accept: true,
+                };
+            } else {
+                // Deny all other tool run requests
+                response = {
+                    id: frame.id,
+                    accept: false,
+                    message: 'do nothing'
+                };
+            }
+
+            gptscript.confirm(response);
+        });
+
         await newStateRun.text();
+        await newStateRun.close();
 
         const newState = JSON.parse(newStateRun.currentChatState());
         currentState.continuation.state.completion.tools = newState.continuation.state.completion.tools;
@@ -359,6 +405,7 @@ const initGPTScriptConfig = async (gptscript) => {
         instructions: '#!sys.echo noop'
     })
     await run.text()
+    await run.close()
 
     const configPath = gptscriptConfigPath();
 
