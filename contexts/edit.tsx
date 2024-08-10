@@ -28,8 +28,6 @@ interface EditContextState {
     setRoot: React.Dispatch<React.SetStateAction<Tool>>;
     tools: Tool[];
     setTools: React.Dispatch<React.SetStateAction<Tool[]>>;
-    texts: Text[];
-    setTexts: React.Dispatch<React.SetStateAction<Text[]>>;
     script: Block[];
     setScript: React.Dispatch<React.SetStateAction<Block[]>>;
     visibility: 'public' | 'private' | 'protected';
@@ -52,7 +50,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     const [loading, setLoading] = useState(true);
     const [root, setRoot] = useState<Tool>({} as Tool);
     const [tools, setTools] = useState<Tool[]>([]);
-    const [texts, setTexts] = useState<Text[]>([]);
     const [script, setScript] = useState<Block[]>([]);
     const [scriptId, setScriptId] = useState<number>(-1);
     const [visibility, setVisibility] = useState<'public' | 'private' | 'protected'>('private');
@@ -79,7 +76,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
                 const texts = await getTexts(script.content || '');
                 setScript(parsedScript);
                 setRoot(findRoot(parsedScript));
-                setTexts(texts);
                 setVisibility(script.visibility as 'public' | 'private' | 'protected');
                 setScriptId(script.id!);
 
@@ -106,9 +102,25 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     useEffect(() => {
         if (loading) return;
         update();
-    }, [root, tools, dependencies, visibility])
+    }, [root, tools, visibility])
 
     useEffect(() => {
+        setTools((prevTools) => {
+            dependencies.forEach((dep) => {
+                prevTools.map((tool) => {
+                    if (tool.name === dep.forTool) {
+                        tool.metaData = { [dep.type]: dep.content };
+                    }
+                    return tool;
+                });
+            })
+            return prevTools;
+        });
+        update();
+    }, [dependencies, tools])
+
+    useEffect(() => {
+        if (loading) return;
         setTools((prevTools) => {
             return [
                 ...prevTools.filter((t) => t.name !== DYNAMIC_INSTRUCTIONS),
@@ -120,7 +132,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
             if (prevRoot.context?.includes(DYNAMIC_INSTRUCTIONS)) return prevRoot;
             return {...prevRoot, context: [...(prevRoot.context || []), DYNAMIC_INSTRUCTIONS]};
         });
-    }, [dynamicInstructions]);
+    }, [dynamicInstructions, loading]);
 
     // The first tool in the script is not always the root tool, so we find it
     // by finding the first non-text tool in the script.
@@ -150,11 +162,11 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         debounceTimer.current = setTimeout(async () => {
             await updateScript({
                 visibility: visibility,
-                content: await stringify([root, ...tools, ...dependenciesToText(dependencies)]),
+                content: await stringify([root, ...tools]),
                 id: scriptId,
             }).catch((error) => console.error(error));
         }, DEBOUNCE_TIME);
-    }, [scriptId, root, tools, dependencies, visibility]);
+    }, [scriptId, root, tools, visibility]);
 
     const newestToolName = useCallback(() => {
         let num = 1
@@ -202,19 +214,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         });
     }
 
-    const dependenciesToText = (dependencies: DependencyBlock[]): Text[] => {
-        return dependencies
-            .map((dep) => {
-                return {
-                    id: `${dep.forTool}-${dep.type}`,
-                    format: `metadata:${dep.forTool}:${dep.type}`,
-                    type: 'text',
-                    content: dep.content,
-                    name: dep.forTool,
-                }
-            });
-    }
-
     // Provide the context value to the children components
     return (
         <EditContext.Provider
@@ -226,7 +225,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
                 loading, setLoading,
                 root, setRoot,
                 tools, setTools,
-                texts, setTexts,
                 script, setScript,
                 visibility, setVisibility,
                 update,
