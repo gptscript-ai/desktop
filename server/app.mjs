@@ -55,14 +55,11 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
         }
 
         setInterval(() => {
-            updateGPTScriptConfig(gptscript)
-                .then(() => {
-                    console.log('GPTScript config updated');
-                })
+            initGPTScriptConfig(gptscript)
                 .catch(err => {
                     console.error('Error updating GPTScript config:', err);
                 });
-        }, 30 * 60 * 1000); // Pull the config from GitHub every 30 minutes
+        }, 30 * 1000); // Pull the config from GitHub every 30 minutes
 
         Promise.resolve(gptscriptInitPromise).then(() => {
             app.prepare().then(() => {
@@ -366,7 +363,7 @@ const initGPTScriptConfig = async (gptscript) => {
 
     const configPath = gptscriptConfigPath();
 
-    fs.readFile(configPath, 'utf8', async (err, data) => {
+    fs.readFile(configPath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading config file:', err);
             return;
@@ -380,62 +377,32 @@ const initGPTScriptConfig = async (gptscript) => {
         }
 
         // Default values to add if they don't exist
-        const defaultConfigResult = await fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json");
-        const defaultConfig = await defaultConfigResult.json()
+        fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json")
+            .then((res) => res.json()
+                .then((defaultConfig) => {
+                    // Update the config object with default values if they don't exist
+                    config = {
+                        ...defaultConfig,
+                        ...config,
+                        integrations: {
+                            ...defaultConfig.integrations,
+                            ...config.integrations
+                        }
+                    };
 
-        // Update the config object with default values if they don't exist
-        config = {
-            ...defaultConfig,
-            ...config,
-            integrations: {
-                ...defaultConfig.integrations,
-                ...config.integrations
-            }
-        };
-
-        // Write the updated config back to the file
-        fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) {
-                console.error('Error writing config file:', writeErr);
-                return;
-            }
-            console.log('Config file updated successfully');
-        });
-    });
-}
-
-async function updateGPTScriptConfig(gptscript) {
-    const configPath = gptscriptConfigPath();
-
-    fs.readFile(configPath, 'utf8', async (err, data) => {
-        if (err) {
-            console.error('Error reading config file:', err);
-            return;
-        }
-
-        let config;
-        try {
-            config = JSON.parse(data);
-        } catch (parseErr) {
-            throw new Error(`Error parsing config file: ${parseErr}`);
-        }
-
-        const defaultConfigResult = await fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json");
-        const defaultConfig = await defaultConfigResult.json()
-
-        // Override the config with the integrations for the gateway if the URLs match
-        if (config.gatewayURL === defaultConfig.gatewayURL) {
-            config.integrations = defaultConfig.integrations
-        }
-
-        // Write the updated config back to the file
-        fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
-            if (writeErr) {
-                console.error('Error writing config file:', writeErr);
-                return;
-            }
-            console.log('Config file updated successfully');
-        });
+                    // Write the updated config back to the file
+                    fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
+                        if (writeErr) {
+                            console.error('Error writing config file:', writeErr);
+                            return;
+                        }
+                        console.log('Config file updated successfully');
+                    });
+                }
+            ))
+            .catch((fetchErr) => {
+                console.error('Error fetching default config:', fetchErr);
+            });
     });
 }
 
