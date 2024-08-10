@@ -59,14 +59,14 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     // handles progress being recieved from the server (callProgress style frames).
     const handleProgress = useCallback(({frame, state}: { frame: CallFrame, state: Record<string, CallFrame> }) => {
+        if (!frame.error && frame.toolCategory === "provider") {
+            return;
+        }
+
         const isMainContent = frame?.output &&
             frame.output.length > 0 &&
             (!frame.parentID || frame.tool?.chat) &&
             !frame.output[frame.output.length - 1].subCalls
-
-        if (frame.tool?.source?.repo?.Root?.includes('github.com/gptscript-ai/gateway-provider')) {
-            return;
-        }
 
         let content = isMainContent ? frame.output[frame.output.length - 1].content || "" : ""
         if (!content) return;
