@@ -50,18 +50,17 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
                 .catch((err) => {
                     console.error('Error initializing GPTScript config:', err);
                     reject(err);
-                    return;
                 });
         }
 
-        setInterval(() => {
-            initGPTScriptConfig(gptscript)
-                .catch(err => {
-                    console.error('Error updating GPTScript config:', err);
-                });
-        }, 30 * 60 * 1000); // Pull the config from GitHub every 30 minutes
-
         Promise.resolve(gptscriptInitPromise).then(() => {
+            setInterval(() => {
+                initGPTScriptConfig(gptscript)
+                    .catch(err => {
+                        console.error('Error updating GPTScript config:', err);
+                    });
+            }, 30 * 60 * 1000); // Pull the config from GitHub every 30 minutes
+
             app.prepare().then(() => {
                 const httpServer = createServer(handler);
                 const io = new Server(httpServer);
@@ -363,46 +362,34 @@ const initGPTScriptConfig = async (gptscript) => {
 
     const configPath = gptscriptConfigPath();
 
-    fs.readFile(configPath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading config file:', err);
+    let config;
+    try {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
+    } catch (err) {
+        console.error('Error reading config file:', err);
+        return;
+    }
+
+    const response = await fetch('https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json')
+    const defaultConfig = await response.json()
+
+    // Update the config object with default values if they don't exist
+    config = {
+        ...defaultConfig,
+        ...config,
+        integrations: {
+            ...defaultConfig.integrations,
+            ...config.integrations
+        }
+    };
+
+    // Write the updated config back to the file
+    fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
+        if (writeErr) {
+            console.error('Error writing config file:', writeErr);
             return;
         }
-
-        let config;
-        try {
-            config = JSON.parse(data);
-        } catch (parseErr) {
-            throw new Error(`Error parsing config file: ${parseErr}`);
-        }
-
-        // Fetch default values to add if they don't exist
-        fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json")
-            .then((res) => res.json()
-                .then((defaultConfig) => {
-                    // Update the config object with default values if they don't exist
-                    config = {
-                        ...defaultConfig,
-                        ...config,
-                        integrations: {
-                            ...defaultConfig.integrations,
-                            ...config.integrations
-                        }
-                    };
-
-                    // Write the updated config back to the file
-                    fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', (writeErr) => {
-                        if (writeErr) {
-                            console.error('Error writing config file:', writeErr);
-                            return;
-                        }
-                        console.log('Config file updated successfully');
-                    });
-                }
-            ))
-            .catch((fetchErr) => {
-                console.error('Error fetching default config:', fetchErr);
-            });
+        console.log('Config file updated successfully');
     });
 }
 
