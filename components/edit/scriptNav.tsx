@@ -2,9 +2,9 @@ import React, {useState, useEffect, useContext} from "react";
 import {fetchScripts} from "@/actions/scripts/fetch";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection, Button} from "@nextui-org/react";
 import {IoMenu} from "react-icons/io5";
-import {FaRegFileCode} from "react-icons/fa";
+import {FaCopy, FaRegFileCode} from "react-icons/fa";
 import {VscNewFile} from "react-icons/vsc";
-import {GoCode, GoPerson, GoSidebarCollapse, GoSidebarExpand} from "react-icons/go";
+import {GoCode, GoCopy, GoPerson, GoSidebarCollapse, GoSidebarExpand} from "react-icons/go";
 import {ParsedScript, getScripts} from "@/actions/me/scripts";
 import { EditContext } from "@/contexts/edit";
 import { PiExport } from "react-icons/pi";
@@ -62,10 +62,10 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className, collapsed, setCollapsed
                 </DropdownItem>
                 <DropdownSection title="Actions" showDivider>
                     <DropdownItem startContent={<VscNewFile/>} key="new">
-                        New script
+                        New assistant
                     </DropdownItem>
-                    <DropdownItem startContent={<PiExport/>} key="export">
-                        Export to GPTScript
+                    <DropdownItem startContent={<FaCopy/>} key="export">
+                        Copy assistant to clipboard
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection title="My Assistants">

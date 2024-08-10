@@ -1,7 +1,7 @@
 import React, {createContext, useState, useEffect, useCallback, useRef} from 'react';
 import {Tool, Text, Block} from '@gptscript-ai/gptscript';
 import {getScript, updateScript} from '@/actions/me/scripts';
-import { parse, stringify} from '@/actions/gptscript';
+import { parse, stringify, getTexts } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
@@ -76,7 +76,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         getScript(scriptPath)
             .then(async (script) => {
                 const parsedScript = await parse(script.content || '')
-                const texts = findTexts(parsedScript);
+                const texts = await getTexts(script.content || '');
                 setScript(parsedScript);
                 setRoot(findRoot(parsedScript));
                 setTexts(texts);
@@ -142,10 +142,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
         return withoutRoot.filter((block) => block.type === 'tool') as Tool[];
     }, [root])
 
-    const findTexts = (script: Block[]): Text[] => {
-        return script.filter((block) => block.type === 'text') as Text[];
-    }
-
     // note: The update function is debounced to prevent too many requests. The
     //       lodash debounce function was not used because it was causing issues.
     //       It is also worth noting that this deletes text tools.
@@ -208,7 +204,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
 
     const dependenciesToText = (dependencies: DependencyBlock[]): Text[] => {
         return dependencies
-            .filter((dep) => dep.content.trim() !== '') // Filter out empty dependencies
             .map((dep) => {
                 return {
                     id: `${dep.forTool}-${dep.type}`,

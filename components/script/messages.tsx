@@ -58,6 +58,7 @@ const Message = ({message, noAvatar, restart}: { message: Message, noAvatar?: bo
                                         base: `bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900 ${
                                             message.error && "border-danger dark:border-danger"
                                         }`,
+                                        name: `text-lg text-default-600`
                                     }}
                                 />
                             </Tooltip>

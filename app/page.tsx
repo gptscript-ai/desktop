@@ -17,7 +17,7 @@ function RunFile() {
                 <div className="border-t-1 dark:border-zinc-800" style={{width: `100vw`, height: `calc(100vh - 50px)`}}>
                     <div className="w-full h-full flex pb-10">
                         <Threads />
-                        <div className="mx-auto w-[75%] 2xl:w-[60%] 3xl:[w-50%]">
+                        <div className="mx-auto w-[75%] 2xl:w-[55%] 3xl:[w-50%]">
                             <Script 
                                 enableThreads 
                                 className="pb-10"

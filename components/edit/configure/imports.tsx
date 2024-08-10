@@ -27,11 +27,13 @@ const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed,
             setLocalTools(tools.filter((t) => !(
                 t.startsWith("https://")  ||
                 t.startsWith("http://")   ||
+                t.startsWith("sys.")      || // not local, but considered remote for the purposes of this component
                 t.startsWith("github.com")
             )));
             setRemoteTools(tools.filter((t) => 
                 t.startsWith("https://")  ||
                 t.startsWith("http://")   ||
+                t.startsWith("sys.")      || // not local, but considered remote for the purposes of this component
                 t.startsWith("github.com")
             ));
         }
@@ -75,7 +77,7 @@ const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed,
                             <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
                                 <div className="flex items-center space-x-2">
                                     {iconForTool(tool)}
-                                    <p className="capitalize">{tool.split("/").pop()?.replace(/-/g, " ")}</p>
+                                    <p className="capitalize">{tool.split("/").pop()?.replace(/-/g, " ").replace("sys.", "")}</p>
                                 </div>
                                 <Button
                                     variant="light"

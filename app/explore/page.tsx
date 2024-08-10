@@ -77,8 +77,7 @@ export default function Explore() {
 
     return (
         <div className="w-full px-10 h-full overflow-y-scroll mx-auto pt-10">
-            <div>
-                <div className="flex space-x-4 mb-4">
+            <div className="flex w-full justify-end space-x-2 mb-6">
                     <Select radius="lg" label="Owners" color="primary" isDisabled={!owners.length} size="sm" aria-label="owners" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
                         onSelectionChange={(keys) => { setFilteredOwners(keys as Set<string>)}}
                     >
@@ -96,7 +95,6 @@ export default function Explore() {
                     >
                         {tags.map((tag) => <SelectItem key={tag} value={tag}>{tag}</SelectItem>)}
                     </Select>
-                </div>
                 <Input 
                     startContent={<GoSearch />}
                     placeholder="Search for an agent..."
@@ -104,7 +102,7 @@ export default function Explore() {
                     variant="bordered"
                     isClearable
                     size="lg"
-                    className="w-full"
+                    className="w-1/5"
                     onChange={(e) => {
                         setQuery(e.target.value)
                         if (e.target.value === '') refresh()
@@ -116,7 +114,6 @@ export default function Explore() {
                     })}
                 />
             </div>
-            <Divider className="my-10"/>
             {loading ?
                 <Loading /> :
                 <div className={'pb-10'}>

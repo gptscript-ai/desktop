@@ -118,7 +118,7 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
                             <Editor
                                 height="35vh"
                                 language={LanguageSyntax[language]}
-                                theme={theme === "dark" ? "hc-black" : "vs-light"}
+                                theme={theme === "dark" ? "vs-dark" : "vs-light"}
                                 value={code}
                                 onChange={(code) => {onChange(code || '')}}
                                 options={{
@@ -153,7 +153,7 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
                                         height="100%"
                                         width="100%"
                                         language={LanguageSyntax[language]}
-                                        theme={theme === "dark" ? "hc-black" : "vs-light"}
+                                        theme={theme === "dark" ? "vs-dark" : "vs-light"}
                                         value={code}
                                         onChange={(code) => {onChange(code || '')}}
                                         options={{
@@ -191,7 +191,7 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
                                 <Editor
                                     height="35vh"
                                     language={LanguageDependencyFileSyntax[language]}
-                                    theme={theme === "dark" ? "hc-black" : "vs-light"}
+                                    theme={theme === "dark" ? "vs-dark" : "vs-light"}
                                     value={dependencies}
                                     onChange={(code) => {onDependenciesChange(code || '', languageDependencyFile(language))}}
                                     options={{
@@ -226,7 +226,7 @@ const Code = ({code, onChange, dependencies, onDependenciesChange}: CodeProps) =
                                             height="100%"
                                             width="100%"
                                             language={LanguageDependencyFileSyntax[language]}
-                                            theme={theme === "dark" ? "hc-black" : "vs-light"}
+                                            theme={theme === "dark" ? "vs-dark" : "vs-light"}
                                             value={code}
                                             onChange={(code) => {onChange(code || '')}}
                                             options={{
