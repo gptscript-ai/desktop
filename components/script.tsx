@@ -127,7 +127,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
                     )}
                 </div>
             </>) : (
-                <Loading>Loading your script...</Loading>
+                <Loading>Loading your assistant...</Loading>
             )}
         </div>
     );

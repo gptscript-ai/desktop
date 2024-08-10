@@ -36,7 +36,7 @@ const priorityTools = [
     {
         name: "Github",
         description: "Provides the ability to interact with GitHub.",
-        url: "github.com/gptscript-ai/tools/cli/github",
+        url: "github.com/gptscript-ai/tools/clis/github",
         tags: ["github", "cli"],
         icon: <FaGithub className="text-7xl"/>,
     },

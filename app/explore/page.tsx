@@ -10,7 +10,7 @@ import Loading from "@/components/loading";
 import {GoSearch} from "react-icons/go";
 import ScriptModal from "@/components/explore/scriptModal";
 import { debounce } from "lodash";
-
+import { MdOutlineTravelExplore } from "react-icons/md";
 
 export default function Explore() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
@@ -76,8 +76,12 @@ export default function Explore() {
     useEffect(() => { refresh() }, [authenticated]);
 
     return (
-        <div className="w-full px-10 h-full overflow-y-scroll mx-auto pt-10">
-            <div className="flex w-full justify-end space-x-2 mb-6">
+        <div className="w-full px-20 h-full overflow-y-scroll mx-auto pt-10">
+            <div className="flex w-full justify-between space-x-2 mt-10 mb-20">
+                <h1 className="text-4xl font-bold text-primary-400">
+                <MdOutlineTravelExplore className="inline mb-2 mr-1 text-5xl"/> Explore
+                </h1>
+                <div className="w-3/4 flex justify-end space-x-4">
                     <Select radius="lg" label="Owners" color="primary" isDisabled={!owners.length} size="sm" aria-label="owners" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
                         onSelectionChange={(keys) => { setFilteredOwners(keys as Set<string>)}}
                     >
@@ -95,24 +99,25 @@ export default function Explore() {
                     >
                         {tags.map((tag) => <SelectItem key={tag} value={tag}>{tag}</SelectItem>)}
                     </Select>
-                <Input 
-                    startContent={<GoSearch />}
-                    placeholder="Search for an agent..."
-                    color="primary"
-                    variant="bordered"
-                    isClearable
-                    size="lg"
-                    className="w-1/5"
-                    onChange={(e) => {
-                        setQuery(e.target.value)
-                        if (e.target.value === '') refresh()
-                    }}
-                    onKeyDown={debounce((e) => {
-                        if (e.key === 'Enter') {
-                            refresh()
-                        }
-                    })}
-                />
+                    <Input 
+                        startContent={<GoSearch />}
+                        placeholder="Search for an agent..."
+                        color="primary"
+                        variant="bordered"
+                        isClearable
+                        size="lg"
+                        className="w-1/5"
+                        onChange={(e) => {
+                            setQuery(e.target.value)
+                            if (e.target.value === '') refresh()
+                        }}
+                        onKeyDown={debounce((e) => {
+                            if (e.key === 'Enter') {
+                                refresh()
+                            }
+                        })}
+                    />
+                </div>
             </div>
             {loading ?
                 <Loading /> :
@@ -155,7 +160,7 @@ export default function Explore() {
                                 isLoading={nextLoading}
                                 color="primary" 
                                 size="lg" 
-                                className="col-span-1 lg:col-span-2 2xl:col-span-3 3xl:col-span-4"
+                                className="col-span-1 md:col-span-2 xl:col-span-3 3xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)
                                     getScripts({limit: 10, continue: next})
