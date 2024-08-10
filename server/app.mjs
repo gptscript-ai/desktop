@@ -420,7 +420,6 @@ async function updateGPTScriptConfig(gptscript) {
             throw new Error(`Error parsing config file: ${parseErr}`);
         }
 
-        // Default values to add if they don't exist
         const defaultConfigResult = await fetch("https://raw.githubusercontent.com/gptscript-ai/gateway-config/main/config.json");
         const defaultConfig = await defaultConfigResult.json()
 
