@@ -20,7 +20,10 @@ const useChatSocket = (isEmpty?: boolean) => {
     const messagesRef = useRef(messages);
     const latestAgentMessageIndex = useRef<number>(-1);
     const trustedRef = useRef<Record<string, boolean>>({});
-    const trustedRepoPrefixesRef = useRef<string[]>(["github.com/gptscript-ai/context"]);
+    const trustedRepoPrefixesRef = useRef<string[]>([
+        "github.com/gptscript-ai/context",
+        "github.com/gptscript-ai/gateway-provider",
+    ]);
 
     // update the refs as the state changes
     useEffect(() => {
@@ -59,6 +62,10 @@ const useChatSocket = (isEmpty?: boolean) => {
             frame.output.length > 0 &&
             (!frame.parentID || frame.tool?.chat) &&
             !frame.output[frame.output.length - 1].subCalls
+
+        if (frame.tool?.source?.repo?.Root?.includes('github.com/gptscript-ai/gateway-provider')) {
+            return;
+        }
 
         let content = isMainContent ? frame.output[frame.output.length - 1].content || "" : ""
         if (!content) return;
@@ -279,7 +286,10 @@ const useChatSocket = (isEmpty?: boolean) => {
         setRunning(false);
         setError(null)
         setMessages([]);
-        trustedRepoPrefixesRef.current = ["github.com/gptscript-ai/context"];
+        trustedRepoPrefixesRef.current = [
+            "github.com/gptscript-ai/context",
+            "github.com/gptscript-ai/gateway-provider",
+        ];
         loadSocket();
     }, [socket]);
 

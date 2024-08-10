@@ -16,9 +16,7 @@
     "dev": "node server.mjs",
     "dev:electron": "electron .",
     "lint": "next lint",
-    "start": "cross-env NODE_ENV='production' node server.mjs",
-    "postinstall": "cross-env NODE_ENV='production' npm run build",
-    "dev-install": "npm install --ignore-scripts"
+    "start": "cross-env NODE_ENV='production' node server.mjs"
   },
   "main": "electron/main.mjs",
   "dependencies": {
