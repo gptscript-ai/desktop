@@ -59,7 +59,7 @@ export const startAppServer = ({dev, hostname, port, dir}) => {
                 .catch(err => {
                     console.error('Error updating GPTScript config:', err);
                 });
-        }, 30 * 1000); // Pull the config from GitHub every 30 minutes
+        }, 30 * 60 * 1000); // Pull the config from GitHub every 30 minutes
 
         Promise.resolve(gptscriptInitPromise).then(() => {
             app.prepare().then(() => {
