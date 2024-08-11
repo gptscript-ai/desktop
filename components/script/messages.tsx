@@ -77,7 +77,9 @@ const Message = ({message, noAvatar, restart}: { message: Message, noAvatar?: bo
                                     {message.message}
                                 </Markdown>
                             )}
-                            {message.component}
+                            <div className="overflow-x-auto">
+                                {message.component}
+                            </div>
                             {message.error && (
                                 <>
                                     <p className="text-danger text-base pl-4 pb-6">{`${JSON.stringify(message.error)}`}</p>

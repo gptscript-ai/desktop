@@ -26,7 +26,7 @@ import {
 } from "react-icons/go";
 import {AiFillFileAdd, AiOutlineKubernetes, AiOutlineSlack} from "react-icons/ai";
 import {PiMicrosoftExcelLogo, PiMicrosoftOutlookLogoDuotone, PiToolbox} from "react-icons/pi";
-import {SiAmazoneks, SiGooglecloud, SiJson, SiNotion, SiSupabase} from "react-icons/si";
+import {SiAmazoneks, SiGooglecloud, SiJson, SiMongodb, SiNotion, SiSupabase} from "react-icons/si";
 import {FaAws, FaCode, FaDigitalOcean, FaGithub, FaGlasses, FaPaintBrush, FaTrello} from "react-icons/fa";
 import { Tool } from "@gptscript-ai/gptscript";
 import { VscAzure } from "react-icons/vsc";
@@ -194,6 +194,13 @@ const featuredTools: FeaturedTools = {
             icon: <SiAmazoneks className="text-7xl"/>
         },
         {
+            name: "MongoDB Atlas",
+            description: "Provides the ability to interact with MongoDB Atlas.",
+            url: "github.com/gptscript-ai/tools/clis/atlas",
+            tags: ["atlas", "mongodb", "db", "cloud", "cli"],
+            icon: <SiMongodb className="text-7xl"/>
+        },
+        {
             name: "Google Cloud Platform",
             description: "Provides the ability to interact with Google Cloud Platform.",
             url: "github.com/gptscript-ai/tools/clis/gcp",
@@ -208,14 +215,7 @@ const featuredTools: FeaturedTools = {
             icon: <AiOutlineKubernetes className="text-7xl"/>,
         },
         {
-            name: "Supabase API",
-            description: "Allows the agent to interact with Supabase via its APIs.",
-            url: "github.com/gptscript-ai/tools/apis/supabase/read-write",
-            tags: ["supabase", "db", "authentication", "api", "apis"],
-            icon: <SiSupabase className="text-7xl"/>
-        },
-        {
-            name: "Supabase CLI",
+            name: "Supabase",
             description: "Allows the agent to interact with Supabase via the CLI.",
             url: "github.com/gptscript-ai/tools/clis/supabase",
             tags: ["supabase", "db", "authentication", "api", "cli"],

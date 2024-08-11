@@ -5,7 +5,6 @@ import {
     ModalBody,
     ModalContent,
 } from "@nextui-org/react";
-import {GoTools} from "react-icons/go";
 import ToolCatalog from "@/components/edit/configure/imports/toolCatalog";
 
 

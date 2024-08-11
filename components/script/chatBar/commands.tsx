@@ -1,11 +1,14 @@
 import { Card, Listbox, ListboxItem, Menu } from "@nextui-org/react";
 import React, { useEffect, useContext } from "react";
-import { GoInbox, GoIssueReopened, GoTools } from "react-icons/go";
+import { GoAlert, GoInbox, GoIssueReopened, GoPaperclip, GoTools } from "react-icons/go";
 import { PiToolbox } from "react-icons/pi";
 import { ScriptContext } from "@/contexts/script";
 import Upload from "@/components/script/chatBar/upload";
 import ToolCatalog from "@/components/script/chatBar/toolCatalog";
-import { MessageType } from "@/components/script/messages";
+import { Message, MessageType } from "@/components/script/messages";
+import { useFilePicker } from "use-file-picker";
+import { uploadFile } from "@/actions/upload";
+import { getWorkspaceDir } from "@/actions/workspace";
 
 /*
     note(tylerslaton):
@@ -26,19 +29,25 @@ import { MessageType } from "@/components/script/messages";
 
 const options = [
     {
-        title: "Restart",
+        title: "Restart Chat",
         command: "restart",
         description: "Restart the current assistant to get a new session",
         icon: <GoIssueReopened className="mr-2" />,
     },
     {
-        title: "Add",
+        title: "Add Knowledge",
+        command: "knowledge",
+        description: "Add knowledge to the current assistant to extend functionality",
+        icon: <GoPaperclip className="mr-2" />,
+    },
+    {
+        title: "Add Tools",
         command: "add",
         description: "Add tools to the current assistant to extend functionality",
         icon: <PiToolbox className="mr-2" />,
     },
     {
-        title: "Workspace",
+        title: "Manage Workspace",
         command: "workspace",
         description: "Manage the workspace which contains the files the assistant has access to",
         icon: <GoInbox className="mr-2" />,
@@ -57,7 +66,9 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
     const [filteredOptions, setFilteredOptions] = React.useState<typeof options>(options);
     const [uploadOpen, setUploadOpen] = React.useState(false);
     const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
-    const {restartScript, socket, setMessages, tools} = useContext(ScriptContext);
+    const {restartScript, socket, setMessages, tools, tool, setTool} = useContext(ScriptContext);
+    const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker({});
+    
 
     useEffect(() => {
         if (!text.startsWith("/")) {
@@ -70,6 +81,43 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
 
         setFilteredOptions(options.filter((option) => option.command.startsWith(command)));
     }, [text]);
+
+    useEffect(() => {
+        if (loading) return;
+        if (!filesContent.length) return;
+
+        let addedMessages = [] as Message[];
+        for (const file of plainFiles) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            getWorkspaceDir()
+                .then((workspace) =>
+                    uploadFile(workspace, formData)
+                        .then(() => {
+                            addedMessages.push({
+                                type: MessageType.Alert,
+                                icon: <GoPaperclip className="mt-1"/>,
+                                message: `Added knowledge ${file.name}`
+                            });
+                        })
+                        .catch((error) => {
+                            addedMessages.push({
+                                type: MessageType.Alert,
+                                icon: <GoAlert className="mt-1"/>,
+                                message: `Error adding knowledge ${file.name}: ${error}`
+                            });
+                        })
+                        .finally(() => {
+                            setMessages((prev) => [...prev, ...addedMessages])
+                            if (!tool || tool.tools?.includes("github.com/gptscript-ai/knowledge")) return;
+                            setTool((prev) => ({...prev, tools: [...prev.tools || [], "github.com/gptscript-ai/knowledge"]}));
+                            socket?.emit("addTool", "github.com/gptscript-ai/knowledge");
+                        })
+                );
+        }
+
+    }, [filesContent, loading, tool]);
     
     const handleSelect = (value: string) => {
         switch (value) {
@@ -81,6 +129,9 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
                 break;
             case "workspace":
                 setUploadOpen(true);
+                break;
+            case "knowledge":
+                openFilePicker();
                 break;
         }
 
