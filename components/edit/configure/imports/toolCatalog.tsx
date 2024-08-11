@@ -16,18 +16,15 @@ import {
     GoGlobe, 
     GoLink, 
     GoPerson, 
-    GoPlay, 
     GoPlus, 
     GoSearch, 
     GoTerminal, 
     GoTools, 
-    GoTrash
 } from "react-icons/go";
 import {AiOutlineKubernetes, AiOutlineSlack} from "react-icons/ai";
 import {PiMicrosoftOutlookLogoDuotone, PiToolbox} from "react-icons/pi";
-import {RiNotionFill} from "react-icons/ri";
-import {SiAmazoneks, SiGooglecloud} from "react-icons/si";
-import {FaAws, FaDigitalOcean, FaGithub, FaMicrosoft} from "react-icons/fa";
+import {SiAmazoneks, SiGitlab, SiGooglecloud, SiNotion, SiSupabase} from "react-icons/si";
+import {FaAws, FaDigitalOcean, FaGithub, FaTrello} from "react-icons/fa";
 import { Tool } from "@gptscript-ai/gptscript";
 import Loading from "@/components/loading";
 import { VscAzure } from "react-icons/vsc";
@@ -83,10 +80,17 @@ const priorityTools = [
         icon: <AiOutlineKubernetes className="text-7xl"/>,
     },
     {
-        name: "Outlook",
+        name: "Outlook Mail",
         description: "Allows the agent to send and receive emails via Outlook.",
-        url: "github.com/gptscript-ai/outlook",
+        url: "github.com/gptscript-ai/tools/apis/outlook/mail/manage",
         tags: ["email", "office", "microsoft", "service"],
+        icon: <PiMicrosoftOutlookLogoDuotone className="text-7xl"/>
+    },
+    {
+        name: "Outlook Calendar",
+        description: "Allows the agent to interact with Outlook Calendar.",
+        url: "github.com/gptscript-ai/tools/apis/outlook/calendar/manage",
+        tags: ["calendar", "office", "microsoft", "service"],
         icon: <PiMicrosoftOutlookLogoDuotone className="text-7xl"/>
     },
     {
@@ -113,9 +117,37 @@ const priorityTools = [
     {
         name: "Slack",
         description: "Allows the agent to interact with Slack.",
-        url: "github.com/gptscript-ai/slack",
-        tags: ["slack", "messaging", "teams", "service"],
+        url: "github.com/gptscript-ai/tools/apis/slack/write",
+        tags: ["slack", "messaging", "teams", "api"],
         icon: <AiOutlineSlack className="text-7xl"/>
+    },
+    {
+        name: "Notion",
+        description: "Allows the agent to interact with Notion.",
+        url: "github.com/gptscript-ai/tools/apis/notion/write",
+        tags: ["notion", "documentation", "notes", "api"],
+        icon: <SiNotion className="text-7xl"/>
+    },
+    {
+        name: "Trello",
+        description: "Allows the agent to interact with Trello.",
+        url: "github.com/gptscript-ai/tools/apis/trello",
+        tags: ["trello", "project", "management", "api"],
+        icon: <FaTrello className="text-7xl"/>
+    },
+    {
+        name: "Gitlab",
+        description: "Allows the agent to interact with Gitlab.",
+        url: "github.com/gptscript-ai/tools/apis/gitlab",
+        tags: ["gitlab", "code", "version", "control", "api"],
+        icon: <SiGitlab className="text-7xl"/>
+    },
+    {
+        name: "Supabase",
+        description: "Allows the agent to interact with Supabase.",
+        url: "github.com/gptscript-ai/tools/apis/supabase/read-write",
+        tags: ["supabase", "db", "authentication", "api", "apis"],
+        icon: <SiSupabase className="text-7xl"/>
     },
     {
         name: "Workspace",
