@@ -23,7 +23,7 @@ export default function Home() {
                     <Create/>
                 </div>
 
-                <div className="w-full pt-16">
+                <div className="w-full pt-16 pb-24">
                     <Scripts/>
                 </div>
         </section>
