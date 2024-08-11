@@ -1,8 +1,7 @@
 "use client";
 
 import React, {useState, useEffect, useCallback, useContext} from "react";
-import {VscNewFile} from "react-icons/vsc";
-import {GoTrash, GoPaperAirplane, GoPencil, GoPerson} from "react-icons/go";
+import {GoTrash, GoPencil} from "react-icons/go";
 import Loading from "@/components/loading";
 import {getScripts, deleteScript, ParsedScript} from '@/actions/me/scripts';
 import {AuthContext} from "@/contexts/auth";
@@ -11,9 +10,12 @@ import {
     CardHeader,
     CardBody,
     Button,
+    CardFooter,
+    Avatar,
+    Divider,
+    ScrollShadow,
 } from "@nextui-org/react";
 import { LuMessageSquare } from "react-icons/lu";
-import Create from "@/components/scripts/create";
 
 export default function Scripts() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
@@ -35,42 +37,70 @@ export default function Scripts() {
             .catch((error) => console.error(error));
     }, []);
 
+    const abbreviate = (name: string) => {
+        const words = name.split(/(?=[A-Z])|[\s_-]/);
+        const firstLetters = words.map(word => word[0]);
+        return firstLetters.slice(0, 2).join('').toUpperCase();
+    }
+
     useEffect(() => { refresh() }, [authenticated, me]);
 
     const ScriptItems = () => authenticated ? (
-        <div className="grid grid-cols-2 gap-6">
-            <div className="grid grid-cols-1 gap-4 col-span-2">
-                <Create />
-            </div>
-            {!loading && !scripts.length &&
-                <Card className="col-span-2 p-4 text-center">
-                    <CardBody className="flex gap-3">
-                        Create a new assistant with the button above to get started!
-                    </CardBody>
-                </Card>
-            }
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-4 w-full gap-10">
             {scripts.map((script) => (
-                <Card key={script.agentName ? script.agentName : script.displayName} className="p-4">
-                    <CardHeader className="flex justify-between">
-                        <div className="flex gap-3 items-center">
-                            <GoPerson className="mb-1 text-xl bg-gray-100 dark:bg-zinc-700 rounded-full text-primary-500 h-8 w-8 p-1.5"/>
-                            {script.agentName ? script.agentName : script.displayName}
+                <Card key={script.agentName ? script.agentName : script.displayName} className="p-4 h-[350px]">
+                    <CardHeader className="w-full grid grid-cols-1">
+                        <div className="flex justify-between">
+                            <div className="flex gap-3 items-center">
+                                <h1 className="text-2xl truncate mb-6">{script.agentName ? script.agentName : script.displayName}</h1>
+                            </div>
                         </div>
-                        <div className="flex-col flex absolute bottom-1 right-4">
-                            <Button startContent={<GoPaperAirplane />} onPress={() => {
-                                window.location.href = `/?file=${script.publicURL}&id=${script.id}`;
-                            }} radius="full" variant="light" isIconOnly/>
-                            { me?.username === script.owner && <Button startContent={<GoPencil />} onPress={() => {
-                                window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`;
-                            }} radius="full" variant="light" isIconOnly/>}
-                            { me?.username === script.owner && <Button startContent={<GoTrash />} onPress={() => {
-                                handleDelete(script)
-                            }} radius="full" variant="light" isIconOnly/> }
-                        </div>
+                        <Divider />
                     </CardHeader>
-                    <CardBody>
-                        <p className="truncate w-4/5 text-zinc-500">{script.description ? script.description : "No description provided"}</p>
+                    <CardBody className="overflow-y-auto">
+                        <ScrollShadow size={8}>
+                            <p className="max-w-full max-h-full text-zinc-500">{script.description ? script.description : "No description provided."}</p>
+                        </ScrollShadow>
                     </CardBody>
+                    <CardFooter className="flex justify-between space-x-2">
+                        <Button
+                            className="w-full"
+                            startContent={<LuMessageSquare />}
+                            color="primary"
+                            variant="flat"
+                            onPress={() => {
+                                window.location.href = `/?file=${script.publicURL}&id=${script.id}`;
+                            }}
+                        >
+                            Chat
+                        </Button>
+                        { me?.username === script.owner && 
+                            <>
+                                <Button
+                                    className="w-full"
+                                    variant="flat"
+                                    color="primary"
+                                    startContent={<GoPencil />}
+                                    onPress={() => {
+                                        window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`;
+                                    }}
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    className="w-full"
+                                    startContent={<GoTrash />}
+                                    variant="flat"
+                                    onPress={() => {
+                                        handleDelete(script)
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                                    
+                            </>
+                        }
+                    </CardFooter>
                 </Card>
             ))}
         </div>
