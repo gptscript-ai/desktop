@@ -1,11 +1,11 @@
 import { createContext, useState, useRef, useEffect, useCallback } from 'react';
 import useChatSocket from '@/components/script/useChatSocket'
 import { Message } from '@/components/script/messages';
-import { Tool, ToolDef } from '@gptscript-ai/gptscript';
+import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
 import { getThreads, getThread, Thread } from '@/actions/threads';
 import { getScript, getScriptContent, type Script } from "@/actions/me/scripts";
-import { rootTool } from "@/actions/gptscript";
+import { parse, rootTool } from "@/actions/gptscript";
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir } from '@/actions/workspace';
 
@@ -70,7 +70,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 	const [showForm, setShowForm] = useState(true);
 	const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
-    const [scriptContent, setScriptContent] = useState<ToolDef[] | null>(null);
+    const [scriptContent, setScriptContent] = useState<Block[] | null>(null);
 	const [hasRun, setHasRun] = useState(false);
 	const [hasParams, setHasParams] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
@@ -97,7 +97,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         if(scriptId) {
             getScript(scriptId).then(async (script) => {
                 setTool(await rootTool(script.content || ''));
-                setScriptContent(script.script as ToolDef[]);
+                setScriptContent(script.script as Block[]);
                 setInitialFetch(true);
             });
         } else {
@@ -132,10 +132,10 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         setIsEmpty(!tool.instructions);
 		if (hasRun || !socket || !connected || !initialFetch) return;
 		if ( !tool.arguments?.properties || Object.keys(tool.arguments.properties).length === 0 ) {
-            socket.emit("run", script, subTool ? subTool : tool.name, formValues, workspace, thread)
+            socket.emit("run", scriptContent ? scriptContent : script, subTool ? subTool : tool.name, formValues, workspace, thread)
 			setHasRun(true);
 		}
-	}, [tool, connected, scriptContent, formValues, workspace, thread]);
+	}, [tool, connected, script, scriptContent, formValues, workspace, thread]);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
@@ -154,8 +154,20 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         debounce(async () => {
             setRunning(false);
             setHasRun(false);
-            const scriptContent = await getScriptContent(script);
-            setTool(await rootTool(scriptContent));
+            setInitialFetch(false);
+
+            if(scriptId) {
+                getScript(scriptId).then(async (script) => {
+                    setTool(await rootTool(script.content || ''));
+                    setScriptContent(script.script as Block[]);
+                    setInitialFetch(true);
+                });
+            } else {
+                getScriptContent(script).then(async (content) => {
+                    setTool(await rootTool(content))
+                    setInitialFetch(true);
+                });
+            }
             restart();
         }, 200),
         [script, restart]

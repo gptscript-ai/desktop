@@ -101,19 +101,19 @@ export async function deleteScript(script: Script) {
 }
 
 export async function getScriptContent(scriptURL: string) {
-    const script = await gpt().parse(scriptURL);
+    const script = await gpt().parse(scriptURL, true);
     return gpt().stringify(script);
 }
 
 export async function getNewScriptName() {
     const me = await getMe();
     const scripts = await getScripts({ owner: me.username, search: 'New Assistant' });
-    let smallestAssistant = Infinity;
+    let latestAssistant = 1;
     for (let script of scripts.scripts || []) {
         if (script.displayName?.includes('New Assistant')) {
             const assistantNumber = parseInt(script.displayName?.split('New Assistant ')[1] || '1');
-            if (assistantNumber < smallestAssistant) smallestAssistant = assistantNumber;
+            if (assistantNumber > latestAssistant) latestAssistant = assistantNumber;
         }
     }
-    return `New Assistant ${smallestAssistant === Infinity ? 1 : smallestAssistant - 1}`;
+    return `New Assistant ${latestAssistant + 1}`;
 }

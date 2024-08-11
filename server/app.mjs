@@ -101,7 +101,13 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
     const WORKSPACE_DIR = process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
     const THREADS_DIR = process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, "threads");
 
-    const script = await gptscript.parse(location, true);
+    let script;
+    if (typeof location === "string") {
+        script = await gptscript.parse(location, true);
+    } else {
+        script = location;
+    }
+    
 
     const opts = {
         input: JSON.stringify(args || {}),
