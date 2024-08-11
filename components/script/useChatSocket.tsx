@@ -14,7 +14,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const [running, setRunning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [tools, setTools] = useState<string[]>([]);
-    const [forceRun, setForceRun] = useState(true);
+    const [forceRun, setForceRun] = useState(false);
 
     // Refs
     const socketRef = useRef<Socket | null>(null);
