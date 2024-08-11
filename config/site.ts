@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-    name: "Assistant Studio",
+    name: "Acorn",
     description: "Run and build GPTSscripts.",
     navItems: [
         {

@@ -6,7 +6,7 @@ import { existsSync, mkdirSync } from "fs";
 import fixPath from "fix-path";
 import os from 'os';
 
-const appName = 'Assistant Studio';
+const appName = 'Acorn';
 const gatewayUrl = process.env.GATEWAY_URL || 'https://gateway-api.gptscript.ai';
 const resourcesDir = dirname(app.getAppPath());
 const dataDir = getDataDir(appName);

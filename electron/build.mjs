@@ -7,8 +7,8 @@ const Platform = builder.Platform;
  * @type {import('electron-builder').Configuration}
  */
 const options = {
-    appId: 'ai.gptscript.assistant-studio',
-    productName: 'Assistant Studio',
+    appId: 'ai.gptscript.acorn',
+    productName: 'Acorn',
     files: [
         "**/*",
         "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
