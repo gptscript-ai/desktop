@@ -236,6 +236,7 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
                                         <Textarea
                                             color="primary"
                                             fullWidth
+                                            maxRows={50}
                                             variant="bordered"
                                             label="Instructions"
                                             placeholder="Describe your how your tool should behave..."

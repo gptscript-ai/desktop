@@ -9,7 +9,7 @@ const newDefaultAssistant = (name: string): string => {
 Name: ${name}
 Chat: true
 
-You are a helpful assistant named ${name}.
+You are a helpful assistant named ${name}. When you first start, just introduce yourself and wait for the user's next message.
 `
 }
 

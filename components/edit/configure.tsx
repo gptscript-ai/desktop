@@ -91,6 +91,7 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
                 <Textarea
                     color="primary"
                     fullWidth
+                    maxRows={50}
                     variant="bordered"
                     label="Instructions"
                     placeholder="Give your assistant instructions on how to behave..."
