@@ -14,6 +14,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     const [running, setRunning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [tools, setTools] = useState<string[]>([]);
+    const [forceRun, setForceRun] = useState(true);
 
     // Refs
     const socketRef = useRef<Socket | null>(null);
@@ -259,8 +260,13 @@ const useChatSocket = (isEmpty?: boolean) => {
         setConnected(false);
         setMessages([]);
 
-        socket.on("connect", () => setConnected(true));
-        socket.on("disconnect", () => setConnected(false));
+        socket.on("connect", () => {
+            setConnected(true);
+        });
+        socket.on("disconnect", () => {
+            setConnected(false);
+            setForceRun(true);
+        });
         socket.on("running", () => setRunning(true));
         socket.on("progress", (data: { frame: CallFrame, state: any }) => handleProgress(data));
         socket.on("error", (data: string) => handleError(data));
@@ -331,6 +337,8 @@ const useChatSocket = (isEmpty?: boolean) => {
         setRunning,
         tools,
         setTools,
+        forceRun,
+        setForceRun,
     };
 };
 
