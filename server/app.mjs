@@ -126,6 +126,14 @@ const mount = async (location, tool, args, scriptWorkspace, socket, threadID, gp
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
         if (state && state.chatState) {
             opts.chatState = state.chatState;
+            // also load the tools defined the states so that when running a thread that has tools added in state, we don't lose them
+            for (let block of script) {
+                if (block.type === "tool") {
+                    if (!block.tools) block.tools = [];
+                    block.tools = [...new Set([...block.tools || [], ...(state.tools || [])])];
+                    break;
+                }
+            }
             socket.emit("loaded", {messages: state.messages, tools: state.tools || []});
         }
     } catch (e) {
