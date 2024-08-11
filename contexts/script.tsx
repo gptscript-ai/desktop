@@ -81,7 +81,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [initialFetch, setInitialFetch] = useState(false);
     const [subTool, setSubTool] = useState(initialSubTool || '');
     const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools, forceRun, setForceRun
     } = useChatSocket(isEmpty);
 
     // need to initialize the workspace from the env variable with serves
@@ -136,6 +136,13 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 			setHasRun(true);
 		}
 	}, [tool, connected, scriptContent, formValues, workspace, thread]);
+
+	useEffect(() => {
+		if (forceRun && socket && connected) {
+			socket.emit("run", script, subTool ? subTool : tool.name, formValues, workspace, thread)
+			setForceRun(false);
+		}
+	}, [forceRun, connected]);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
