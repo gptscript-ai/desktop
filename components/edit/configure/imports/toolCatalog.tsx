@@ -50,14 +50,14 @@ const featuredTools: FeaturedTools = {
         {
             name: "Vision",
             description: "Allows the assistant to interact with images.",
-            url: "github.com/gptscript-ai/gpt4-v-vision",
+            url: "github.com/gptscript-ai/gpt4-v-vision@gateway",
             tags: ["vision", "images", "ai"],
             icon: <BsEye className="text-7xl"/>
         },
         {
             name: "Image Generation",
             description: "Allows the assistant to generate images.",
-            url: "github.com/gptscript-ai/dalle-image-generation",
+            url: "github.com/gptscript-ai/dalle-image-generation@gateway",
             tags: ["images", "ai", "generation"],
             icon: <FaPaintBrush className="text-7xl"/>
         },
@@ -124,7 +124,7 @@ const featuredTools: FeaturedTools = {
         {
             name: "Knowledge",
             description: "Provides the assistant with information based context.",
-            url: "github.com/gptscript-ai/knowledge",
+            url: "github.com/gptscript-ai/knowledge@gateway",
             tags: ["knowledge", "rag"],
             icon: <GoBook className="text-7xl"/>,
         },
