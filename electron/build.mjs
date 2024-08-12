@@ -56,7 +56,7 @@ const options = {
             Encoding: 'UTF-8',
             MimeType: 'x-scheme-handler/deeplink',
         },
-        icon: "electron/icon.icns",
+        icon: "electron/icon.png",
         target: ['AppImage'],
     },
     compression: 'normal',
