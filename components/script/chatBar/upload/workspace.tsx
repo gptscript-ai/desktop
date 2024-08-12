@@ -30,7 +30,9 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
         setWorkspace(workspaceInput);
         setIsOpen(false);
         // Here we use selectedThreadId here because it is always set after thread is created. Thread might not be set when it is created on the fly.
-        updateThreadWorkspace(selectedThreadId ?? '', workspaceInput);
+        if (selectedThreadId) {
+            updateThreadWorkspace(selectedThreadId, workspace);
+        }
         onRestart();
     }, [workspaceInput]);
 

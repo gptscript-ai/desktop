@@ -88,7 +88,7 @@ export async function generateThreadName(firstMessage: string): Promise<string> 
     return summary.text();
 }
 
-export async function createThread(script: string, firstMessage?: string, scriptId?: string): Promise<Thread> {
+export async function createThread(script: string, firstMessage?: string, scriptId?: string, workspace?: string): Promise<Thread> {
     const threadsDir = THREADS_DIR();
 
     // will probably want something else for this
@@ -101,7 +101,7 @@ export async function createThread(script: string, firstMessage?: string, script
         description: '',
         created: new Date(),
         updated: new Date(),
-        workspace: WORKSPACE_DIR(),
+        workspace: workspace ?? WORKSPACE_DIR(),
         id,
         scriptId: scriptId || '',
         script,

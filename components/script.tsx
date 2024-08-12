@@ -43,6 +43,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         restartScript,
         scriptId,
         fetchThreads,
+        workspace,
     } = useContext(ScriptContext);
 
     useEffect(() => {
@@ -78,7 +79,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
 
         let threadId = "";
         if (hasNoUserMessages() && enableThreads && !thread && setThreads && setSelectedThreadId) {
-            const newThread = await createThread(script, message, scriptId);
+            const newThread = await createThread(script, message, scriptId, workspace);
             threadId = newThread?.meta?.id;
             setThreads(await getThreads());
             setSelectedThreadId(threadId);
