@@ -14,15 +14,17 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
         setScript,
         setThread, 
         threads,
+        setScriptId,
         selectedThreadId,
         setSelectedThreadId,
     } = useContext(ScriptContext);
 
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const handleRun = async (script: string, id: string) => {
+    const handleRun = async (script: string, id: string, scriptId: string) => {
         setScript(script);
         setThread(id);
+        setScriptId(scriptId);
         setSelectedThreadId(id);
     };
 
@@ -58,7 +60,7 @@ const Threads: React.FC<ThreadsProps> = ({className}) => {
                                     <div
                                         key={key}
                                         className={`border-1 border-gray-300 px-4 rounded-xl transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:border-primary-50 dark:bg-primary-50 text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer dark:bg-zinc-800 dark:border-zinc-800'} `}
-                                        onClick={() => handleRun(thread.meta.script, thread.meta.id)}
+                                        onClick={() => handleRun(thread.meta.script, thread.meta.id, thread.meta.scriptId || '')}
                                     >
                                         <div className="flex justify-between items-center">
                                             <h2 className="text-sm truncate">{thread.meta.name}</h2>

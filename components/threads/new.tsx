@@ -33,7 +33,7 @@ const NewThread = ({className}: NewThreadProps) => {
     useEffect(() => { fetchScripts() }, [isOpen]);
 
     const handleCreateThread = (script: string) => {
-        createThread(script).then((newThread) => {
+        createThread(script, '', scriptId).then((newThread) => {
             setThreads((threads: Thread[]) => [newThread, ...threads]);
             setScript(script);
             setThread(newThread.meta.id);

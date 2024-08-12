@@ -20,6 +20,7 @@ interface ScriptContextProps{
 interface ScriptContextState {
     script: string;
     scriptId?: string;
+    setScriptId: React.Dispatch<React.SetStateAction<string | undefined>>;
     scriptContent: ToolDef[] | null;
     workspace: string;
     tools: string[];
@@ -106,7 +107,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
                 setInitialFetch(true);
             });
         }
-	}, [script]);
+	}, [script, scriptId]);
 
     useEffect(() => {
 		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
@@ -114,13 +115,14 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 
     useEffect(() => {
         if(thread) {
-            getThread(thread).then((thread) => {
-                if(thread) {
-                    setWorkspace(thread.meta.workspace);
-                    setScriptId(thread.meta.scriptId);
-                }
-            });
-            restartScript();
+            getThread(thread)
+                .then((thread) => {
+                    if(thread) {
+                        setInitialFetch(false);
+                        setWorkspace(thread.meta.workspace);
+                    }
+                    restartScript();
+                })
         }
     }, [thread]);
 
@@ -139,10 +141,10 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 
 	useEffect(() => {
 		if (forceRun && socket && connected) {
-			socket.emit("run", script, subTool ? subTool : tool.name, formValues, workspace, thread)
+			socket.emit("run", scriptContent ? scriptContent : script, subTool ? subTool : tool.name, formValues, workspace, thread)
 			setForceRun(false);
 		}
-	}, [forceRun, connected]);
+	}, [forceRun, script, scriptContent, subTool, formValues, workspace, thread, connected]);
 
 	useEffect(() => {
 		const smallBody = document.getElementById("small-message");
@@ -177,14 +179,14 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
             }
             restart();
         }, 200),
-        [script, restart]
+        [script, thread, restart]
     );
 
     return (
         <ScriptContext.Provider 
             value={{
                 scriptContent,
-                scriptId,
+                scriptId, setScriptId,
                 script, setScript,
                 workspace, setWorkspace,
                 tool, setTool,

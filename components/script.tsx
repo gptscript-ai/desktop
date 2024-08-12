@@ -39,6 +39,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         connected,
         running,
         restartScript,
+        scriptId,
         fetchThreads,
     } = useContext(ScriptContext);
 
@@ -75,7 +76,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
 
         let threadId = "";
         if (hasNoUserMessages() && enableThreads && !thread && setThreads && setSelectedThreadId) {
-            const newThread = await createThread(script, message)
+            const newThread = await createThread(script, message, scriptId);
             threadId = newThread?.meta?.id;
             setThreads(await getThreads());
             setSelectedThreadId(threadId);
