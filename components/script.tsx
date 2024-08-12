@@ -33,6 +33,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         messages,
         setMessages,
         thread,
+        setThread,
         setThreads,
         setSelectedThreadId,
         socket,

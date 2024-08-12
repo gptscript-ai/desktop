@@ -17,7 +17,7 @@ interface WorkspaceProps {
 
 const Workspace = ({onRestart}: WorkspaceProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const {workspace, setWorkspace, thread} = useContext(ScriptContext);
+    const {workspace, setWorkspace, selectedThreadId} = useContext(ScriptContext);
     const [workspaceInput, setWorkspaceInput] = useState<string>('');
 
     useEffect(() => {
@@ -29,7 +29,8 @@ const Workspace = ({onRestart}: WorkspaceProps) => {
     const handleConfirm = useCallback(() => {
         setWorkspace(workspaceInput);
         setIsOpen(false);
-        updateThreadWorkspace(thread, workspaceInput);
+        // Here we use selectedThreadId here because it is always set after thread is created. Thread might not be set when it is created on the fly.
+        updateThreadWorkspace(selectedThreadId ?? '', workspaceInput);
         onRestart();
     }, [workspaceInput]);
 
