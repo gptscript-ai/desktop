@@ -110,9 +110,9 @@ export default function Commands({text, setText, isOpen, setIsOpen, children }: 
                         })
                         .finally(() => {
                             setMessages((prev) => [...prev, ...addedMessages])
-                            if (!tool || tool.tools?.includes("github.com/gptscript-ai/knowledge@gateway")) return;
-                            setTool((prev) => ({...prev, tools: [...prev.tools || [], "github.com/gptscript-ai/knowledge@gateway"]}));
-                            socket?.emit("addTool", "github.com/gptscript-ai/knowledge@gateway");
+                            if (!tool || tool.tools?.includes("github.com/gptscript-ai/knowledge@v0.4.5-gateway")) return;
+                            setTool((prev) => ({...prev, tools: [...prev.tools || [], "github.com/gptscript-ai/knowledge@v0.4.5-gateway"]}));
+                            socket?.emit("addTool", "github.com/gptscript-ai/knowledge@v0.4.5-gateway");
                         })
                 );
         }
