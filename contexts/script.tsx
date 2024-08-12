@@ -82,7 +82,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [initialFetch, setInitialFetch] = useState(false);
     const [subTool, setSubTool] = useState(initialSubTool || '');
     const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools, forceRun, setForceRun
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools, forceRun, setForceRun, 
     } = useChatSocket(isEmpty);
 
     // need to initialize the workspace from the env variable with serves
@@ -171,6 +171,11 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
         // conditions. In particular, the restart may not be processed correctly and can
         // get the user into a state where no run has been sent to the server.
         debounce(async () => {
+            // Here we specifically update Thread with selectedThreadId so that when it restarts it restarts with the specific thread.
+            // We don't set thread directly after creating because it will re-render the page once thread is created on the fly
+            if (selectedThreadId) {
+                setThread(selectedThreadId);	
+            }
             setRunning(false);
             setHasRun(false);
             setInitialFetch(false);
@@ -199,7 +204,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
             }
             restart();
         }, 200),
-        [script, thread, restart]
+        [script, thread, restart, selectedThreadId]
     );
 
     return (
