@@ -108,7 +108,7 @@ export async function getScriptContent(scriptURL: string) {
 export async function getNewScriptName() {
     const me = await getMe();
     const scripts = await getScripts({ owner: me.username, search: 'New Assistant' });
-    let latestAssistant = 1;
+    let latestAssistant = 0;
     for (let script of scripts.scripts || []) {
         if (script.displayName?.includes('New Assistant')) {
             const assistantNumber = parseInt(script.displayName?.split('New Assistant ')[1] || '1');
