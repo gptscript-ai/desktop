@@ -26,7 +26,7 @@ export default function Create() {
                 }).then((script) => {
                     getScript(`${script.id}`)
                         .then((script) =>
-                            window.location.href = `/edit?file=${script.publicURL}&id=${script.id}`
+                            window.location.href = `/edit?file=${script?.publicURL}&id=${script?.id}`
                         );
                 })
             })
