@@ -7,11 +7,15 @@ import {Input} from "@nextui-org/input";
 import {AuthContext} from "@/contexts/auth";
 import {Card, CardHeader, CardBody, Select, SelectItem, Chip, Divider, Avatar, Tooltip, Button} from "@nextui-org/react";
 import Loading from "@/components/loading";
-import {GoSearch} from "react-icons/go";
+import {GoPerson, GoSearch} from "react-icons/go";
 import ScriptModal from "@/components/explore/scriptModal";
-import { debounce } from "lodash";
+import { debounce, set } from "lodash";
 import { MdOutlineTravelExplore } from "react-icons/md";
 import { NavContext } from "@/contexts/nav";
+import { BsGithub, BsTrello } from "react-icons/bs";
+import { VscAzure } from "react-icons/vsc";
+import { FaAws, FaDigitalOcean } from "react-icons/fa";
+import { SiAmazoneks, SiGooglecloud, SiKubernetes } from "react-icons/si";
 
 export default function Explore() {
     const [scripts, setScripts] = useState<ParsedScript[]>([]);
@@ -25,15 +29,43 @@ export default function Explore() {
     const [selectedScript, setSelectedScript] = useState<ParsedScript>({} as ParsedScript);
     const [next, setNext] = useState<string | undefined>("");
     const [nextLoading, setNextLoading] = useState(false);
-    
-    // filters
     const [query, setQuery] = useState<string>('');
-    const [filteredOwners, setFilteredOwners] = useState<Set<string>>(new Set([]));
-    const [filteredVisibility, setFilteredVisibility] = useState<Set<string>>(new Set([]));
-    const [filteredTags, setFilteredTags] = useState<Set<string>>(new Set([]));
+    const [filter, setFilter] = useState<string>('featured');
+    const [owner, setOwner] = useState<string>('');
+    const [visibility, setVisibility] = useState<"public" | "private" | undefined>();
+
+    const iconForAssistant = (name: string) => {
+        const incoming = name.toLowerCase();
+        if (incoming.includes("trello")) {
+            return <BsTrello className="text-3xl" />
+        } else if (incoming.includes("azure")) {
+            return <VscAzure className="text-3xl" />
+        } else if (incoming.includes("aws")) {
+            return <FaAws className="text-3xl" />
+        } else if (incoming.replace(" ", "").includes("digitalocean")) {
+            return <FaDigitalOcean className="text-3xl" />
+        } else if (incoming.includes("github")) {
+            return <BsGithub className="text-3xl" />
+        } else if (incoming.includes("eks")) {
+            return <SiAmazoneks className="text-3xl" />
+        } else if (incoming.includes("kubernetes")) {
+            return <SiKubernetes className="text-3xl" />
+        } else if (incoming.replace(" ", "").includes("googlecloud")) {
+            return <SiGooglecloud className="text-3xl" />
+        } else {
+            return <GoPerson className="text-3xl"/>
+        }
+    }
 
     const refresh = useCallback(() => {
-        getScripts({limit: 10, search: query})
+        setLoading(true);
+        getScripts({
+            limit: 10,
+            search: query,
+            visibility: visibility,
+            filter: (query || owner || visibility) && filter === "featured" ? '' : filter,
+            owner: owner,
+        })
             .then((resp) => {
                 setNext(resp.continue)
                 setScripts(resp.scripts || []) 
@@ -41,38 +73,11 @@ export default function Explore() {
             })
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
-    }, []);
+    }, [query, filter, owner, visibility]);
 
-    // this currently doesn't update whenever the filtered scripts is updated to avoid an rerender loop
-    useEffect(() => {
-        // make assumption that all scripts will have an owner
-        setOwners(Array.from(new Set(filteredScripts.map((script) => script.owner!))));
-        // horrible code, needs adjustment
-        setTags(Array.from(new Set(filteredScripts.map((script) => script.tags).flat())).filter((tag) => tag != undefined) as string[]);
-    }, [scripts]);
-
-    useEffect(() => {
-        if (!query && !filteredOwners.size && !filteredVisibility.size && !filteredTags) {
-            setFilteredScripts(scripts);
-            return;
-        }
-
-        let newFilteredScripts = scripts;
-        if (filteredOwners.size) {
-            newFilteredScripts = newFilteredScripts.filter((script) => filteredOwners.has(script.owner!));
-        }
-        if (filteredVisibility.size) {
-            newFilteredScripts = newFilteredScripts.filter((script) => filteredVisibility.has(script.visibility!));
-        }
-        if (filteredTags.size) {
-            newFilteredScripts = newFilteredScripts.filter((script) => script.tags?.some((tag) => filteredTags.has(tag)));
-        }
-        if (query) {
-            newFilteredScripts = newFilteredScripts.filter((script) => script.displayName?.toLowerCase()?.includes(query.toLowerCase()) || script.content?.toLowerCase().includes(query.toLowerCase()));
-        }
-        
-        setFilteredScripts(newFilteredScripts);
-    }, [query, filteredOwners, filteredVisibility, filteredTags]);
+    useEffect(() => {   
+        refresh()
+    }, [query, filter, owner, visibility]);
 
     useEffect(() => { 
         setCurrent('/explore')
@@ -87,38 +92,75 @@ export default function Explore() {
                 <MdOutlineTravelExplore className="inline mb-2 mr-1 text-5xl"/> Explore
                 </h1>
                 <div className="w-3/4 flex justify-end space-x-4">
-                    <Select radius="lg" label="Owners" color="primary" isDisabled={!owners.length} size="sm" aria-label="owners" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
-                        onSelectionChange={(keys) => { setFilteredOwners(keys as Set<string>)}}
-                    >
-                        {owners.map((owner) => <SelectItem key={owner} value={owner}>{owner}</SelectItem>)}
-                    </Select>
-                    <Select radius="lg" label="Visibility" color="primary" size="sm" aria-label="visibility" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
-                        onSelectionChange={(keys) => { setFilteredVisibility(keys as Set<string>)}}
+                    <Input
+                        radius="lg"
+                        label="Owners"
+                        color="primary"
+                        size="sm"
+                        className="w-1/6"
+                        variant="bordered"
+                        classNames={{label: 'text-gray-500 dark:text-gray-400', input:'text-black dark:text-white'}}
+                        isClearable
+                        onClear={() => setOwner('')}
+                        onChange={(e) => {
+                            if(!e.target.value) setOwner('')
+                        }}
+                        onKeyDown={(e) => {
+                            if(e.key === "Enter") {
+                                setOwner(e.currentTarget.value.toLowerCase())
+                            }
+                        }}
+                    />
+                    <Select
+                        radius="lg"
+                        label="Visibility"
+                        color="primary"
+                        size="sm"
+                        aria-label="visibility"
+                        className="w-1/6"
+                        variant="bordered"
+                        classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
+                        onChange={(e) => {
+                            setVisibility(e.target.value as "public" | "private" | undefined)
+                        }}
                     >
                         <SelectItem key="public" value="public">Public</SelectItem>
                         <SelectItem key="private" value="private">Private</SelectItem>
-                        <SelectItem key="protected" value="private">Protected</SelectItem>
                     </Select>
-                    <Select radius="lg" label="Tags" color="primary" isDisabled={!tags.length} size="sm" aria-label="tags" selectionMode="multiple" className="w-1/6" variant="bordered" classNames={{label: 'text-gray-500 dark:text-gray-400', value:'text-black dark:text-white'}}
-                        onSelectionChange={(keys) => { setFilteredTags(keys as Set<string>)}}
-                    >
-                        {tags.map((tag) => <SelectItem key={tag} value={tag}>{tag}</SelectItem>)}
-                    </Select>
+                    <Input
+                        radius="lg"
+                        label="Tags"
+                        color="primary"
+                        size="sm"
+                        className="w-1/6"
+                        variant="bordered"
+                        classNames={{label: 'text-gray-500 dark:text-gray-400', input:'text-black dark:text-white'}}
+                        isClearable
+                        onClear={() => setFilter('featured')}
+                        onChange={(e) => {
+                            if(!e.target.value) setFilter('featured')
+                        }}
+                        onKeyDown={(e) => {
+                            if(e.key === "Enter") {
+                                setFilter(e.currentTarget.value.toLowerCase())
+                            }
+                        }}
+                    />
                     <Input 
                         startContent={<GoSearch />}
-                        placeholder="Search for an agent..."
+                        placeholder="Search for assistant content..."
                         color="primary"
                         variant="bordered"
                         isClearable
                         size="lg"
                         className="w-1/5"
+                        onClear={() => setQuery('')}
                         onChange={(e) => {
-                            setQuery(e.target.value)
-                            if (e.target.value === '') refresh()
+                            if (e.target.value === '') setQuery('')
                         }}
                         onKeyDown={debounce((e) => {
                             if (e.key === 'Enter') {
-                                refresh()
+                                setQuery(e.currentTarget.value.toLowerCase())
                             }
                         })}
                     />
@@ -128,7 +170,7 @@ export default function Explore() {
                 <Loading /> :
                 <div className={'pb-10'}>
                     <ScriptModal script={selectedScript} open={open} setOpen={setOpen} />
-                    <div className="grid gap-12 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
+                    <div className="grid gap-12 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-4">
                         {filteredScripts.map((script) => (
                             <div
                                 key={script.displayName}
@@ -143,13 +185,20 @@ export default function Explore() {
                                     shadow="md"
                                 >
                                     <CardHeader className="block">
-                                        <div className="w-full">
-                                            <h1 className="text-2xl font-medium truncate">{script.agentName ? script.agentName : script.displayName}</h1>
-                                            <p className="block truncate"><span className="text-primary text-sm">{script.owner}</span></p>
+                                        <div className="flex space-x-4 w-full items-center">
+                                            <Avatar
+                                                color="primary"
+                                                icon={iconForAssistant(script.agentName ? script.agentName : script.displayName || '')}
+                                                classNames={{base: 'w-14 h-14 p-2'}}
+                                            />
+                                            <div style={{width: 'calc(100% - 70px)'}}>
+                                                <h1 className="text-2xl font-medium truncate">{script.agentName ? script.agentName : script.displayName}</h1>
+                                                <p className="block truncate"><span className="text-primary text-sm">{script.owner}</span></p>
+                                            </div>
                                         </div>
-                                        <div className="flex space-x-1 w-[90%] overflow-x-auto mt-4">
-                                            {tags.map((tag) => script.tags?.includes(tag) ? 
-                                                <Chip size="sm" className="pb-0 mb-0" color="primary" key={tag}>{tag}</Chip> : null
+                                        <div className="flex space-x-1 w-[90%] overflow-x-auto pt-10 pb-2">
+                                            {script.tags?.map((tag) => 
+                                                <Chip size="sm" className="pb-0 mb-0" key={tag}>{tag}</Chip>
                                             )}
                                         </div>
                                         <Divider className="mt-4"/>
@@ -165,7 +214,7 @@ export default function Explore() {
                                 isLoading={nextLoading}
                                 color="primary" 
                                 size="lg" 
-                                className="col-span-1 md:col-span-2 xl:col-span-3 3xl:col-span-4"
+                                className="col-span-1 lg:col-span-2 2xl:col-span-3 4xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)
                                     getScripts({limit: 10, continue: next})

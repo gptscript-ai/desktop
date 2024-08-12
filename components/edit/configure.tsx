@@ -53,15 +53,18 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
         <>
             <div className="flex flex-col w-full justify-center items-center space-y-2 mb-6 mt-10">
                 <Tooltip
-                    content={"Upload a profile picture for your assistant."}
-                    placement="top"
+                    content={root.name || "Unnamed Assistant"}
+                    placement="bottom"
                     closeDelay={0.5}
                 >
-                    <Avatar 
-                        size="lg"
-                        icon={<HiOutlinePlus className="text-xl" />}
-                        className="block cursor-pointer mb-6"
-                        classNames={{base: "bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900"}}
+                    <Avatar
+                        showFallback
+                        name={abbreviate(root.name || "Unnamed Assistant")}
+                        className="w-[40px] cursor-default"
+                        classNames={{
+                            base: 'bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900',
+                            name: 'text-lg text-default-600'
+                        }}
                     />
                 </Tooltip>
             </div>

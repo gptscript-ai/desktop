@@ -1,5 +1,6 @@
 import {useCallback, useContext, useEffect, useState} from "react";
 import {
+    Avatar,
     Button,
     Card,
     Chip,
@@ -33,6 +34,7 @@ import { VscAzure } from "react-icons/vsc";
 import {BsClock, BsCode, BsDownload, BsEye, BsFiles, BsFolder, BsSearch } from "react-icons/bs";
 import { MdDeleteForever} from "react-icons/md";
 import { IoWarning } from "react-icons/io5";
+import { LuServer } from "react-icons/lu";
 
 type FeaturedTool = {
     name: string;
@@ -52,35 +54,35 @@ const featuredTools: FeaturedTools = {
             description: "Allows the assistant to interact with images.",
             url: "github.com/gptscript-ai/gpt4-v-vision@gateway",
             tags: ["vision", "images", "ai"],
-            icon: <BsEye className="text-7xl"/>
+            icon: <BsEye className="text-5xl"/>
         },
         {
             name: "Image Generation",
             description: "Allows the assistant to generate images.",
             url: "github.com/gptscript-ai/dalle-image-generation@gateway",
             tags: ["images", "ai", "generation"],
-            icon: <FaPaintBrush className="text-7xl"/>
+            icon: <FaPaintBrush className="text-5xl"/>
         },
         {
             name: "Answers From The Internet",
             description: "Allows the assistant to search the web for answers.",
             url: "github.com/gptscript-ai/answers-from-the-internet",
             tags: ["search", "web", "internet"],
-            icon: <GoGlobe className="text-7xl"/>
+            icon: <GoGlobe className="text-5xl"/>
         },
         {
             name: "Search Website",
             description: "Allows the assistant to search a website.",
             url: "github.com/gptscript-ai/search-website",
             tags: ["search", "web", "site"],
-            icon: <GoSearch className="text-7xl"/>
+            icon: <GoSearch className="text-5xl"/>
         },
         {
             name: "Browser",
             description: "Provides the assistant with the ability to interact with the web via a Chrome window.",
             url: "github.com/gptscript-ai/browser",
             tags: ["browser", "web", "chrome", "search"],
-            icon: <GoBrowser className="text-7xl"/>
+            icon: <GoBrowser className="text-5xl"/>
         },
     ],
     "Productivity": [
@@ -89,35 +91,35 @@ const featuredTools: FeaturedTools = {
             description: "Allows the assistant to interact with Slack.",
             url: "github.com/gptscript-ai/tools/apis/slack/write",
             tags: ["slack", "messaging", "teams", "api"],
-            icon: <AiOutlineSlack className="text-7xl"/>
+            icon: <AiOutlineSlack className="text-5xl"/>
         },
         {
             name: "Notion",
             description: "Allows the assistant to interact with Notion.",
             url: "github.com/gptscript-ai/tools/apis/notion/write",
             tags: ["notion", "documentation", "notes", "api"],
-            icon: <SiNotion className="text-7xl"/>
+            icon: <SiNotion className="text-5xl"/>
         },
         {
             name: "Trello",
             description: "Allows the assistant to interact with Trello.",
             url: "github.com/gptscript-ai/tools/apis/trello",
             tags: ["trello", "project", "management", "api"],
-            icon: <FaTrello className="text-7xl"/>
+            icon: <FaTrello className="text-5xl"/>
         },
         {
             name: "Outlook Mail",
             description: "Allows the assistant to send and receive emails via Outlook.",
             url: "github.com/gptscript-ai/tools/apis/outlook/mail/manage",
             tags: ["email", "office", "microsoft", "service"],
-            icon: <PiMicrosoftOutlookLogoDuotone className="text-7xl"/>
+            icon: <PiMicrosoftOutlookLogoDuotone className="text-5xl"/>
         },
         {
             name: "Outlook Calendar",
             description: "Allows the assistant to interact with Outlook Calendar.",
             url: "github.com/gptscript-ai/tools/apis/outlook/calendar/manage",
             tags: ["calendar", "office", "microsoft", "service"],
-            icon: <PiMicrosoftOutlookLogoDuotone className="text-7xl"/>
+            icon: <PiMicrosoftOutlookLogoDuotone className="text-5xl"/>
         },
     ],
     "Working with Local Files": [
@@ -126,35 +128,35 @@ const featuredTools: FeaturedTools = {
             description: "Provides the assistant with information based context.",
             url: "github.com/gptscript-ai/knowledge@gateway",
             tags: ["knowledge", "rag"],
-            icon: <GoBook className="text-7xl"/>,
+            icon: <GoBook className="text-5xl"/>,
         },
         {
             name: "Structured Data Querier",
             description: "Query Excel spreadsheets, CSV files, and JSON files.",
             url: "github.com/gptscript-ai/structured-data-querier",
             tags: ["data", "structured", "query"],
-            icon: <PiMicrosoftExcelLogo className="text-7xl"/>
+            icon: <PiMicrosoftExcelLogo className="text-5xl"/>
         }, 
         {
             name: "JSON Query",
             description: "Allows the assistant to query JSON data.",
             url: "github.com/gptscript-ai/json-query",
             tags: ["json", "query", "data"],
-            icon: <SiJson className="text-7xl"/>
+            icon: <SiJson className="text-5xl"/>
         },
         {
             name: "Filesystem",
             description: "Allows the assistant to interact with the filesystem.",
             url: "github.com/gptscript-ai/context/filesystem",
             tags: ["json", "query", "data"],
-            icon: <BsFiles className="text-7xl"/>
+            icon: <BsFiles className="text-5xl"/>
         },
         {
             name: "Workspace",
             description: "Allows the assistant to be aware of and iteract with files in your workspace.",
             url: "github.com/gptscript-ai/context/workspace",
             tags: ["workspace", "files"],
-            icon: <GoFileDirectory className="text-7xl"/>,
+            icon: <GoFileDirectory className="text-5xl"/>,
         },
     ],
     "Coding and DevOps": [
@@ -163,63 +165,63 @@ const featuredTools: FeaturedTools = {
             description: "Provides the ability to interact with GitHub.",
             url: "github.com/gptscript-ai/tools/clis/github",
             tags: ["github", "cli"],
-            icon: <FaGithub className="text-7xl"/>,
+            icon: <FaGithub className="text-5xl"/>,
         },
         {
             name: "Amazon Web Services",
             description: "Provides the ability to interact with AWS.",
             url: "github.com/gptscript-ai/tools/clis/aws",
             tags: ["aws", "cloud", "amazon", "cli"],
-            icon: <FaAws className="text-7xl"/>,
+            icon: <FaAws className="text-5xl"/>,
         },
         {
             name: "Azure",
             description: "Provides the ability to interact with Azure.",
             url: "github.com/gptscript-ai/tools/clis/azure",
             tags: ["azure", "cloud", "microsoft", "cli"],
-            icon: <VscAzure className="text-7xl"/>,
+            icon: <VscAzure className="text-5xl"/>,
         },
         {
             name: "Digital Ocean",
             description: "Provides the ability to interact with Digital Ocean.",
             url: "github.com/gptscript-ai/tools/clis/digitalocean",
             tags: ["digital", "ocean", "cloud", "cli"],
-            icon: <FaDigitalOcean className="text-7xl"/>,
+            icon: <FaDigitalOcean className="text-5xl"/>,
         },
         {
             name: "Amazon EKS",
             description: "Provides the ability to interact with Amazon EKS Clusters.",
             url: "github.com/gptscript-ai/tools/clis/eksctl",
             tags: ["eksctl", "kubernetes", "aws", "cli", "eks", "amazon"],
-            icon: <SiAmazoneks className="text-7xl"/>
+            icon: <SiAmazoneks className="text-5xl"/>
         },
         {
             name: "MongoDB Atlas",
             description: "Provides the ability to interact with MongoDB Atlas.",
             url: "github.com/gptscript-ai/tools/clis/atlas",
             tags: ["atlas", "mongodb", "db", "cloud", "cli"],
-            icon: <SiMongodb className="text-7xl"/>
+            icon: <SiMongodb className="text-5xl"/>
         },
         {
             name: "Google Cloud Platform",
             description: "Provides the ability to interact with Google Cloud Platform.",
             url: "github.com/gptscript-ai/tools/clis/gcp",
             tags: ["gcp", "cloud", "google", "cli"],
-            icon: <SiGooglecloud className="text-7xl"/>,
+            icon: <SiGooglecloud className="text-5xl"/>,
         },
         {
             name: "Kubernetes",
             description: "Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs",
             url: "github.com/gptscript-ai/tools/clis/k8s",
             tags: ["kubernetes", "containers", "ops", "cli"],
-            icon: <AiOutlineKubernetes className="text-7xl"/>,
+            icon: <AiOutlineKubernetes className="text-5xl"/>,
         },
         {
             name: "Supabase",
             description: "Allows the agent to interact with Supabase via the CLI.",
             url: "github.com/gptscript-ai/tools/clis/supabase",
             tags: ["supabase", "db", "authentication", "api", "cli"],
-            icon: <SiSupabase className="text-7xl"/>
+            icon: <SiSupabase className="text-5xl"/>
         },
     ],
     "System Tools": [
@@ -228,105 +230,105 @@ const featuredTools: FeaturedTools = {
             description: "Appends the contents to a file",
             url: "sys.append",
             tags: ["system", "append"],
-            icon: <AiFillFileAdd className="text-7xl"/>
+            icon: <AiFillFileAdd className="text-5xl"/>
         },
         {
             name: "Download",
             description: "Downloads a URL, saving the contents to disk at a given location.",
             url: "sys.download",
             tags: ["system", "download"],
-            icon: <BsDownload className="text-7xl"/>
+            icon: <BsDownload className="text-5xl"/>
         },
         {
             name: "Execute",
             description: "Execute a command and get the output of the command.",
             url: "sys.exec",
             tags: ["system", "execute", "exec"],
-            icon: <GoTerminal className="text-7xl"/>
+            icon: <GoTerminal className="text-5xl"/>
         },
         {
             name: "Find",
             description: "Traverse a directory looking for files that match a pattern in the style of the unix find command.",
             url: "sys.find",
             tags: ["system", "find"],
-            icon: <BsFiles className="text-7xl"/>
+            icon: <BsFiles className="text-5xl"/>
         },
         {
             name: "Get Environment Variable",
             description: "Gets the value of an OS environment variable.",
             url: "sys.getenv",
             tags: ["system", "getenv", "environment", "env"],
-            icon: <BsCode className="text-7xl"/>
+            icon: <LuServer className="text-5xl"/>
         },
         {
             name: "HTML to Text",
             description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML.",
             url: "sys.http.html2text",
             tags: ["system", "http", "html", "text"],
-            icon: <FaCode className="text-7xl"/>
+            icon: <FaCode className="text-5xl"/>
         },
         {
             name: "HTTP GET",
             description: "Download the contents of a http or https URL.",
             url: "sys.http.get",
             tags: ["system", "http", "get"],
-            icon: <GoGlobe className="text-7xl"/>
+            icon: <GoGlobe className="text-5xl"/>
         },
         {
             name: "HTTP POST",
             description: "Write contents to a http or https URL using the POST method.",
             url: "sys.http.post",
             tags: ["system", "http", "post"],
-            icon: <GoGlobe className="text-7xl"/>
+            icon: <GoGlobe className="text-5xl"/>
         },
         {
             name: "List Directory",
             description: "Lists the contents of a directory.",
             url: "sys.ls",
             tags: ["system", "ls", "list", "directory"],
-            icon: <BsFolder className="text-7xl"/>
+            icon: <BsFolder className="text-5xl"/>
         },
         {
             name: "Prompt",
             description: "Prompts the user for input.",
             url: "sys.prompt",
             tags: ["system", "prompt", "input"],
-            icon: <GoQuestion className="text-7xl"/>
+            icon: <GoQuestion className="text-5xl"/>
         },
         {
             name: "Read File",
             description: "Reads the contents of a file.",
             url: "sys.read",
             tags: ["system", "read", "file"],
-            icon: <FaGlasses className="text-7xl"/>
+            icon: <FaGlasses className="text-5xl"/>
         },
         {
             name: "Remove File",
             description: "Removes the specified file.",
             url: "sys.remove",
             tags: ["system", "remove", "file"],
-            icon: <MdDeleteForever className="text-7xl"/>
+            icon: <MdDeleteForever className="text-5xl"/>
         },
         {
             name: "File Stat",
             description: "Gets size, modfied time, and mode of the specified file.",
             url: "sys.stat",
             tags: ["system", "stat", "file"],
-            icon: <BsSearch className="text-7xl"/>
+            icon: <BsSearch className="text-5xl"/>
         },
         {
             name: "Current Time",
             description: "Returns the current date and time in RFC3339 format.",
             url: "sys.time.now",
             tags: ["system", "time", "now"],
-            icon: <BsClock className="text-7xl"/>
+            icon: <BsClock className="text-5xl"/>
         },
         {
             name: "Write File",
             description: "Write the contents to a file.",
             url: "sys.write",
             tags: ["system", "write", "file"],
-            icon: <GoPencil className="text-7xl"/>
+            icon: <GoPencil className="text-5xl"/>
         }
     ]
 }
@@ -367,8 +369,8 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
     return (
         <div>
             <div className="mt-24 mb-10 px-10 flex w-full justify-between items-center">
-                <h1 className="text-3xl font-bold text-primary lg:text-4xl">
-                    <PiToolbox className="inline text-4xl lg:text-5xl mb-1"/> Tool catalog
+                <h1 className="text-3xl font-bold text-primary lg:text-5xl">
+                    <PiToolbox className="inline text-5xl lg:text-5xl mb-1"/> Tool catalog
                 </h1>
                 <div className="flex space-x-4 justify-end items-center w-4/6">
                     <Input
@@ -396,22 +398,6 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                         }}
                         className="w-2/6"
                     />
-                    <Select 
-                        aria-label="Filter tools by type"
-                        variant="flat"
-                        color="primary"
-                        placeholder="All"
-                        className="w-1/6"
-                        selectionMode="multiple"
-                        classNames={{popoverContent: 'w-[220px]'}}
-                    >
-                        <SelectItem key="foo" value="foo" textValue="CLI" startContent={<GoTerminal className="mr-1"/>}>
-                            CLI required
-                        </SelectItem>
-                        <SelectItem key="bar" value="bar" textValue="OAuth" startContent={<GoPerson className="mr-1"/>}>
-                            OAuth Login required
-                        </SelectItem>
-                    </Select>
                 </div>
             </div>
 
@@ -472,7 +458,12 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                                 <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4 gap-10 overflow-y-auto p-10">
                                     { category === "From URL" && (
                                         <Card className="h-[275px] p-4">
-                                            <GoLink className="text-7xl"/>
+                                            <Avatar
+                                                icon={<GoLink className="text-5xl"/>}
+                                                color="primary"
+                                                classNames={{base: "w-20 h-20"}}
+                                            />
+                                            
                                             <div className="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-xl mt-4">
                                                 <h2 className="text-xl mb-4 font-bold">Add by URL</h2>
                                                 <p className="text-sm mb-2">Add a tool to the catalog by providing a URL.</p>
@@ -503,7 +494,7 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                                                                     description: "A custom tool you added.",
                                                                     url: url,
                                                                     tags: [url, "from-url"],
-                                                                    icon: <GoTools className="text-7xl"/>
+                                                                    icon: <GoTools className="text-5xl"/>
                                                                 })
                                                             } else {
                                                                 removeTool(url);
@@ -519,7 +510,11 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                                     {priorityTools[category].map((tool, i) => (
                                         <Card key={tool.name + i} className="h-[275px] p-4">
                                             <div className="flex justify-between">
-                                                {tool.icon}
+                                                <Avatar 
+                                                    icon={tool.icon}
+                                                    color="primary"
+                                                    classNames={{base: "w-20 h-20"}}
+                                                />
                                                 <Button
                                                     size="md"
                                                     className="mb-2"

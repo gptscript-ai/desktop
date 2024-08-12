@@ -20,6 +20,7 @@ interface EditContextProps {
 }
 
 interface EditContextState {
+    scriptId: number;
     loading: boolean;
     setLoading: (loading: boolean) => void;
     root: Tool;
@@ -218,6 +219,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     return (
         <EditContext.Provider
             value={{
+                scriptId,
                 scriptPath,
                 dependencies, setDependencies,
                 dynamicInstructions, setDynamicInstructions,
