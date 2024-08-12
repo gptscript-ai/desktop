@@ -7,7 +7,7 @@ import fixPath from "fix-path";
 import os from 'os';
 
 const appName = 'Acorn';
-const gatewayUrl = process.env.GATEWAY_URL || 'https://gateway-api.gptscript.ai';
+const gatewayUrl = process.env.GPTSCRIPT_GATEWAY_URL || 'https://gateway-api.gptscript.ai';
 const resourcesDir = dirname(app.getAppPath());
 const dataDir = getDataDir(appName);
 
@@ -34,7 +34,7 @@ async function startServer(isPackaged) {
   process.env.GPTSCRIPT_BIN = process.env.GPTSCRIPT_BIN || gptscriptBin;
   process.env.THREADS_DIR = process.env.THREADS_DIR || join(dataDir, "threads");
   process.env.WORKSPACE_DIR = process.env.WORKSPACE_DIR || join(dataDir, "workspace");
-  process.env.GATEWAY_URL = process.env.GATEWAY_URL || gatewayUrl;
+  process.env.GPTSCRIPT_GATEWAY_URL = process.env.GPTSCRIPT_GATEWAY_URL || gatewayUrl;
 
   console.log(`Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`);
 
