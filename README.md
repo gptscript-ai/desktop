@@ -36,7 +36,7 @@ Here are just some of the tools available to you:
 
 #### Coding and DevOps
 
-[AWS](https://github.com/gptscript-ai/tools/tree/main/clis/aws), [Azure](https://github.com/gptscript-ai/tools/tree/main/clis/azure), [Digital Ocean](https://github.com/gptscript-ai/tools/tree/main/clis/digitalocean), [EKS](https://github.com/gptscript-ai/tools/tree/main/clis/eksctl), [GCP](https://github.com/gptscript-ai/tools/tree/main/clis/gcp), [Github](https://github.com/gptscript-ai/tools/tree/main/clis/github), [k8s](https://github.com/gptscript-ai/tools/tree/main/clis/k8s), [Supabase cli](https://github.com/gptscript-ai/tools/tree/main/clis/supabase), [Supabase API](https://github.com/gptscript-ai/tools/tree/main/apis/supabase)
+[AWS](https://github.com/gptscript-ai/tools/tree/main/clis/aws), [Azure](https://github.com/gptscript-ai/tools/tree/main/clis/azure), [DigitalOcean](https://github.com/gptscript-ai/tools/tree/main/clis/digitalocean), [EKS](https://github.com/gptscript-ai/tools/tree/main/clis/eksctl), [GCP](https://github.com/gptscript-ai/tools/tree/main/clis/gcp), [GitHub](https://github.com/gptscript-ai/tools/tree/main/clis/github), [k8s](https://github.com/gptscript-ai/tools/tree/main/clis/k8s), [Supabase cli](https://github.com/gptscript-ai/tools/tree/main/clis/supabase), [Supabase API](https://github.com/gptscript-ai/tools/tree/main/apis/supabase)
 
 ## Development
 
