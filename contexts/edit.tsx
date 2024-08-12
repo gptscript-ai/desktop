@@ -22,6 +22,8 @@ interface EditContextProps {
 interface EditContextState {
     loading: boolean;
     setLoading: (loading: boolean) => void;
+    notFound: boolean;
+    setNotFound: (notFound: boolean) => void;
     root: Tool;
     dependencies: DependencyBlock[]; setDependencies: React.Dispatch<React.SetStateAction<DependencyBlock[]>>;
     models: string[], setModels: React.Dispatch<React.SetStateAction<string[]>>;
@@ -48,6 +50,7 @@ interface EditContextState {
 const EditContext = createContext<EditContextState>({} as EditContextState);
 const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children}) => {
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const [root, setRoot] = useState<Tool>({} as Tool);
     const [tools, setTools] = useState<Tool[]>([]);
     const [script, setScript] = useState<Block[]>([]);
@@ -72,6 +75,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
 
         getScript(scriptPath)
             .then(async (script) => {
+                if (script === undefined) {
+                    setNotFound(true);
+                    return;
+                }
                 const parsedScript = await parse(script.content || '')
                 const texts = await getTexts(script.content || '');
                 setScript(parsedScript);
@@ -223,6 +230,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
                 dynamicInstructions, setDynamicInstructions,
                 models, setModels,
                 loading, setLoading,
+                notFound, setNotFound,
                 root, setRoot,
                 tools, setTools,
                 script, setScript,

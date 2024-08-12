@@ -78,13 +78,18 @@ export async function getScripts(query?: ScriptsQuery): Promise<ParsedScriptsQue
 
 }
 
-export async function getScript(id: string): Promise<ParsedScript> {
-    const scripts = await get("scripts", id.replace(`${GATEWAY_URL()}/`, '')) as Script
-    const parsedScript = await gpt().parseTool(scripts.content || '')
-    return { ...scripts, 
-        script: parsedScript,
-        description: getDescription(parsedScript),
-        agentName: getName(parsedScript)
+export async function getScript(id: string): Promise<ParsedScript | undefined> {
+    try {
+        const scripts = await get("scripts", id.replace(`${GATEWAY_URL()}/`, '')) as Script
+        const parsedScript = await gpt().parseTool(scripts.content || '')
+        return {
+            ...scripts,
+            script: parsedScript,
+            description: getDescription(parsedScript),
+            agentName: getName(parsedScript)
+        }
+    } catch (e) {
+        return undefined
     }
 }
 
@@ -100,9 +105,13 @@ export async function deleteScript(script: Script) {
     return await del(`${script.id}`, "scripts")
 }
 
-export async function getScriptContent(scriptURL: string) {
-    const script = await gpt().parse(scriptURL, true);
-    return gpt().stringify(script);
+export async function getScriptContent(scriptURL: string): Promise<string | undefined> {
+    try {
+        const script = await gpt().parse(scriptURL, true);
+        return gpt().stringify(script);
+    } catch (e) {
+        return undefined;
+    }
 }
 
 export async function getNewScriptName() {

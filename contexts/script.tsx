@@ -96,17 +96,27 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     useEffect(() => {
         if(scriptId) {
             getScript(scriptId).then(async (script) => {
+                if (script === undefined) {
+                    setNotFound(true);
+                    return;
+                }
+                setNotFound(false);
                 setTool(await rootTool(script.content || ''));
                 setScriptContent(script.script as Block[]);
                 setInitialFetch(true);
             });
         } else {
             getScriptContent(script).then(async (content) => {
+                if (content === undefined) {
+                    setNotFound(true);
+                    return;
+                }
+                setNotFound(false);
                 setTool(await rootTool(content))
                 setInitialFetch(true);
             });
         }
-	}, [script]);
+	}, [script, scriptId]);
 
     useEffect(() => {
 		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
@@ -165,12 +175,22 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 
             if(scriptId) {
                 getScript(scriptId).then(async (script) => {
+                    if (script === undefined) {
+                        setNotFound(true);
+                        return;
+                    }
+                    setNotFound(false);
                     setTool(await rootTool(script.content || ''));
                     setScriptContent(script.script as Block[]);
                     setInitialFetch(true);
                 });
             } else {
                 getScriptContent(script).then(async (content) => {
+                    if (content === undefined) {
+                        setNotFound(true);
+                        return;
+                    }
+                    setNotFound(false);
                     setTool(await rootTool(content))
                     setInitialFetch(true);
                 });

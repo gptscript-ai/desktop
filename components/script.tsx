@@ -8,9 +8,9 @@ import Loading from "@/components/loading";
 import {Button} from "@nextui-org/react";
 import {getWorkspaceDir} from "@/actions/workspace";
 import {createThread, getThreads, generateThreadName, renameThread} from "@/actions/threads";
-import {type Script} from "@/actions/me/scripts";
 import {getGatewayUrl} from "@/actions/gateway";
 import {ScriptContext} from "@/contexts/script";
+import AssistantNotFound from "@/components/assistant-not-found"
 
 interface ScriptProps {
 	className?: string
@@ -38,6 +38,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
         socket,
         connected,
         running,
+        notFound,
         restartScript,
         fetchThreads,
     } = useContext(ScriptContext);
@@ -126,7 +127,7 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
                         <ChatBar onMessageSent={handleMessageSent} />
                     )}
                 </div>
-            </>) : (
+            </>) : notFound ? <AssistantNotFound /> : (
                 <Loading>Loading your assistant...</Loading>
             )}
         </div>

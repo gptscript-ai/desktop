@@ -17,6 +17,7 @@ import {
     AccordionItem,
 } from "@nextui-org/react";
 import { PiToolboxBold } from "react-icons/pi";
+import AssistantNotFound from "@/components/assistant-not-found"
 
 interface ConfigureProps {
     collapsed?: boolean;
@@ -29,6 +30,7 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
         setRoot,
         models,
         loading,
+        notFound,
         visibility,
         setVisibility,
         dynamicInstructions,
@@ -48,6 +50,8 @@ const Configure: React.FC<ConfigureProps> = ({className, collapsed}) => {
     }, [root]);
 
     if (loading) return <Loading>Loading your assistant's details...</Loading>;
+
+    if (notFound) return <AssistantNotFound />;
 
     return (
         <>
