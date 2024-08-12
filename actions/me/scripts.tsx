@@ -107,7 +107,7 @@ export async function deleteScript(script: Script) {
 
 export async function getScriptContent(scriptURL: string): Promise<string | undefined> {
     try {
-        const script = await gpt().parse(scriptURL, true);
+        const script = await gpt().parse(scriptURL);
         return gpt().stringify(script);
     } catch (e) {
         return undefined;
