@@ -2,7 +2,7 @@ import { app, BrowserWindow } from "electron";
 import { getPort } from 'get-port-please';
 import { startAppServer } from '../server/app.mjs';
 import { join, dirname } from "path";
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import fixPath from "fix-path";
 import os from 'os';
 
@@ -37,6 +37,9 @@ async function startServer(isPackaged) {
   process.env.GPTSCRIPT_GATEWAY_URL = process.env.GPTSCRIPT_GATEWAY_URL || gatewayUrl;
 
   console.log(`Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`);
+
+  // Set up the browser tool to run in headless mode.
+  writeFileSync(`${process.env.WORKSPACE_DIR}/browsersettings.json`, JSON.stringify({ headless: true }));
 
   try {
     const url = await startAppServer({ dev: !isPackaged, hostname: 'localhost', port, dir: app.getAppPath() });
