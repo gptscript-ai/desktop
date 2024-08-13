@@ -1,13 +1,22 @@
 import builder from 'electron-builder';
 import os from 'os';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { embedVersionInfo } from './utils.mjs';
-
-const currentDir = dirname(fileURLToPath(import.meta.url));  // Directory where this script resides
+import {getGitInfo} from "./utils.mjs";
+import {join} from "path";
+import {writeFileSync} from "fs";
 
 const Platform = builder.Platform;
 
+export function embedVersionInfo() {
+    const versionInfo = process.env.GITHUB_REF_NAME || getGitInfo();
+    const versionFilePath = join('electron', 'version.json');
+
+    writeFileSync('version.json', JSON.stringify({ version: versionInfo }, null, 2));
+    console.log(`Version information written to ${versionFilePath}: ${versionInfo}`);
+}
+
+/**
+ * @type {import('electron-builder').Configuration}
+ */
 const options = {
     appId: 'ai.gptscript.acorn',
     productName: 'Acorn',
@@ -26,12 +35,6 @@ const options = {
         "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
         "!**/{appveyor.yml,.travis.yml,circle.yml}",
         "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
-    ],
-    extraResources: [
-        {
-            from: join(currentDir, 'version.json'),
-            to: 'version.json'  // Include version.json in the resources directory of the packaged app
-        }
     ],
     mac: {
         hardenedRuntime: true,
@@ -84,6 +87,8 @@ const options = {
 
 function go() {
     const platform = os.platform();
+    const arch = os.arch();
+
     let targetPlatform;
     switch (platform) {
         case 'darwin':
@@ -98,18 +103,26 @@ function go() {
         default:
             throw new Error(`Unsupported platform: ${platform}`);
     }
+    console.log(`targetPlatform: ${targetPlatform}`)
 
-    embedVersionInfo();  // Generate version.json in the same directory
+    embedVersionInfo()
 
+    // Only publish when the GH_TOKEN is set.
+    // This indicates the intent to publish the build to a release.
     const publishOption = process.env.GH_TOKEN ? 'always' : 'never';
 
-    builder.build({
-        targets: Platform[targetPlatform.toUpperCase()].createTarget(),
-        config: options,
-        publish: publishOption,
-    }).then((result) => {
-        console.info('Build completed:', JSON.stringify(result, null, 2));
-    });
+    builder
+        .build({
+            targets: Platform[targetPlatform.toUpperCase()].createTarget(),
+            config: options,
+            publish: publishOption,
+        })
+        .then((result) => {
+            console.info('----------------------------');
+            console.info('Platform:', platform);
+            console.info('Architecture:', arch);
+            console.info('Output:', JSON.stringify(result, null, 2));
+        });
 }
 
 go();
