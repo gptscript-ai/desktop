@@ -50,7 +50,7 @@ const Imports: React.FC<ImportsProps> = ({tools, setTools, className, collapsed,
                 return <BsEye className="text-md"/>
             case "dalle image generation":
                 return <FaPaintBrush className="text-md"/>
-            case "answers-from-the-internet":
+            case "answers from the internet":
                 return <GoGlobe className="text-md"/>
             case "search website":
                 return <GoSearch className="text-md"/>

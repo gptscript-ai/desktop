@@ -48,6 +48,7 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
         models,
         dependencies,
         setDependencies,
+        scriptId,
     } = useContext(EditContext)
 
     useEffect(() => {
@@ -295,7 +296,7 @@ const CustomTool: React.FC<ConfigureProps> = ({className, tool}) => {
                             </div>
                         </div>
                         <div className="h-full overflow-y-auto">
-                            <ScriptContextProvider initialScript={scriptPath} initialThread="" initialSubTool={customTool.name}>
+                            <ScriptContextProvider initialScript={scriptPath} initialThread="" initialSubTool={customTool.name} initialScriptId={`${scriptId}`}>
                                 <Script messagesHeight="h-[93%]" />
                             </ScriptContextProvider>
                         </div>

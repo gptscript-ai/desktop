@@ -30,6 +30,7 @@ export interface ScriptsQuery {
     limit?: number
     continue?: string
     search?: string
+    visibility?: "public" | "private" | undefined
 }
 
 export interface ScriptsQueryResponse {
