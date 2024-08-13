@@ -487,6 +487,7 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({tools, addTool, removeTool}) =
                                                         startContent={<GoPlus />}
                                                         color="primary"
                                                         onPress={() => {
+                                                            if (!url) return;
                                                             if (!priorityTools["From URL"].map((t) => t.url).includes(url)) {
                                                                 addTool(url)
                                                                 priorityTools["From URL"].push({
