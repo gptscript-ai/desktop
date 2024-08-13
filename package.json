@@ -7,7 +7,7 @@
     "url": "https://acorn.io"
   },
   "private": true,
-  "version": "v0.10.0-rc1",
+  "version": "v0.10.0-rc2",
   "scripts": {
     "build": "next build --no-lint",
     "build:electron": "next build --no-lint && node electron/build.mjs",
@@ -20,7 +20,7 @@
   },
   "main": "electron/main.mjs",
   "dependencies": {
-    "@gptscript-ai/gptscript": "^0.9.5-rc1",
+    "@gptscript-ai/gptscript": "^0.9.5-rc2",
     "@monaco-editor/react": "^4.6.0",
     "@nextui-org/button": "2.0.32",
     "@nextui-org/code": "2.0.28",
