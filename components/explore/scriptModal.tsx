@@ -1,10 +1,10 @@
 "use client"
 
 import {Modal, ModalContent, ModalBody, ModalHeader, ModalFooter, Button, Link, Avatar, Divider, Accordion, AccordionItem, Chip, Tooltip, Table, TableHeader, TableColumn, TableRow, TableCell, TableBody } from "@nextui-org/react";
-import {ParsedScript} from "@/actions/me/scripts";
+import {deleteScript, ParsedScript} from "@/actions/me/scripts";
 import { GoCode, GoPaperAirplane, GoPencil, GoTrash } from "react-icons/go";
 import { AuthContext } from "@/contexts/auth";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {TbListDetails} from "react-icons/tb";
 import { LiaExpandArrowsAltSolid } from "react-icons/lia";
 
@@ -12,11 +12,19 @@ interface ScriptModalProps {
     className?: string;
     script: ParsedScript;
     open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    refresh: () => void;
 }
 
-const ScriptModal = ({ className, script, open, setOpen }: ScriptModalProps) => {
+const ScriptModal = ({ className, script, open, setOpen, refresh }: ScriptModalProps) => {
     const {authenticated, me} = useContext(AuthContext);
     const [expanded, setExpanded] = useState(false);
+
+    const handleDelete = useCallback((script: ParsedScript) => {
+        deleteScript(script)
+            .then(() => refresh() )
+            .catch((error) => console.error(error))
+            .finally(() => setOpen(false));
+    }, []);
 
     return (
         <Modal
@@ -97,7 +105,7 @@ const ScriptModal = ({ className, script, open, setOpen }: ScriptModalProps) => 
                         {authenticated && me?.username === script.owner && 
                             <>
                                 <Button as={Link} href={`/edit?file=${script.publicURL}&id=${script.id}`} color="primary" className="w-full" startContent={<GoPencil />}>Edit</Button> 
-                                <Button className="w-full" color="danger" variant="bordered" startContent={<GoTrash />}>Delete</Button>
+                                <Button className="w-full" color="danger" variant="bordered" startContent={<GoTrash />} onPress={() => handleDelete(script)}>Delete</Button>
                             </>
                         }
                 </ModalFooter>

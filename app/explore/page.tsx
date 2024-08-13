@@ -83,6 +83,7 @@ export default function Explore() {
         setCurrent('/explore')
         refresh() 
     }, []);
+
     useEffect(() => { refresh() }, [authenticated]);;
 
     return (
@@ -169,7 +170,7 @@ export default function Explore() {
             {loading ?
                 <Loading /> :
                 <div className={'pb-10'}>
-                    <ScriptModal script={selectedScript} open={open} setOpen={setOpen} />
+                    <ScriptModal script={selectedScript} open={open} setOpen={setOpen} refresh={refresh} />
                     <div className="grid gap-12 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-4">
                         {filteredScripts.map((script) => (
                             <div
@@ -217,7 +218,14 @@ export default function Explore() {
                                 className="col-span-1 lg:col-span-2 2xl:col-span-3 4xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)
-                                    getScripts({limit: 10, continue: next})
+                                    getScripts({
+                                        limit: 10,
+                                        filter: (query || owner || visibility) && filter === "featured" ? '' : filter,
+                                        search: query,
+                                        visibility: visibility,
+                                        owner: owner,
+                                        continue: next
+                                    })
                                         .then((resp) => {
                                             if (resp.continue) setNext(resp.continue)
                                             else setNext(undefined)
