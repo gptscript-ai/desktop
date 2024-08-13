@@ -2,26 +2,41 @@ import { app, BrowserWindow } from "electron";
 import { getPort } from 'get-port-please';
 import { startAppServer } from '../server/app.mjs';
 import { join, dirname } from "path";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
 import fixPath from "fix-path";
 import os from 'os';
+import { ensureDirExists, getGitInfo } from './utils.mjs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 const appName = 'Acorn';
 const gatewayUrl = process.env.GPTSCRIPT_GATEWAY_URL || 'https://gateway-api.gptscript.ai';
-const resourcesDir = dirname(app.getAppPath());
 const dataDir = getDataDir(appName);
+const resourcesDir = dirname(app.getAppPath());  // Points to the resources directory
 
-function getDataDir(appName) {
-  const userDataPath = app.getPath('userData');
-  return join(userDataPath, appName);
+export function getDataDir(appName) {
+  return join(app.getPath('userData'), appName);
 }
 
-function ensureDirExists(dir) {
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+function getAppVersion() {
+  console.log(`versionFilePath: ${resourcesDir}`)
+  const versionFilePath = join(resourcesDir, 'version.json');
+
+  if (existsSync(versionFilePath)) {
+    try {
+      const versionData = JSON.parse(readFileSync(versionFilePath, 'utf8'));
+      return versionData.version || null;
+    } catch (error) {
+      console.error('Failed to read version info from version.json:', error);
+    }
+  } else {
+    console.log('version.json file does not exist. Falling back to Git version.');
+  }
+
+  return null;
 }
 
 async function startServer(isPackaged) {
   const port = isPackaged ? await getPort({ portRange: [30000, 40000] }) : 3000;
+
   const gptscriptBin = join(
       isPackaged ? join(resourcesDir, "app.asar.unpacked") : "",
       "node_modules",
@@ -43,8 +58,7 @@ async function startServer(isPackaged) {
   writeFileSync(`${process.env.WORKSPACE_DIR}/browsersettings.json`, JSON.stringify({ headless: true }));
 
   try {
-    const url = await startAppServer({ dev: !isPackaged, hostname: 'localhost', port, dir: app.getAppPath() });
-    console.log(`> ${isPackaged ? "" : "Dev "}Electron app started at ${url}`);
+    const url = await startAppServer({ dev: !isPackaged, hostname: 'localhost', port });
     createWindow(url);
   } catch (err) {
     console.error(err);
@@ -57,7 +71,7 @@ function createWindow(url) {
   const win = new BrowserWindow({
     width: 1024,
     height: 720,
-    frame: isMac ? false : true, // Use frame: true for Windows and Linux
+    frame: !isMac,
     webPreferences: {
       preload: join(app.getAppPath(), "electron/preload.js"),
       nodeIntegration: true,
@@ -67,7 +81,6 @@ function createWindow(url) {
     }
   });
 
-  // Check if the platform is macOS before calling setWindowButtonVisibility
   if (isMac) {
     win.setWindowButtonVisibility(true);
   }
@@ -79,6 +92,21 @@ function createWindow(url) {
 app.on("ready", () => {
   fixPath();
   ensureDirExists(dataDir);
+
+  let appVersion = getAppVersion();
+  if (!appVersion) {
+    console.log("No version found in version.json, falling back to Git version.");
+    appVersion = getGitInfo();
+    console.log(`Fallback to Git version: ${appVersion}`);
+  }
+
+  app.setAboutPanelOptions({
+    applicationName: appName,
+    applicationVersion: appVersion,
+    copyright: "© 2024 Acorn Labs",
+    website: "https://acorn.io"
+  });
+
   startServer(app.isPackaged);
 });
 

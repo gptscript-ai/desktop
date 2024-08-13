@@ -15,6 +15,7 @@
 # production
 /build
 /electron-dist
+/electron/version.json
 
 # misc
 .DS_Store
