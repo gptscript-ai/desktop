@@ -1,4 +1,4 @@
-"use server"
+'use server';
 
 import { GATEWAY_URL } from '@/config/env';
 

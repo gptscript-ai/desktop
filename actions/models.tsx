@@ -1,7 +1,7 @@
-"use server"
+'use server';
 
-import {gpt} from '@/config/env';
+import { gpt } from '@/config/env';
 
 export const getModels = async (): Promise<string[]> => {
-    return (await gpt().listModels()).split('\n');
-}
+  return (await gpt().listModels()).split('\n');
+};
