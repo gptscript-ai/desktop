@@ -101,8 +101,6 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
 
     return (
         <div className={`h-full w-full ${className}`}>
-            {showAssistantName && <h1
-              className="px-6 pt-10 text-2xl font-medium truncate">{scriptDisplayName ?? ''}</h1>}
             {(connected && running) || (showForm && hasParams) ? (<>
                 <div
                   id="small-message"
@@ -115,7 +113,11 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
                             handleInputChange={handleInputChange}
                         />
                     ) : (
-                        <Messages restart={restartScript} messages={messages}/>
+                      <div>
+                          {showAssistantName && <h1
+                            className="mb-10 text-2xl font-medium truncate">{scriptDisplayName ?? ''}</h1>}
+                          <Messages restart={restartScript} messages={messages}/>
+                      </div>
                     )}
                 </div>
 
