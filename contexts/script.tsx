@@ -115,6 +115,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
                     setNotFound(true);
                     return;
                 }
+                setScriptDisplayName("Default Assistant")
                 setNotFound(false);
                 setTool(await rootTool(content))
                 setInitialFetch(true);
