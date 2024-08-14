@@ -13,16 +13,18 @@ import {ScriptContext} from "@/contexts/script";
 import AssistantNotFound from "@/components/assistant-not-found"
 
 interface ScriptProps {
-	className?: string
-	messagesHeight?: string
+	  className?: string
+	  messagesHeight?: string
     enableThreads?: boolean
+    showAssistantName?: boolean
 }
 
-const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', enableThreads }) => {
+const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', enableThreads, showAssistantName }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [inputValue, setInputValue] = useState<string>("");
     const {
         script,
+        scriptDisplayName,
         tool,
         showForm,
         setShowForm,
@@ -99,9 +101,11 @@ const Script: React.FC<ScriptProps> = ({ className, messagesHeight = 'h-full', e
 
     return (
         <div className={`h-full w-full ${className}`}>
+            {showAssistantName && <h1
+              className="px-6 pt-10 text-2xl font-medium truncate">{scriptDisplayName ?? ''}</h1>}
             {(connected && running) || (showForm && hasParams) ? (<>
                 <div
-                    id="small-message"
+                  id="small-message"
                     className={`px-6 pt-10 overflow-y-auto w-full items-center ${messagesHeight}`}
                 >
                     {showForm && hasParams ? (

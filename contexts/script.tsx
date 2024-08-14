@@ -20,6 +20,7 @@ interface ScriptContextProps{
 interface ScriptContextState {
     script: string;
     scriptId?: string;
+    scriptDisplayName?: string
     setScriptId: React.Dispatch<React.SetStateAction<string | undefined>>;
     scriptContent: ToolDef[] | null;
     workspace: string;
@@ -68,12 +69,12 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [script, setScript] = useState<string>(initialScript);
     const [workspace, setWorkspace] = useState('');
     const [tool, setTool] = useState<Tool>({} as Tool);
-	const [showForm, setShowForm] = useState(true);
-	const [formValues, setFormValues] = useState<Record<string, string>>({});
+	  const [showForm, setShowForm] = useState(true);
+	  const [formValues, setFormValues] = useState<Record<string, string>>({});
     const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
     const [scriptContent, setScriptContent] = useState<Block[] | null>(null);
-	const [hasRun, setHasRun] = useState(false);
-	const [hasParams, setHasParams] = useState(false);
+	  const [hasRun, setHasRun] = useState(false);
+	  const [hasParams, setHasParams] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [thread, setThread] = useState<string>(initialThread);
@@ -81,9 +82,10 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
     const [initialFetch, setInitialFetch] = useState(false);
     const [subTool, setSubTool] = useState(initialSubTool || '');
-    const { 
-        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools, forceRun, setForceRun, 
+    const {
+        socket, connected, running, messages, setMessages, restart, interrupt, generating, error, setRunning, tools, setTools, forceRun, setForceRun,
     } = useChatSocket(isEmpty);
+    const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
 
     // need to initialize the workspace from the env variable with serves
     // as the default.
@@ -104,6 +106,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
                 setNotFound(false);
                 setTool(await rootTool(script.content || ''));
                 setScriptContent(script.script as Block[]);
+                setScriptDisplayName(script.displayName || '');
                 setInitialFetch(true);
             });
         } else {
@@ -120,8 +123,8 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
 	}, [script, scriptId]);
 
     useEffect(() => {
-		setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
-	}, [tool]);
+		  setHasParams(tool.arguments?.properties != undefined && Object.keys(tool.arguments?.properties).length > 0);
+	  }, [tool]);
 
     useEffect(() => {
         if(thread) {
@@ -174,7 +177,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
             // Here we specifically update Thread with selectedThreadId so that when it restarts it restarts with the specific thread.
             // We don't set thread directly after creating because it will re-render the page once thread is created on the fly
             if (selectedThreadId) {
-                setThread(selectedThreadId);	
+                setThread(selectedThreadId);
             }
             setRunning(false);
             setHasRun(false);
@@ -208,9 +211,10 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({children, initialS
     );
 
     return (
-        <ScriptContext.Provider 
+        <ScriptContext.Provider
             value={{
                 scriptContent,
+                scriptDisplayName,
                 scriptId, setScriptId,
                 script, setScript,
                 workspace, setWorkspace,

@@ -43,7 +43,11 @@ export default function Scripts() {
         return firstLetters.slice(0, 2).join('').toUpperCase();
     }
 
-    useEffect(() => { refresh() }, [authenticated, me]);
+    useEffect(() => {
+        if (authenticated && me) {
+            refresh();
+        }
+    }, [authenticated, me]);
 
     const ScriptItems = () => authenticated ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-4 w-full gap-10">
@@ -74,7 +78,7 @@ export default function Scripts() {
                         >
                             Chat
                         </Button>
-                        { me?.username === script.owner && 
+                        { me?.username === script.owner &&
                             <>
                                 <Button
                                     className="w-full"
@@ -97,7 +101,7 @@ export default function Scripts() {
                                 >
                                     Delete
                                 </Button>
-                                    
+
                             </>
                         }
                     </CardFooter>

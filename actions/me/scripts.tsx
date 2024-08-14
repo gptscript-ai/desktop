@@ -1,7 +1,6 @@
 "use server"
 
 import {create, del, get, list, update} from "@/actions/common"
-import { getMe } from "@/actions/me/me"
 import { GATEWAY_URL, gpt } from "@/config/env"
 import { Block } from "@gptscript-ai/gptscript"
 
@@ -68,7 +67,7 @@ export async function getScripts(query?: ScriptsQuery): Promise<ParsedScriptsQue
     for (const script of scripts.scripts || []) {
         const parsedScript = await gpt().parseTool(script.content || '');
 
-        parsedScripts.push({ ...script, 
+        parsedScripts.push({ ...script,
             script: parsedScript,
             description: getDescription(parsedScript),
             agentName: getName(parsedScript)
@@ -113,17 +112,4 @@ export async function getScriptContent(scriptURL: string): Promise<string | unde
     } catch (e) {
         return undefined;
     }
-}
-
-export async function getNewScriptName() {
-    const me = await getMe();
-    const scripts = await getScripts({ owner: me.username, search: 'New Assistant' });
-    let latestAssistant = 0;
-    for (let script of scripts.scripts || []) {
-        if (script.displayName?.includes('New Assistant')) {
-            const assistantNumber = parseInt(script.displayName?.split('New Assistant ')[1] || '1');
-            if (assistantNumber > latestAssistant) latestAssistant = assistantNumber;
-        }
-    }
-    return `New Assistant ${latestAssistant + 1}`;
 }
