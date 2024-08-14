@@ -18,7 +18,7 @@ export default function Create() {
 
     const handleSubmit = async () => {
         const defaultName = "New Assistant";
-        const slug = defaultName.toLowerCase().replace(" ", "-") + "-" + Math.random().toString(36).substring(2, 7);
+        const slug = defaultName.toLowerCase().replaceAll(" ", "-") + "-" + Math.random().toString(36).substring(2, 7);
         createScript({
             displayName: defaultName,
             slug,

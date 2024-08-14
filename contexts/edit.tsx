@@ -178,7 +178,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
                 // Only update slug when displayName has changed
                 if (existing?.displayName !== root.name) {
                     toUpdate.displayName = root.name;
-                    toUpdate.slug = toUpdate.displayName?.toLowerCase().replace(" ", "-") + "-" + Math.random().toString(36).substring(2, 7);
+                    toUpdate.slug = toUpdate.displayName?.toLowerCase().replaceAll(" ", "-") + "-" + Math.random().toString(36).substring(2, 7);
                 } else {
                     toUpdate.slug = existing?.slug;
                 }
