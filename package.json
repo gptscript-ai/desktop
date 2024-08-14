@@ -7,7 +7,7 @@
     "url": "https://acorn.io"
   },
   "private": true,
-  "version": "v0.10.0-rc2",
+  "version": "v0.10.0-rc3",
   "scripts": {
     "build": "next build --no-lint",
     "build:electron": "next build --no-lint && node electron/build.mjs",
