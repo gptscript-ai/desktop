@@ -15,9 +15,9 @@ const NewThread = ({className}: NewThreadProps) => {
     const [loading, setLoading] = useState(true);
     const {
         workspace,
-        setThread, 
-        setSelectedThreadId, 
-        setScript, 
+        setThread,
+        setSelectedThreadId,
+        setScript,
         setThreads,
         scriptId,
     } = useContext(ScriptContext);
@@ -29,7 +29,6 @@ const NewThread = ({className}: NewThreadProps) => {
         setScripts(resp.scripts || []);
     }
 
-    useEffect(() => { fetchScripts() }, []);
     useEffect(() => { fetchScripts() }, [isOpen]);
 
     const handleCreateThread = (script: string) => {
@@ -51,12 +50,12 @@ const NewThread = ({className}: NewThreadProps) => {
                 <Menu aria-label="my-scripts">
                     <MenuSection aria-label={"my-scripts"} title="Select a script">
                         {scripts.map((script, i) => (
-                            <MenuItem 
-                                aria-label={script.displayName} 
+                            <MenuItem
+                                aria-label={script.displayName}
                                 key={i} color="primary"
-                                className="py-2 truncate max-w-[200px]" 
-                                content={script.displayName} 
-                                onClick={() => { 
+                                className="py-2 truncate max-w-[200px]"
+                                content={script.displayName}
+                                onClick={() => {
                                     handleCreateThread(script.publicURL!); setIsOpen(false)
                                 }}
                             >

@@ -68,23 +68,22 @@ export default function Explore() {
         })
             .then((resp) => {
                 setNext(resp.continue)
-                setScripts(resp.scripts || []) 
+                setScripts(resp.scripts || [])
                 setFilteredScripts(resp.scripts || [])
             })
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
     }, [query, filter, owner, visibility]);
 
-    useEffect(() => {   
-        refresh()
-    }, [query, filter, owner, visibility]);
-
-    useEffect(() => { 
+    useEffect(() => {
         setCurrent('/explore')
-        refresh() 
     }, []);
 
-    useEffect(() => { refresh() }, [authenticated]);;
+    useEffect(() => {
+        if (authenticated) {
+            refresh();
+        }
+    }, [authenticated, query, filter, owner, visibility]);
 
     return (
         <div className="w-full px-20 h-full overflow-y-scroll mx-auto pt-10">
@@ -147,7 +146,7 @@ export default function Explore() {
                             }
                         }}
                     />
-                    <Input 
+                    <Input
                         startContent={<GoSearch />}
                         placeholder="Search for assistant content..."
                         color="primary"
@@ -180,8 +179,8 @@ export default function Explore() {
                                     setOpen(true)
                                 }}
                             >
-                                <Card 
-                                    className="h-[350px] border-2 border-white dark:bg-zinc-900 p-6 dark:border-zinc-900 hover:border-primary hover:shadow-2xl dark:hover:border-primary cursor-pointer transition duration-300 ease-in-out transform hover:scale-105" 
+                                <Card
+                                    className="h-[350px] border-2 border-white dark:bg-zinc-900 p-6 dark:border-zinc-900 hover:border-primary hover:shadow-2xl dark:hover:border-primary cursor-pointer transition duration-300 ease-in-out transform hover:scale-105"
                                     key={script.displayName}
                                     shadow="md"
                                 >
@@ -198,7 +197,7 @@ export default function Explore() {
                                             </div>
                                         </div>
                                         <div className="flex space-x-1 w-[90%] overflow-x-auto pt-10 pb-2">
-                                            {script.tags?.map((tag) => 
+                                            {script.tags?.map((tag) =>
                                                 <Chip size="sm" className="pb-0 mb-0" key={tag}>{tag}</Chip>
                                             )}
                                         </div>
@@ -210,11 +209,11 @@ export default function Explore() {
                                 </Card>
                             </div>
                         ))}
-                        {next && 
+                        {next &&
                             <Button
                                 isLoading={nextLoading}
-                                color="primary" 
-                                size="lg" 
+                                color="primary"
+                                size="lg"
                                 className="col-span-1 lg:col-span-2 2xl:col-span-3 4xl:col-span-4"
                                 onPress={() => {
                                     setNextLoading(true)

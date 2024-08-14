@@ -32,7 +32,7 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className, collapsed, setCollapsed
     const ScriptItems = scripts && scripts.length ?
         scripts.map((script, i) => (
             <DropdownItem startContent={<GoPerson className="mb-1"/>} key={script.publicURL}>{script.agentName || `Untitled Assistant ${i}`}</DropdownItem>
-        )) : 
+        )) :
         <DropdownItem key={'no-files'} isReadOnly>No files found</DropdownItem>;
 
     return (
@@ -42,9 +42,9 @@ const ScriptNav: React.FC<ScriptNavProps> = ({className, collapsed, setCollapsed
                     <IoMenu/>
                 </Button>
             </DropdownTrigger>
-            <DropdownMenu 
-                aria-label="edit" 
-                onAction={(key) => { 
+            <DropdownMenu
+                aria-label="edit"
+                onAction={(key) => {
                     if (key === 'collapse') {
                         setCollapsed && setCollapsed(!collapsed);
                     } else if (key === 'export') {

@@ -1,7 +1,7 @@
-import React, {createContext, useState, useEffect, useCallback, useRef} from 'react';
-import {Tool, Text, Block} from '@gptscript-ai/gptscript';
-import {getScript, updateScript} from '@/actions/me/scripts';
-import { parse, stringify, getTexts } from '@/actions/gptscript';
+import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { Block, Tool } from '@gptscript-ai/gptscript';
+import { getScript, Script, updateScript } from '@/actions/me/scripts';
+import { getTexts, parse, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
@@ -59,8 +59,8 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     const [visibility, setVisibility] = useState<'public' | 'private' | 'protected'>('private');
     const [models, setModels] = useState<string[]>([]);
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-    
-    // Dynamic instructions are simply a text tool with the name "dynamic-instructions" that is 
+
+    // Dynamic instructions are simply a text tool with the name "dynamic-instructions" that is
     // imported as a context in the root tool. This field is used to store the instructions for
     // that tool.
     const [dynamicInstructions, setDynamicInstructions] = useState<string>('');
@@ -168,11 +168,22 @@ const EditContextProvider: React.FC<EditContextProps> = ({scriptPath, children})
     const update = useCallback(async () => {
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(async () => {
-            await updateScript({
-                visibility: visibility,
-                content: await stringify([root, ...tools]),
-                id: scriptId,
-            }).catch((error) => console.error(error));
+            if (scriptId && visibility && root) {
+                const existing = await getScript(scriptId.toString())
+                let toUpdate: Script = {
+                    visibility: visibility,
+                    content: await stringify([root, ...tools]),
+                    id: scriptId,
+                }
+                // Only update slug when displayName has changed
+                if (existing?.displayName !== root.name) {
+                    toUpdate.displayName = root.name;
+                    toUpdate.slug = toUpdate.displayName?.toLowerCase().replace(" ", "-") + "-" + Math.random().toString(36).substring(2, 7);
+                } else {
+                    toUpdate.slug = existing?.slug;
+                }
+                await updateScript(toUpdate).catch((error) => console.error(error));
+            }
         }, DEBOUNCE_TIME);
     }, [scriptId, root, tools, visibility]);
 

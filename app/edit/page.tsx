@@ -9,12 +9,13 @@ import {ScriptContextProvider} from "@/contexts/script";
 import New from "@/components/edit/new";
 import ScriptNav from "@/components/edit/scriptNav";
 import { NavContext } from "@/contexts/nav";
+import { AuthContextProvider } from '@/contexts/auth';
 
 function EditFile() {
     const [file, setFile] = useState<string>(useSearchParams().get('file') || '');
     const [scriptId, setScriptId] = useState<string>(useSearchParams().get('id') || '');
     const [collapsed, setCollapsed] = useState(false);
-    
+
     const {setCurrent} = useContext(NavContext);
     useEffect(() => setCurrent('/build'), [])
 
@@ -23,7 +24,7 @@ function EditFile() {
             <div className="absolute left-2 top-2">
                 <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed}/>
             </div>
-            <New 
+            <New
                 className="w-1/2"
                 setFile={setFile}
             />
