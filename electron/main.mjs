@@ -39,6 +39,7 @@ async function startServer(isPackaged) {
   console.log(`Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`);
 
   // Set up the browser tool to run in headless mode.
+  ensureDirExists(process.env.WORKSPACE_DIR)
   writeFileSync(`${process.env.WORKSPACE_DIR}/browsersettings.json`, JSON.stringify({ headless: true }));
 
   try {
