@@ -22,7 +22,7 @@ function ensureDirExists(dir) {
 }
 
 async function startServer(isPackaged) {
-  const port = isPackaged ? await getPort({ portRange: [30000, 40000] }) : 3000;
+  const port = isPackaged ? await getPort({ portRange: [30000, 40000] }) : process.env.PORT || 3000;
   const gptscriptBin = join(
     isPackaged ? join(resourcesDir, 'app.asar.unpacked') : '',
     'node_modules',
