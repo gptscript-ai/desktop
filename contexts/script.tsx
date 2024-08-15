@@ -30,6 +30,7 @@ interface ScriptContextState {
   subTool: string;
   setSubTool: React.Dispatch<React.SetStateAction<string>>;
   setScript: React.Dispatch<React.SetStateAction<string>>;
+  setScriptContent: React.Dispatch<React.SetStateAction<Block[] | null>>;
   tool: Tool;
   setTool: React.Dispatch<React.SetStateAction<Tool>>;
   showForm: boolean;
@@ -269,6 +270,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
         setScriptId,
         script,
         setScript,
+        setScriptContent,
         workspace,
         setWorkspace,
         tool,
