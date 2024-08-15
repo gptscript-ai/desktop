@@ -15,9 +15,11 @@ import {
   Tooltip,
   Accordion,
   AccordionItem,
+  Button,
 } from '@nextui-org/react';
 import { PiToolboxBold } from 'react-icons/pi';
 import AssistantNotFound from '@/components/assistant-not-found';
+import { useRouter } from 'next/navigation';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -25,6 +27,7 @@ interface ConfigureProps {
 }
 
 const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
+  const router = useRouter();
   const {
     root,
     setRoot,
@@ -177,6 +180,16 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             />
           </AccordionItem>
         </Accordion>
+      </div>
+      <div className="w-full justify-end px-2 flex space-y-4 mb-6">
+        <Button
+          color="primary"
+          onClick={() => {
+            router.push('/build');
+          }}
+        >
+          Finish
+        </Button>
       </div>
     </>
   );
