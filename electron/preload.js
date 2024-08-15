@@ -1,10 +1,10 @@
-const electron = require('electron')
+import { contextBridge, ipcRenderer } from 'electron';
 
-electron.contextBridge.exposeInMainWorld("electronAPI", {
-    on: (channel, callback) => {
-        electron.ipcRenderer.on(channel, callback);
-    },
-    send: (channel, args) => {
-        electron.ipcRenderer.send(channel, args);
-    }
+contextBridge.exposeInMainWorld('electronAPI', {
+  on: (channel, callback) => {
+    ipcRenderer.on(channel, callback);
+  },
+  send: (channel, args) => {
+    ipcRenderer.send(channel, args);
+  },
 });
