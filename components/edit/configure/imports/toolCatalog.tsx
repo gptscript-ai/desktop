@@ -149,7 +149,7 @@ const featuredTools: FeaturedTools = {
     {
       name: 'Knowledge',
       description: 'Provides the assistant with information based context.',
-      url: 'github.com/gptscript-ai/knowledge@v0.4.6-gateway',
+      url: 'github.com/gptscript-ai/knowledge@v0.4.7-gateway',
       tags: ['knowledge', 'rag'],
       icon: <GoBook className="text-5xl" />,
     },
