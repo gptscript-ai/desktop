@@ -22,6 +22,7 @@ export type DependencyBlock = {
 
 interface EditContextProps {
   scriptPath: string;
+  initialScriptId: string;
   children: React.ReactNode;
 }
 
@@ -62,6 +63,7 @@ interface EditContextState {
 const EditContext = createContext<EditContextState>({} as EditContextState);
 const EditContextProvider: React.FC<EditContextProps> = ({
   scriptPath,
+  initialScriptId,
   children,
 }) => {
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   const [root, setRoot] = useState<Tool>({} as Tool);
   const [tools, setTools] = useState<Tool[]>([]);
   const [script, setScript] = useState<Block[]>([]);
-  const [scriptId, setScriptId] = useState<number>(-1);
+  const [scriptId, setScriptId] = useState<number>(parseInt(initialScriptId));
   const [visibility, setVisibility] = useState<
     'public' | 'private' | 'protected'
   >('private');
@@ -90,7 +92,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
       setModels(m);
     });
 
-    getScript(scriptPath)
+    getScript(initialScriptId)
       .then(async (script) => {
         if (script === undefined) {
           setNotFound(true);
