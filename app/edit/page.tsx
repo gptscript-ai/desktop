@@ -31,7 +31,7 @@ function EditFile() {
       initialScriptId={scriptId}
       initialThread=""
     >
-      <EditContextProvider scriptPath={file}>
+      <EditContextProvider scriptPath={file} initialScriptId={scriptId}>
         <div
           className={`w-full h-full grid ${collapsed ? 'grid-cols-4' : 'grid-cols-2'}`}
         >
