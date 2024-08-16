@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, shell, BrowserWindow } from 'electron';
 import { getPort } from 'get-port-please';
 import { startAppServer } from '../server/app.mjs';
 import { join, dirname } from 'path';
@@ -22,7 +22,9 @@ function ensureDirExists(dir) {
 }
 
 async function startServer(isPackaged) {
-  const port = isPackaged ? await getPort({ portRange: [30000, 40000] }) : process.env.PORT || 3000;
+  const port = isPackaged
+    ? await getPort({ portRange: [30000, 40000] })
+    : process.env.PORT || 3000;
   const gptscriptBin = join(
     isPackaged ? join(resourcesDir, 'app.asar.unpacked') : '',
     'node_modules',
@@ -85,10 +87,24 @@ function createWindow(url) {
     win.setWindowButtonVisibility(true);
   }
 
+  // Open the NextJS app
   win.loadURL(url);
+
   win.webContents.on('did-fail-load', () =>
     win.webContents.reloadIgnoringCache()
   );
+
+  // Open all external links in the default system browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    // Check if the URL is external
+    if (url.startsWith('http') && !url.includes('localhost')) {
+      shell.openExternal(url);
+      return { action: 'deny' }; // Prevent Electron from opening the link in the app
+    }
+
+    // Allow navigation for internal URLs
+    return { action: 'allow' };
+  });
 }
 
 app.on('ready', () => {
