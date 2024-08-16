@@ -137,7 +137,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
           setNotFound(true);
           return;
         }
-        setScriptDisplayName('Default Assistant');
+        setScriptDisplayName('Tildy');
         setNotFound(false);
         setTool(await rootTool(content));
         setInitialFetch(true);
