@@ -131,7 +131,7 @@ export default function Commands({
             if (
               !tool ||
               tool.tools?.includes(
-                'github.com/gptscript-ai/knowledge@v0.4.6-gateway'
+                'github.com/gptscript-ai/knowledge@v0.4.7-gateway'
               )
             )
               return;
@@ -139,12 +139,12 @@ export default function Commands({
               ...prev,
               tools: [
                 ...(prev.tools || []),
-                'github.com/gptscript-ai/knowledge@v0.4.6-gateway',
+                'github.com/gptscript-ai/knowledge@v0.4.7-gateway',
               ],
             }));
             socket?.emit(
               'addTool',
-              'github.com/gptscript-ai/knowledge@v0.4.6-gateway'
+              'github.com/gptscript-ai/knowledge@v0.4.7-gateway'
             );
           })
       );
