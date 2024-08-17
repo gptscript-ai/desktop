@@ -40,6 +40,7 @@ async function startServer(isPackaged) {
     process.env.WORKSPACE_DIR || join(dataDir, 'workspace');
   process.env.GPTSCRIPT_GATEWAY_URL =
     process.env.GPTSCRIPT_GATEWAY_URL || gatewayUrl;
+  process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
 
   console.log(
     `Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`
