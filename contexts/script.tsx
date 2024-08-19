@@ -221,7 +221,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   };
 
   const restartScript = useCallback(
-    // This is debonced as allowing the user to spam the restart button can cause race
+    // This is debounced as allowing the user to spam the restart button can cause race
     // conditions. In particular, the restart may not be processed correctly and can
     // get the user into a state where no run has been sent to the server.
     debounce(async () => {

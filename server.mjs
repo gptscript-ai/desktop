@@ -9,9 +9,9 @@ dotenv.config({ path: ['.env', '.env.local'] });
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
 const port = parseInt(process.env.GPTSCRIPT_PORT ?? '3000');
-const dir = dirname(fileURLToPath(import.meta.url));
+const appDir = dirname(fileURLToPath(import.meta.url));
 const runFile = process.env.UI_RUN_FILE;
-startAppServer({ dev, hostname, port, dir })
+startAppServer({ dev, hostname, port, appDir })
   .then((address) => {
     let landingPage = address;
     if (runFile) {

@@ -1,64 +1,43 @@
 import { app, shell, BrowserWindow } from 'electron';
-import { getPort } from 'get-port-please';
 import { startAppServer } from '../server/app.mjs';
 import { join, dirname } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fixPath from 'fix-path';
 import os from 'os';
+import { config } from './config.mjs';
 
-const appName = 'Acorn';
-const gatewayUrl =
-  process.env.GPTSCRIPT_GATEWAY_URL || 'https://gateway-api.gptscript.ai';
-const resourcesDir = dirname(app.getAppPath());
-const dataDir = getDataDir(appName);
-
-function getDataDir(appName) {
-  const userDataPath = app.getPath('userData');
-  return join(userDataPath, appName);
-}
-
-function ensureDirExists(dir) {
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-}
+app.on('window-all-closed', () => app.quit());
+app.on('ready', () => {
+  startServer(app.isPackaged);
+});
 
 async function startServer(isPackaged) {
-  const port = isPackaged
-    ? await getPort({ portRange: [30000, 40000] })
-    : process.env.PORT || 3000;
-  const gptscriptBin = join(
-    isPackaged ? join(resourcesDir, 'app.asar.unpacked') : '',
-    'node_modules',
-    '@gptscript-ai',
-    'gptscript',
-    'bin',
-    `gptscript${process.platform === 'win32' ? '.exe' : ''}`
-  );
+  // Fix path so that tools can find binaries installed on the system.
+  fixPath();
 
-  process.env.GPTSCRIPT_BIN = process.env.GPTSCRIPT_BIN || gptscriptBin;
-  process.env.THREADS_DIR = process.env.THREADS_DIR || join(dataDir, 'threads');
-  process.env.WORKSPACE_DIR =
-    process.env.WORKSPACE_DIR || join(dataDir, 'workspace');
-  process.env.GPTSCRIPT_GATEWAY_URL =
-    process.env.GPTSCRIPT_GATEWAY_URL || gatewayUrl;
-  process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
-
-  console.log(
-    `Starting app server with GPTSCRIPT_BIN="${process.env.GPTSCRIPT_BIN}"`
-  );
+  // Ensure the app's data directory exists
+  ensureDirExists(config.dataDir);
 
   // Set up the browser tool to run in headless mode.
-  ensureDirExists(process.env.WORKSPACE_DIR);
+  ensureDirExists(config.workspaceDir);
   writeFileSync(
-    `${process.env.WORKSPACE_DIR}/browsersettings.json`,
+    `${config.workspaceDir}/browsersettings.json`,
     JSON.stringify({ headless: true })
   );
 
+  // Project config onto environment variables to configure GPTScript/sdk-server and the Next.js app.
+  process.env.GPTSCRIPT_BIN = config.gptscriptBin;
+  process.env.THREADS_DIR = config.threadsDir;
+  process.env.WORKSPACE_DIR = config.workspaceDir;
+  process.env.GPTSCRIPT_GATEWAY_URL = config.gatewayUrl;
+  process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
+
   try {
     const url = await startAppServer({
-      dev: !isPackaged,
+      dev: config.dev,
       hostname: 'localhost',
-      port,
-      dir: app.getAppPath(),
+      port: config.port,
+      appDir: config.appDir,
     });
     console.log(`> ${isPackaged ? '' : 'Dev '}Electron app started at ${url}`);
     createWindow(url);
@@ -73,9 +52,9 @@ function createWindow(url) {
   const win = new BrowserWindow({
     width: 1024,
     height: 720,
-    frame: isMac ? false : true, // Use frame: true for Windows and Linux
+    frame: !isMac,
     webPreferences: {
-      preload: join(app.getAppPath(), 'electron/preload.js'),
+      preload: join(config.appDir, 'electron/preload.mjs'),
       nodeIntegration: true,
       allowRunningInsecureContent: true,
       webSecurity: false,
@@ -88,7 +67,7 @@ function createWindow(url) {
     win.setWindowButtonVisibility(true);
   }
 
-  // Open the NextJS app
+  // Open the Next.js app
   win.loadURL(url);
 
   win.webContents.on('did-fail-load', () =>
@@ -108,10 +87,6 @@ function createWindow(url) {
   });
 }
 
-app.on('ready', () => {
-  fixPath();
-  ensureDirExists(dataDir);
-  startServer(app.isPackaged);
-});
-
-app.on('window-all-closed', () => app.quit());
+function ensureDirExists(dir) {
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+}

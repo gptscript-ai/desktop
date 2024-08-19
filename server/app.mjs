@@ -18,7 +18,7 @@ let serverRunning = false;
 let gptscriptInitialized = false;
 let gptscriptInitPromise = null;
 
-export const startAppServer = ({ dev, hostname, port, dir }) => {
+export const startAppServer = ({ dev, hostname, port, appDir }) => {
   const address = `http://${hostname}:${port ?? 3000}`;
 
   return new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ export const startAppServer = ({ dev, hostname, port, dir }) => {
       hostname: hostname,
       port: port,
       conf: nextConfig,
-      dir: dir,
+      dir: appDir,
       customServer: true,
     });
     const handler = app.getRequestHandler();
