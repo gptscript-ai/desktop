@@ -1,6 +1,6 @@
-import { app, shell, BrowserWindow } from 'electron';
+import { app, shell, screen, BrowserWindow } from 'electron';
 import { startAppServer } from '../server/app.mjs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fixPath from 'fix-path';
 import os from 'os';
@@ -11,7 +11,7 @@ app.on('ready', () => {
   startServer(app.isPackaged);
 });
 
-async function startServer(isPackaged) {
+async function startServer() {
   // Fix path so that tools can find binaries installed on the system.
   fixPath();
 
@@ -21,7 +21,7 @@ async function startServer(isPackaged) {
   // Set up the browser tool to run in headless mode.
   ensureDirExists(config.workspaceDir);
   writeFileSync(
-    `${config.workspaceDir}/browsersettings.json`,
+    join(`${config.workspaceDir}`, 'browsersettings.json'),
     JSON.stringify({ headless: true })
   );
 
@@ -39,7 +39,7 @@ async function startServer(isPackaged) {
       port: config.port,
       appDir: config.appDir,
     });
-    console.log(`> ${isPackaged ? '' : 'Dev '}Electron app started at ${url}`);
+    console.log(`> ${config.dev ? 'Dev ' : ''}Electron app started at ${url}`);
     createWindow(url);
   } catch (err) {
     console.error(err);
@@ -48,10 +48,12 @@ async function startServer(isPackaged) {
 }
 
 function createWindow(url) {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const isMac = os.platform() === 'darwin';
   const win = new BrowserWindow({
-    width: 1024,
-    height: 720,
+    width: Math.min(width, 1280),
+    height: Math.min(height, 960),
+    center: true,
     frame: !isMac,
     webPreferences: {
       preload: join(config.appDir, 'electron/preload.mjs'),
