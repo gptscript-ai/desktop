@@ -153,14 +153,23 @@ const useChatSocket = (isEmpty?: boolean) => {
         if (latestAgentMessageIndex.current !== -1) {
           // Update the message content
           updatedMessages[latestAgentMessageIndex.current].message =
-            frame.message;
+            frame.metadata &&
+            frame.metadata.authURL &&
+            frame.metadata.toolDisplayName
+              ? `${frame.metadata.toolDisplayName} requires authentication`
+              : frame.message;
           updatedMessages[latestAgentMessageIndex.current].component = form;
           updatedMessages[latestAgentMessageIndex.current].calls = state;
         } else {
           // If there are no previous messages, create a new message
           updatedMessages.push({
             type: MessageType.Agent,
-            message: frame.message,
+            message:
+              frame.metadata &&
+              frame.metadata.authURL &&
+              frame.metadata.toolDisplayName
+                ? `${frame.metadata.toolDisplayName} requires authentication`
+                : frame.message,
             component: form,
             calls: state,
           });
