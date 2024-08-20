@@ -166,7 +166,9 @@ const mount = async (
         tools: state.tools || [],
       });
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Error loading state:', e);
+  }
 
   // Start the script
   let runningScript = null;

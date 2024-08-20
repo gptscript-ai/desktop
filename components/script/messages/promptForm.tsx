@@ -23,7 +23,17 @@ const PromptForm = ({
   const onSubmitForm = () => {
     setSubmitted(true);
     onSubmit({ id: frame.id, responses: getValues() });
+    if (frame.metadata && frame.metadata.authURL) {
+      open(frame.metadata.authURL);
+    }
   };
+
+  let buttonText = noFields ? 'OK' : 'Submit';
+  let includeHiddenInput = false;
+  if (noFields && frame.metadata && frame.metadata.authURL) {
+    buttonText = 'Click here to sign in';
+    includeHiddenInput = true;
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className="mx-4">
@@ -40,6 +50,14 @@ const PromptForm = ({
             />
           )
       )}
+      {includeHiddenInput && (
+        <Input
+          type="text"
+          className="hidden"
+          {...register('handled')}
+          value={'true'}
+        />
+      )}
       <Button
         startContent={<GoCheckCircle />}
         type="submit"
@@ -48,7 +66,7 @@ const PromptForm = ({
         color="primary"
         isDisabled={submitted}
       >
-        {noFields ? 'OK' : submitted ? 'Submitted' : 'Submit'}
+        {submitted ? 'Submitted' : buttonText}
       </Button>
     </form>
   );
