@@ -1,9 +1,9 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import useChatSocket from '@/components/script/useChatSocket';
 import { Message } from '@/components/script/messages';
 import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
-import { getThreads, getThread, Thread } from '@/actions/threads';
+import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
@@ -13,8 +13,8 @@ interface ScriptContextProps {
   children: React.ReactNode;
   initialScript: string;
   initialSubTool?: string;
-  initialThread: string;
   initialScriptId?: string;
+  enableThread?: boolean;
 }
 
 interface ScriptContextState {
@@ -65,15 +65,17 @@ interface ScriptContextState {
   restartScript: () => void;
 }
 
+const defaultScriptName = `Tildy`;
+
 const ScriptContext = createContext<ScriptContextState>(
   {} as ScriptContextState
 );
 const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   children,
   initialScript,
-  initialThread,
   initialSubTool,
   initialScriptId,
+  enableThread,
 }) => {
   const [script, setScript] = useState<string>(initialScript);
   const [workspace, setWorkspace] = useState('');
@@ -86,7 +88,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   const [hasParams, setHasParams] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [thread, setThread] = useState<string>(initialThread);
+  const [thread, setThread] = useState<string>('');
   const [threads, setThreads] = useState<Thread[]>([]);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [initialFetch, setInitialFetch] = useState(false);
@@ -108,11 +110,11 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
     setForceRun,
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
+  const threadInitialized = useRef(false);
 
   // need to initialize the workspace from the env variable with serves
   // as the default.
   useEffect(() => {
-    fetchThreads();
     getWorkspaceDir().then((workspace) => {
       setWorkspace(workspace);
     });
@@ -137,13 +139,50 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
           setNotFound(true);
           return;
         }
-        setScriptDisplayName('Tildy');
+        setScriptDisplayName(defaultScriptName);
         setNotFound(false);
         setTool(await rootTool(content));
         setInitialFetch(true);
       });
     }
-  }, [script, scriptId]);
+  }, [script, scriptId, thread]);
+
+  useEffect(() => {
+    if (!enableThread) {
+      return;
+    }
+    if (!thread && !threadInitialized.current) {
+      threadInitialized.current = true;
+      const createAndSetThread = async () => {
+        try {
+          const threads = await getThreads();
+          if ((initialScript && initialScriptId) || threads.length === 0) {
+            // if both threads and scriptId are set, then always create a new thread
+            const newThread = await createThread(
+              script,
+              scriptDisplayName ?? defaultScriptName,
+              scriptId
+            );
+            const threadId = newThread?.meta?.id;
+            setThread(threadId);
+            setThreads(await getThreads());
+            setSelectedThreadId(threadId);
+            setWorkspace(newThread.meta.workspace);
+          } else if (threads.length > 0) {
+            setThreads(threads);
+            const latestThread = threads[0];
+            setThread(latestThread.meta.id);
+            setSelectedThreadId(latestThread.meta.id);
+            setScriptId(latestThread.meta.scriptId);
+          }
+        } catch (e) {
+          threadInitialized.current = false;
+          console.error(e);
+        }
+      };
+      createAndSetThread();
+    }
+  }, [thread, threads, enableThread, scriptDisplayName]);
 
   useEffect(() => {
     setHasParams(
@@ -170,7 +209,14 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
 
   useEffect(() => {
     setIsEmpty(!tool.instructions);
-    if (hasRun || !socket || !connected || !initialFetch) return;
+    if (
+      hasRun ||
+      !socket ||
+      !connected ||
+      !initialFetch ||
+      (enableThread && !threadInitialized.current)
+    )
+      return;
     if (
       !tool.arguments?.properties ||
       Object.keys(tool.arguments.properties).length === 0
@@ -185,7 +231,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
       );
       setHasRun(true);
     }
-  }, [tool, connected, script, scriptContent, formValues, workspace, thread]);
+  }, [tool, connected, script, scriptContent, formValues, workspace]);
 
   useEffect(() => {
     if (forceRun && socket && connected) {

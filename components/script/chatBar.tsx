@@ -2,6 +2,7 @@
 
 import React, { useState, useContext, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
+import { Spinner } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
 import { Button, Textarea } from '@nextui-org/react';
 import Commands from '@/components/script/chatBar/commands';
@@ -76,7 +77,10 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
         radius="full"
         className="text-lg"
         color="primary"
-        onPress={() => setCommandsOpen(true)}
+        onPress={() => {
+          if (disabled) return;
+          setCommandsOpen(true);
+        }}
         onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
       />
       <div className="w-full relative">
@@ -128,15 +132,21 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
           onPress={interrupt}
         />
       ) : (
-        <Button
-          startContent={<IoMdSend />}
-          isDisabled={disabled}
-          isIconOnly
-          radius="full"
-          className="text-lg"
-          color="primary"
-          onPress={handleSend}
-        />
+        <>
+          {disabled ? (
+            <Spinner />
+          ) : (
+            <Button
+              startContent={<IoMdSend />}
+              isIconOnly
+              isDisabled={!inputValue}
+              radius="full"
+              className="text-lg"
+              color="primary"
+              onPress={handleSend}
+            />
+          )}
+        </>
       )}
     </div>
   );

@@ -1,18 +1,12 @@
 'use client';
 
-import { useContext, useCallback, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import Messages, { MessageType } from '@/components/script/messages';
 import ChatBar from '@/components/script/chatBar';
 import ToolForm from '@/components/script/form';
 import Loading from '@/components/loading';
 import { Button } from '@nextui-org/react';
 import { getWorkspaceDir } from '@/actions/workspace';
-import {
-  createThread,
-  getThreads,
-  generateThreadName,
-  renameThread,
-} from '@/actions/threads';
 import { getGatewayUrl } from '@/actions/gateway';
 import { ScriptContext } from '@/contexts/script';
 import AssistantNotFound from '@/components/assistant-not-found';
@@ -27,7 +21,6 @@ interface ScriptProps {
 const Script: React.FC<ScriptProps> = ({
   className,
   messagesHeight = 'h-full',
-  enableThreads,
   showAssistantName,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,16 +38,11 @@ const Script: React.FC<ScriptProps> = ({
     messages,
     setMessages,
     thread,
-    setThreads,
-    setSelectedThreadId,
     socket,
     connected,
     running,
     notFound,
     restartScript,
-    scriptId,
-    fetchThreads,
-    workspace,
   } = useContext(ScriptContext);
 
   useEffect(() => {
@@ -94,45 +82,16 @@ const Script: React.FC<ScriptProps> = ({
   const handleMessageSent = async (message: string) => {
     if (!socket || !connected) return;
 
-    let threadId = '';
-    if (
-      hasNoUserMessages() &&
-      enableThreads &&
-      !thread &&
-      setThreads &&
-      setSelectedThreadId
-    ) {
-      const newThread = await createThread(
-        script,
-        message,
-        scriptId,
-        workspace
-      );
-      threadId = newThread?.meta?.id;
-      setThreads(await getThreads());
-      setSelectedThreadId(threadId);
-    }
-
     setMessages((prevMessages) => [
       ...prevMessages,
       { type: MessageType.User, message },
     ]);
-    socket.emit('userMessage', message, threadId);
-
-    if (hasNoUserMessages() && thread) {
-      renameThread(thread, await generateThreadName(message));
-      fetchThreads();
-    }
+    socket.emit('userMessage', message, thread);
   };
-
-  const hasNoUserMessages = useCallback(
-    () => messages.filter((m) => m.type === MessageType.User).length === 0,
-    [messages]
-  );
 
   return (
     <div className={`h-full w-full ${className}`}>
-      {(connected && running) || (showForm && hasParams) ? (
+      {connected || (showForm && hasParams) ? (
         <>
           <div
             id="small-message"
@@ -168,7 +127,7 @@ const Script: React.FC<ScriptProps> = ({
                 {tool.chat ? 'Start chat' : 'Run script'}
               </Button>
             ) : (
-              <ChatBar onMessageSent={handleMessageSent} />
+              <ChatBar disabled={!running} onMessageSent={handleMessageSent} />
             )}
           </div>
         </>

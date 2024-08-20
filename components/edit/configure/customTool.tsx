@@ -381,7 +381,7 @@ const CustomTool: React.FC<ConfigureProps> = ({ tool }) => {
               <div className="h-full overflow-y-auto">
                 <ScriptContextProvider
                   initialScript={scriptPath}
-                  initialThread=""
+                  enableThread={false}
                   initialSubTool={customTool.name}
                   initialScriptId={`${scriptId}`}
                 >

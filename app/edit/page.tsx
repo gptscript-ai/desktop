@@ -29,7 +29,7 @@ function EditFile() {
     <ScriptContextProvider
       initialScript={file}
       initialScriptId={scriptId}
-      initialThread=""
+      enableThread={false}
     >
       <EditContextProvider scriptPath={file} initialScriptId={scriptId}>
         <div

@@ -2,6 +2,7 @@ import { Card, Listbox, ListboxItem } from '@nextui-org/react';
 import React, { useEffect, useContext } from 'react';
 import {
   GoAlert,
+  GoCheckCircleFill,
   GoInbox,
   GoIssueReopened,
   GoPaperclip,
@@ -11,10 +12,10 @@ import { PiToolbox } from 'react-icons/pi';
 import { ScriptContext } from '@/contexts/script';
 import Upload from '@/components/script/chatBar/upload';
 import ToolCatalog from '@/components/script/chatBar/toolCatalog';
-import { Message, MessageType } from '@/components/script/messages';
+import { MessageType } from '@/components/script/messages';
 import { useFilePicker } from 'use-file-picker';
 import { uploadFile } from '@/actions/upload';
-import { getWorkspaceDir } from '@/actions/workspace';
+import { ingest } from '@/actions/knowledge/knowledge';
 
 /*
     note(tylerslaton):
@@ -32,6 +33,9 @@ import { getWorkspaceDir } from '@/actions/workspace';
     looks for the up-arrow. As such I have a keyDownCapture event that will pass the focus
     to the previous command in the list. This is a bit hacky but it works for now.
 */
+
+const gatewayTool =
+  'github.com/StrongMonkey/knowledge@110c951e81cdbcb8ffdc2294e4d0992dce892875';
 
 const options = [
   {
@@ -62,6 +66,18 @@ const options = [
   },
 ];
 
+function getCookie(name: string): string {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const value = parts?.pop()?.split(';').shift();
+    if (value) {
+      return decodeURIComponent(value);
+    }
+  }
+  return '';
+}
+
 interface CommandsProps {
   text: string;
   setText: (text: string) => void;
@@ -81,8 +97,16 @@ export default function Commands({
     React.useState<typeof options>(options);
   const [uploadOpen, setUploadOpen] = React.useState(false);
   const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
-  const { restartScript, socket, setMessages, tools, tool, setTool } =
-    useContext(ScriptContext);
+  const {
+    restartScript,
+    socket,
+    setMessages,
+    tools,
+    tool,
+    setTool,
+    workspace,
+    selectedThreadId,
+  } = useContext(ScriptContext);
   const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker(
     {}
   );
@@ -102,54 +126,52 @@ export default function Commands({
   }, [text]);
 
   useEffect(() => {
-    if (loading) return;
-    if (!filesContent.length) return;
+    const uploadKnowledge = async () => {
+      if (loading) return;
+      if (!filesContent.length) return;
 
-    const addedMessages = [] as Message[];
-    for (const file of plainFiles) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      getWorkspaceDir().then((workspace) =>
-        uploadFile(workspace, formData)
-          .then(() => {
-            addedMessages.push({
+      try {
+        for (const file of plainFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+          setMessages((prev) => [
+            ...prev,
+            {
               type: MessageType.Alert,
               icon: <GoPaperclip className="mt-1" />,
-              message: `Added knowledge ${file.name}`,
-            });
-          })
-          .catch((error) => {
-            addedMessages.push({
-              type: MessageType.Alert,
-              icon: <GoAlert className="mt-1" />,
-              message: `Error adding knowledge ${file.name}: ${error}`,
-            });
-          })
-          .finally(() => {
-            setMessages((prev) => [...prev, ...addedMessages]);
-            if (
-              !tool ||
-              tool.tools?.includes(
-                'github.com/gptscript-ai/knowledge@v0.4.7-gateway'
-              )
-            )
-              return;
-            setTool((prev) => ({
-              ...prev,
-              tools: [
-                ...(prev.tools || []),
-                'github.com/gptscript-ai/knowledge@v0.4.7-gateway',
-              ],
-            }));
-            socket?.emit(
-              'addTool',
-              'github.com/gptscript-ai/knowledge@v0.4.7-gateway'
-            );
-          })
-      );
-    }
-  }, [filesContent, loading, tool]);
+              message: `Uploading knowledge ${file.name}`,
+            },
+          ]);
+          await uploadFile(workspace, formData, true);
+        }
+        await ingest(workspace, getCookie('gateway_token'), selectedThreadId);
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: MessageType.Alert,
+            icon: <GoCheckCircleFill className="mt-1" />,
+            message: `Successfully uploaded knowledge ${plainFiles.map((f) => f.name).join(', ')}`,
+          },
+        ]);
+        if (!tool || tool.tools?.includes(gatewayTool)) return;
+        setTool((prev) => ({
+          ...prev,
+          tools: [...(prev.tools || []), gatewayTool],
+        }));
+        socket?.emit('addTool', gatewayTool);
+      } catch (e) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: MessageType.Alert,
+            icon: <GoAlert className="mt-1" />,
+            message: `Error uploading knowledge ${filesContent.map((f) => f.name).join(', ')}: ${e}`,
+          },
+        ]);
+      }
+    };
+    uploadKnowledge();
+  }, [filesContent, loading]);
 
   const handleSelect = (value: string) => {
     switch (value) {

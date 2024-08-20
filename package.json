@@ -6,6 +6,9 @@
     "email": "info@acorn.io",
     "url": "https://acorn.io"
   },
+  "files": [
+    "bin"
+  ],
   "private": true,
   "version": "v0.10.0-rc3",
   "scripts": {
@@ -17,7 +20,8 @@
     "dev:electron": "electron .",
     "lint": "next lint",
     "format": "prettier --write .",
-    "start": "cross-env NODE_ENV='production' node server.mjs"
+    "start": "cross-env NODE_ENV='production' node server.mjs",
+    "postinstall": "node scripts/install-binary.mjs"
   },
   "main": "electron/main.mjs",
   "dependencies": {

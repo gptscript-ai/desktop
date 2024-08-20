@@ -1,6 +1,6 @@
 'use server';
 
-import { GATEWAY_URL, THREADS_DIR, WORKSPACE_DIR } from '@/config/env';
+import { THREADS_DIR, WORKSPACE_DIR } from '@/config/env';
 import { gpt } from '@/config/env';
 import fs from 'fs/promises';
 import path from 'path';
@@ -24,15 +24,6 @@ export type ThreadMeta = {
   workspace: string;
 };
 
-export async function init() {
-  const threadsDir = THREADS_DIR();
-  try {
-    await fs.access(threadsDir);
-  } catch (error) {
-    await fs.mkdir(threadsDir, { recursive: true });
-  }
-}
-
 export async function getThreads() {
   const threads: Thread[] = [];
   const threadsDir = THREADS_DIR();
@@ -41,6 +32,7 @@ export async function getThreads() {
   try {
     threadDirs = await fs.readdir(threadsDir);
   } catch (e) {
+    console.error('Failed to read threads directory', e);
     return [];
   }
 
@@ -49,18 +41,19 @@ export async function getThreads() {
   for (const threadDir of threadDirs) {
     const threadPath = path.join(threadsDir, threadDir);
     const files = await fs.readdir(threadPath);
+    const stateFile = path.join(threadPath, STATE_FILE);
 
     const thread: Thread = {} as Thread;
     if (files.includes(STATE_FILE)) {
-      const state = await fs.readFile(
-        path.join(threadPath, STATE_FILE),
-        'utf-8'
-      );
+      const state = await fs.readFile(stateFile, 'utf-8');
       thread.state = state;
     }
     if (files.includes(META_FILE)) {
       const meta = await fs.readFile(path.join(threadPath, META_FILE), 'utf-8');
+      const stateStats = await fs.stat(stateFile);
+      const lastModified = stateStats.mtime;
       thread.meta = JSON.parse(meta) as ThreadMeta;
+      thread.meta.updated = lastModified;
     } else {
       continue;
     }
@@ -96,9 +89,8 @@ export async function generateThreadName(
 
 export async function createThread(
   script: string,
-  firstMessage?: string,
-  scriptId?: string,
-  workspace?: string
+  threadName?: string,
+  scriptId?: string
 ): Promise<Thread> {
   const threadsDir = THREADS_DIR();
 
@@ -106,13 +98,18 @@ export async function createThread(
   const id = Math.random().toString(36).substring(7);
   const threadPath = path.join(threadsDir, id);
   await fs.mkdir(threadPath, { recursive: true });
+  const workspace = path.join(threadPath, 'workspace');
+  await fs.mkdir(workspace, { recursive: true });
 
+  if (!threadName) {
+    threadName = await newThreadName();
+  }
   const threadMeta = {
-    name: await newThreadName(),
+    name: threadName,
     description: '',
     created: new Date(),
     updated: new Date(),
-    workspace: workspace ?? WORKSPACE_DIR(),
+    workspace: workspace,
     id,
     scriptId: scriptId || '',
     script,
@@ -124,11 +121,6 @@ export async function createThread(
     JSON.stringify(threadMeta)
   );
   await fs.writeFile(path.join(threadPath, STATE_FILE), '');
-
-  if (firstMessage) {
-    const generatedThreadName = await generateThreadName(firstMessage);
-    await renameThread(id, generatedThreadName);
-  }
 
   return {
     state: threadState,
