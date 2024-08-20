@@ -203,16 +203,13 @@ const useChatSocket = (isEmpty?: boolean) => {
       }
 
       let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
-      if (
-        !frame.tool.instructions?.startsWith('#!sys.openapi') &&
-        frame.displayText
-      ) {
+      if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
+        confirmMessage = `Proceed with running the following API operation (or allow all runs of this operation)?`;
+      } else if (frame.displayText) {
         const tool = frame.tool?.name?.replace('sys.', '');
         confirmMessage = frame.tool?.source?.repo
           ? `Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?`
           : `Proceed with running the following (or allow all **${tool}** calls)?`;
-      } else if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
-        confirmMessage = `Proceed with running the following API operation (or allow all runs of this operation)?`;
       }
 
       const form = (
@@ -287,10 +284,10 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
       // If the tool is an OpenAPI tool to list operations or get the schema for an operation, allow it.
+      const instructions = frame.tool.instructions.split(' ');
       if (
-        frame.tool.instructions?.split(' ').length > 2 &&
-        (frame.tool.instructions?.split(' ')[1] == 'list' ||
-          frame.tool.instructions?.split(' ')[1] == 'get-schema')
+        instructions.length > 2 &&
+        (instructions[1] == 'list' || instructions[1] == 'get-schema')
       ) {
         return true;
       }
