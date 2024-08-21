@@ -140,10 +140,7 @@ const mount = async (
     workspace: scriptWorkspace,
     prompt: true,
     confirm: true,
-    env: [
-      ...Object.entries(process.env).map(([key, value]) => `${key}=${value}`),
-      'GPTSCRIPT_THREAD_ID=' + threadID,
-    ],
+    env: ['GPTSCRIPT_THREAD_ID=' + threadID],
   };
 
   if (tool) opts.subTool = tool;
