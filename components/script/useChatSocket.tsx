@@ -33,6 +33,8 @@ const useChatSocket = (isEmpty?: boolean) => {
   const latestAgentMessageIndex = useRef<number>(-1);
   const trustedRef = useRef<Record<string, boolean>>({});
   const trustedRepoPrefixesRef = useRef<string[]>([...initiallyTrustedRepos]);
+  // trustedOpenAPIRef contains a mapping of OpenAPI run tools to OpenAPI operation names that have been trusted.
+  const trustedOpenAPIRef = useRef<Record<string, Record<string, boolean>>>({});
 
   // update the refs as the state changes
   useEffect(() => {
@@ -201,7 +203,9 @@ const useChatSocket = (isEmpty?: boolean) => {
       }
 
       let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
-      if (frame.displayText) {
+      if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
+        confirmMessage = `Proceed with running the following API operation (or allow all runs of this operation)?`;
+      } else if (frame.displayText) {
         const tool = frame.tool?.name?.replace('sys.', '');
         confirmMessage = frame.tool?.source?.repo
           ? `Proceed with running the following (or allow all calls from the **${trimRepo(frame.tool?.source.repo!.Root)}** repo)?`
@@ -278,6 +282,28 @@ const useChatSocket = (isEmpty?: boolean) => {
   const alreadyAllowed = (frame: CallFrame): boolean => {
     if (!frame.tool) return false;
 
+    if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
+      // If the tool is an OpenAPI tool to list operations or get the schema for an operation, allow it.
+      const instructions = frame.tool.instructions.split(' ');
+      if (
+        instructions.length > 2 &&
+        (instructions[1] == 'list' || instructions[1] == 'get-schema')
+      ) {
+        return true;
+      }
+
+      // If the tool is an OpenAPI tool to run an operation, check if it has been trusted.
+      if (!frame.tool.name) {
+        return false;
+      }
+
+      const operation = JSON.parse(frame.input as string)['operation'];
+      return (
+        trustedOpenAPIRef.current[frame.tool.name] &&
+        trustedOpenAPIRef.current[frame.tool.name][operation]
+      );
+    }
+
     // Check if the tool has already been allowed
     if (frame.tool.name && trustedRef.current[frame.tool.name]) return true;
 
@@ -303,6 +329,22 @@ const useChatSocket = (isEmpty?: boolean) => {
 
   const addTrustedFor = (frame: CallFrame) => {
     if (!frame.tool) return () => {};
+
+    if (
+      frame.tool.instructions &&
+      frame.tool.name &&
+      frame.tool.instructions.startsWith('#!sys.openapi')
+    ) {
+      return () => {
+        const toolName = frame.tool?.name ?? ''; // Not possible for this to be null, but I have to satisfy the type checker.
+        const operation = JSON.parse(frame.input as string)['operation'];
+
+        if (!trustedOpenAPIRef.current[toolName]) {
+          trustedOpenAPIRef.current[toolName] = {};
+        }
+        trustedOpenAPIRef.current[toolName][operation] = true;
+      };
+    }
 
     return frame.tool.source?.repo
       ? () => {

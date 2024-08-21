@@ -46,7 +46,7 @@ const ConfirmForm = ({
         {message}
       </Markdown>
       {command && (
-        <Code className="ml-4">
+        <Code className="ml-4 whitespace-pre-wrap">
           {command.startsWith('Running')
             ? command.replace('Running', '').replace(/`/g, '')
             : command.replace(/`/g, '')}

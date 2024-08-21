@@ -39,6 +39,10 @@ const Message = ({
   noAvatar?: boolean;
   restart?: () => void;
 }) => {
+  if (message === undefined) {
+    return null;
+  }
+
   switch (message.type) {
     case MessageType.User:
       return (
