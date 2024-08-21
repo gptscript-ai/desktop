@@ -371,6 +371,7 @@ const useChatSocket = (isEmpty?: boolean) => {
       'github.com/gptscript-ai/context',
       'github.com/gptscript-ai/gateway-provider',
       'github.com/gptscript-ai/gateway-creds',
+      'github.com/gptscript-ai/gateway-oauth2',
     ];
     loadSocket();
   }, [socket]);
