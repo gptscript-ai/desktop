@@ -8,6 +8,7 @@ import { Button, Textarea } from '@nextui-org/react';
 import Commands from '@/components/script/chatBar/commands';
 import { GoKebabHorizontal, GoSquareFill } from 'react-icons/go';
 import { ScriptContext } from '@/contexts/script';
+import { MessageType } from '@/components/script/messages';
 
 interface ChatBarProps {
   disabled?: boolean;
@@ -18,8 +19,32 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
   const [inputValue, setInputValue] = useState('');
   const [commandsOpen, setCommandsOpen] = useState(false);
   const [locked, setLocked] = useState(false);
-  const { generating, interrupt, hasParams, tool, setShowForm, setMessages } =
-    useContext(ScriptContext);
+  const {
+    generating,
+    interrupt,
+    hasParams,
+    tool,
+    setShowForm,
+    messages,
+    setMessages,
+  } = useContext(ScriptContext);
+  const [userMessages, setUserMessages] = useState<string[]>([]);
+  const [_userMessagesIndex, setUserMessagesIndex] = useState(-1);
+
+  const getMessageAtIndex = (index: number) => {
+    if (index >= 0 && index < userMessages.length) {
+      return userMessages[userMessages.length - 1 - index];
+    }
+    return '';
+  };
+
+  useEffect(() => {
+    setUserMessages(
+      messages
+        .filter((m) => m.type === MessageType.User)
+        .map((m) => m.message ?? '')
+    );
+  }, [messages]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -39,6 +64,7 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
     setLocked(true);
     onMessageSent(inputValue);
     setInputValue(''); // Clear the input field after sending the message
+    setUserMessagesIndex(-1);
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +142,25 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
                 if (commandsOpen) {
                   event.preventDefault();
                   document.getElementById('command-0')?.focus();
+                } else {
+                  setUserMessagesIndex((prevIndex) => {
+                    const newIndex = Math.min(
+                      prevIndex + 1,
+                      userMessages.length - 1
+                    );
+                    setInputValue(getMessageAtIndex(newIndex));
+                    return newIndex;
+                  });
                 }
+              }
+              if (event.key === 'ArrowDown') {
+                setUserMessagesIndex((prevIndex) => {
+                  const newIndex = Math.max(prevIndex - 1, -1);
+                  setInputValue(
+                    newIndex === -1 ? '' : getMessageAtIndex(newIndex)
+                  );
+                  return newIndex;
+                });
               }
             }}
           />
