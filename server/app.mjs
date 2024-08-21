@@ -264,8 +264,8 @@ const mount = async (
     // TODO - also filter out context tools maybe?
     const toolSet = {};
     const credentials = new Set();
-    for (tool of Object.values(loaded?.program?.toolSet)) {
-      if (tool.credentials) {
+    for (const t of Object.values(loaded?.program?.toolSet)) {
+      if (t.credentials) {
         for (let cred of tool.credentials) {
           for (let mapping of tool.toolMapping[cred]) {
             credentials.add(mapping.toolID);
