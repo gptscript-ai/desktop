@@ -253,7 +253,35 @@ const mount = async (
     socket.emit('addingTool');
 
     const loaded = await gptscript.loadTools(script, true);
-    const newTools = toChatStateTools(loaded?.program?.toolSet);
+
+    // We need to filter out credential tools so that we do not give them to the LLM.
+    // TODO - also filter out context tools maybe?
+    const toolSet = {};
+    const credentials = [];
+    for (tool of Object.values(loaded?.program?.toolSet)) {
+      if (tool.credentials) {
+        for (let cred of tool.credentials) {
+          credentials.push(tool.toolMapping[cred][0].toolID);
+          console.log('pushed tool ID:', tool.toolMapping[cred][0].toolID);
+        }
+      }
+      if (tool['exportCredentials']) {
+        for (let cred of tool['exportCredentials']) {
+          credentials.push(tool.toolMapping[cred][0].toolID);
+          console.log('pushed tool ID:', tool.toolMapping[cred][0].toolID);
+        }
+      }
+    }
+
+    for (let [key, value] of Object.entries(loaded?.program?.toolSet)) {
+      if (!credentials.includes(key)) {
+        toolSet[key] = value;
+      } else {
+        console.log('skipping tool:', key);
+      }
+    }
+
+    const newTools = toChatStateTools(toolSet);
     const currentState = JSON.parse(state.chatState);
     currentState.continuation.state.completion.tools = newTools;
 
