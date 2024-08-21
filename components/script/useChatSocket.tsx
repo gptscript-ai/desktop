@@ -11,6 +11,12 @@ import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
 
 const useChatSocket = (isEmpty?: boolean) => {
+  const initiallyTrustedRepos = [
+    'github.com/gptscript-ai/context',
+    'github.com/gptscript-ai/gateway-provider',
+    'github.com/gptscript-ai/gateway-creds',
+    'github.com/gptscript-ai/gateway-oauth2',
+  ];
   // State
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -26,12 +32,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   const messagesRef = useRef(messages);
   const latestAgentMessageIndex = useRef<number>(-1);
   const trustedRef = useRef<Record<string, boolean>>({});
-  const trustedRepoPrefixesRef = useRef<string[]>([
-    'github.com/gptscript-ai/context',
-    'github.com/gptscript-ai/gateway-provider',
-    'github.com/gptscript-ai/gateway-creds',
-    'github.com/gptscript-ai/gateway-oauth2',
-  ]);
+  const trustedRepoPrefixesRef = useRef<string[]>([...initiallyTrustedRepos]);
 
   // update the refs as the state changes
   useEffect(() => {
@@ -367,11 +368,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     setRunning(false);
     setError(null);
     setMessages([]);
-    trustedRepoPrefixesRef.current = [
-      'github.com/gptscript-ai/context',
-      'github.com/gptscript-ai/gateway-provider',
-      'github.com/gptscript-ai/gateway-creds',
-    ];
+    trustedRepoPrefixesRef.current = [...initiallyTrustedRepos];
     loadSocket();
   }, [socket]);
 
