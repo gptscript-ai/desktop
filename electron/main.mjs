@@ -7,9 +7,7 @@ import os from 'os';
 import { config } from './config.mjs';
 
 app.on('window-all-closed', () => app.quit());
-app.on('ready', () => {
-  startServer(app.isPackaged);
-});
+app.on('ready', startServer);
 
 async function startServer() {
   // Fix path so that tools can find binaries installed on the system.
@@ -32,6 +30,8 @@ async function startServer() {
   process.env.GPTSCRIPT_GATEWAY_URL = config.gatewayUrl;
   process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
   process.env.KNOWLEDGE_BIN = config.knowledgeBin;
+
+  console.log('GPTSCRIPT_BIN=', config.gptscriptBin);
 
   try {
     const url = await startAppServer({
