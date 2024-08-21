@@ -46,12 +46,12 @@ Object.assign(log.transports.file, {
     return join(logsDir, `${variables.appName}.log`);
   },
   archiveLogFn: (file) => {
-    // Get the current Unix timestamp
-    const info = parse(file.toString());
+    const filePath = file.toString();
+    const info = parse(filePath);
     const timestamp = Math.floor(Date.now() / 1000);
 
     try {
-      renameSync(file, join(info.dir, `${info.name}.${timestamp}.${info.ext}`));
+      renameSync(filePath, join(info.dir, `${info.name}.${timestamp}${info.ext}`));
     } catch (e) {
       console.warn('failed to rotate log file', e);
     }
