@@ -257,26 +257,26 @@ const mount = async (
     // We need to filter out credential tools so that we do not give them to the LLM.
     // TODO - also filter out context tools maybe?
     const toolSet = {};
-    const credentials = [];
+    const credentials = new Set();
     for (tool of Object.values(loaded?.program?.toolSet)) {
       if (tool.credentials) {
         for (let cred of tool.credentials) {
           for (let mapping of tool.toolMapping[cred]) {
-            credentials.push(mapping.toolID);
+            credentials.add(mapping.toolID);
           }
         }
       }
       if (tool['exportCredentials']) {
         for (let cred of tool['exportCredentials']) {
           for (let mapping of tool.toolMapping[cred]) {
-            credentials.push(mapping.toolID);
+            credentials.add(mapping.toolID);
           }
         }
       }
     }
 
     for (let [key, value] of Object.entries(loaded?.program?.toolSet)) {
-      if (!credentials.includes(key)) {
+      if (!credentials.has(key)) {
         toolSet[key] = value;
       }
     }
