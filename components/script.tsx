@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useCallback } from 'react';
 import Messages, { MessageType } from '@/components/script/messages';
 import ChatBar from '@/components/script/chatBar';
 import ToolForm from '@/components/script/form';
@@ -10,6 +10,7 @@ import { getWorkspaceDir } from '@/actions/workspace';
 import { getGatewayUrl } from '@/actions/gateway';
 import { ScriptContext } from '@/contexts/script';
 import AssistantNotFound from '@/components/assistant-not-found';
+import { generateThreadName, renameThread } from '@/actions/threads';
 
 interface ScriptProps {
   className?: string;
@@ -43,6 +44,7 @@ const Script: React.FC<ScriptProps> = ({
     running,
     notFound,
     restartScript,
+    fetchThreads,
   } = useContext(ScriptContext);
 
   useEffect(() => {
@@ -79,6 +81,11 @@ const Script: React.FC<ScriptProps> = ({
     }));
   };
 
+  const hasNoUserMessages = useCallback(
+    () => messages.filter((m) => m.type === MessageType.User).length === 0,
+    [messages]
+  );
+
   const handleMessageSent = async (message: string) => {
     if (!socket || !connected) return;
 
@@ -86,6 +93,10 @@ const Script: React.FC<ScriptProps> = ({
       ...prevMessages,
       { type: MessageType.User, message },
     ]);
+    if (hasNoUserMessages() && thread) {
+      renameThread(thread, await generateThreadName(message));
+      fetchThreads();
+    }
     socket.emit('userMessage', message, thread);
   };
 
