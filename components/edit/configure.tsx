@@ -93,7 +93,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             onChange={(e) => setRoot({ ...root, name: e.target.value })}
           />
         </div>
-        <Textarea
+        <Input
           color="primary"
           fullWidth
           variant="bordered"
