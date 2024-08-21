@@ -261,12 +261,16 @@ const mount = async (
     for (tool of Object.values(loaded?.program?.toolSet)) {
       if (tool.credentials) {
         for (let cred of tool.credentials) {
-          credentials.push(tool.toolMapping[cred][0].toolID);
+          for (let mapping of tool.toolMapping[cred]) {
+            credentials.push(mapping.toolID);
+          }
         }
       }
       if (tool['exportCredentials']) {
         for (let cred of tool['exportCredentials']) {
-          credentials.push(tool.toolMapping[cred][0].toolID);
+          for (let mapping of tool.toolMapping[cred]) {
+            credentials.push(mapping.toolID);
+          }
         }
       }
     }
