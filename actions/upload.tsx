@@ -5,7 +5,14 @@ import path from 'node:path';
 import { revalidatePath } from 'next/cache';
 import { Dirent } from 'fs';
 
-export async function uploadFile(workspace: string, formData: FormData) {
+export async function uploadFile(
+  workspace: string,
+  formData: FormData,
+  isKnowledge?: boolean
+) {
+  if (isKnowledge) {
+    workspace = path.join(workspace, 'knowledge');
+  }
   const file = formData.get('file') as File;
   await fs.mkdir(workspace, { recursive: true });
 

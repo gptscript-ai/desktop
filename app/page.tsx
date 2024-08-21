@@ -11,12 +11,10 @@ function RunFile() {
   const [script, _setScript] = useState<string>(
     useSearchParams().get('file') ?? 'github.com/gptscript-ai/ui-assistant'
   );
-  const [thread, _setThread] = useState<string>(
-    useSearchParams().get('thread') ?? ''
-  );
   const [scriptId, _scriptId] = useState<string>(
     useSearchParams().get('id') ?? ''
   );
+
   const { setCurrent } = useContext(NavContext);
 
   useEffect(() => setCurrent('/'), []);
@@ -24,8 +22,8 @@ function RunFile() {
   return (
     <ScriptContextProvider
       initialScript={script}
-      initialThread={thread}
       initialScriptId={scriptId}
+      enableThread={true}
     >
       <section className="absolute left-0 top-[50px]">
         <div

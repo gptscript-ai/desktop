@@ -24,6 +24,7 @@ const options = {
     '!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}',
     '!**/{appveyor.yml,.travis.yml,circle.yml}',
     '!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}',
+    'bin/*',
   ],
   mac: {
     hardenedRuntime: true,
@@ -72,6 +73,13 @@ const options = {
     releaseType: 'release',
     vPrefixedTagName: true,
   },
+  extraResources: [
+    {
+      from: 'bin/',
+      to: 'bin',
+      filter: ['**/*'],
+    },
+  ],
 };
 
 function go() {

@@ -17,7 +17,8 @@
     "dev:electron": "electron .",
     "lint": "next lint",
     "format": "prettier --write .",
-    "start": "cross-env NODE_ENV='production' node server.mjs"
+    "start": "cross-env NODE_ENV='production' node server.mjs",
+    "postinstall": "node scripts/install-binary.mjs"
   },
   "main": "electron/main.mjs",
   "dependencies": {

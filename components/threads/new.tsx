@@ -12,6 +12,7 @@ import { useEffect, useState, useContext } from 'react';
 import { ScriptContext } from '@/contexts/script';
 import { GoPlus } from 'react-icons/go';
 import { getScripts, Script } from '@/actions/me/scripts';
+import { setWorkspaceDir } from '@/actions/workspace';
 
 interface NewThreadProps {
   className?: string;
@@ -21,7 +22,7 @@ const NewThread = ({ className }: NewThreadProps) => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [_loading, setLoading] = useState(true);
-  const { setThread, setSelectedThreadId, setScript, setThreads, scriptId } =
+  const { setThread, setSelectedThreadId, setScript, setThreads, setScriptId } =
     useContext(ScriptContext);
 
   const fetchScripts = async () => {
@@ -35,12 +36,14 @@ const NewThread = ({ className }: NewThreadProps) => {
     fetchScripts();
   }, [isOpen]);
 
-  const handleCreateThread = (script: string) => {
-    createThread(script, '', scriptId).then((newThread) => {
+  const handleCreateThread = (script: string, id?: string) => {
+    createThread(script, '', id).then((newThread) => {
+      setScriptId(id);
       setThreads((threads: Thread[]) => [newThread, ...threads]);
       setScript(script);
       setThread(newThread.meta.id);
       setSelectedThreadId(newThread.meta.id);
+      setWorkspaceDir(newThread.meta.workspace);
       setLoading(false);
     });
   };
@@ -71,7 +74,7 @@ const NewThread = ({ className }: NewThreadProps) => {
                 className="py-2 truncate max-w-[200px]"
                 content={script.displayName}
                 onClick={() => {
-                  handleCreateThread(script.publicURL!);
+                  handleCreateThread(script.publicURL!, script.id?.toString());
                   setIsOpen(false);
                 }}
               >
