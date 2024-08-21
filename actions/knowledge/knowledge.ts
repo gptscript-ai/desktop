@@ -14,20 +14,7 @@ export async function ingest(
     throw new Error('Dataset ID is required');
   }
   const dir = path.join(workspace, 'knowledge');
-  let knowledgeBinaryPath = '';
-  if (process.env.KNOWLEDGE_BIN) {
-    knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
-  } else {
-    if (process.env.NODE_ENV === 'production') {
-      knowledgeBinaryPath = path.join(
-        process.resourcesPath,
-        'bin',
-        'knowledge' + (process.platform === 'win32' ? '.exe' : '')
-      );
-    } else {
-      knowledgeBinaryPath = path.join(process.cwd(), 'bin', 'knowledge');
-    }
-  }
+  const knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
   await execPromise(
     `${knowledgeBinaryPath} ingest --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
     { env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token } }

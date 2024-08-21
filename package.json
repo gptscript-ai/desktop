@@ -6,9 +6,6 @@
     "email": "info@acorn.io",
     "url": "https://acorn.io"
   },
-  "files": [
-    "bin"
-  ],
   "private": true,
   "version": "v0.10.0-rc3",
   "scripts": {

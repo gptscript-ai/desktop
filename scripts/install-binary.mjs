@@ -23,7 +23,7 @@ async function downloadAndExtract(url, saveDirectory) {
         if (err) {
           return reject(err);
         }
-        fs.chmod(newFilePath, 0o755, (err) => {
+        fs.chmod(newFilePath, 0o755, (_err) => {
           if (url.endsWith('.zip')) {
             const zip = new AdmZip(downloadedFilePath);
             zip.extractAllTo(saveDirectory, true);
@@ -107,6 +107,7 @@ const fileExist = (path) => {
   try {
     fs.accessSync(path);
     return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return false;
   }
@@ -128,17 +129,14 @@ async function needToInstall() {
   }
 }
 
-(async () => {
-  await needToInstall();
-  if (process.env.KNOWLEDGE_SKIP_INSTALL_BINARY === 'true') {
-    console.info('Skipping binary download');
-    process.exit(0);
-  }
-
-  console.log(`Downloading and extracting knowledge binary from ${url}...`);
-  try {
-    await downloadAndExtract(url, outputDir);
-  } catch (error) {
-    console.error('Error downloading and extracting:', error);
-  }
-})();
+await needToInstall();
+if (process.env.KNOWLEDGE_SKIP_INSTALL_BINARY === 'true') {
+  console.info('Skipping binary download');
+  process.exit(0);
+}
+console.log(`Downloading and extracting knowledge binary from ${url}...`);
+try {
+  await downloadAndExtract(url, outputDir);
+} catch (error) {
+  console.error('Error downloading and extracting:', error);
+}

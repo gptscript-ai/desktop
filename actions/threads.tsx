@@ -31,8 +31,8 @@ export async function getThreads() {
   let threadDirs: void | string[] = [];
   try {
     threadDirs = await fs.readdir(threadsDir);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
-    console.error('Failed to read threads directory', e);
     return [];
   }
 

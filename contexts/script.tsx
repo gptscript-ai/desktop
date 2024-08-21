@@ -148,40 +148,38 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   }, [script, scriptId, thread]);
 
   useEffect(() => {
-    if (!enableThread) {
+    if (!enableThread || thread || threadInitialized.current) {
       return;
     }
-    if (!thread && !threadInitialized.current) {
-      threadInitialized.current = true;
-      const createAndSetThread = async () => {
-        try {
-          const threads = await getThreads();
-          if ((initialScript && initialScriptId) || threads.length === 0) {
-            // if both threads and scriptId are set, then always create a new thread
-            const newThread = await createThread(
-              script,
-              scriptDisplayName ?? defaultScriptName,
-              scriptId
-            );
-            const threadId = newThread?.meta?.id;
-            setThread(threadId);
-            setThreads(await getThreads());
-            setSelectedThreadId(threadId);
-            setWorkspace(newThread.meta.workspace);
-          } else if (threads.length > 0) {
-            setThreads(threads);
-            const latestThread = threads[0];
-            setThread(latestThread.meta.id);
-            setSelectedThreadId(latestThread.meta.id);
-            setScriptId(latestThread.meta.scriptId);
-          }
-        } catch (e) {
-          threadInitialized.current = false;
-          console.error(e);
+    threadInitialized.current = true;
+    const createAndSetThread = async () => {
+      try {
+        const threads = await getThreads();
+        if ((initialScript && initialScriptId) || threads.length === 0) {
+          // if both threads and scriptId are set, then always create a new thread
+          const newThread = await createThread(
+            script,
+            scriptDisplayName ?? defaultScriptName,
+            scriptId
+          );
+          const threadId = newThread?.meta?.id;
+          setThread(threadId);
+          setThreads(await getThreads());
+          setSelectedThreadId(threadId);
+          setWorkspace(newThread.meta.workspace);
+        } else if (threads.length > 0) {
+          setThreads(threads);
+          const latestThread = threads[0];
+          setThread(latestThread.meta.id);
+          setSelectedThreadId(latestThread.meta.id);
+          setScriptId(latestThread.meta.scriptId);
         }
-      };
-      createAndSetThread();
-    }
+      } catch (e) {
+        threadInitialized.current = false;
+        console.error(e);
+      }
+    };
+    createAndSetThread();
   }, [thread, threads, enableThread, scriptDisplayName]);
 
   useEffect(() => {
