@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Block, Tool } from '@gptscript-ai/gptscript';
 import { getScript, Script, updateScript } from '@/actions/me/scripts';
-import { getTexts, parse, stringify } from '@/actions/gptscript';
+import { getTexts, parseContent, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
@@ -98,7 +98,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
           setNotFound(true);
           return;
         }
-        const parsedScript = await parse(script.content || '');
+        const parsedScript = await parseContent(script.content || '');
         const texts = await getTexts(script.content || '');
         setScript(parsedScript);
         setRoot(findRoot(parsedScript));
