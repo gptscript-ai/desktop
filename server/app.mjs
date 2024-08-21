@@ -262,13 +262,11 @@ const mount = async (
       if (tool.credentials) {
         for (let cred of tool.credentials) {
           credentials.push(tool.toolMapping[cred][0].toolID);
-          console.log('pushed tool ID:', tool.toolMapping[cred][0].toolID);
         }
       }
       if (tool['exportCredentials']) {
         for (let cred of tool['exportCredentials']) {
           credentials.push(tool.toolMapping[cred][0].toolID);
-          console.log('pushed tool ID:', tool.toolMapping[cred][0].toolID);
         }
       }
     }
@@ -276,8 +274,6 @@ const mount = async (
     for (let [key, value] of Object.entries(loaded?.program?.toolSet)) {
       if (!credentials.includes(key)) {
         toolSet[key] = value;
-      } else {
-        console.log('skipping tool:', key);
       }
     }
 
