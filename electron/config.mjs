@@ -20,7 +20,7 @@ const port =
 const gptscriptBin =
   process.env.GPTSCRIPT_BIN ||
   join(
-    dev ? join(resourcesDir, 'app.asar.unpacked') : '',
+    !dev ? join(resourcesDir, 'app.asar.unpacked') : '',
     'node_modules',
     '@gptscript-ai',
     'gptscript',
