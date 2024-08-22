@@ -34,9 +34,9 @@ const Threads: React.FC<ThreadsProps> = () => {
 
   return (
     <div
-      className={`relative p-4 overflow-y-auto ${isCollapsed ? 'border-none' : 'border-r-1 dark:border-r-zinc-800'}`}
+      className={`relative p-4 overflow-y-auto transition-[width] duration-300 ease-in-out ${isCollapsed ? 'border-none w-[125px]' : 'w-[350px] border-r-1 dark:border-r-zinc-800'}`}
     >
-      <div className={`flex justify-between items-center mb-2`}>
+      <div className={`flex justify-between gap-0 mb-2`}>
         <Tooltip
           content={isCollapsed ? 'Expand threads' : 'Collapse threads'}
           placement="top"
@@ -56,24 +56,13 @@ const Threads: React.FC<ThreadsProps> = () => {
         <New />
       </div>
       <div
-        style={{
-          width: isCollapsed ? '50px' : 'w-1/2 w-max-250px',
-          transition: 'width 0.3s ease-in-out',
-        }}
+        className={`transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-0' : 'w-full'}`}
       >
         <Divider
-          className="mb-4"
-          style={{
-            opacity: isCollapsed ? 0 : 1,
-            transition: 'opacity 0.2s 0.2s',
-          }}
+          className={`mb-4 transition-opacity duration-200 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}
         />
         <div
-          style={{
-            opacity: isCollapsed ? 0 : 1,
-            transition: 'opacity 0.05s 0.05s',
-            pointerEvents: isCollapsed ? 'none' : 'auto',
-          }}
+          className={`mb-4 transition-opacity duration-200 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}
         >
           <div className="space-y-2">
             {threads.length === 0 ? (
