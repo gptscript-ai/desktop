@@ -57,6 +57,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         // If there are no previous messages, create a new error message
         updatedMessages.push({
           type: MessageType.Agent,
+          name: '',
           message:
             'The script encountered an error. You can either restart the script or try to continue chatting.',
           error,
@@ -66,14 +67,16 @@ const useChatSocket = (isEmpty?: boolean) => {
     });
   }, []);
 
-  // handles progress being recieved from the server (callProgress style frames).
+  // handles progress being received from the server (callProgress style frames).
   const handleProgress = useCallback(
     ({
       frame,
       state,
+      name,
     }: {
       frame: CallFrame;
       state: Record<string, CallFrame>;
+      name?: string;
     }) => {
       if (!frame.error && frame.toolCategory === 'provider') {
         return;
@@ -106,7 +109,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         type: MessageType.Agent,
         message: content,
         calls: state,
-        name: frame.tool?.name,
+        name: name,
       };
       if (latestAgentMessageIndex.current === -1) {
         latestAgentMessageIndex.current = messagesRef.current.length;
@@ -139,9 +142,11 @@ const useChatSocket = (isEmpty?: boolean) => {
     ({
       frame,
       state,
+      name,
     }: {
       frame: PromptFrame;
       state: Record<string, CallFrame>;
+      name?: string;
     }) => {
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages];
@@ -164,6 +169,7 @@ const useChatSocket = (isEmpty?: boolean) => {
               : frame.message;
           updatedMessages[latestAgentMessageIndex.current].component = form;
           updatedMessages[latestAgentMessageIndex.current].calls = state;
+          updatedMessages[latestAgentMessageIndex.current].name = name;
         } else {
           // If there are no previous messages, create a new message
           updatedMessages.push({
@@ -176,6 +182,7 @@ const useChatSocket = (isEmpty?: boolean) => {
                 : frame.message,
             component: form,
             calls: state,
+            name: name,
           });
         }
         return updatedMessages;
@@ -188,9 +195,11 @@ const useChatSocket = (isEmpty?: boolean) => {
     ({
       frame,
       state,
+      name,
     }: {
       frame: CallFrame;
       state: Record<string, CallFrame>;
+      name?: string;
     }) => {
       if (!frame.tool) return;
 
@@ -227,7 +236,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
       const message: Message = {
         type: MessageType.Agent,
-        name: frame.tool?.name,
+        name: name,
         component: form,
         calls: state,
       };
@@ -379,15 +388,21 @@ const useChatSocket = (isEmpty?: boolean) => {
       setForceRun(true);
     });
     socket.on('running', () => setRunning(true));
-    socket.on('progress', (data: { frame: CallFrame; state: any }) =>
-      handleProgress(data)
+    socket.on(
+      'progress',
+      (data: { frame: CallFrame; state: any; name?: string }) =>
+        handleProgress(data)
     );
     socket.on('error', (data: string) => handleError(data));
-    socket.on('promptRequest', (data: { frame: PromptFrame; state: any }) =>
-      handlePromptRequest(data)
+    socket.on(
+      'promptRequest',
+      (data: { frame: PromptFrame; state: any; name?: string }) =>
+        handlePromptRequest(data)
     );
-    socket.on('confirmRequest', (data: { frame: CallFrame; state: any }) =>
-      handleConfirmRequest(data)
+    socket.on(
+      'confirmRequest',
+      (data: { frame: CallFrame; state: any; name?: string }) =>
+        handleConfirmRequest(data)
     );
     socket.on('toolAdded', handleToolAdded);
     socket.on('addingTool', handleAddingTool);

@@ -137,6 +137,7 @@ export default function Commands({
             ...prev,
             {
               type: MessageType.Alert,
+              name: prev ? prev[prev.length - 1].name : undefined,
               icon: <GoPaperclip className="mt-1" />,
               message: `Uploading knowledge ${file.name}`,
             },
@@ -149,6 +150,7 @@ export default function Commands({
           {
             type: MessageType.Alert,
             icon: <GoCheckCircleFill className="mt-1" />,
+            name: prev ? prev[prev.length - 1].name : undefined,
             message: `Successfully uploaded knowledge ${plainFiles.map((f) => f.name).join(', ')}`,
           },
         ]);
@@ -163,6 +165,7 @@ export default function Commands({
           ...prev,
           {
             type: MessageType.Alert,
+            name: prev ? prev[prev.length - 1].name : undefined,
             icon: <GoAlert className="mt-1" />,
             message: `Error uploading knowledge ${filesContent.map((f) => f.name).join(', ')}: ${e}`,
           },
@@ -204,6 +207,7 @@ export default function Commands({
             {
               type: MessageType.Alert,
               icon: <GoTools className="mt-1" />,
+              name: prev ? prev[prev.length - 1].name : undefined,
               message: `Added ${tool
                 .split('/')
                 .pop()
@@ -219,6 +223,7 @@ export default function Commands({
             {
               type: MessageType.Alert,
               icon: <GoTools className="mt-1" />,
+              name: prev ? prev[prev.length - 1].name : undefined,
               message: `Removed ${tool
                 .split('/')
                 .pop()
