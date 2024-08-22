@@ -6,25 +6,24 @@ import {
   DropdownSection,
   DropdownItem,
 } from '@nextui-org/react';
-import { createThread, Thread } from '@/actions/threads';
 import { useEffect, useState, useContext } from 'react';
 import { ChatContext } from '@/contexts/chat';
 import { GoPlus } from 'react-icons/go';
-import { getScripts, Script } from '@/actions/me/scripts';
-import { setWorkspaceDir } from '@/actions/workspace';
+import { getScript, getScripts, Script } from '@/actions/me/scripts';
 import { AuthContext } from '@/contexts/auth';
 import { tildy } from '@/config/assistant';
 
 interface NewThreadProps {
   className?: string;
+  onOpenExplore: () => void;
 }
 
-const NewThread = ({ className }: NewThreadProps) => {
+const NewThread = ({ className, onOpenExplore }: NewThreadProps) => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { me } = useContext(AuthContext);
-  const { setThread, setSelectedThreadId, setScript, setThreads, setScriptId } =
-    useContext(ChatContext);
+  const { handleCreateThread } = useContext(ChatContext);
+  const [favorites, setFavorites] = useState<Script[]>([]);
 
   const fetchScripts = async () => {
     setScripts([]);
@@ -40,22 +39,35 @@ const NewThread = ({ className }: NewThreadProps) => {
         })
         .slice(0, 3)
     );
+
+    const favoriteScriptIds = Object.values(
+      JSON.parse(localStorage.getItem('FavoriteAssistants') || '{}')
+    );
+
+    const favoriteScripts = await Promise.all(
+      favoriteScriptIds.map(async (id) => {
+        const script = await getScript(id as string);
+        if (!script) return;
+        return script;
+      })
+    );
+
+    setFavorites(
+      ((favoriteScripts || []).filter((s) => s) as Script[])
+        .sort((a, b) => {
+          // updatedAt should always be set.
+          if (!a.updatedAt || !b.updatedAt) return 0;
+          if (a.updatedAt < b.updatedAt) return 1;
+          if (a.updatedAt > b.updatedAt) return -1;
+          return 0;
+        })
+        .slice(0, 3)
+    );
   };
 
   useEffect(() => {
     fetchScripts();
   }, [isOpen]);
-
-  const handleCreateThread = (script: string, id?: string) => {
-    createThread(script, '', id).then((newThread) => {
-      setScriptId(id);
-      setThreads((threads: Thread[]) => [newThread, ...threads]);
-      setScript(script);
-      setThread(newThread.meta.id);
-      setSelectedThreadId(newThread.meta.id);
-      setWorkspaceDir(newThread.meta.workspace);
-    });
-  };
 
   return (
     <Dropdown placement="right-start">
@@ -83,8 +95,23 @@ const NewThread = ({ className }: NewThreadProps) => {
             {'Tildy'}
           </DropdownItem>
         </DropdownSection>
-        <DropdownSection title="Recent Assistant" showDivider>
+        <DropdownSection title="Recent Assistants" showDivider>
           {scripts.map((script, i) => (
+            <DropdownItem
+              key={i}
+              color="primary"
+              className="py-2 truncate max-w-[200px]"
+              onClick={() => {
+                handleCreateThread(script.publicURL!, script.id?.toString());
+                setIsOpen(false);
+              }}
+            >
+              {script.displayName}
+            </DropdownItem>
+          ))}
+        </DropdownSection>
+        <DropdownSection title="Favorites" showDivider>
+          {favorites.map((script, i) => (
             <DropdownItem
               key={i}
               color="primary"
@@ -102,7 +129,7 @@ const NewThread = ({ className }: NewThreadProps) => {
           <DropdownItem key="My Assistants" href="/build">
             {'My Assistants'}
           </DropdownItem>
-          <DropdownItem key="All Assistants" href="/explore">
+          <DropdownItem key="All Assistants" onClick={onOpenExplore}>
             {'Explore Assistants'}
           </DropdownItem>
         </DropdownSection>

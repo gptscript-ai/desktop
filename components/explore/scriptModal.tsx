@@ -26,17 +26,32 @@ import { AuthContext } from '@/contexts/auth';
 import { useCallback, useContext, useState } from 'react';
 import { TbListDetails } from 'react-icons/tb';
 import { LiaExpandArrowsAltSolid } from 'react-icons/lia';
+import { CiStar } from 'react-icons/ci';
+import { IoStarSharp } from 'react-icons/io5';
+import { ChatContext } from '@/contexts/chat';
 
 interface ScriptModalProps {
   className?: string;
   script: ParsedScript;
   open: boolean;
+  favorites: Set<string>;
+  onToggleFavorite: (scriptId?: string) => void;
+  onCloseExplore: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   refresh: () => void;
 }
 
-const ScriptModal = ({ script, open, setOpen, refresh }: ScriptModalProps) => {
+const ScriptModal = ({
+  script,
+  open,
+  setOpen,
+  refresh,
+  favorites,
+  onToggleFavorite,
+  onCloseExplore,
+}: ScriptModalProps) => {
   const { authenticated, me } = useContext(AuthContext);
+  const { handleCreateThread } = useContext(ChatContext);
   const [expanded, setExpanded] = useState(false);
 
   const handleDelete = useCallback((script: ParsedScript) => {
@@ -73,9 +88,24 @@ const ScriptModal = ({ script, open, setOpen, refresh }: ScriptModalProps) => {
             startContent={<LiaExpandArrowsAltSolid />}
           />
           <div className="mb-4 mt-4">
-            <h1 className="text-4xl truncate mb-2">
-              {script.agentName ? script.agentName : script.displayName}
-            </h1>
+            <div className="flex justify-between items-center">
+              <h1 className="text-4xl truncate mb-2">
+                {script.agentName ? script.agentName : script.displayName}
+              </h1>
+              <Tooltip content="Add to My Favorites">
+                <Button
+                  isIconOnly
+                  className={`bg-white ${favorites.has(script.id?.toString() ?? '-1') ? 'text-yellow-500' : 'text-gray-500'}`}
+                  onClick={() => onToggleFavorite(script.id?.toString())}
+                >
+                  {favorites.has(script.id?.toString() ?? '-1') ? (
+                    <IoStarSharp size={32} />
+                  ) : (
+                    <CiStar size={32} />
+                  )}
+                </Button>
+              </Tooltip>
+            </div>
             <Tooltip
               color="primary"
               placement="right"
@@ -152,11 +182,14 @@ const ScriptModal = ({ script, open, setOpen, refresh }: ScriptModalProps) => {
         </ModalBody>
         <ModalFooter className="flex justify-between space-x-2">
           <Button
-            as={Link}
-            href={`/?file=${script.publicURL}&id=${script.id}`}
             color="primary"
             className="w-full"
             startContent={<GoPaperAirplane />}
+            onClick={() => {
+              setOpen(false);
+              onCloseExplore();
+              handleCreateThread(script.publicURL ?? '', script.id?.toString());
+            }}
           >
             Run
           </Button>

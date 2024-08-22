@@ -9,12 +9,8 @@ export const siteConfig = {
       href: '/',
     },
     {
-      label: 'Build',
+      label: 'My Assistants',
       href: '/build',
-    },
-    {
-      label: 'Explore',
-      href: '/explore',
     },
   ],
   navMenuItems: [
