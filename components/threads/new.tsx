@@ -1,11 +1,10 @@
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
   Button,
-  Menu,
-  MenuItem,
-  MenuSection,
+  DropdownMenu,
+  Dropdown,
+  DropdownTrigger,
+  DropdownSection,
+  DropdownItem,
 } from '@nextui-org/react';
 import { createThread, Thread } from '@/actions/threads';
 import { useEffect, useState, useContext } from 'react';
@@ -13,6 +12,8 @@ import { ScriptContext } from '@/contexts/script';
 import { GoPlus } from 'react-icons/go';
 import { getScripts, Script } from '@/actions/me/scripts';
 import { setWorkspaceDir } from '@/actions/workspace';
+import { AuthContext } from '@/contexts/auth';
+import { tildy } from '@/config/assistant';
 
 interface NewThreadProps {
   className?: string;
@@ -21,15 +22,24 @@ interface NewThreadProps {
 const NewThread = ({ className }: NewThreadProps) => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [_loading, setLoading] = useState(true);
+  const { me } = useContext(AuthContext);
   const { setThread, setSelectedThreadId, setScript, setThreads, setScriptId } =
     useContext(ScriptContext);
 
   const fetchScripts = async () => {
     setScripts([]);
-    const resp = await getScripts();
-    setLoading(false);
-    setScripts(resp.scripts || []);
+    const resp = await getScripts({ owner: me?.username });
+    setScripts(
+      (resp.scripts || [])
+        .sort((a, b) => {
+          // updatedAt should always be set.
+          if (!a.updatedAt || !b.updatedAt) return 0;
+          if (a.updatedAt < b.updatedAt) return 1;
+          if (a.updatedAt > b.updatedAt) return -1;
+          return 0;
+        })
+        .slice(0, 3)
+    );
   };
 
   useEffect(() => {
@@ -44,17 +54,12 @@ const NewThread = ({ className }: NewThreadProps) => {
       setThread(newThread.meta.id);
       setSelectedThreadId(newThread.meta.id);
       setWorkspaceDir(newThread.meta.workspace);
-      setLoading(false);
     });
   };
 
   return (
-    <Popover
-      placement="right"
-      isOpen={isOpen}
-      onOpenChange={(open) => setIsOpen(open)}
-    >
-      <PopoverTrigger>
+    <Dropdown placement="right-start">
+      <DropdownTrigger>
         <Button
           startContent={<GoPlus />}
           className={`${className}`}
@@ -62,29 +67,47 @@ const NewThread = ({ className }: NewThreadProps) => {
           variant="light"
           isIconOnly
         />
-      </PopoverTrigger>
-      <PopoverContent className="flex flex-col space-y-3 p-4">
-        <Menu aria-label="my-scripts">
-          <MenuSection aria-label={'my-scripts'} title="Select a script">
-            {scripts.map((script, i) => (
-              <MenuItem
-                aria-label={script.displayName}
-                key={i}
-                color="primary"
-                className="py-2 truncate max-w-[200px]"
-                content={script.displayName}
-                onClick={() => {
-                  handleCreateThread(script.publicURL!, script.id?.toString());
-                  setIsOpen(false);
-                }}
-              >
-                {script.displayName}
-              </MenuItem>
-            ))}
-          </MenuSection>
-        </Menu>
-      </PopoverContent>
-    </Popover>
+      </DropdownTrigger>
+      <DropdownMenu>
+        <DropdownSection title="Default" showDivider>
+          <DropdownItem
+            aria-label={'Tildy'}
+            color="primary"
+            key={'Tildy'}
+            className="py-2 truncate max-w-[200px]"
+            content={'Tildy'}
+            onClick={() => {
+              handleCreateThread(tildy, '');
+            }}
+          >
+            {'Tildy'}
+          </DropdownItem>
+        </DropdownSection>
+        <DropdownSection title="Recent Assistant" showDivider>
+          {scripts.map((script, i) => (
+            <DropdownItem
+              key={i}
+              color="primary"
+              className="py-2 truncate max-w-[200px]"
+              onClick={() => {
+                handleCreateThread(script.publicURL!, script.id?.toString());
+                setIsOpen(false);
+              }}
+            >
+              {script.displayName}
+            </DropdownItem>
+          ))}
+        </DropdownSection>
+        <DropdownSection title="Explore" showDivider>
+          <DropdownItem key="My Assistants" href="/build">
+            {'My Assistants'}
+          </DropdownItem>
+          <DropdownItem key="All Assistants" href="/explore">
+            {'Explore Assistants'}
+          </DropdownItem>
+        </DropdownSection>
+      </DropdownMenu>
+    </Dropdown>
   );
 };
 

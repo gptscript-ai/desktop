@@ -6,10 +6,11 @@ import Script from '@/components/script';
 import Threads from '@/components/threads';
 import { ScriptContextProvider } from '@/contexts/script';
 import { NavContext } from '@/contexts/nav';
+import { tildy } from '@/config/assistant';
 
 function RunFile() {
   const [script, _setScript] = useState<string>(
-    useSearchParams().get('file') ?? 'github.com/gptscript-ai/ui-assistant'
+    useSearchParams().get('file') ?? tildy
   );
   const [scriptId, _scriptId] = useState<string>(
     useSearchParams().get('id') ?? ''
