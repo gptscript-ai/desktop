@@ -16,6 +16,9 @@ const useChatSocket = (isEmpty?: boolean) => {
     'github.com/gptscript-ai/gateway-provider',
     'github.com/gptscript-ai/gateway-creds',
     'github.com/gptscript-ai/gateway-oauth2',
+    'github.com/gptscript-ai/knowledge',
+    'github.com/gptscript-ai/answers-from-the-internet',
+    'github.com/gptscript-ai/search-website',
   ];
   // State
   const [socket, setSocket] = useState<Socket | null>(null);
