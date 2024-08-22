@@ -369,7 +369,7 @@ const mount = async (
       opts.input = message;
       runningScript = await gptscript.evaluate(script, opts);
     } else {
-      name = runningScript.respondingTool().name || '';
+      name = (runningScript.respondingTool() || {}).name || '';
       runningScript = runningScript.nextChat(message);
     }
 
