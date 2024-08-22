@@ -6,10 +6,17 @@ import {
   Button,
   Menu,
   MenuItem,
+  useDisclosure,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
 } from '@nextui-org/react';
 import { deleteThread, renameThread, Thread } from '@/actions/threads';
 import { GoPencil, GoTrash, GoKebabHorizontal } from 'react-icons/go';
 import { ScriptContext } from '@/contexts/script';
+import { Input } from '@nextui-org/input';
 
 interface NewThreadProps {
   className?: string;
@@ -17,8 +24,10 @@ interface NewThreadProps {
 }
 
 const NewThread = ({ className, thread }: NewThreadProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { setThreads } = useContext(ScriptContext);
+  const [threadNameInput, setThreadNameInput] = useState('');
 
   const handleDeleteThread = () => {
     deleteThread(thread).then(() => {
@@ -28,8 +37,7 @@ const NewThread = ({ className, thread }: NewThreadProps) => {
     });
   };
 
-  const handleRenameThread = () => {
-    const newName = prompt('Enter a new name for the thread');
+  const handleRenameThread = (newName: string) => {
     if (newName) {
       renameThread(thread, newName).then(() => {
         setThreads((threads: Thread[]) =>
@@ -45,48 +53,82 @@ const NewThread = ({ className, thread }: NewThreadProps) => {
   };
 
   return (
-    <Popover
-      placement="right"
-      isOpen={isOpen}
-      onOpenChange={(open) => setIsOpen(open)}
-    >
-      <PopoverTrigger>
-        <Button
-          variant="light"
-          radius="full"
-          className={`${className}`}
-          isIconOnly
-          startContent={<GoKebabHorizontal />}
-        />
-      </PopoverTrigger>
-      <PopoverContent className="">
-        <Menu aria-label="options">
-          <MenuItem
-            className="py-2"
-            content="Rename"
-            startContent={<GoPencil />}
-            onClick={() => {
-              setIsOpen(false);
-              handleRenameThread();
-            }}
-          >
-            Rename
-          </MenuItem>
-          <MenuItem
-            aria-label="delete"
-            className="py-2"
-            content="Delete"
-            startContent={<GoTrash />}
-            onClick={() => {
-              setIsOpen(false);
-              handleDeleteThread();
-            }}
-          >
-            Delete
-          </MenuItem>
-        </Menu>
-      </PopoverContent>
-    </Popover>
+    <>
+      <Popover
+        placement="right-start"
+        isOpen={isPopoverOpen}
+        onOpenChange={(open) => setIsPopoverOpen(open)}
+      >
+        <PopoverTrigger>
+          <Button
+            variant="light"
+            radius="full"
+            className={`${className}`}
+            isIconOnly
+            startContent={<GoKebabHorizontal />}
+          />
+        </PopoverTrigger>
+        <PopoverContent className="">
+          <Menu aria-label="options">
+            <MenuItem
+              className="py-2"
+              content="Rename"
+              startContent={<GoPencil />}
+              onClick={() => {
+                setIsPopoverOpen(false);
+                onOpen();
+              }}
+            >
+              Rename
+            </MenuItem>
+            <MenuItem
+              aria-label="delete"
+              className="py-2"
+              content="Delete"
+              startContent={<GoTrash />}
+              onClick={() => {
+                setIsPopoverOpen(false);
+                handleDeleteThread();
+              }}
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+        </PopoverContent>
+      </Popover>
+      <Modal
+        backdrop={'opaque'}
+        isOpen={isOpen}
+        onClose={onClose}
+        placement="top-center"
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            Rename thread
+          </ModalHeader>
+          <ModalBody>
+            <Input
+              aria-label="rename"
+              label="New Name"
+              value={threadNameInput}
+              onChange={(e) => setThreadNameInput(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              aria-label="rename"
+              color="primary"
+              onPress={() => {
+                handleRenameThread(threadNameInput);
+                onClose();
+              }}
+            >
+              Rename
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
