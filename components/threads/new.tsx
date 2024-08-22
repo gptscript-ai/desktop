@@ -98,7 +98,7 @@ const NewThread = ({ className }: NewThreadProps) => {
             </DropdownItem>
           ))}
         </DropdownSection>
-        <DropdownSection title="Explore" showDivider>
+        <DropdownSection title="Explore">
           <DropdownItem key="My Assistants" href="/build">
             {'My Assistants'}
           </DropdownItem>
