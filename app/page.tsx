@@ -33,9 +33,7 @@ function RunFile() {
         >
           <div className="w-full h-full flex pb-10">
             <Threads />
-            <div className="mx-auto w-[75%] 2xl:w-[55%] 3xl:[w-50%]">
-              <Script enableThreads showAssistantName className="pb-10" />
-            </div>
+            <Script enableThreads showAssistantName className="pb-10" />
           </div>
         </div>
       </section>

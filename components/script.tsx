@@ -106,7 +106,7 @@ const Script: React.FC<ScriptProps> = ({
         <>
           <div
             id="small-message"
-            className={`px-6 pt-10 overflow-y-auto w-full items-center ${messagesHeight}`}
+            className={`overflow-y-auto w-full items-center ${messagesHeight}`}
           >
             {showForm && hasParams ? (
               <ToolForm
@@ -117,9 +117,11 @@ const Script: React.FC<ScriptProps> = ({
             ) : (
               <div>
                 {showAssistantName && (
-                  <h1 className="mb-10 text-2xl font-medium truncate">
-                    {scriptDisplayName ?? ''}
-                  </h1>
+                  <div className="sticky top-0 p-4 z-50 bg-background">
+                    <h1 className="text-2xl font-medium truncate">
+                      {scriptDisplayName ?? ''}
+                    </h1>
+                  </div>
                 )}
                 <Messages restart={restartScript} messages={messages} />
               </div>
