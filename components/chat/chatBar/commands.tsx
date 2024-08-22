@@ -9,10 +9,10 @@ import {
   GoTools,
 } from 'react-icons/go';
 import { PiToolbox } from 'react-icons/pi';
-import { ScriptContext } from '@/contexts/script';
-import Upload from '@/components/script/chatBar/upload';
-import ToolCatalog from '@/components/script/chatBar/toolCatalog';
-import { MessageType } from '@/components/script/messages';
+import { ChatContext } from '@/contexts/chat';
+import Upload from '@/components/chat/chatBar/upload';
+import ToolCatalog from '@/components/chat/chatBar/toolCatalog';
+import { MessageType } from '@/components/chat/messages';
 import { useFilePicker } from 'use-file-picker';
 import { uploadFile } from '@/actions/upload';
 import { ingest } from '@/actions/knowledge/knowledge';
@@ -105,7 +105,7 @@ export default function Commands({
     setTool,
     workspace,
     selectedThreadId,
-  } = useContext(ScriptContext);
+  } = useContext(ChatContext);
   const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker(
     {}
   );

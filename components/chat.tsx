@@ -1,28 +1,33 @@
 'use client';
 
 import { useContext, useEffect, useState, useRef, useCallback } from 'react';
-import Messages, { MessageType } from '@/components/script/messages';
-import ChatBar from '@/components/script/chatBar';
-import ToolForm from '@/components/script/form';
+import Messages, { MessageType } from '@/components/chat/messages';
+import ChatBar from '@/components/chat/chatBar';
+import ToolForm from '@/components/chat/form';
 import Loading from '@/components/loading';
 import { Button } from '@nextui-org/react';
 import { getWorkspaceDir } from '@/actions/workspace';
 import { getGatewayUrl } from '@/actions/gateway';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 import AssistantNotFound from '@/components/assistant-not-found';
 import { generateThreadName, renameThread } from '@/actions/threads';
 
 interface ScriptProps {
   className?: string;
   messagesHeight?: string;
-  enableThreads?: boolean;
   showAssistantName?: boolean;
+  inputPlaceholder?: string;
+  disableInput?: boolean;
+  disableCommands?: boolean;
 }
 
-const Script: React.FC<ScriptProps> = ({
+const Chat: React.FC<ScriptProps> = ({
   className,
   messagesHeight = 'h-full',
   showAssistantName,
+  inputPlaceholder,
+  disableInput = false,
+  disableCommands = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
@@ -45,7 +50,7 @@ const Script: React.FC<ScriptProps> = ({
     notFound,
     restartScript,
     fetchThreads,
-  } = useContext(ScriptContext);
+  } = useContext(ChatContext);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -140,7 +145,12 @@ const Script: React.FC<ScriptProps> = ({
                 {tool.chat ? 'Start chat' : 'Run script'}
               </Button>
             ) : (
-              <ChatBar disabled={!running} onMessageSent={handleMessageSent} />
+              <ChatBar
+                disableInput={disableInput || !running}
+                disableCommands={disableCommands}
+                inputPlaceholder={inputPlaceholder}
+                onMessageSent={handleMessageSent}
+              />
             )}
           </div>
         </>
@@ -153,4 +163,4 @@ const Script: React.FC<ScriptProps> = ({
   );
 };
 
-export default Script;
+export default Chat;

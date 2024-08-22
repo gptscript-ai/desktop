@@ -3,7 +3,7 @@ import { Tool, Property } from '@gptscript-ai/gptscript';
 import Params from '@/components/edit/configure/params';
 import Models from '@/components/edit/configure/models';
 import Imports from '@/components/edit/configure/imports';
-import Script from '@/components/script';
+import Chat from '@/components/chat';
 import Code from '@/components/edit/configure/code';
 import {
   Textarea,
@@ -23,7 +23,7 @@ import {
 import { EditContext } from '@/contexts/edit';
 import { GoCode, GoPencil, GoTools, GoTrash } from 'react-icons/go';
 import { LuWrench, LuMessageSquare } from 'react-icons/lu';
-import { ScriptContextProvider } from '@/contexts/script';
+import { ChatContextProvider } from '@/contexts/chat';
 import { HiCog } from 'react-icons/hi2';
 import PropTypes from 'prop-types';
 
@@ -379,14 +379,14 @@ const CustomTool: React.FC<ConfigureProps> = ({ tool }) => {
                 </div>
               </div>
               <div className="h-full overflow-y-auto">
-                <ScriptContextProvider
+                <ChatContextProvider
                   initialScript={scriptPath}
                   enableThread={false}
                   initialSubTool={customTool.name}
                   initialScriptId={`${scriptId}`}
                 >
-                  <Script messagesHeight="h-[93%]" />
-                </ScriptContextProvider>
+                  <Chat messagesHeight="h-[93%]" />
+                </ChatContextProvider>
               </div>
             </ModalBody>
           </ModalContent>
