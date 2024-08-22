@@ -194,18 +194,21 @@ const mount = async (
       socket.emit('progress', {
         frame: data,
         state: runningScript.calls,
+        name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
         state: runningScript.calls,
+        name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
         state: runningScript.calls,
+        name: script[0]?.name || data.tool?.name || '',
       })
     );
     socket.on(
@@ -222,7 +225,11 @@ const mount = async (
         if (!runningScript) return;
 
         if (!state.messages) state.messages = [];
-        state.messages.push({ type: AGENT, message: output });
+        state.messages.push({
+          type: AGENT,
+          message: output,
+          name: (runningScript.respondingTool() || {}).name || '',
+        });
         state.chatState = runningScript.currentChatState();
 
         if (threadID) {
@@ -357,10 +364,12 @@ const mount = async (
 
     // If there is not a running script, that means we're loading a thread and have been waiting
     // for the user to send a message.
+    let name = script[0].name || '';
     if (!runningScript) {
       opts.input = message;
       runningScript = await gptscript.evaluate(script, opts);
     } else {
+      name = runningScript.respondingTool().name || '';
       runningScript = runningScript.nextChat(message);
     }
 
@@ -368,18 +377,21 @@ const mount = async (
       socket.emit('progress', {
         frame: data,
         state: runningScript.calls,
+        name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
         state: runningScript.calls,
+        name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
         state: runningScript.calls,
+        name: name || data.tool?.name || '',
       })
     );
     socket.on(
@@ -396,7 +408,11 @@ const mount = async (
         if (!state.messages) state.messages = [];
         state.messages.push(
           { type: USER, message: message },
-          { type: AGENT, message: output }
+          {
+            type: AGENT,
+            message: output,
+            name: (runningScript.respondingTool() || {}).name || '',
+          }
         );
 
         state.chatState = runningScript.currentChatState();
