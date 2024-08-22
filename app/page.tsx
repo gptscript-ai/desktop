@@ -33,7 +33,7 @@ function RunFile() {
         >
           <div className="w-full h-full flex pb-10">
             <Threads />
-            <Script enableThreads showAssistantName className="pb-10" />
+            <Script enableThreads showAssistantName className="w-[75%] pb-10" />
           </div>
         </div>
       </section>
