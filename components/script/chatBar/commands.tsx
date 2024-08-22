@@ -34,7 +34,7 @@ import { ingest } from '@/actions/knowledge/knowledge';
     to the previous command in the list. This is a bit hacky but it works for now.
 */
 
-const gatewayTool = 'github.com/gptscript-ai/knowledge@v0.4.10-gateway.2';
+const gatewayTool = 'github.com/gptscript-ai/knowledge@v0.4.10-gateway.3';
 
 const options = [
   {
