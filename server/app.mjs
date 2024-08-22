@@ -319,12 +319,12 @@ const mount = async (
       runningScript = null;
     }
 
+    const stateTools = (state.tools || []).filter((t) => t !== tool);
     // find the root tool and then remove the tool
     for (let block of script) {
       if (block.type === 'tool') {
         if (!block.tools) break;
-        const stateTools = (state.tools || []).filter((t) => t !== tool);
-        block.tools = [...new Set(block.tools, ...stateTools)];
+        block.tools = [...new Set(block.tools.filter((t) => t !== tool))];
         break;
       }
     }
@@ -338,7 +338,7 @@ const mount = async (
 
     opts.chatState = JSON.stringify(currentState);
     state.chatState = JSON.stringify(currentState);
-    state.tools = state.tools.filter((t) => t !== tool);
+    state.tools = stateTools;
 
     if (threadID) {
       fs.writeFile(statePath, JSON.stringify(state), (err) => {
