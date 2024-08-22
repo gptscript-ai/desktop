@@ -34,7 +34,7 @@ const Threads: React.FC<ThreadsProps> = () => {
 
   return (
     <div
-      className={`relative p-4 overflow-y-auto ${isCollapsed ? 'border-none' : 'border-r-1 dark:border-r-zinc-800'}`}
+      className={`min-w-fit relative p-4 overflow-y-auto ${isCollapsed ? 'border-none' : 'border-r-1 dark:border-r-zinc-800'}`}
     >
       <div className={`flex justify-between items-center mb-2`}>
         <Tooltip
@@ -57,7 +57,7 @@ const Threads: React.FC<ThreadsProps> = () => {
       </div>
       <div
         style={{
-          width: isCollapsed ? '50px' : '250px',
+          width: isCollapsed ? '50px' : 'max-w-[300px]',
           transition: 'width 0.3s ease-in-out',
         }}
       >

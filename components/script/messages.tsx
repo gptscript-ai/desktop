@@ -163,7 +163,7 @@ const Messages = ({
   noAvatar?: boolean;
   restart?: () => void;
 }) => (
-  <div>
+  <div className="mx-auto px-6 2xl:w-[75%]">
     {messages.map((message, index) => (
       <Message
         key={index}
