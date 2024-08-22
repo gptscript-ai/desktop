@@ -215,6 +215,7 @@ export default function Commands({
                 .replace(/\b\w/g, (c) => c.toUpperCase())}`,
             },
           ]);
+          setToolCatalogOpen(false);
         }}
         removeTool={(tool) => {
           socket?.emit('removeTool', tool);
