@@ -111,6 +111,11 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
+  const hasRunRef = useRef(false);
+
+  useEffect(() => {
+    hasRunRef.current = hasRun;
+  }, [hasRun]);
 
   // need to initialize the workspace from the env variable with serves
   // as the default.
@@ -208,7 +213,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   useEffect(() => {
     setIsEmpty(!tool.instructions);
     if (
-      hasRun ||
+      hasRunRef.current ||
       !socket ||
       !connected ||
       !initialFetch ||
