@@ -57,7 +57,7 @@ const Threads: React.FC<ThreadsProps> = () => {
       </div>
       <div
         style={{
-          width: isCollapsed ? '50px' : 'max-w-[300px]',
+          width: isCollapsed ? '50px' : 'w-1/2 w-max-250px',
           transition: 'width 0.3s ease-in-out',
         }}
       >
