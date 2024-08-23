@@ -96,7 +96,7 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
   }
 
   return (
-    <div className="flex px-4 space-x-2 sw-full mx-auto 2xl:w-[75%]">
+    <div className="flex px-4 space-x-2 sw-full">
       <Button
         isIconOnly
         startContent={<GoKebabHorizontal />}
