@@ -1,5 +1,25 @@
-import { useContext, useEffect, useState } from 'react';
+import CustomTool from '@/components/edit/configure/customTool';
+import ToolCatalogModal from '@/components/edit/configure/imports/toolCatalogModal';
+import { EditContext } from '@/contexts/edit';
 import { Button } from '@nextui-org/react';
+import PropTypes from 'prop-types';
+import { useContext, useEffect, useState } from 'react';
+import {
+  AiFillFileAdd,
+  AiOutlineKubernetes,
+  AiOutlineSlack,
+} from 'react-icons/ai';
+import { BsCode, BsDownload, BsEye, BsFiles, BsFolder } from 'react-icons/bs';
+import {
+  FaAws,
+  FaCode,
+  FaDigitalOcean,
+  FaGithub,
+  FaGitlab,
+  FaHubspot,
+  FaPaintBrush,
+  FaTrello,
+} from 'react-icons/fa';
 import {
   GoBrowser,
   GoFileDirectory,
@@ -11,27 +31,10 @@ import {
   GoTools,
   GoTrash,
 } from 'react-icons/go';
-import ToolCatalogModal from '@/components/edit/configure/imports/toolCatalogModal';
-import {
-  AiFillFileAdd,
-  AiOutlineKubernetes,
-  AiOutlineSlack,
-} from 'react-icons/ai';
-import {
-  FaAws,
-  FaCode,
-  FaDigitalOcean,
-  FaGithub,
-  FaGlasses,
-  FaPaintBrush,
-  FaTrello,
-} from 'react-icons/fa';
 import {
   PiMicrosoftExcelLogo,
   PiMicrosoftOutlookLogoDuotone,
 } from 'react-icons/pi';
-import { EditContext } from '@/contexts/edit';
-import CustomTool from '@/components/edit/configure/customTool';
 import {
   SiAmazoneks,
   SiGooglecloud,
@@ -41,19 +44,8 @@ import {
   SiSupabase,
 } from 'react-icons/si';
 import { VscAzure } from 'react-icons/vsc';
-import {
-  BsClock,
-  BsCode,
-  BsDownload,
-  BsEye,
-  BsFiles,
-  BsFolder,
-  BsSearch,
-} from 'react-icons/bs';
-import { MdDeleteForever } from 'react-icons/md';
-import PropTypes from 'prop-types';
 
-import { load } from '@/actions/gptscript';
+import { getToolDisplayName } from '@/actions/gptscript';
 
 interface ImportsProps {
   tools: string[] | undefined;
@@ -84,7 +76,7 @@ const Imports: React.FC<ImportsProps> = ({
         // We've already the display name of this tool
         continue;
       }
-      updatedRemoteTools.set(ref, await getDisplayName(ref));
+      updatedRemoteTools.set(ref, await getToolDisplayName(ref));
     }
 
     setRemoteTools(() => {
@@ -210,99 +202,114 @@ function isRemote(ref: string): boolean {
   );
 }
 
-async function getDisplayName(ref: string): Promise<string> {
-  let displayName: string =
-    ref.split('/').pop()?.replace('sys.', '').replace('.', ' ') ?? ref;
+const toolIconMap = new Map<string, () => React.ReactNode>([
+  [
+    'github.com/gptscript-ai/gpt4-v-vision@gateway',
+    () => <BsEye className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/dalle-image-generation@gateway',
+    () => <FaPaintBrush className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/answers-from-the-internet',
+    () => <GoGlobe className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/search-website',
+    () => <GoSearch className="text-md" />,
+  ],
+  ['github.com/gptscript-ai/browser', () => <GoBrowser className="text-md" />],
+  [
+    'github.com/gptscript-ai/tools/apis/slack/write',
+    () => <AiOutlineSlack className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/notion/write',
+    () => <SiNotion className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/trello',
+    () => <FaTrello className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/hubspot/crm',
+    () => <FaHubspot className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/outlook/mail/manage',
+    () => <PiMicrosoftOutlookLogoDuotone className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/outlook/calendar/manage',
+    () => <PiMicrosoftOutlookLogoDuotone className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/structured-data-querier',
+    () => <PiMicrosoftExcelLogo className="text-md" />,
+  ],
+  ['github.com/gptscript-ai/json-query', () => <SiJson className="text-md" />],
+  [
+    'github.com/gptscript-ai/context/filesystem',
+    () => <BsFiles className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/context/workspace',
+    () => <GoFileDirectory className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/github/write',
+    () => <FaGithub className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/apis/gitlab',
+    () => <FaGitlab className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/aws',
+    () => <FaAws className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/azure',
+    () => <VscAzure className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/digitalocean',
+    () => <FaDigitalOcean className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/eksctl',
+    () => <SiAmazoneks className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/atlas',
+    () => <SiMongodb className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/gcp',
+    () => <SiGooglecloud className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/k8s',
+    () => <AiOutlineKubernetes className="text-md" />,
+  ],
+  [
+    'github.com/gptscript-ai/tools/clis/supabase',
+    () => <SiSupabase className="text-md" />,
+  ],
+  ['sys.append', () => <AiFillFileAdd className="text-md" />],
+  ['sys.download', () => <BsDownload className="text-md" />],
+  ['sys.exec', () => <GoTerminal className="text-md" />],
+  ['sys.find', () => <BsFiles className="text-md" />],
+  ['sys.getenv', () => <BsCode className="text-md" />],
+  ['sys.http.html2text', () => <FaCode className="text-md" />],
+  ['sys.http.get', () => <GoGlobe className="text-md" />],
+  ['sys.http.post', () => <GoGlobe className="text-md" />],
+  ['sys.ls', () => <BsFolder className="text-md" />],
+  ['sys.prompt', () => <GoQuestion className="text-md" />],
+]);
 
-  if (!ref.startsWith('sys.')) {
-    const loadedTool = await load(ref);
-    const loadedName = loadedTool.toolSet[loadedTool.entryToolId].name;
-    if (loadedName) {
-      displayName = loadedName;
-    }
-  }
-
-  return displayName.replace(/-/g, ' ');
-}
-
-// note - I know this is a bit of a mess, but it's a quick way to get icons for tools
 const iconForTool = (toolName: string | undefined) => {
-  switch (toolName) {
-    case 'github.com/gptscript-ai/gpt4-v-vision@gateway':
-      return <BsEye className="text-md" />;
-    case 'github.com/gptscript-ai/dalle-image-generation@gateway':
-      return <FaPaintBrush className="text-md" />;
-    case 'github.com/gptscript-ai/answers-from-the-internet':
-      return <GoGlobe className="text-md" />;
-    case 'github.com/gptscript-ai/search-website':
-      return <GoSearch className="text-md" />;
-    case 'github.com/gptscript-ai/browser':
-      return <GoBrowser className="text-md" />;
-    case 'github.com/gptscript-ai/tools/apis/slack/write':
-      return <AiOutlineSlack className="text-md" />;
-    case 'github.com/gptscript-ai/tools/apis/notion/write':
-      return <SiNotion className="text-md" />;
-    case 'github.com/gptscript-ai/tools/apis/trello':
-      return <FaTrello className="text-md" />;
-    case 'github.com/gptscript-ai/tools/apis/outlook/mail/manage':
-      return <PiMicrosoftOutlookLogoDuotone className="text-md" />;
-    case 'github.com/gptscript-ai/tools/apis/outlook/calendar/manage':
-      return <PiMicrosoftOutlookLogoDuotone className="text-md" />;
-    case 'github.com/gptscript-ai/structured-data-querier':
-      return <PiMicrosoftExcelLogo className="text-md" />;
-    case 'github.com/gptscript-ai/json-query':
-      return <SiJson className="text-md" />;
-    case 'github.com/gptscript-ai/context/filesystem':
-      return <BsFiles className="text-md" />;
-    case 'github.com/gptscript-ai/context/workspace':
-      return <GoFileDirectory className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/github':
-      return <FaGithub className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/aws':
-      return <FaAws className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/azure':
-      return <VscAzure className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/digitalocean':
-      return <FaDigitalOcean className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/eksctl':
-      return <SiAmazoneks className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/atlas':
-      return <SiMongodb className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/gcp':
-      return <SiGooglecloud className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/k8s':
-      return <AiOutlineKubernetes className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/supabase':
-      return <SiSupabase className="text-md" />;
-    case 'sys.append':
-      return <AiFillFileAdd className="text-md" />;
-    case 'sys.download':
-      return <BsDownload className="text-md" />;
-    case 'sys.exec':
-      return <GoTerminal className="text-md" />;
-    case 'sys.find':
-      return <BsFiles className="text-md" />;
-    case 'sys.getenv':
-      return <BsCode className="text-md" />;
-    case 'sys.http.html2text':
-      return <FaCode className="text-md" />;
-    case 'sys.http.get':
-      return <GoGlobe className="text-md" />;
-    case 'sys.http.post':
-      return <GoGlobe className="text-md" />;
-    case 'sys.ls':
-      return <BsFolder className="text-md" />;
-    case 'sys.prompt':
-      return <GoQuestion className="text-md" />;
-    case 'sys.read':
-      return <FaGlasses className="text-md" />;
-    case 'sys.remove':
-      return <MdDeleteForever className="text-md" />;
-    case 'sys.stat':
-      return <BsSearch className="text-md" />;
-    case 'sys.time.now':
-      return <BsClock className="text-md" />;
-    case 'sys.write':
-      return <GoPencil className="text-md" />;
-  }
+  if (!toolName) return <GoQuestion className="text-md" />;
+  return toolIconMap.get(toolName)?.() || <GoQuestion className="text-md" />;
 };

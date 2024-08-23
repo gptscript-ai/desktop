@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react';
+import Loading from '@/components/loading';
+import { FeaturedTools, ToolsApiResponse } from '@/model/tools';
 import {
   Avatar,
   Button,
@@ -8,74 +9,31 @@ import {
   Input,
   Tooltip,
 } from '@nextui-org/react';
-import Loading from '@/components/loading';
+import PropTypes from 'prop-types';
+import { useCallback, useState } from 'react';
+import { AiOutlineSlack } from 'react-icons/ai';
+import { BsEye } from 'react-icons/bs';
+import { FaGithub, FaGitlab, FaHubspot, FaPaintBrush } from 'react-icons/fa';
 import {
-  GoBook,
   GoBrowser,
   GoCheck,
   GoFileDirectory,
   GoGlobe,
   GoLink,
-  GoPencil,
   GoPlus,
-  GoQuestion,
   GoSearch,
-  GoTerminal,
   GoTools,
 } from 'react-icons/go';
-import {
-  AiFillFileAdd,
-  AiOutlineKubernetes,
-  AiOutlineSlack,
-} from 'react-icons/ai';
+import { IoWarning } from 'react-icons/io5';
 import {
   PiMicrosoftExcelLogo,
   PiMicrosoftOutlookLogoDuotone,
   PiToolbox,
 } from 'react-icons/pi';
-import {
-  SiAmazoneks,
-  SiGooglecloud,
-  SiJson,
-  SiMongodb,
-  SiNotion,
-  SiSupabase,
-} from 'react-icons/si';
-import {
-  FaAws,
-  FaCode,
-  FaDigitalOcean,
-  FaGithub,
-  FaGlasses,
-  FaPaintBrush,
-  FaTrello,
-} from 'react-icons/fa';
-import { Tool } from '@gptscript-ai/gptscript';
-import { VscAzure } from 'react-icons/vsc';
-import {
-  BsClock,
-  BsDownload,
-  BsEye,
-  BsFiles,
-  BsFolder,
-  BsSearch,
-} from 'react-icons/bs';
-import { MdDeleteForever } from 'react-icons/md';
-import { IoWarning } from 'react-icons/io5';
-import { LuServer } from 'react-icons/lu';
-import PropTypes from 'prop-types';
-
-type FeaturedTool = {
-  name: string;
-  description: string;
-  url: string;
-  tags: string[];
-  icon: JSX.Element;
-};
-type FeaturedTools = Record<string, FeaturedTool[]>;
+import { SiJson, SiNotion } from 'react-icons/si';
 
 // note(tylerslaton) - This will eventually be retrieved from the tools site, for now we must endure the pain of hardcoding.
-const featuredTools: FeaturedTools = {
+const priorityTools: FeaturedTools = {
   'AI and Web': [
     {
       name: 'Vision',
@@ -130,11 +88,11 @@ const featuredTools: FeaturedTools = {
       icon: <SiNotion className="text-2xl" />,
     },
     {
-      name: 'Trello',
-      description: 'Allows the assistant to interact with Trello.',
-      url: 'github.com/gptscript-ai/tools/apis/trello',
-      tags: ['trello', 'project', 'management', 'api'],
-      icon: <FaTrello className="text-2xl" />,
+      name: 'Hubspot',
+      description: 'Allows the assistant to interact with Hubspot.',
+      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm',
+      tags: ['hubspot', 'api'],
+      icon: <FaHubspot className="text-lg" />,
     },
     {
       name: 'Outlook Mail',
@@ -154,13 +112,6 @@ const featuredTools: FeaturedTools = {
   ],
   'Working with Local Files': [
     {
-      name: 'Knowledge',
-      description: 'Provides the assistant with information based context.',
-      url: 'github.com/gptscript-ai/knowledge@v0.4.7-gateway',
-      tags: ['knowledge', 'rag'],
-      icon: <GoBook className="text-2xl" />,
-    },
-    {
       name: 'Structured Data Querier',
       description: 'Query Excel spreadsheets, CSV files, and JSON files.',
       url: 'github.com/gptscript-ai/structured-data-querier',
@@ -175,13 +126,6 @@ const featuredTools: FeaturedTools = {
       icon: <SiJson className="text-2xl" />,
     },
     {
-      name: 'Filesystem',
-      description: 'Allows the assistant to interact with the filesystem.',
-      url: 'github.com/gptscript-ai/context/filesystem',
-      tags: ['json', 'query', 'data'],
-      icon: <BsFiles className="text-2xl" />,
-    },
-    {
       name: 'Workspace',
       description:
         'Allows the assistant to be aware of and iteract with files in your workspace.',
@@ -194,178 +138,16 @@ const featuredTools: FeaturedTools = {
     {
       name: 'Github',
       description: 'Provides the ability to interact with GitHub.',
-      url: 'github.com/gptscript-ai/tools/clis/github',
-      tags: ['github', 'cli'],
+      url: 'github.com/gptscript-ai/tools/apis/github/write',
+      tags: ['github', 'api'],
       icon: <FaGithub className="text-2xl" />,
     },
     {
-      name: 'Amazon Web Services',
-      description: 'Provides the ability to interact with AWS.',
-      url: 'github.com/gptscript-ai/tools/clis/aws',
-      tags: ['aws', 'cloud', 'amazon', 'cli'],
-      icon: <FaAws className="text-2xl" />,
-    },
-    {
-      name: 'Azure',
-      description: 'Provides the ability to interact with Azure.',
-      url: 'github.com/gptscript-ai/tools/clis/azure',
-      tags: ['azure', 'cloud', 'microsoft', 'cli'],
-      icon: <VscAzure className="text-2xl" />,
-    },
-    {
-      name: 'Digital Ocean',
-      description: 'Provides the ability to interact with Digital Ocean.',
-      url: 'github.com/gptscript-ai/tools/clis/digitalocean',
-      tags: ['digital', 'ocean', 'cloud', 'cli'],
-      icon: <FaDigitalOcean className="text-2xl" />,
-    },
-    {
-      name: 'Amazon EKS',
-      description: 'Provides the ability to interact with Amazon EKS Clusters.',
-      url: 'github.com/gptscript-ai/tools/clis/eksctl',
-      tags: ['eksctl', 'kubernetes', 'aws', 'cli', 'eks', 'amazon'],
-      icon: <SiAmazoneks className="text-2xl" />,
-    },
-    {
-      name: 'MongoDB Atlas',
-      description: 'Provides the ability to interact with MongoDB Atlas.',
-      url: 'github.com/gptscript-ai/tools/clis/atlas',
-      tags: ['atlas', 'mongodb', 'db', 'cloud', 'cli'],
-      icon: <SiMongodb className="text-2xl" />,
-    },
-    {
-      name: 'Google Cloud Platform',
-      description:
-        'Provides the ability to interact with Google Cloud Platform.',
-      url: 'github.com/gptscript-ai/tools/clis/gcp',
-      tags: ['gcp', 'cloud', 'google', 'cli'],
-      icon: <SiGooglecloud className="text-2xl" />,
-    },
-    {
-      name: 'Kubernetes',
-      description:
-        'Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs',
-      url: 'github.com/gptscript-ai/tools/clis/k8s',
-      tags: ['kubernetes', 'containers', 'ops', 'cli'],
-      icon: <AiOutlineKubernetes className="text-2xl" />,
-    },
-    {
-      name: 'Supabase',
-      description: 'Allows the agent to interact with Supabase via the CLI.',
-      url: 'github.com/gptscript-ai/tools/clis/supabase',
-      tags: ['supabase', 'db', 'authentication', 'api', 'cli'],
-      icon: <SiSupabase className="text-2xl" />,
-    },
-  ],
-  'System Tools': [
-    {
-      name: 'Append',
-      description: 'Appends the contents to a file',
-      url: 'sys.append',
-      tags: ['system', 'append'],
-      icon: <AiFillFileAdd className="text-2xl" />,
-    },
-    {
-      name: 'Download',
-      description:
-        'Downloads a URL, saving the contents to disk at a given location.',
-      url: 'sys.download',
-      tags: ['system', 'download'],
-      icon: <BsDownload className="text-2xl" />,
-    },
-    {
-      name: 'Execute',
-      description: 'Execute a command and get the output of the command.',
-      url: 'sys.exec',
-      tags: ['system', 'execute', 'exec'],
-      icon: <GoTerminal className="text-2xl" />,
-    },
-    {
-      name: 'Find',
-      description:
-        'Traverse a directory looking for files that match a pattern in the style of the unix find command.',
-      url: 'sys.find',
-      tags: ['system', 'find'],
-      icon: <BsFiles className="text-2xl" />,
-    },
-    {
-      name: 'Get Environment Variable',
-      description: 'Gets the value of an OS environment variable.',
-      url: 'sys.getenv',
-      tags: ['system', 'getenv', 'environment', 'env'],
-      icon: <LuServer className="text-2xl" />,
-    },
-    {
-      name: 'HTML to Text',
-      description:
-        'Download the contents of a http or https URL returning the content as rendered text converted from HTML.',
-      url: 'sys.http.html2text',
-      tags: ['system', 'http', 'html', 'text'],
-      icon: <FaCode className="text-2xl" />,
-    },
-    {
-      name: 'HTTP GET',
-      description: 'Download the contents of a http or https URL.',
-      url: 'sys.http.get',
-      tags: ['system', 'http', 'get'],
-      icon: <GoGlobe className="text-2xl" />,
-    },
-    {
-      name: 'HTTP POST',
-      description:
-        'Write contents to a http or https URL using the POST method.',
-      url: 'sys.http.post',
-      tags: ['system', 'http', 'post'],
-      icon: <GoGlobe className="text-2xl" />,
-    },
-    {
-      name: 'List Directory',
-      description: 'Lists the contents of a directory.',
-      url: 'sys.ls',
-      tags: ['system', 'ls', 'list', 'directory'],
-      icon: <BsFolder className="text-2xl" />,
-    },
-    {
-      name: 'Prompt',
-      description: 'Prompts the user for input.',
-      url: 'sys.prompt',
-      tags: ['system', 'prompt', 'input'],
-      icon: <GoQuestion className="text-2xl" />,
-    },
-    {
-      name: 'Read File',
-      description: 'Reads the contents of a file.',
-      url: 'sys.read',
-      tags: ['system', 'read', 'file'],
-      icon: <FaGlasses className="text-2xl" />,
-    },
-    {
-      name: 'Remove File',
-      description: 'Removes the specified file.',
-      url: 'sys.remove',
-      tags: ['system', 'remove', 'file'],
-      icon: <MdDeleteForever className="text-2xl" />,
-    },
-    {
-      name: 'File Stat',
-      description: 'Gets size, modfied time, and mode of the specified file.',
-      url: 'sys.stat',
-      tags: ['system', 'stat', 'file'],
-      icon: <BsSearch className="text-2xl" />,
-    },
-    {
-      name: 'Current Time',
-      description: 'Returns the current date and time in RFC3339 format.',
-      url: 'sys.time.now',
-      tags: ['system', 'time', 'now'],
-      icon: <BsClock className="text-2xl" />,
-    },
-    {
-      name: 'Write File',
-      description: 'Write the contents to a file.',
-      url: 'sys.write',
-      tags: ['system', 'write', 'file'],
-      icon: <GoPencil className="text-2xl" />,
+      name: 'GitLab',
+      description: 'Provides the ability to interact with GitLab.',
+      url: 'github.com/gptscript-ai/tools/apis/gitlab',
+      tags: ['gitlab', 'api'],
+      icon: <FaGitlab className="text-lg" />,
     },
   ],
   'From URL': [],
@@ -376,20 +158,15 @@ interface ToolCatalogProps {
   addTool: (tool: string) => void;
 }
 
-interface ToolsSiteResponse {
-  tools: Record<string, Tool[]>;
-}
-
 const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
   const [url, setUrl] = useState('');
   const [query, setQuery] = useState('');
-  const [searchResults, setSearchResults] = useState({} as ToolsSiteResponse);
+  const [searchResults, setSearchResults] = useState({} as ToolsApiResponse);
   const [loading, setLoading] = useState(false);
-  const [priorityTools] = useState(featuredTools);
 
   const search = useCallback(() => {
     if (!query) {
-      setSearchResults({} as ToolsSiteResponse);
+      setSearchResults({} as ToolsApiResponse);
       return;
     }
     setLoading(true);
@@ -420,13 +197,13 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
             value={query}
             onChange={(e) => {
               if (e.target.value === '') {
-                setSearchResults({} as ToolsSiteResponse);
+                setSearchResults({} as ToolsApiResponse);
               }
               setQuery(e.target.value);
             }}
             onClear={() => {
               setQuery('');
-              setSearchResults({} as ToolsSiteResponse);
+              setSearchResults({} as ToolsApiResponse);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

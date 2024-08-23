@@ -43,7 +43,6 @@ const Chat: React.FC<ScriptProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
-  const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
   const [tool, setTool] = useState<Tool>({} as Tool);
 
   const {
@@ -176,8 +175,6 @@ const Chat: React.FC<ScriptProps> = ({
                 disableCommands={disableCommands}
                 inputPlaceholder={inputPlaceholder}
                 onMessageSent={handleMessageSent}
-                toolCatalogOpen={toolCatalogOpen}
-                setToolCatalogOpen={setToolCatalogOpen}
               />
             )}
           </div>

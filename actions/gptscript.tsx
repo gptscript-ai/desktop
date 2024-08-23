@@ -2,6 +2,7 @@
 
 import { ToolDef, Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
 import { gpt } from '@/config/env';
+import { createAction } from '@/actions/helpers';
 
 export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
   for (const block of toolContent) {
@@ -17,6 +18,10 @@ export const parseContent = async (toolContent: string): Promise<Tool[]> => {
   ) as Tool[];
 };
 
+export const parseBlock = createAction(async (ref: string) => {
+  return await gpt().parse(ref);
+});
+
 export const parse = async (file: string): Promise<Tool[]> => {
   const parsedTool = await gpt().parse(file);
   return parsedTool.filter(
@@ -26,6 +31,21 @@ export const parse = async (file: string): Promise<Tool[]> => {
 
 export const load = async (file: string): Promise<Program> => {
   return (await gpt().load(file)).program;
+};
+
+export const getToolDisplayName = async (ref: string): Promise<string> => {
+  let displayName: string =
+    ref.split('/').pop()?.replace('sys.', '').replace('.', ' ') ?? ref;
+
+  if (!ref.startsWith('sys.')) {
+    const loadedTool = await load(ref);
+    const loadedName = loadedTool.toolSet[loadedTool.entryToolId].name;
+    if (loadedName) {
+      displayName = loadedName;
+    }
+  }
+
+  return displayName.replace(/-/g, ' ');
 };
 
 export const loadTools = async (
