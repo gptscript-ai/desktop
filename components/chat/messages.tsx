@@ -163,7 +163,7 @@ const Messages = ({
   noAvatar?: boolean;
   restart?: () => void;
 }) => (
-  <div>
+  <div className="pr-4">
     {messages.map((message, index) => (
       <Message
         key={index}
