@@ -1,5 +1,5 @@
 import { Card, Listbox, ListboxItem } from '@nextui-org/react';
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useCallback } from 'react';
 import {
   GoAlert,
   GoCheckCircleFill,
@@ -10,12 +10,11 @@ import {
 } from 'react-icons/go';
 import { PiToolbox } from 'react-icons/pi';
 import { ChatContext } from '@/contexts/chat';
-import Upload from '@/components/chat/chatBar/upload';
-import ToolCatalog from '@/components/chat/chatBar/toolCatalog';
 import { MessageType } from '@/components/chat/messages';
 import { useFilePicker } from 'use-file-picker';
 import { uploadFile } from '@/actions/upload';
 import { ingest } from '@/actions/knowledge/knowledge';
+import CatalogListbox from '@/components/chat/chatBar/search/catalog';
 
 /*
     note(tylerslaton):
@@ -82,6 +81,8 @@ interface CommandsProps {
   setText: (text: string) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isCatalogOpen: boolean;
+  setIsCatalogOpen: (open: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -90,12 +91,13 @@ export default function Commands({
   setText,
   isOpen,
   setIsOpen,
+  isCatalogOpen,
+  setIsCatalogOpen,
   children,
 }: CommandsProps) {
   const [filteredOptions, setFilteredOptions] =
     React.useState<typeof options>(options);
   const [uploadOpen, setUploadOpen] = React.useState(false);
-  const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
   const {
     restartScript,
     socket,
@@ -181,7 +183,7 @@ export default function Commands({
         restartScript();
         break;
       case 'add':
-        setToolCatalogOpen(true);
+        setIsCatalogOpen(true);
         break;
       case 'workspace':
         setUploadOpen(true);
@@ -195,47 +197,71 @@ export default function Commands({
     setIsOpen(false);
   };
 
+  const equipTools = useCallback(
+    (updatedTools: string[]) => {
+      const removed = tools.filter((tool) => !updatedTools.includes(tool));
+      const added = updatedTools.filter((tool) => !tools.includes(tool));
+
+      removed.forEach((tool) => {
+        socket?.emit('removeTool', tool);
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: MessageType.Alert,
+            icon: <GoTools className="mt-1" />,
+            name: prev ? prev[prev.length - 1].name : undefined,
+            message: `Removed ${tool
+              .split('/')
+              .pop()
+              ?.replace(/-/g, ' ')
+              .replace(/\b\w/g, (c) => c.toUpperCase())}`,
+          },
+        ]);
+      });
+
+      added.forEach((tool) => {
+        socket?.emit('addTool', tool);
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: MessageType.Alert,
+            icon: <GoTools className="mt-1" />,
+            name: prev ? prev[prev.length - 1].name : undefined,
+            message: `Added ${tool
+              .split('/')
+              .pop()
+              ?.replace(/-/g, ' ')
+              .replace(/\b\w/g, (c) => c.toUpperCase())}`,
+          },
+        ]);
+      });
+    },
+    [tools]
+  );
+
+  const handleQueryChange = useCallback((query: string) => {
+    if (query == text) {
+      return;
+    }
+
+    document.getElementById('chatInput')?.focus();
+    setText(query)
+  }, [text, setText])
+
   return (
-    <div className="relative w-full command-options">
-      <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
-      <ToolCatalog
-        tools={tools}
-        addTool={(tool) => {
-          socket?.emit('addTool', tool);
-          setMessages((prev) => [
-            ...prev,
-            {
-              type: MessageType.Alert,
-              icon: <GoTools className="mt-1" />,
-              name: prev ? prev[prev.length - 1].name : undefined,
-              message: `Added ${tool
-                .split('/')
-                .pop()
-                ?.replace(/-/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase())}`,
-            },
-          ]);
-          setToolCatalogOpen(false);
-        }}
-        removeTool={(tool) => {
-          socket?.emit('removeTool', tool);
-          setMessages((prev) => [
-            ...prev,
-            {
-              type: MessageType.Alert,
-              icon: <GoTools className="mt-1" />,
-              name: prev ? prev[prev.length - 1].name : undefined,
-              message: `Removed ${tool
-                .split('/')
-                .pop()
-                ?.replace(/-/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase())}`,
-            },
-          ]);
-        }}
-        isOpen={toolCatalogOpen}
-        setIsOpen={setToolCatalogOpen}
-      />
+    <div className="relative w-full h-3/4 command-options">
+      {isCatalogOpen && (
+        <CatalogListbox
+          query={text}
+          onQueryChange={handleQueryChange}
+          equippedTools={tools}
+          onEquippedChange={equipTools}
+          onEscape={() => {
+            setIsCatalogOpen(false);
+          }}
+        />
+      )}
+
       {isOpen && !!filteredOptions.length && (
         <Card className="absolute bottom-14 w-full p-4">
           <Listbox aria-label="commands">

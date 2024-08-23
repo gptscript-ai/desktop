@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, {useState, useContext, useEffect, useCallback} from 'react';
 import { IoMdSend } from 'react-icons/io';
 import { Spinner } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
@@ -25,6 +25,7 @@ const ChatBar = ({
 }: ChatBarProps) => {
   const [inputValue, setInputValue] = useState('');
   const [commandsOpen, setCommandsOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const {
     generating,
@@ -66,6 +67,13 @@ const ChatBar = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (!catalogOpen) {
+      setInputValue('')
+    }
+    document.getElementById('chatInput')?.focus()
+  }, [catalogOpen, setInputValue])
 
   const handleSend = () => {
     setLocked(true);
@@ -124,6 +132,8 @@ const ChatBar = ({
           setText={setInputValue}
           isOpen={commandsOpen}
           setIsOpen={setCommandsOpen}
+          isCatalogOpen={catalogOpen}
+          setIsCatalogOpen={setCatalogOpen}
         >
           <Textarea
             color="primary"
@@ -131,7 +141,9 @@ const ChatBar = ({
             id="chatInput"
             autoComplete="off"
             placeholder={
-              inputPlaceholder || 'Start chatting or type / for more options'
+              catalogOpen
+                ? 'Search for tools to add or press <Esc> to return to the chat'
+                : inputPlaceholder || 'Start chatting or type / for more options'
             }
             value={inputValue}
             radius="full"
@@ -148,12 +160,21 @@ const ChatBar = ({
               }
               if (event.key === 'Escape') {
                 setCommandsOpen(false);
+                setCatalogOpen(false);
+                document.getElementById('chatInput')?.focus()
               }
               if (event.key === 'ArrowUp') {
+                const catalogStart = document.getElementById(`catalog-item-0`);
                 if (commandsOpen) {
+                  console.log('commands open')
                   event.preventDefault();
                   document.getElementById('command-0')?.focus();
+                } else if (catalogStart) {
+                  console.log('catalog start!')
+                  event.preventDefault();
+                  catalogStart.focus()
                 } else {
+                  console.log('set user message')
                   setUserMessagesIndex((prevIndex) => {
                     const newIndex = Math.min(
                       prevIndex + 1,
