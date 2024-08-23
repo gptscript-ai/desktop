@@ -12,16 +12,19 @@ import { PiToolboxThin, PiXThin } from 'react-icons/pi';
 import { MessageType } from '@/components/chat/messages';
 import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
+import { gatewayTool } from '@/actions/knowledge/util';
 
 const ScriptToolsDropdown = () => {
   const { program, tools, socket, setMessages } = useContext(ChatContext);
   const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
   const [threadTools, setThreadTools] = useState<string[]>([]);
 
+  const knowledgeGatewayTool = gatewayTool();
+
   useEffect(() => {
     const threadTools = [];
     for (const tool of tools) {
-      if (tool !== 'github.com/gptscript-ai/knowledge@v0.4.10-gateway.7') {
+      if (tool !== knowledgeGatewayTool) {
         threadTools.push(tool);
         if (!displayNames[tool]) {
           load(tool).then((loadedTool) => {

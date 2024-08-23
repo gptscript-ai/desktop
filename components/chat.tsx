@@ -18,6 +18,7 @@ import { ChatContext } from '@/contexts/chat';
 import ScriptToolsDropdown from '@/components/scripts/tool-dropdown';
 import AssistantNotFound from '@/components/assistant-not-found';
 import { generateThreadName, renameThread } from '@/actions/threads';
+import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 
 interface ScriptProps {
   className?: string;
@@ -136,9 +137,8 @@ const Chat: React.FC<ScriptProps> = ({
                       {scriptDisplayName ?? ''}
                     </h1>
                     <div className="flex gap-2">
-                      <ScriptToolsDropdown
-                        setToolCatalogOpen={setToolCatalogOpen}
-                      />
+                      <ScriptToolsDropdown />
+                      <KnowledgeDropdown />
                     </div>
                   </div>
                 )}
