@@ -1,11 +1,11 @@
 import { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import useChatSocket from '@/components/chat/useChatSocket';
 import { Message } from '@/components/chat/messages';
-import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
+import { Block, Tool, ToolDef, Program } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
 import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
-import { rootTool } from '@/actions/gptscript';
+import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir } from '@/actions/workspace';
 
@@ -33,6 +33,7 @@ interface ChatContextState {
   setScriptContent: React.Dispatch<React.SetStateAction<Block[] | null>>;
   tool: Tool;
   setTool: React.Dispatch<React.SetStateAction<Tool>>;
+  program: Program | null;
   showForm: boolean;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
   formValues: Record<string, string>;
@@ -78,6 +79,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   const [script, setScript] = useState<string>(initialScript);
   const [workspace, setWorkspace] = useState('');
   const [tool, setTool] = useState<Tool>({} as Tool);
+  const [program, setProgram] = useState<Program>({} as Program);
   const [showForm, setShowForm] = useState(true);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
@@ -115,6 +117,17 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     hasRunRef.current = hasRun;
   }, [hasRun]);
 
+  useEffect(() => {
+    if (!scriptContent) return;
+    loadTools(scriptContent?.filter((block) => block.type === 'tool') || [])
+      .then((program) => {
+        setProgram(program);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  }, [scriptContent]);
+
   // need to initialize the workspace from the env variable with serves
   // as the default.
   useEffect(() => {
@@ -143,6 +156,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           return;
         }
         setScriptDisplayName(defaultScriptName);
+        setScriptContent(await parseContent(content));
         setNotFound(false);
         setTool(await rootTool(content));
         setInitialFetch(true);
@@ -322,6 +336,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setWorkspace,
         tool,
         setTool,
+        program,
         subTool,
         setSubTool,
         showForm,

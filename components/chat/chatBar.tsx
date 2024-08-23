@@ -15,6 +15,8 @@ interface ChatBarProps {
   disableCommands?: boolean;
   inputPlaceholder?: string;
   onMessageSent: (message: string) => void;
+  toolCatalogOpen: boolean;
+  setToolCatalogOpen: (open: boolean) => void;
 }
 
 const ChatBar = ({
@@ -22,6 +24,8 @@ const ChatBar = ({
   disableCommands = false,
   inputPlaceholder,
   onMessageSent,
+  toolCatalogOpen,
+  setToolCatalogOpen,
 }: ChatBarProps) => {
   const [inputValue, setInputValue] = useState('');
   const [commandsOpen, setCommandsOpen] = useState(false);
@@ -124,6 +128,8 @@ const ChatBar = ({
           setText={setInputValue}
           isOpen={commandsOpen}
           setIsOpen={setCommandsOpen}
+          toolCatalogOpen={toolCatalogOpen}
+          setToolCatalogOpen={setToolCatalogOpen}
         >
           <Textarea
             color="primary"

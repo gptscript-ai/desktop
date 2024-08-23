@@ -224,9 +224,7 @@ async function getDisplayName(ref: string): Promise<string> {
 
   if (!ref.startsWith('sys.')) {
     const loadedTool = await load(ref);
-    // TODO: Use entryToolId field once node-gptscript is bumped to a release containing 317e6457f056718bd9fdade18d6fbf9e0311cd46
-    const entryToolId = (loadedTool as any)['entryToolId'];
-    const loadedName = loadedTool.toolSet[entryToolId].name;
+    const loadedName = loadedTool.toolSet[loadedTool.entryToolId].name;
     if (loadedName) {
       displayName = loadedName;
     }
