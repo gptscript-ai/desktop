@@ -44,14 +44,14 @@ export default function Home() {
       </div>
       <div className="flex h-5 ml-2 mt-5 items-center space-x-4 text-medium text-zinc-500">
         <div
-          className={`cursor-pointer hover:text-zinc-700 ${!showFavorites ? 'font-bold text-zinc-900' : ''}`}
+          className={`cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 ${!showFavorites ? 'font-bold text-zinc-900 dark:text-white' : ''}`}
           onClick={() => setShowFavorites(false)}
         >
           My Assistants
         </div>
         <Divider orientation="vertical" />
         <div
-          className={`cursor-pointer hover:text-zinc-700 ${showFavorites ? 'font-bold text-zinc-900' : ''}`}
+          className={`cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 ${showFavorites ? 'font-bold text-zinc-900 dark:text-white' : ''}`}
           onClick={() => setShowFavorites(true)}
         >
           Favorites
