@@ -2,10 +2,9 @@
 
 import { useEffect, useState, Suspense, useContext } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Script from '@/components/script';
 import Configure from '@/components/edit/configure';
 import { EditContextProvider } from '@/contexts/edit';
-import { ScriptContextProvider } from '@/contexts/script';
+import { ChatContextProvider } from '@/contexts/chat';
 import New from '@/components/edit/new';
 import ScriptNav from '@/components/edit/scriptNav';
 import { NavContext } from '@/contexts/nav';
@@ -26,7 +25,7 @@ function EditFile() {
       <New className="w-1/2" setFile={setFile} />
     </div>
   ) : (
-    <ScriptContextProvider
+    <ChatContextProvider
       initialScript={file}
       initialScriptId={scriptId}
       enableThread={false}
@@ -38,18 +37,10 @@ function EditFile() {
           <div className="absolute left-6 top-6">
             <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed} />
           </div>
-          <div
-            className={`h-full overflow-auto w-full border-r-2 dark:border-zinc-800 p-6 ${collapsed ? '' : 'xl:px-20'}`}
-          >
-            <Configure collapsed={collapsed} />
-          </div>
-          <Script
-            messagesHeight="h-[93%]"
-            className={`p-6 overflow-auto ${collapsed ? 'col-span-3 px-32' : ''}`}
-          />
+          <Configure collapsed={collapsed} />
         </div>
       </EditContextProvider>
-    </ScriptContextProvider>
+    </ChatContextProvider>
   );
 }
 

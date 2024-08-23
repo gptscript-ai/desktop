@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useCallback, useRef } from 'react';
-import useChatSocket from '@/components/script/useChatSocket';
-import { Message } from '@/components/script/messages';
+import useChatSocket from '@/components/chat/useChatSocket';
+import { Message } from '@/components/chat/messages';
 import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
 import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
@@ -9,7 +9,7 @@ import { rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir } from '@/actions/workspace';
 
-interface ScriptContextProps {
+interface ChatContextProps {
   children: React.ReactNode;
   initialScript: string;
   initialSubTool?: string;
@@ -17,7 +17,7 @@ interface ScriptContextProps {
   enableThread?: boolean;
 }
 
-interface ScriptContextState {
+interface ChatContextState {
   script: string;
   scriptId?: string;
   scriptDisplayName?: string;
@@ -67,10 +67,8 @@ interface ScriptContextState {
 
 const defaultScriptName = `Tildy`;
 
-const ScriptContext = createContext<ScriptContextState>(
-  {} as ScriptContextState
-);
-const ScriptContextProvider: React.FC<ScriptContextProps> = ({
+const ChatContext = createContext<ChatContextState>({} as ChatContextState);
+const ChatContextProvider: React.FC<ChatContextProps> = ({
   children,
   initialScript,
   initialSubTool,
@@ -311,7 +309,7 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
   );
 
   return (
-    <ScriptContext.Provider
+    <ChatContext.Provider
       value={{
         scriptContent,
         scriptDisplayName,
@@ -360,8 +358,8 @@ const ScriptContextProvider: React.FC<ScriptContextProps> = ({
       }}
     >
       {children}
-    </ScriptContext.Provider>
+    </ChatContext.Provider>
   );
 };
 
-export { ScriptContext, ScriptContextProvider };
+export { ChatContext, ChatContextProvider };

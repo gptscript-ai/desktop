@@ -1,5 +1,5 @@
 import { useState, useCallback, useContext, useEffect } from 'react';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 import {
   Modal,
   ModalContent,
@@ -17,8 +17,7 @@ interface WorkspaceProps {
 
 const Workspace = ({ onRestart }: WorkspaceProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { workspace, setWorkspace, selectedThreadId } =
-    useContext(ScriptContext);
+  const { workspace, setWorkspace, selectedThreadId } = useContext(ChatContext);
   const [workspaceInput, setWorkspaceInput] = useState<string>('');
 
   useEffect(() => {

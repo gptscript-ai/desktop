@@ -3,8 +3,8 @@ import { GoUpload, GoFile, GoX } from 'react-icons/go';
 import Files from './upload/files';
 import { uploadFile, lsFiles } from '@/actions/upload';
 import { Dirent } from 'fs';
-import Workspace from '@/components/script/chatBar/upload/workspace';
-import { ScriptContext } from '@/contexts/script';
+import Workspace from '@/components/chat/chatBar/upload/workspace';
+import { ChatContext } from '@/contexts/chat';
 import {
   Modal,
   ModalContent,
@@ -24,7 +24,7 @@ const UploadModal = ({ isOpen, setIsOpen }: UploadModalProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [files, setFiles] = useState<Dirent[]>([]);
   const selectedFileRef = useRef(selectedFile);
-  const { workspace, restartScript } = useContext(ScriptContext);
+  const { workspace, restartScript } = useContext(ChatContext);
 
   useEffect(() => {
     selectedFileRef.current = selectedFile;

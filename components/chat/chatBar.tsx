@@ -5,17 +5,24 @@ import { IoMdSend } from 'react-icons/io';
 import { Spinner } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
 import { Button, Textarea } from '@nextui-org/react';
-import Commands from '@/components/script/chatBar/commands';
+import Commands from '@/components/chat/chatBar/commands';
 import { GoKebabHorizontal, GoSquareFill } from 'react-icons/go';
-import { ScriptContext } from '@/contexts/script';
-import { MessageType } from '@/components/script/messages';
+import { ChatContext } from '@/contexts/chat';
+import { MessageType } from '@/components/chat/messages';
 
 interface ChatBarProps {
-  disabled?: boolean;
+  disableInput?: boolean;
+  disableCommands?: boolean;
+  inputPlaceholder?: string;
   onMessageSent: (message: string) => void;
 }
 
-const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
+const ChatBar = ({
+  disableInput = false,
+  disableCommands = false,
+  inputPlaceholder,
+  onMessageSent,
+}: ChatBarProps) => {
   const [inputValue, setInputValue] = useState('');
   const [commandsOpen, setCommandsOpen] = useState(false);
   const [locked, setLocked] = useState(false);
@@ -27,7 +34,7 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
     setShowForm,
     messages,
     setMessages,
-  } = useContext(ScriptContext);
+  } = useContext(ChatContext);
   const [userMessages, setUserMessages] = useState<string[]>([]);
   const [_userMessagesIndex, setUserMessagesIndex] = useState(-1);
 
@@ -70,7 +77,7 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if the user started the message with /, we assume they are trying to run a command
     // so we don't update the input value and instead open the command modal
-    setCommandsOpen(event.target.value.startsWith('/'));
+    if (!disableCommands) setCommandsOpen(event.target.value.startsWith('/'));
     setInputValue(event.target.value);
   };
 
@@ -97,18 +104,20 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
 
   return (
     <div className="flex px-4 space-x-2 sw-full">
-      <Button
-        isIconOnly
-        startContent={<GoKebabHorizontal />}
-        radius="full"
-        className="text-lg"
-        color="primary"
-        onPress={() => {
-          if (disabled) return;
-          setCommandsOpen(true);
-        }}
-        onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
-      />
+      {!disableCommands && (
+        <Button
+          isIconOnly
+          startContent={<GoKebabHorizontal />}
+          radius="full"
+          className="text-lg"
+          color="primary"
+          onPress={() => {
+            if (disableInput) return;
+            setCommandsOpen(true);
+          }}
+          onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
+        />
+      )}
       <div className="w-full relative">
         <Commands
           text={inputValue}
@@ -118,10 +127,12 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
         >
           <Textarea
             color="primary"
-            isDisabled={disabled}
+            isDisabled={disableInput}
             id="chatInput"
             autoComplete="off"
-            placeholder="Start chatting or type / for more options "
+            placeholder={
+              inputPlaceholder || 'Start chatting or type / for more options'
+            }
             value={inputValue}
             radius="full"
             minRows={1}
@@ -171,16 +182,17 @@ const ChatBar = ({ disabled = false, onMessageSent }: ChatBarProps) => {
           startContent={<GoSquareFill className="mr-[1px] text-xl" />}
           isIconOnly
           radius="full"
-          isDisabled={disabled}
+          isDisabled={disableInput}
           className="text-lg"
           onPress={interrupt}
         />
       ) : (
         <>
-          {disabled ? (
+          {disableInput && !disableCommands ? (
             <Spinner />
           ) : (
             <Button
+              disabled={!disableInput}
               startContent={<IoMdSend />}
               isIconOnly
               isDisabled={!inputValue}

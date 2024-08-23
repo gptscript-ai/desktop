@@ -15,7 +15,7 @@ import {
 } from '@nextui-org/react';
 import { deleteThread, renameThread, Thread } from '@/actions/threads';
 import { GoPencil, GoTrash, GoKebabHorizontal } from 'react-icons/go';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 import { Input } from '@nextui-org/input';
 
 interface NewThreadProps {
@@ -26,7 +26,7 @@ interface NewThreadProps {
 const NewThread = ({ className, thread }: NewThreadProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { setThreads } = useContext(ScriptContext);
+  const { setThreads } = useContext(ChatContext);
   const [threadNameInput, setThreadNameInput] = useState('');
 
   const handleDeleteThread = () => {

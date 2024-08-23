@@ -8,7 +8,7 @@ import {
 } from '@nextui-org/react';
 import { createThread, Thread } from '@/actions/threads';
 import { useEffect, useState, useContext } from 'react';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 import { GoPlus } from 'react-icons/go';
 import { getScripts, Script } from '@/actions/me/scripts';
 import { setWorkspaceDir } from '@/actions/workspace';
@@ -24,7 +24,7 @@ const NewThread = ({ className }: NewThreadProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { me } = useContext(AuthContext);
   const { setThread, setSelectedThreadId, setScript, setThreads, setScriptId } =
-    useContext(ScriptContext);
+    useContext(ChatContext);
 
   const fetchScripts = async () => {
     setScripts([]);

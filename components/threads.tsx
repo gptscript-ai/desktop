@@ -3,7 +3,7 @@ import New from './threads/new';
 import Menu from './threads/menu';
 import { Button, Divider, Tooltip } from '@nextui-org/react';
 import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 
 interface ThreadsProps {
   className?: string;
@@ -18,7 +18,7 @@ const Threads: React.FC<ThreadsProps> = () => {
     setScriptId,
     selectedThreadId,
     setSelectedThreadId,
-  } = useContext(ScriptContext);
+  } = useContext(ChatContext);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 

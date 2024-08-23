@@ -11,7 +11,7 @@ import {
 } from '@nextui-org/react';
 import { deleteFile, lsFiles } from '@/actions/upload';
 import { Dirent } from 'fs';
-import { ScriptContext } from '@/contexts/script';
+import { ChatContext } from '@/contexts/chat';
 import path from 'path';
 
 interface FilesProps {
@@ -21,7 +21,7 @@ interface FilesProps {
 
 const Files: React.FC<FilesProps> = ({ files, setFiles }) => {
   useEffect(() => fetchFiles(), []);
-  const { workspace } = useContext(ScriptContext);
+  const { workspace } = useContext(ChatContext);
 
   const fetchFiles = useCallback(() => {
     lsFiles(workspace)
