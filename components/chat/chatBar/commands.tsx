@@ -16,6 +16,7 @@ import { MessageType } from '@/components/chat/messages';
 import { useFilePicker } from 'use-file-picker';
 import { uploadFile } from '@/actions/upload';
 import { ingest } from '@/actions/knowledge/knowledge';
+import { gatewayTool, getCookie } from '@/actions/knowledge/util';
 
 /*
     note(tylerslaton):
@@ -33,8 +34,6 @@ import { ingest } from '@/actions/knowledge/knowledge';
     looks for the up-arrow. As such I have a keyDownCapture event that will pass the focus
     to the previous command in the list. This is a bit hacky but it works for now.
 */
-
-const gatewayTool = 'github.com/gptscript-ai/knowledge@v0.4.10-gateway.7';
 
 const options = [
   {
@@ -65,18 +64,6 @@ const options = [
   },
 ];
 
-function getCookie(name: string): string {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    const value = parts?.pop()?.split(';').shift();
-    if (value) {
-      return decodeURIComponent(value);
-    }
-  }
-  return '';
-}
-
 interface CommandsProps {
   text: string;
   setText: (text: string) => void;
@@ -103,8 +90,6 @@ export default function Commands({
     socket,
     setMessages,
     tools,
-    tool,
-    setTool,
     workspace,
     selectedThreadId,
   } = useContext(ChatContext);
@@ -132,6 +117,8 @@ export default function Commands({
       if (loading) return;
       if (!filesContent.length) return;
 
+      const gatewayKnowledgeTool = gatewayTool();
+
       try {
         for (const file of plainFiles) {
           const formData = new FormData();
@@ -157,12 +144,9 @@ export default function Commands({
             message: `Successfully uploaded knowledge ${plainFiles.map((f) => f.name).join(', ')}`,
           },
         ]);
-        if (!tool || tool.tools?.includes(gatewayTool)) return;
-        setTool((prev) => ({
-          ...prev,
-          tools: [...(prev.tools || []), gatewayTool],
-        }));
-        socket?.emit('addTool', gatewayTool);
+        if (!tools || !tools.includes(gatewayKnowledgeTool)) {
+          socket?.emit('addTool', gatewayKnowledgeTool);
+        }
       } catch (e) {
         setMessages((prev) => [
           ...prev,

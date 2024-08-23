@@ -16,7 +16,7 @@ export async function ingest(
   const dir = path.join(workspace, 'knowledge');
   const knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
   await execPromise(
-    `${knowledgeBinaryPath} ingest --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
+    `${knowledgeBinaryPath} ingest --prune --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
     { env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token } }
   );
   return;
