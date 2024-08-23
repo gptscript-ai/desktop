@@ -25,13 +25,13 @@ async function startServer() {
 
   // Project config onto environment variables to configure GPTScript/sdk-server and the Next.js app.
   process.env.GPTSCRIPT_BIN = config.gptscriptBin;
+  process.env.KNOWLEDGE_BIN = config.knowledgeBin;
   process.env.THREADS_DIR = config.threadsDir;
   process.env.WORKSPACE_DIR = config.workspaceDir;
   process.env.GPTSCRIPT_GATEWAY_URL = config.gatewayUrl;
   process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
-  process.env.KNOWLEDGE_BIN = config.knowledgeBin;
 
-  console.log('GPTSCRIPT_BIN=', config.gptscriptBin);
+  console.log(`GPTSCRIPT_BIN=${config.gptscriptBin}`);
 
   try {
     const url = await startAppServer({
