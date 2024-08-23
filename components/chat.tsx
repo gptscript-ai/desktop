@@ -1,6 +1,12 @@
 'use client';
 
-import { useContext, useEffect, useState, useRef, useCallback } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
 import Messages, { MessageType } from '@/components/chat/messages';
 import ChatBar from '@/components/chat/chatBar';
 import ToolForm from '@/components/chat/form';
@@ -9,6 +15,7 @@ import { Button } from '@nextui-org/react';
 import { getWorkspaceDir } from '@/actions/workspace';
 import { getGatewayUrl } from '@/actions/gateway';
 import { ChatContext } from '@/contexts/chat';
+import ScriptToolsDropdown from '@/components/scripts/tool-dropdown';
 import AssistantNotFound from '@/components/assistant-not-found';
 import { generateThreadName, renameThread } from '@/actions/threads';
 
@@ -31,6 +38,8 @@ const Chat: React.FC<ScriptProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
+  const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
+
   const {
     script,
     scriptDisplayName,
@@ -121,11 +130,16 @@ const Chat: React.FC<ScriptProps> = ({
               />
             ) : (
               <div>
-                {showAssistantName && (
+                {showAssistantName && scriptDisplayName && (
                   <div className="sticky top-0 p-4 z-50 bg-background">
-                    <h1 className="text-2xl font-medium truncate">
+                    <h1 className="text-3xl font-medium truncate">
                       {scriptDisplayName ?? ''}
                     </h1>
+                    <div className="flex gap-2">
+                      <ScriptToolsDropdown
+                        setToolCatalogOpen={setToolCatalogOpen}
+                      />
+                    </div>
                   </div>
                 )}
                 <Messages restart={restartScript} messages={messages} />
@@ -150,6 +164,8 @@ const Chat: React.FC<ScriptProps> = ({
                 disableCommands={disableCommands}
                 inputPlaceholder={inputPlaceholder}
                 onMessageSent={handleMessageSent}
+                toolCatalogOpen={toolCatalogOpen}
+                setToolCatalogOpen={setToolCatalogOpen}
               />
             )}
           </div>

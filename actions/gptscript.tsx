@@ -1,6 +1,6 @@
 'use server';
 
-import { Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
+import { ToolDef, Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
 import { gpt } from '@/config/env';
 
 export const rootTool = async (toolContent: string): Promise<Tool> => {
@@ -28,6 +28,19 @@ export const parse = async (file: string): Promise<Tool[]> => {
 
 export const load = async (file: string): Promise<Program> => {
   return (await gpt().load(file)).program;
+};
+
+export const loadTools = async (
+  tools: ToolDef | ToolDef[]
+): Promise<Program> => {
+  try {
+    if (Array.isArray(tools)) return (await gpt().loadTools(tools)).program;
+    return (await gpt().loadTools([tools])).program;
+  } catch (e) {
+    console.log(`Error loading tools: ${e}`);
+  }
+
+  return {} as Program;
 };
 
 export const getTexts = async (toolContent: string): Promise<Text[]> => {

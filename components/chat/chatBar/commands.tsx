@@ -82,6 +82,8 @@ interface CommandsProps {
   setText: (text: string) => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  toolCatalogOpen: boolean;
+  setToolCatalogOpen: (open: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -90,12 +92,12 @@ export default function Commands({
   setText,
   isOpen,
   setIsOpen,
+  toolCatalogOpen,
+  setToolCatalogOpen,
   children,
 }: CommandsProps) {
   const [filteredOptions, setFilteredOptions] =
     React.useState<typeof options>(options);
-  const [uploadOpen, setUploadOpen] = React.useState(false);
-  const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
   const {
     restartScript,
     socket,
@@ -106,6 +108,7 @@ export default function Commands({
     workspace,
     selectedThreadId,
   } = useContext(ChatContext);
+  const [uploadOpen, setUploadOpen] = React.useState(false);
   const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker(
     {}
   );
