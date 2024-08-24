@@ -21,7 +21,7 @@ import {
   TableBody,
 } from '@nextui-org/react';
 import { deleteScript, ParsedScript } from '@/actions/me/scripts';
-import { GoPaperAirplane, GoPencil, GoTrash } from 'react-icons/go';
+import { GoPencil, GoTrash } from 'react-icons/go';
 import { AuthContext } from '@/contexts/auth';
 import { useCallback, useContext, useState } from 'react';
 import { TbListDetails } from 'react-icons/tb';
@@ -29,6 +29,7 @@ import { LiaExpandArrowsAltSolid } from 'react-icons/lia';
 import { CiStar } from 'react-icons/ci';
 import { IoStarSharp } from 'react-icons/io5';
 import { ChatContext } from '@/contexts/chat';
+import { LuMessageSquare } from 'react-icons/lu';
 
 interface ScriptModalProps {
   className?: string;
@@ -184,14 +185,14 @@ const ScriptModal = ({
           <Button
             color="primary"
             className="w-full"
-            startContent={<GoPaperAirplane />}
+            startContent={<LuMessageSquare />}
             onClick={() => {
               setOpen(false);
               onCloseExplore();
               handleCreateThread(script.publicURL ?? '', script.id?.toString());
             }}
           >
-            Run
+            Chat
           </Button>
           {authenticated && me?.username === script.owner && (
             <>
