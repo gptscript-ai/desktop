@@ -1,12 +1,14 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useContext, useEffect, useState } from 'react';
+import React, { Suspense, useContext, useEffect, useState } from 'react';
 import Chat from '@/components/chat';
 import Threads from '@/components/threads';
 import { ChatContextProvider } from '@/contexts/chat';
 import { NavContext } from '@/contexts/nav';
 import { tildy } from '@/config/assistant';
+import ExploreModal from '@/components/explore/ExploreModal';
+import { useDisclosure } from '@nextui-org/react';
 
 function RunFile() {
   const [script, _setScript] = useState<string>(
@@ -15,6 +17,7 @@ function RunFile() {
   const [scriptId, _scriptId] = useState<string>(
     useSearchParams().get('id') ?? ''
   );
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { setCurrent } = useContext(NavContext);
 
@@ -32,12 +35,13 @@ function RunFile() {
           style={{ width: `100vw`, height: `calc(100vh - 50px)` }}
         >
           <div className="w-full h-full flex pb-10">
-            <Threads />
+            <Threads onOpenExplore={onOpen} />
             <div className="mx-auto w-[75%] 2xl:w-[55%] 3xl:[w-50%]">
               <Chat showAssistantName className="px-4 pb-10" />
             </div>
           </div>
         </div>
+        <ExploreModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
       </section>
     </ChatContextProvider>
   );

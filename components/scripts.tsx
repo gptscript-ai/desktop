@@ -1,31 +1,62 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { GoTrash, GoPencil } from 'react-icons/go';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { GoPencil, GoTrash } from 'react-icons/go';
 import Loading from '@/components/loading';
-import { getScripts, deleteScript, ParsedScript } from '@/actions/me/scripts';
+import {
+  createScript,
+  deleteScript,
+  getScript,
+  getScripts,
+  ParsedScript,
+  Script,
+} from '@/actions/me/scripts';
 import { AuthContext } from '@/contexts/auth';
 import {
-  Card,
-  CardHeader,
-  CardBody,
   Button,
+  Card,
+  CardBody,
   CardFooter,
+  CardHeader,
   Divider,
   ScrollShadow,
 } from '@nextui-org/react';
 import { LuMessageSquare } from 'react-icons/lu';
+import { FaCopy } from 'react-icons/fa';
+import { Tool } from '@gptscript-ai/gptscript/src/gptscript';
+import { stringify } from '@/actions/gptscript';
 
-export default function Scripts() {
+interface ScriptsProps {
+  showFavorites?: boolean;
+}
+
+export default function Scripts({ showFavorites }: ScriptsProps) {
   const [scripts, setScripts] = useState<ParsedScript[]>([]);
+  const [favoriteScripts, setFavoriteScripts] = useState<ParsedScript[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCopying, setIsCopying] = useState(false);
   const { authenticated, me } = useContext(AuthContext);
 
-  const refresh = () => {
-    getScripts({ owner: me?.username })
-      .then((resp) => setScripts(resp.scripts || []))
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
+  const refresh = async () => {
+    if (!showFavorites) {
+      const scripts = await getScripts({ owner: me?.username });
+      setScripts(scripts.scripts || []);
+    } else {
+      const favoriteScriptIds = Object.values(
+        JSON.parse(localStorage.getItem('FavoriteAssistants') || '{}')
+      );
+
+      const favorites = await Promise.all(
+        favoriteScriptIds.map(async (id) => {
+          const script = await getScript(id as string);
+          if (!script) return;
+          return script;
+        })
+      );
+      setFavoriteScripts((favorites || []).filter((s) => s) as ParsedScript[]);
+    }
+
+    setLoading(false);
   };
 
   const handleDelete = useCallback((script: ParsedScript) => {
@@ -38,20 +69,51 @@ export default function Scripts() {
       .catch((error) => console.error(error));
   }, []);
 
+  const onClickCopy = async (script: ParsedScript) => {
+    if (!script.id) {
+      return;
+    }
+    setIsCopying(true);
+    const toCreate: Script = {
+      displayName: 'Copy of ' + script.agentName ?? script.displayName,
+      visibility: 'private',
+    };
+    if (script.script.length > 0 && script.script[0].type === 'tool') {
+      (script.script[0] as Tool).name = toCreate.displayName;
+    }
+    toCreate.content = await stringify(script.script);
+    toCreate.slug =
+      toCreate.displayName?.toLowerCase().replaceAll(' ', '-') +
+      '-' +
+      Math.random().toString(36).substring(2, 7);
+
+    const { id } = await createScript(toCreate);
+    if (!id) {
+      console.error('failed to create script');
+      setIsCopying(false);
+      return;
+    }
+    const createdScript = await getScript(id?.toString());
+    if (!createdScript) {
+      console.error('failed to get created script');
+      setIsCopying(false);
+      return;
+    }
+    setIsCopying(false);
+    window.location.href = `/edit?file=${createdScript.publicURL}&id=${createdScript.id}`;
+  };
+
   useEffect(() => {
     if (authenticated && me) {
       refresh();
     }
-  }, [authenticated, me]);
+  }, [authenticated, me, showFavorites]);
 
   const ScriptItems = () =>
     authenticated ? (
       <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 4xl:grid-cols-4 w-full gap-10">
-        {scripts.map((script) => (
-          <Card
-            key={script.agentName ? script.agentName : script.displayName}
-            className="p-4 h-[350px]"
-          >
+        {(showFavorites ? favoriteScripts : scripts).map((script) => (
+          <Card key={script.id} className="p-4 h-[350px]">
             <CardHeader className="w-full grid grid-cols-1">
               <div className="flex justify-between">
                 <div className="flex gap-3 items-center">
@@ -83,7 +145,7 @@ export default function Scripts() {
               >
                 Chat
               </Button>
-              {me?.username === script.owner && (
+              {me?.username === script.owner && !showFavorites && (
                 <>
                   <Button
                     className="w-full"
@@ -105,6 +167,20 @@ export default function Scripts() {
                     }}
                   >
                     Delete
+                  </Button>
+                </>
+              )}
+              {showFavorites && (
+                <>
+                  <Button
+                    className="w-full"
+                    variant="flat"
+                    color="primary"
+                    startContent={<FaCopy />}
+                    isLoading={isCopying}
+                    onPress={() => onClickCopy(script)}
+                  >
+                    Make a Copy
                   </Button>
                 </>
               )}

@@ -7,9 +7,10 @@ import { ChatContext } from '@/contexts/chat';
 
 interface ThreadsProps {
   className?: string;
+  onOpenExplore: () => void;
 }
 
-const Threads: React.FC<ThreadsProps> = () => {
+const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
   const {
     setScript,
     setScriptContent,
@@ -53,7 +54,7 @@ const Threads: React.FC<ThreadsProps> = () => {
             isIconOnly
           />
         </Tooltip>
-        <New />
+        <New onOpenExplore={onOpenExplore} />
       </div>
       <div
         className={`transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-0' : 'w-full'}`}

@@ -7,7 +7,7 @@ import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
-import { getWorkspaceDir } from '@/actions/workspace';
+import { getWorkspaceDir, setWorkspaceDir } from '@/actions/workspace';
 
 interface ChatContextProps {
   children: React.ReactNode;
@@ -55,6 +55,7 @@ interface ChatContextState {
   selectedThreadId: string | null;
   setSelectedThreadId: React.Dispatch<React.SetStateAction<string | null>>;
   socket: Socket | null;
+  handleCreateThread: (script: string, id?: string) => void;
   connected: boolean;
   running: boolean;
   generating: boolean;
@@ -322,6 +323,17 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     [script, thread, restart, selectedThreadId]
   );
 
+  const handleCreateThread = (script: string, id?: string) => {
+    createThread(script, '', id).then((newThread) => {
+      setScriptId(id);
+      setThreads((threads: Thread[]) => [newThread, ...threads]);
+      setScript(script);
+      setThread(newThread.meta.id);
+      setSelectedThreadId(newThread.meta.id);
+      setWorkspaceDir(newThread.meta.workspace);
+    });
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -370,6 +382,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         restartScript,
         tools,
         setTools,
+        handleCreateThread,
       }}
     >
       {children}

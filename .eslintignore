@@ -1,6 +1,5 @@
 node_modules/
 dist/
-build/
 electron-dist/
 .next
 tailwind.config.js
