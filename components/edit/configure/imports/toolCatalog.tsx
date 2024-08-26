@@ -374,18 +374,13 @@ const featuredTools: FeaturedTools = {
 interface ToolCatalogProps {
   tools: string[] | undefined;
   addTool: (tool: string) => void;
-  removeTool: (tool: string) => void;
 }
 
 interface ToolsSiteResponse {
   tools: Record<string, Tool[]>;
 }
 
-const ToolCatalog: React.FC<ToolCatalogProps> = ({
-  tools,
-  addTool,
-  removeTool,
-}) => {
+const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
   const [url, setUrl] = useState('');
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState({} as ToolsSiteResponse);
@@ -478,11 +473,10 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({
                         startContent={
                           tools?.includes(repo) ? <GoCheck /> : <GoPlus />
                         }
+                        disabled={tools?.includes(repo)}
                         color={tools?.includes(repo) ? 'success' : 'primary'}
                         onPress={() => {
-                          if (tools?.includes(repo)) {
-                            removeTool(repo);
-                          } else {
+                          if (!tools?.includes(repo)) {
                             addTool(repo);
                           }
                         }}
@@ -576,7 +570,6 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({
                                   icon: <GoTools className="text-2xl" />,
                                 });
                               } else {
-                                removeTool(url);
                                 priorityTools['From URL'] = priorityTools[
                                   'From URL'
                                 ].filter((t) => t.url !== url);
@@ -621,6 +614,7 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({
                           isIconOnly
                           radius="full"
                           variant="flat"
+                          disabled={tools?.includes(tool.url)}
                           startContent={
                             tools?.includes(tool.url) ? <GoCheck /> : <GoPlus />
                           }
@@ -628,9 +622,7 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({
                             tools?.includes(tool.url) ? 'success' : 'primary'
                           }
                           onPress={() => {
-                            if (tools?.includes(tool.url)) {
-                              removeTool(tool.url);
-                            } else {
+                            if (!tools?.includes(tool.url)) {
                               addTool(tool.url);
                             }
                           }}

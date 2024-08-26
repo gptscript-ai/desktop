@@ -204,22 +204,6 @@ export default function Commands({
           ]);
           setToolCatalogOpen(false);
         }}
-        removeTool={(tool) => {
-          socket?.emit('removeTool', tool);
-          setMessages((prev) => [
-            ...prev,
-            {
-              type: MessageType.Alert,
-              icon: <GoTools className="mt-1" />,
-              name: prev ? prev[prev.length - 1].name : undefined,
-              message: `Removed ${tool
-                .split('/')
-                .pop()
-                ?.replace(/-/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase())}`,
-            },
-          ]);
-        }}
         isOpen={toolCatalogOpen}
         setIsOpen={setToolCatalogOpen}
       />

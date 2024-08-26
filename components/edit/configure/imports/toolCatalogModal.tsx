@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button, Modal, ModalBody, ModalContent } from '@nextui-org/react';
 import { GoTools } from 'react-icons/go';
 import ToolCatalog from '@/components/edit/configure/imports/toolCatalog';
@@ -7,15 +7,21 @@ import PropTypes from 'prop-types';
 interface ToolCatalogModalProps {
   tools: string[] | undefined;
   addTool: (tool: string) => void;
-  removeTool: (tool: string) => void;
 }
 
 const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
   tools,
   addTool,
-  removeTool,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const addToolAndClose = useCallback(
+    (tool: string) => {
+      setIsModalOpen(false);
+      addTool(tool);
+    },
+    [addTool, isModalOpen, setIsModalOpen]
+  );
 
   return (
     <>
@@ -44,11 +50,7 @@ const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
       >
         <ModalContent>
           <ModalBody>
-            <ToolCatalog
-              tools={tools}
-              addTool={addTool}
-              removeTool={removeTool}
-            />
+            <ToolCatalog tools={tools} addTool={addToolAndClose} />
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -60,7 +62,6 @@ ToolCatalogModal.propTypes = {
   // @ts-ignore
   tools: PropTypes.arrayOf(PropTypes.string).isRequired,
   addTool: PropTypes.func.isRequired,
-  removeTool: PropTypes.func.isRequired,
 };
 
 export default ToolCatalogModal;

@@ -173,13 +173,6 @@ const Imports: React.FC<ImportsProps> = ({
           addTool={(tool) => {
             setTools([...(tools || []), tool]);
           }}
-          removeTool={(tool) => {
-            if (isRemote(tool)) {
-              deleteRemoteTool(tool);
-            } else {
-              setTools(tools?.filter((t) => t !== tool) || []);
-            }
-          }}
         />
         {enableLocal && (
           <Button
