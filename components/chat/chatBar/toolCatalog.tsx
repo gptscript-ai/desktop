@@ -6,7 +6,6 @@ interface ToolCatalogModalProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   addTool: (tool: string) => void;
-  removeTool: (tool: string) => void;
 }
 
 const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
@@ -14,7 +13,6 @@ const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
   isOpen,
   setIsOpen,
   addTool,
-  removeTool,
 }) => {
   return (
     <Modal
@@ -31,11 +29,7 @@ const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
     >
       <ModalContent>
         <ModalBody>
-          <ToolCatalog
-            tools={tools}
-            addTool={addTool}
-            removeTool={removeTool}
-          />
+          <ToolCatalog tools={tools} addTool={addTool} />
         </ModalBody>
       </ModalContent>
     </Modal>
