@@ -313,31 +313,40 @@ const mount = async (
     socket.emit('toolAdded', state.tools);
   });
 
-  socket.on('removeTool', async (tool) => {
+  socket.on('removeTool', async (tool, alterChatState) => {
     if (runningScript) {
       await runningScript.close();
       runningScript = null;
     }
 
-    const stateTools = (state.tools || []).filter((t) => t !== tool);
-    // find the root tool and then remove the tool
-    for (let block of script) {
-      if (block.type === 'tool') {
-        if (!block.tools) break;
-        block.tools = [...new Set(block.tools.filter((t) => t !== tool))];
-        break;
+    const stateTools = (state.tools || []).filter((t) => {
+      if (Array.isArray(tool)) {
+        return !tool.includes(t);
       }
-    }
+      return t !== tool;
+    });
 
     socket.emit('removingTool');
 
-    const loaded = await gptscript.loadTools(script, true);
-    const newTools = toChatStateTools(loaded?.program?.toolSet);
-    const currentState = JSON.parse(state.chatState);
-    currentState.continuation.state.completion.tools = newTools;
+    if (alterChatState) {
+      // find the root tool and then remove the tool
+      for (let block of script) {
+        if (block.type === 'tool') {
+          if (!block.tools) break;
+          block.tools = [...new Set(block.tools.filter((t) => t !== tool))];
+          break;
+        }
+      }
 
-    opts.chatState = JSON.stringify(currentState);
-    state.chatState = JSON.stringify(currentState);
+      const loaded = await gptscript.loadTools(script, true);
+      const newTools = toChatStateTools(loaded?.program?.toolSet);
+      const currentState = JSON.parse(state.chatState);
+      currentState.continuation.state.completion.tools = newTools;
+
+      opts.chatState = JSON.stringify(currentState);
+      state.chatState = JSON.stringify(currentState);
+    }
+
     state.tools = stateTools;
 
     if (threadID) {

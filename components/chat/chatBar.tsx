@@ -34,7 +34,7 @@ const ChatBar = ({
     generating,
     interrupt,
     hasParams,
-    tool,
+    rootTool,
     setShowForm,
     messages,
     setMessages,
@@ -89,7 +89,7 @@ const ChatBar = ({
     if (generating) setLocked(false);
   }, [generating]);
 
-  if (!tool.chat) {
+  if (!rootTool.chat) {
     if (hasParams)
       return (
         <Button
