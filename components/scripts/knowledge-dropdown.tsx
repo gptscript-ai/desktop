@@ -13,11 +13,11 @@ import { MessageType } from '@/components/chat/messages';
 import { GoCheckCircleFill } from 'react-icons/go';
 import { deleteKnowledgeFile, lsKnowledgeFiles } from '@/actions/upload';
 import { ingest } from '@/actions/knowledge/knowledge';
-import { getCookie } from '@/actions/knowledge/util';
+import { gatewayTool, getCookie } from '@/actions/knowledge/util';
 import { Dirent } from 'fs';
 
 const ScriptKnowledgeDropdown = () => {
-  const { workspace, selectedThreadId, program, setMessages } =
+  const { socket, workspace, selectedThreadId, program, setMessages } =
     useContext(ChatContext);
   const [knowledgeFiles, setKnowledgeFiles] = useState<string[]>([]);
 
@@ -41,7 +41,12 @@ const ScriptKnowledgeDropdown = () => {
               message: `Successfully removed knowledge ${file}`,
             },
           ]);
-          setKnowledgeFiles(knowledgeFiles.filter((f) => f !== file));
+
+          const newKnowledgeFiles = knowledgeFiles.filter((f) => f !== file);
+          setKnowledgeFiles(newKnowledgeFiles);
+          if (newKnowledgeFiles.length === 0) {
+            socket?.emit('removeTool', gatewayTool());
+          }
         }
       );
     });
