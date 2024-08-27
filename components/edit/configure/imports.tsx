@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react';
 import {
-  GoBook,
   GoBrowser,
   GoFileDirectory,
   GoGlobe,
@@ -249,8 +248,6 @@ const iconForTool = (toolName: string | undefined) => {
       return <PiMicrosoftOutlookLogoDuotone className="text-md" />;
     case 'github.com/gptscript-ai/tools/apis/outlook/calendar/manage':
       return <PiMicrosoftOutlookLogoDuotone className="text-md" />;
-    case 'github.com/gptscript-ai/knowledge@v0.4.7-gateway':
-      return <GoBook className="text-md" />;
     case 'github.com/gptscript-ai/structured-data-querier':
       return <PiMicrosoftExcelLogo className="text-md" />;
     case 'github.com/gptscript-ai/json-query':

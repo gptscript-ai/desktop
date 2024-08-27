@@ -1,10 +1,10 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import RemoteImports from '@/components/edit/configure/imports';
 import Loading from '@/components/loading';
 import Models from '@/components/edit/configure/models';
 import Visibility from '@/components/edit/configure/visibility';
 import Code from '@/components/edit/configure/code';
-import { EditContext } from '@/contexts/edit';
+import { EditContext, KNOWLEDGE_NAME } from '@/contexts/edit';
 import { GoLightBulb } from 'react-icons/go';
 import { HiCog } from 'react-icons/hi2';
 import { LuCircuitBoard } from 'react-icons/lu';
@@ -16,12 +16,19 @@ import {
   Accordion,
   AccordionItem,
   Button,
+  useDisclosure,
+  Spinner,
 } from '@nextui-org/react';
 import { PiToolboxBold } from 'react-icons/pi';
 import AssistantNotFound from '@/components/assistant-not-found';
 import { useRouter } from 'next/navigation';
 import { ChatContext } from '@/contexts/chat';
 import Chat from '@/components/chat';
+import { GoDatabase } from 'react-icons/go';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { IoMdAdd } from 'react-icons/io';
+import { RiFileSearchLine } from 'react-icons/ri';
+import KnowledgeModals from '@/components/knowledge/KnowledgeModals';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -42,10 +49,15 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     setDynamicInstructions,
     dependencies,
     setDependencies,
+    setDroppedFiles,
+    droppedFileDetails,
+    ingesting,
+    updated,
+    setUpdated,
   } = useContext(EditContext);
   const { restartScript } = useContext(ChatContext);
-
-  const [updated, setUpdated] = useState<boolean>(false);
+  const fileTableModal = useDisclosure();
+  const fileSettingModal = useDisclosure();
 
   const abbreviate = (name: string) => {
     const words = name.split(/(?=[A-Z])|[\s_-]/);
@@ -60,6 +72,18 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     },
     [root]
   );
+
+  const handleAddFiles = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = (event: any) => {
+      const files = Array.from(event.target?.files);
+      const filePaths = files.map((file: any) => file.path as string);
+      setDroppedFiles((prevFiles: string[]) => [...prevFiles, ...filePaths]);
+    };
+    input.click();
+  };
 
   const placeholderName = (): string => {
     return root.name && root.name.length > 0 ? root.name : 'your assistant';
@@ -179,10 +203,49 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
             >
               <RemoteImports
-                tools={root.tools}
+                tools={root.tools?.filter((t) => t != KNOWLEDGE_NAME)}
                 setTools={setRootTools}
                 collapsed={collapsed}
               />
+            </AccordionItem>
+            <AccordionItem
+              aria-label="files"
+              title={<h1>Files</h1>}
+              startContent={<RiFileSearchLine />}
+              classNames={{ content: 'pt-1 pb-3' }}
+            >
+              <div className="flex justify-between items-center">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  startContent={<GoDatabase />}
+                  onClick={fileTableModal.onOpen}
+                />
+
+                {droppedFileDetails?.size > 0 && !ingesting && (
+                  <p className="text-sm text-zinc-500 ml-2">{`${droppedFileDetails.size} ${droppedFileDetails.size === 1 ? 'file' : 'files'}, ${Array.from(
+                    droppedFileDetails.values()
+                  )
+                    .reduce((acc, detail) => acc + detail.size, 0)
+                    .toFixed(2)} KB`}</p>
+                )}
+                {ingesting && <Spinner size="sm" className="ml-2" />}
+                <div className="ml-auto flex space-x-2">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    startContent={<IoSettingsOutline />}
+                    onClick={fileSettingModal.onOpen}
+                  />
+                  <Button
+                    size="sm"
+                    startContent={<IoMdAdd />}
+                    onClick={handleAddFiles}
+                  >
+                    Files
+                  </Button>
+                </div>
+              </div>
             </AccordionItem>
             <AccordionItem
               aria-label="advanced"
@@ -244,6 +307,13 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             ? `Chat with ${placeholderName()}`
             : `Click "Refresh Chat" to chat with the updated version of ${placeholderName()}`
         }
+      />
+      <KnowledgeModals
+        isFileSettingOpen={fileSettingModal.isOpen}
+        onFileSettingClose={fileSettingModal.onClose}
+        isFileTableOpen={fileTableModal.isOpen}
+        onFileTableClose={fileTableModal.onClose}
+        handleAddFiles={handleAddFiles}
       />
     </>
   );
