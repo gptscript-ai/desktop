@@ -31,8 +31,8 @@ interface ChatContextState {
   setSubTool: React.Dispatch<React.SetStateAction<string>>;
   setScript: React.Dispatch<React.SetStateAction<string>>;
   setScriptContent: React.Dispatch<React.SetStateAction<Block[] | null>>;
-  tool: Tool;
-  setTool: React.Dispatch<React.SetStateAction<Tool>>;
+  rootTool: Tool;
+  setRootTool: React.Dispatch<React.SetStateAction<Tool>>;
   program: Program | null;
   showForm: boolean;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
@@ -346,8 +346,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setScriptContent,
         workspace,
         setWorkspace,
-        tool,
-        setTool,
+        rootTool: tool,
+        setRootTool: setTool,
         program,
         subTool,
         setSubTool,

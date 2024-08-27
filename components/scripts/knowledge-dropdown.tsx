@@ -45,7 +45,7 @@ const ScriptKnowledgeDropdown = () => {
           const newKnowledgeFiles = knowledgeFiles.filter((f) => f !== file);
           setKnowledgeFiles(newKnowledgeFiles);
           if (newKnowledgeFiles.length === 0) {
-            socket?.emit('removeTool', gatewayTool());
+            socket?.emit('removeTool', gatewayTool(), true);
           }
         }
       );

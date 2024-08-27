@@ -19,6 +19,7 @@ import ScriptToolsDropdown from '@/components/scripts/tool-dropdown';
 import AssistantNotFound from '@/components/assistant-not-found';
 import { generateThreadName, renameThread } from '@/actions/threads';
 import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
+import SaveScriptDropdown from '@/components/scripts/script-save';
 
 interface ScriptProps {
   className?: string;
@@ -44,7 +45,7 @@ const Chat: React.FC<ScriptProps> = ({
   const {
     script,
     scriptDisplayName,
-    tool,
+    rootTool,
     showForm,
     setShowForm,
     formValues,
@@ -80,7 +81,7 @@ const Chat: React.FC<ScriptProps> = ({
       socket?.emit(
         'run',
         `${await getGatewayUrl()}/${script}`,
-        tool.name,
+        rootTool.name,
         formValues,
         workspace,
         thread
@@ -125,7 +126,7 @@ const Chat: React.FC<ScriptProps> = ({
           >
             {showForm && hasParams ? (
               <ToolForm
-                tool={tool}
+                tool={rootTool}
                 formValues={formValues}
                 handleInputChange={handleInputChange}
               />
@@ -139,6 +140,7 @@ const Chat: React.FC<ScriptProps> = ({
                     <div className="flex gap-2">
                       <ScriptToolsDropdown />
                       <KnowledgeDropdown />
+                      <SaveScriptDropdown />
                     </div>
                   </div>
                 )}
@@ -152,11 +154,11 @@ const Chat: React.FC<ScriptProps> = ({
               <Button
                 className="mt-4 w-full"
                 type="submit"
-                color={tool.chat ? 'primary' : 'secondary'}
+                color={rootTool.chat ? 'primary' : 'secondary'}
                 onPress={handleFormSubmit}
                 size="lg"
               >
-                {tool.chat ? 'Start chat' : 'Run script'}
+                {rootTool.chat ? 'Start chat' : 'Run script'}
               </Button>
             ) : (
               <ChatBar

@@ -61,7 +61,7 @@ const ScriptToolsDropdown = () => {
   }
 
   function removeTool(tool: string) {
-    socket?.emit('removeTool', tool);
+    socket?.emit('removeTool', tool, true);
     setMessages((prev) => [
       ...prev,
       {
