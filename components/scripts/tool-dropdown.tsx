@@ -43,7 +43,19 @@ const ScriptToolsDropdown = () => {
     setThreadTools(threadTools);
   }, [tools, displayNames, knowledgeGatewayTool]);
 
+  function dynamicInstructions(name: string | undefined): string | undefined {
+    if (name && name === 'dynamic-instructions') {
+      return 'Dynamic Instructions';
+    }
+
+    return name;
+  }
+
   function getDisplayName(ref: string): string {
+    if (ref === 'dynamic-instructions') {
+      return 'Dynamic Instructions';
+    }
+
     return (
       ref
         .split('/')
@@ -100,9 +112,11 @@ const ScriptToolsDropdown = () => {
                     content={t}
                     isReadOnly
                   >
-                    {program.toolSet[
-                      (v.find((v) => v.reference === t) || {}).toolID || ''
-                    ].name || getDisplayName(t)}
+                    {dynamicInstructions(
+                      program.toolSet[
+                        (v.find((v) => v.reference === t) || {}).toolID || ''
+                      ].name
+                    ) || getDisplayName(t)}
                   </DropdownItem>
                 ))
               ) : (
