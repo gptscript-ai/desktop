@@ -93,7 +93,7 @@ const ScriptKnowledgeDropdown = () => {
             <DropdownItem
               aria-label="No Knowledge"
               key="No Knowledge"
-              className="py-2"
+              className="py-2 hover:cursor-default text-foreground-400"
               content="No Knowledge"
               isReadOnly
             >
