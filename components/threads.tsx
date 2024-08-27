@@ -4,6 +4,7 @@ import Menu from './threads/menu';
 import { Button, Divider, Tooltip } from '@nextui-org/react';
 import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
+import { getScript } from '@/actions/me/scripts';
 
 interface ThreadsProps {
   className?: string;
@@ -24,7 +25,7 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleRun = async (script: string, id: string, scriptId: string) => {
-    setScriptContent(null);
+    setScriptContent((await getScript(scriptId))?.script || []);
     setScript(script);
     setThread(id);
     setScriptId(scriptId);

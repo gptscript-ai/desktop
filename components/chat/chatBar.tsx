@@ -9,6 +9,8 @@ import Commands from '@/components/chat/chatBar/commands';
 import { GoKebabHorizontal, GoSquareFill } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { MessageType } from '@/components/chat/messages';
+import { Tool } from '@gptscript-ai/gptscript';
+import { rootTool } from '@/actions/gptscript';
 
 interface ChatBarProps {
   disableInput?: boolean;
@@ -34,13 +36,14 @@ const ChatBar = ({
     generating,
     interrupt,
     hasParams,
-    rootTool,
+    scriptContent,
     setShowForm,
     messages,
     setMessages,
   } = useContext(ChatContext);
   const [userMessages, setUserMessages] = useState<string[]>([]);
   const [_userMessagesIndex, setUserMessagesIndex] = useState(-1);
+  const [tool, setTool] = useState<Tool>({} as Tool);
 
   const getMessageAtIndex = (index: number) => {
     if (index >= 0 && index < userMessages.length) {
@@ -89,7 +92,13 @@ const ChatBar = ({
     if (generating) setLocked(false);
   }, [generating]);
 
-  if (!rootTool.chat) {
+  useEffect(() => {
+    if (scriptContent.length > 0) {
+      rootTool(scriptContent).then((tool) => setTool(tool));
+    }
+  }, [scriptContent]);
+
+  if (!tool.chat) {
     if (hasParams)
       return (
         <Button
