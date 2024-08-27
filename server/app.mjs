@@ -165,13 +165,14 @@ const mount = async (
               break;
             }
           }
-          socket.emit('loaded', {
-            messages: state.messages,
-            tools: state.tools || [],
-          });
         }
       }
     }
+
+    socket.emit('loaded', {
+      messages: state.messages ?? [],
+      tools: state.tools ?? [],
+    });
   } catch (e) {
     console.error('Error loading state:', e);
   }
