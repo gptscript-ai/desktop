@@ -30,10 +30,10 @@ const ScriptToolsDropdown = () => {
           load(tool).then((loadedTool) => {
             const loadedName = loadedTool.toolSet[loadedTool.entryToolId].name;
             if (loadedName) {
-              setDisplayNames({
-                ...displayNames,
+              setDisplayNames((prev) => ({
+                ...prev,
                 [tool]: loadedName,
-              });
+              }));
             }
           });
         }
@@ -41,7 +41,7 @@ const ScriptToolsDropdown = () => {
     }
 
     setThreadTools(threadTools);
-  }, [tools]);
+  }, [tools, displayNames, knowledgeGatewayTool]);
 
   function getDisplayName(ref: string): string {
     return (
