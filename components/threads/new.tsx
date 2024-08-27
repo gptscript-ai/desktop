@@ -8,7 +8,7 @@ import {
 } from '@nextui-org/react';
 import { useEffect, useState, useContext } from 'react';
 import { ChatContext } from '@/contexts/chat';
-import { GoPlus } from 'react-icons/go';
+import { RiChatNewLine } from 'react-icons/ri';
 import { getScript, getScripts, Script } from '@/actions/me/scripts';
 import { AuthContext } from '@/contexts/auth';
 import { tildy } from '@/config/assistant';
@@ -73,7 +73,7 @@ const NewThread = ({ className, onOpenExplore }: NewThreadProps) => {
     <Dropdown placement="right-start">
       <DropdownTrigger>
         <Button
-          startContent={<GoPlus />}
+          startContent={<RiChatNewLine />}
           className={`${className}`}
           size="lg"
           variant="light"
