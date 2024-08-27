@@ -110,7 +110,7 @@ const ScriptToolsDropdown = () => {
                   aria-label="No tools"
                   color="primary"
                   key="No tools"
-                  className="py-2 hover:cursor-default"
+                  className="py-2 hover:cursor-default text-foreground-400"
                   content="No tools"
                   isReadOnly
                 >
@@ -143,7 +143,7 @@ const ScriptToolsDropdown = () => {
                 aria-label="No tools"
                 color="danger"
                 key="No tools"
-                className="py-2"
+                className="py-2 hover:cursor-default text-foreground-400"
                 content="No tools"
                 isReadOnly
               >
