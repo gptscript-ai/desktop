@@ -36,6 +36,7 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
     else if (!me)
       getMe().then((me) => {
         setMe(me);
+        setAuthenticated(!!me);
       });
   }, [me, loading]);
 
