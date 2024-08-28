@@ -20,6 +20,9 @@ import AssistantNotFound from '@/components/assistant-not-found';
 import { generateThreadName, renameThread } from '@/actions/threads';
 import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 import SaveScriptDropdown from '@/components/scripts/script-save';
+import { Tool } from '@gptscript-ai/gptscript';
+import { rootTool } from '@/actions/gptscript';
+import { gatewayTool } from '@/actions/knowledge/util';
 
 interface ScriptProps {
   className?: string;
@@ -41,11 +44,12 @@ const Chat: React.FC<ScriptProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
   const [toolCatalogOpen, setToolCatalogOpen] = React.useState(false);
+  const [tool, setTool] = useState<Tool>({} as Tool);
 
   const {
     script,
     scriptDisplayName,
-    rootTool,
+    scriptContent,
     showForm,
     setShowForm,
     formValues,
@@ -62,6 +66,10 @@ const Chat: React.FC<ScriptProps> = ({
     restartScript,
     fetchThreads,
   } = useContext(ChatContext);
+
+  useEffect(() => {
+    rootTool(scriptContent).then((tool) => setTool(tool));
+  }, [scriptContent]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -81,10 +89,11 @@ const Chat: React.FC<ScriptProps> = ({
       socket?.emit(
         'run',
         `${await getGatewayUrl()}/${script}`,
-        rootTool.name,
+        tool.name,
         formValues,
         workspace,
-        thread
+        thread,
+        gatewayTool()
       );
     });
     setHasRun(true);
@@ -126,7 +135,7 @@ const Chat: React.FC<ScriptProps> = ({
           >
             {showForm && hasParams ? (
               <ToolForm
-                tool={rootTool}
+                tool={tool}
                 formValues={formValues}
                 handleInputChange={handleInputChange}
               />
@@ -154,11 +163,11 @@ const Chat: React.FC<ScriptProps> = ({
               <Button
                 className="mt-4 w-full"
                 type="submit"
-                color={rootTool.chat ? 'primary' : 'secondary'}
+                color={tool.chat ? 'primary' : 'secondary'}
                 onPress={handleFormSubmit}
                 size="lg"
               >
-                {rootTool.chat ? 'Start chat' : 'Run script'}
+                {tool.chat ? 'Start chat' : 'Run script'}
               </Button>
             ) : (
               <ChatBar

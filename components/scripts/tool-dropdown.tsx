@@ -13,16 +13,20 @@ import { MessageType } from '@/components/chat/messages';
 import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
 import { gatewayTool } from '@/actions/knowledge/util';
+import { ToolReference } from '@gptscript-ai/gptscript';
 
 const ScriptToolsDropdown = () => {
   const { program, tools, socket, setMessages } = useContext(ChatContext);
   const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
   const [threadTools, setThreadTools] = useState<string[]>([]);
+  const [assistantTools, setAssistantTools] = useState<
+    [string, ToolReference[]][]
+  >([]);
 
   const knowledgeGatewayTool = gatewayTool();
 
   useEffect(() => {
-    const threadTools = [];
+    const threadTools: string[] = [];
     for (const tool of tools) {
       if (tool !== knowledgeGatewayTool) {
         threadTools.push(tool);
@@ -40,8 +44,20 @@ const ScriptToolsDropdown = () => {
       }
     }
 
+    if (program && program.toolSet) {
+      setAssistantTools(
+        program.toolSet[program.entryToolId].toolMapping
+          ? Object.entries(
+              program.toolSet[program.entryToolId].toolMapping || {}
+            ).filter(([t, _]) => !threadTools.includes(t))
+          : []
+      );
+    } else {
+      setAssistantTools([]);
+    }
+
     setThreadTools(threadTools);
-  }, [tools, displayNames, knowledgeGatewayTool]);
+  }, [tools, displayNames, knowledgeGatewayTool, program]);
 
   function dynamicInstructions(name: string | undefined): string | undefined {
     if (name && name === 'dynamic-instructions') {
@@ -73,7 +89,7 @@ const ScriptToolsDropdown = () => {
   }
 
   function removeTool(tool: string) {
-    socket?.emit('removeTool', tool, true);
+    socket?.emit('removeTool', tool);
     setMessages((prev) => [
       ...prev,
       {
@@ -100,10 +116,8 @@ const ScriptToolsDropdown = () => {
         >
           {program.toolSet && (
             <DropdownSection title="Assistant's Tools">
-              {program.toolSet[program.entryToolId].toolMapping ? (
-                Object.entries(
-                  program.toolSet[program.entryToolId].toolMapping || {}
-                ).map(([t, v]) => (
+              {assistantTools.length > 0 ? (
+                assistantTools.map(([t, v]) => (
                   <DropdownItem
                     aria-label={t}
                     color="primary"
@@ -113,9 +127,11 @@ const ScriptToolsDropdown = () => {
                     isReadOnly
                   >
                     {dynamicInstructions(
-                      program.toolSet[
-                        (v.find((v) => v.reference === t) || {}).toolID || ''
-                      ].name
+                      (
+                        program.toolSet[
+                          (v.find((v) => v.reference === t) || {}).toolID || ''
+                        ] || {}
+                      ).name
                     ) || getDisplayName(t)}
                   </DropdownItem>
                 ))

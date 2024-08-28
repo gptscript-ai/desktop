@@ -73,7 +73,14 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
             io.emit('message', 'connected');
             socket.on(
               'run',
-              async (location, tool, args, scriptWorkspace, threadID) => {
+              async (
+                location,
+                tool,
+                args,
+                scriptWorkspace,
+                threadID,
+                knowledgeTool
+              ) => {
                 if (runningScript) {
                   await runningScript.close();
                   runningScript = null;
@@ -87,7 +94,8 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
                     scriptWorkspace,
                     socket,
                     threadID,
-                    gptscript
+                    gptscript,
+                    knowledgeTool
                   );
                 } catch (e) {
                   socket.emit('error', e);
@@ -120,7 +128,8 @@ const mount = async (
   scriptWorkspace,
   socket,
   threadID,
-  gptscript
+  gptscript,
+  knowledgeTool
 ) => {
   const WORKSPACE_DIR =
     process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
@@ -155,24 +164,25 @@ const mount = async (
         state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
         if (state && state.chatState) {
           opts.chatState = state.chatState;
-          // also load the tools defined the states so that when running a thread that has tools added in state, we don't lose them
-          for (let block of script) {
-            if (block.type === 'tool') {
-              if (!block.tools) block.tools = [];
-              block.tools = [
-                ...new Set([...(block.tools || []), ...(state.tools || [])]),
-              ];
-              break;
-            }
-          }
         }
       }
     }
 
     socket.emit('loaded', {
+      scriptContent: script,
       messages: state.messages ?? [],
       tools: state.tools ?? [],
     });
+
+    // also load the tools defined the states so that when running a thread that has tools added in state, we don't lose them
+    for (let block of script) {
+      if (block.type === 'tool') {
+        block.tools = [
+          ...new Set([...(block.tools || []), ...(state.tools || [])]),
+        ];
+        break;
+      }
+    }
   } catch (e) {
     console.error('Error loading state:', e);
   }
@@ -242,7 +252,7 @@ const mount = async (
         }
       })
       .catch(
-        (e) => e && e != 'Run has been aborted' && socket.emit('error', e)
+        (e) => e && e !== 'Run has been aborted' && socket.emit('error', e)
       );
   } else {
     socket.emit('running'); // temp
@@ -258,49 +268,11 @@ const mount = async (
     // find the root tool and then add the new tool
     for (let block of script) {
       if (block.type === 'tool') {
-        if (!block.tools) block.tools = [];
         block.tools = [...new Set([...(block.tools || []), tool])];
         break;
       }
     }
 
-    socket.emit('addingTool');
-
-    const loaded = await gptscript.loadTools(script, true);
-
-    // We need to filter out credential tools so that we do not give them to the LLM.
-    // TODO - also filter out context tools maybe?
-    const toolSet = {};
-    const credentials = new Set();
-    for (const t of Object.values(loaded?.program?.toolSet)) {
-      if (t.credentials) {
-        for (let cred of t.credentials) {
-          for (let mapping of t.toolMapping[cred]) {
-            credentials.add(mapping.toolID);
-          }
-        }
-      }
-      if (t['exportCredentials']) {
-        for (let cred of t['exportCredentials']) {
-          for (let mapping of t.toolMapping[cred]) {
-            credentials.add(mapping.toolID);
-          }
-        }
-      }
-    }
-
-    for (let [key, value] of Object.entries(loaded?.program?.toolSet)) {
-      if (!credentials.has(key)) {
-        toolSet[key] = value;
-      }
-    }
-
-    const newTools = toChatStateTools(toolSet);
-    const currentState = JSON.parse(state.chatState);
-    currentState.continuation.state.completion.tools = newTools;
-
-    opts.chatState = JSON.stringify(currentState);
-    state.chatState = JSON.stringify(currentState);
     state.tools = [...new Set([...(state.tools || []), tool])];
 
     if (threadID) {
@@ -314,38 +286,22 @@ const mount = async (
     socket.emit('toolAdded', state.tools);
   });
 
-  socket.on('removeTool', async (tool, alterChatState) => {
+  socket.on('removeTool', async (tool) => {
     if (runningScript) {
       await runningScript.close();
       runningScript = null;
     }
 
-    const stateTools = (state.tools || []).filter((t) => {
-      if (Array.isArray(tool)) {
-        return !tool.includes(t);
-      }
-      return t !== tool;
-    });
+    const stateTools = (state.tools || []).filter((t) => t !== tool);
 
-    socket.emit('removingTool');
-
-    if (alterChatState) {
-      // find the root tool and then remove the tool
-      for (let block of script) {
-        if (block.type === 'tool') {
-          if (!block.tools) break;
+    // find the root tool and then remove the tool
+    for (let block of script) {
+      if (block.type === 'tool') {
+        if (block.tools) {
           block.tools = [...new Set(block.tools.filter((t) => t !== tool))];
-          break;
         }
+        break;
       }
-
-      const loaded = await gptscript.loadTools(script, true);
-      const newTools = toChatStateTools(loaded?.program?.toolSet);
-      const currentState = JSON.parse(state.chatState);
-      currentState.continuation.state.completion.tools = newTools;
-
-      opts.chatState = JSON.stringify(currentState);
-      state.chatState = JSON.stringify(currentState);
     }
 
     state.tools = stateTools;
@@ -359,6 +315,25 @@ const mount = async (
     }
 
     socket.emit('toolRemoved', state.tools);
+  });
+
+  socket.on('saveScript', async () => {
+    if (runningScript) {
+      await runningScript.close();
+      runningScript = null;
+    }
+
+    state.tools = state.tools.filter((t) => t === knowledgeTool);
+
+    if (threadID) {
+      fs.writeFile(statePath, JSON.stringify(state), (err) => {
+        if (err) {
+          socket.emit('error', err);
+        }
+      });
+    }
+
+    socket.emit('scriptSaved', state.tools);
   });
 
   // If the user sends a message, we continue and setup the next chat's event listeners
@@ -515,77 +490,4 @@ function gptscriptConfigPath() {
   }
 
   return path.join(configDir, 'gptscript', 'config.json');
-}
-
-function pickToolName(toolName, existing) {
-  if (!toolName) {
-    toolName = 'external';
-  }
-
-  let testName = toolNormalizer(toolName);
-  while (existing.has(testName)) {
-    testName += '0';
-  }
-  existing.add(testName);
-  return testName;
-}
-
-function toolNormalizer(tool) {
-  const invalidChars = /[^a-zA-Z0-9_]+/g;
-  const validToolName = /^[a-zA-Z0-9]{1,64}$/;
-
-  let parts = tool.split('/');
-  tool = parts[parts.length - 1];
-  if (tool.endsWith('.gpt')) {
-    tool = tool.slice(0, -4);
-  }
-  tool = tool.replace(/^sys\./, '');
-
-  if (validToolName.test(tool)) {
-    return tool;
-  }
-
-  if (tool.length > 55) {
-    tool = tool.slice(0, 55);
-  }
-
-  tool = tool.replace(invalidChars, '_');
-
-  let result = [];
-  let appended = false;
-  for (let part of tool.split('_')) {
-    let lower = part.toLowerCase();
-    if (appended && lower.length > 0) {
-      lower = lower.charAt(0).toUpperCase() + lower.slice(1);
-    }
-    if (lower) {
-      result.push(lower);
-      appended = true;
-    }
-  }
-
-  let final = result.join('');
-  return final || 'tool';
-}
-
-function toChatStateTools(toolSet) {
-  const toolNames = new Set();
-
-  return Object.entries(toolSet)
-    .filter(([key, tool]) => !key.startsWith('inline:') && tool.instructions)
-    .map(([key, tool]) => {
-      let toolName = tool.name || key;
-      toolName = pickToolName(toolName, toolNames);
-
-      let args = tool.arguments || {}; // Default to an empty object if no arguments are provided
-
-      return {
-        function: {
-          toolID: key,
-          name: toolName,
-          description: tool.description,
-          parameters: args,
-        },
-      };
-    });
 }

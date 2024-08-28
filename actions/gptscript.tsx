@@ -3,10 +3,8 @@
 import { ToolDef, Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
 import { gpt } from '@/config/env';
 
-export const rootTool = async (toolContent: string): Promise<Tool> => {
-  if (!toolContent) return {} as Tool;
-  const parsedTool = await gpt().parseContent(toolContent);
-  for (const block of parsedTool) {
+export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
+  for (const block of toolContent) {
     if (block.type === 'tool') return block;
   }
   return {} as Tool;

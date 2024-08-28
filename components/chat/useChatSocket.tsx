@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type {
+import {
   CallFrame,
   PromptFrame,
   PromptResponse,
   AuthResponse,
+  Block,
 } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
@@ -29,6 +30,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   const [error, setError] = useState<string | null>(null);
   const [tools, setTools] = useState<string[]>([]);
   const [forceRun, setForceRun] = useState(false);
+  const [scriptContent, setScriptContent] = useState<Block[]>([]);
 
   // Refs
   const socketRef = useRef<Socket | null>(null);
@@ -265,14 +267,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     []
   );
 
-  const handleAddingTool = () => setRunning(false);
-  const handleToolAdded = (tools: string[]) => {
-    setTools(tools);
-    setRunning(true);
-  };
-
-  const handleRemovingTool = () => setRunning(false);
-  const handleToolRemoved = (tools: string[]) => {
+  const handleToolAdjusted = (tools: string[]) => {
     setTools(tools);
     setRunning(true);
   };
@@ -407,14 +402,21 @@ const useChatSocket = (isEmpty?: boolean) => {
       (data: { frame: CallFrame; state: any; name?: string }) =>
         handleConfirmRequest(data)
     );
-    socket.on('toolAdded', handleToolAdded);
-    socket.on('addingTool', handleAddingTool);
-    socket.on('toolRemoved', handleToolRemoved);
-    socket.on('removingTool', handleRemovingTool);
-    socket.on('loaded', (data: { messages: Message[]; tools: string[] }) => {
-      setMessages(data.messages);
-      setTools(data.tools);
-    });
+    socket.on('toolAdded', (tools: string[]) => handleToolAdjusted(tools));
+    socket.on('toolRemoved', (tools: string[]) => handleToolAdjusted(tools));
+    socket.on('scriptSaved', (tools: string[]) => handleToolAdjusted(tools));
+    socket.on(
+      'loaded',
+      (data: {
+        messages: Message[];
+        tools: string[];
+        scriptContent: Block[];
+      }) => {
+        setScriptContent(data.scriptContent);
+        setMessages(data.messages);
+        setTools(data.tools);
+      }
+    );
 
     setSocket(socket);
   };
@@ -476,6 +478,8 @@ const useChatSocket = (isEmpty?: boolean) => {
     setRunning,
     tools,
     setTools,
+    scriptContent,
+    setScriptContent,
     forceRun,
     setForceRun,
   };

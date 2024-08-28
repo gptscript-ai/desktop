@@ -7,41 +7,56 @@ import {
 } from '@nextui-org/react';
 import React, { useContext } from 'react';
 import { ChatContext } from '@/contexts/chat';
-import { PiFloppyDiskThin } from 'react-icons/pi';
-import { getScript, Script, updateScript } from '@/actions/me/scripts';
+import { PiFloppyDiskThin, PiUser } from 'react-icons/pi';
+import { updateScript } from '@/actions/me/scripts';
 import { stringify } from '@/actions/gptscript';
 import { gatewayTool } from '@/actions/knowledge/util';
+import { MessageType } from '@/components/chat/messages';
 
 const SaveScriptDropdown = () => {
-  const { scriptId, rootTool, setRootTool, tools, socket, setScriptContent } =
-    useContext(ChatContext);
+  const {
+    scriptId,
+    tools,
+    socket,
+    scriptContent,
+    setScriptContent,
+    setMessages,
+  } = useContext(ChatContext);
 
   const knowledgeTool = gatewayTool();
 
-  async function saveScript() {
-    if (!rootTool.tools || rootTool.tools.length === 0) {
-      rootTool.tools = [];
-    }
-
+  function saveScript() {
     // The knowledge tool is dynamic and not controlled by the user. Don't add it to the saved tool.
     const addedTools = tools.filter((t) => t !== knowledgeTool);
 
-    rootTool.tools = rootTool.tools
-      .filter((t) => !addedTools.includes(t))
-      .concat(...addedTools);
-    try {
-      await updateScript({
-        content: await stringify([rootTool]),
-        id: parseInt(scriptId!),
-      } as Script);
-
-      socket?.emit('removeTool', addedTools, false);
-      setRootTool(rootTool);
-
-      setScriptContent((await getScript(scriptId!))?.script || null);
-    } catch (e) {
-      console.error(e);
+    // find the root tool and then add the new tool
+    for (const block of scriptContent!) {
+      if (block.type === 'tool') {
+        block.tools = (block.tools || [])
+          .filter((t) => !addedTools.includes(t))
+          .concat(...addedTools);
+        break;
+      }
     }
+
+    stringify(scriptContent).then((content) => {
+      updateScript({
+        content: content,
+        id: parseInt(scriptId!),
+      }).then(() => {
+        setScriptContent([...scriptContent]);
+        socket?.emit('saveScript');
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: MessageType.Alert,
+            icon: <PiUser className="mt-1" />,
+            name: prev ? prev[prev.length - 1].name : undefined,
+            message: `Assistant Saved`,
+          },
+        ]);
+      });
+    });
   }
 
   return (

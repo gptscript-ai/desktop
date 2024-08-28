@@ -1,13 +1,20 @@
-import { createContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import useChatSocket from '@/components/chat/useChatSocket';
 import { Message } from '@/components/chat/messages';
-import { Block, Tool, ToolDef, Program } from '@gptscript-ai/gptscript';
+import { Block, Tool, Program } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
 import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
 import { getWorkspaceDir, setWorkspaceDir } from '@/actions/workspace';
+import { gatewayTool } from '@/actions/knowledge/util';
 
 interface ChatContextProps {
   children: React.ReactNode;
@@ -22,7 +29,7 @@ interface ChatContextState {
   scriptId?: string;
   scriptDisplayName?: string;
   setScriptId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  scriptContent: ToolDef[] | null;
+  scriptContent: Block[];
   workspace: string;
   tools: string[];
   setTools: React.Dispatch<React.SetStateAction<string[]>>;
@@ -30,9 +37,7 @@ interface ChatContextState {
   subTool: string;
   setSubTool: React.Dispatch<React.SetStateAction<string>>;
   setScript: React.Dispatch<React.SetStateAction<string>>;
-  setScriptContent: React.Dispatch<React.SetStateAction<Block[] | null>>;
-  rootTool: Tool;
-  setRootTool: React.Dispatch<React.SetStateAction<Tool>>;
+  setScriptContent: React.Dispatch<React.SetStateAction<Block[]>>;
   program: Program | null;
   showForm: boolean;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
@@ -84,7 +89,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   const [showForm, setShowForm] = useState(true);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
-  const [scriptContent, setScriptContent] = useState<Block[] | null>(null);
   const [hasRun, setHasRun] = useState(false);
   const [hasParams, setHasParams] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -107,20 +111,28 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     setRunning,
     tools,
     setTools,
+    scriptContent,
+    setScriptContent,
     forceRun,
     setForceRun,
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
-  const hasRunRef = useRef(false);
 
   useEffect(() => {
-    hasRunRef.current = hasRun;
-  }, [hasRun]);
+    if (scriptContent.length === 0) return;
 
-  useEffect(() => {
-    if (!scriptContent) return;
-    loadTools(scriptContent?.filter((block) => block.type === 'tool') || [])
+    rootTool(scriptContent).then((tool) => {
+      setTool((prev) => {
+        if (prev.name !== tool.name) {
+          setHasRun(false);
+        }
+
+        return tool;
+      });
+    });
+
+    loadTools(scriptContent?.filter((block) => block.type === 'tool'))
       .then((program) => {
         setProgram(program);
       })
@@ -145,7 +157,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           return;
         }
         setNotFound(false);
-        setTool(await rootTool(script.content || ''));
         setScriptContent(script.script as Block[]);
         setScriptDisplayName(script.displayName || '');
         setInitialFetch(true);
@@ -159,7 +170,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setScriptDisplayName(defaultScriptName);
         setScriptContent(await parseContent(content));
         setNotFound(false);
-        setTool(await rootTool(content));
         setInitialFetch(true);
       });
     }
@@ -226,28 +236,24 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   useEffect(() => {
     setIsEmpty(!tool.instructions);
     if (
-      hasRunRef.current ||
+      hasRun ||
       !socket ||
       !connected ||
       !initialFetch ||
       (enableThread && !threadInitialized.current)
     )
       return;
-    if (
-      !tool.arguments?.properties ||
-      Object.keys(tool.arguments.properties).length === 0
-    ) {
-      socket.emit(
-        'run',
-        scriptContent ? scriptContent : script,
-        subTool ? subTool : tool.name,
-        formValues,
-        workspace,
-        thread
-      );
-      setHasRun(true);
-    }
-  }, [tool, connected, script, scriptContent, formValues, workspace]);
+    socket.emit(
+      'run',
+      scriptContent ? scriptContent : script,
+      subTool ? subTool : tool.name,
+      formValues,
+      workspace,
+      thread,
+      gatewayTool()
+    );
+    setHasRun(true);
+  }, [tool, connected, script, scriptContent, formValues, workspace, hasRun]);
 
   useEffect(() => {
     if (forceRun && socket && connected) {
@@ -257,7 +263,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         subTool ? subTool : tool.name,
         formValues,
         workspace,
-        thread
+        thread,
+        gatewayTool()
       );
       setForceRun(false);
     }
@@ -303,7 +310,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
             return;
           }
           setNotFound(false);
-          setTool(await rootTool(script.content || ''));
           setScriptContent(script.script as Block[]);
           setInitialFetch(true);
         });
@@ -313,8 +319,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
             setNotFound(true);
             return;
           }
+          setScriptContent(await parseContent(content));
           setNotFound(false);
-          setTool(await rootTool(content));
           setInitialFetch(true);
         });
       }
@@ -346,8 +352,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setScriptContent,
         workspace,
         setWorkspace,
-        rootTool: tool,
-        setRootTool: setTool,
         program,
         subTool,
         setSubTool,
