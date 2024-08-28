@@ -96,7 +96,7 @@ const ScriptToolsDropdown = () => {
         type: MessageType.Alert,
         icon: <GoTools className="mt-1" />,
         name: prev ? prev[prev.length - 1].name : undefined,
-        message: `Removed ${displayNames[tool]}`,
+        message: `Removed ${displayNames[tool] || getDisplayName(tool)}`,
       },
     ]);
   }
