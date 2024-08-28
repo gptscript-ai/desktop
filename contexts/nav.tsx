@@ -1,6 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
-import { Me, getMe } from '@/actions/me/me';
-import { loginThroughTool } from '@/actions/auth/auth';
+import { createContext, useState } from 'react';
 
 interface NavContextProps {
   children: React.ReactNode;

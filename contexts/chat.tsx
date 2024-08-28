@@ -13,8 +13,9 @@ import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
-import { getWorkspaceDir, setWorkspaceDir } from '@/actions/workspace';
+import { setWorkspaceDir } from '@/actions/workspace';
 import { gatewayTool } from '@/actions/knowledge/util';
+import { tildy } from '@/config/assistant';
 
 interface ChatContextProps {
   children: React.ReactNode;
@@ -83,7 +84,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   enableThread,
 }) => {
   const [script, setScript] = useState<string>(initialScript);
-  const [workspace, setWorkspace] = useState('');
+  const [workspace, setWorkspace] = useState<string>('');
   const [tool, setTool] = useState<Tool>({} as Tool);
   const [program, setProgram] = useState<Program>({} as Program);
   const [showForm, setShowForm] = useState(true);
@@ -141,14 +142,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       });
   }, [scriptContent]);
 
-  // need to initialize the workspace from the env variable with serves
-  // as the default.
-  useEffect(() => {
-    getWorkspaceDir().then((workspace) => {
-      setWorkspace(workspace);
-    });
-  }, []);
-
   useEffect(() => {
     if (scriptId) {
       getScript(scriptId).then(async (script) => {
@@ -161,14 +154,16 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setScriptDisplayName(script.displayName || '');
         setInitialFetch(true);
       });
-    } else {
-      getScriptContent(script).then(async (content) => {
+    } else if (script) {
+      getScriptContent(script).then((content) => {
         if (content === undefined) {
           setNotFound(true);
           return;
         }
         setScriptDisplayName(defaultScriptName);
-        setScriptContent(await parseContent(content));
+        parseContent(content).then((parsedContent) => {
+          setScriptContent(parsedContent);
+        });
         setNotFound(false);
         setInitialFetch(true);
       });
@@ -186,12 +181,14 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         if ((initialScript && initialScriptId) || threads.length === 0) {
           // if both threads and scriptId are set, then always create a new thread
           const newThread = await createThread(
-            script,
-            scriptDisplayName ?? defaultScriptName,
+            script ? script : tildy,
+            scriptDisplayName !== '' ? scriptDisplayName : defaultScriptName,
             scriptId
           );
           const threadId = newThread?.meta?.id;
           setThread(threadId);
+          setScript(newThread.meta.script);
+          setScriptId(newThread.meta.scriptId);
           setThreads(await getThreads());
           setSelectedThreadId(threadId);
           setWorkspace(newThread.meta.workspace);
@@ -201,6 +198,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setThread(latestThread.meta.id);
           setSelectedThreadId(latestThread.meta.id);
           setScriptId(latestThread.meta.scriptId);
+          setScript(latestThread.meta.script);
         }
       } catch (e) {
         threadInitialized.current = false;
