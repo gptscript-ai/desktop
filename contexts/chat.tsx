@@ -112,11 +112,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
-  const hasRunRef = useRef(false);
-
-  useEffect(() => {
-    hasRunRef.current = hasRun;
-  }, [hasRun]);
 
   useEffect(() => {
     if (!scriptContent) return;
@@ -214,7 +209,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setInitialFetch(false);
           setWorkspace(thread.meta.workspace);
         }
-        restartScript();
       });
     }
   }, [thread]);
@@ -226,7 +220,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   useEffect(() => {
     setIsEmpty(!tool.instructions);
     if (
-      hasRunRef.current ||
+      hasRun ||
       !socket ||
       !connected ||
       !initialFetch ||
@@ -247,7 +241,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       );
       setHasRun(true);
     }
-  }, [tool, connected, script, scriptContent, formValues, workspace]);
+  }, [tool, connected, script, scriptContent, formValues, workspace, hasRun]);
 
   useEffect(() => {
     if (forceRun && socket && connected) {
