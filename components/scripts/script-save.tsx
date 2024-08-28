@@ -60,7 +60,7 @@ const SaveScriptDropdown = () => {
   }
 
   return (
-    <Dropdown placement="bottom">
+    <Dropdown placement="bottom-start">
       <DropdownTrigger>
         <Button variant="light" isIconOnly>
           <PiFloppyDiskThin className="size-5" />

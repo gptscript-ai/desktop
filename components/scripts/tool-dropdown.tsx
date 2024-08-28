@@ -102,7 +102,7 @@ const ScriptToolsDropdown = () => {
   }
 
   return (
-    <Dropdown placement="bottom" closeOnSelect={false}>
+    <Dropdown placement="bottom-start" closeOnSelect={false}>
       <DropdownTrigger>
         <Button variant="light" isIconOnly>
           <PiToolboxThin className="size-5" />
