@@ -6,13 +6,12 @@ import Chat from '@/components/chat';
 import Threads from '@/components/threads';
 import { ChatContextProvider } from '@/contexts/chat';
 import { NavContext } from '@/contexts/nav';
-import { tildy } from '@/config/assistant';
 import ExploreModal from '@/components/explore/ExploreModal';
 import { useDisclosure } from '@nextui-org/react';
 
 function RunFile() {
   const [script, _setScript] = useState<string>(
-    useSearchParams().get('file') ?? tildy
+    useSearchParams().get('file') ?? ''
   );
   const [scriptId, _scriptId] = useState<string>(
     useSearchParams().get('id') ?? ''

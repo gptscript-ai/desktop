@@ -22,32 +22,22 @@ const AuthContextProvider: React.FC<AuthContextProps> = ({ children }) => {
 
   useEffect(() => {
     setAuthenticated(document && document?.cookie?.includes('gateway_token'));
-    if (document && document.cookie?.includes('gateway_token')) {
-      getMe()
-        .then((me) => {
-          setMe(me);
-          setAuthenticated(true);
-        })
-        .finally(() => setLoading(false));
+    if (!document || !document.cookie?.includes('gateway_token')) {
+      loginThroughTool().then(() => {
+        setLoading(false);
+      });
     } else {
-      loginThroughTool()
-        .then(() => {
-          getMe().then((me) => {
-            setMe(me);
-            setAuthenticated(true);
-          });
-        })
-        .finally(() => setLoading(false));
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!authenticated) setMe(null);
+    if (loading) setMe(null);
     else if (!me)
       getMe().then((me) => {
         setMe(me);
       });
-  }, [authenticated]);
+  }, [me, loading]);
 
   return (
     <AuthContext.Provider

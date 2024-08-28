@@ -22,7 +22,7 @@ export async function create<T>(obj: T, path: string): Promise<T> {
   return request(obj, path, 'POST');
 }
 
-export async function del<T>(id: string, path: string): Promise<any> {
+export async function del(id: string, path: string): Promise<any> {
   return request(undefined, `${path}/${id}`, 'DELETE');
 }
 

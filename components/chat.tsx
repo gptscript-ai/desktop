@@ -68,7 +68,8 @@ const Chat: React.FC<ScriptProps> = ({
   } = useContext(ChatContext);
 
   useEffect(() => {
-    rootTool(scriptContent).then((tool) => setTool(tool));
+    if (scriptContent.length)
+      rootTool(scriptContent).then((tool) => setTool(tool));
   }, [scriptContent]);
 
   useEffect(() => {

@@ -27,7 +27,8 @@ const NewThread = ({ className, onOpenExplore }: NewThreadProps) => {
 
   const fetchScripts = async () => {
     setScripts([]);
-    const resp = await getScripts({ owner: me?.username });
+    if (!me) return;
+    const resp = await getScripts({ owner: me.username });
     setScripts(
       (resp.scripts || [])
         .sort((a, b) => {
@@ -67,7 +68,7 @@ const NewThread = ({ className, onOpenExplore }: NewThreadProps) => {
 
   useEffect(() => {
     fetchScripts();
-  }, [isOpen]);
+  }, [isOpen, me]);
 
   return (
     <Dropdown placement="right-start">
