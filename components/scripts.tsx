@@ -25,6 +25,7 @@ import { LuMessageSquare } from 'react-icons/lu';
 import { FaCopy } from 'react-icons/fa';
 import { Tool } from '@gptscript-ai/gptscript/src/gptscript';
 import { stringify } from '@/actions/gptscript';
+import { deleteDataset } from '@/actions/knowledge/knowledge';
 
 interface ScriptsProps {
   showFavorites?: boolean;
@@ -59,14 +60,14 @@ export default function Scripts({ showFavorites }: ScriptsProps) {
     setLoading(false);
   };
 
-  const handleDelete = useCallback((script: ParsedScript) => {
-    deleteScript(script)
-      .then(() => {
-        setScripts((scripts) =>
-          scripts.filter((currScript) => currScript.id !== script.id)
-        );
-      })
-      .catch((error) => console.error(error));
+  const handleDelete = useCallback(async (script: ParsedScript) => {
+    await deleteScript(script);
+    setScripts((scripts) =>
+      scripts.filter((currScript) => currScript.id !== script.id)
+    );
+    if (script.id) {
+      await deleteDataset(script.id.toString());
+    }
   }, []);
 
   const onClickCopy = async (script: ParsedScript) => {

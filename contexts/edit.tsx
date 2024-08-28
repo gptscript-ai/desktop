@@ -9,9 +9,22 @@ import { Block, Tool } from '@gptscript-ai/gptscript';
 import { getScript, Script, updateScript } from '@/actions/me/scripts';
 import { getTexts, parseContent, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
+import {
+  getBasename,
+  getFileOrFolderSizeInKB,
+} from '@/actions/knowledge/filehelper';
+import {
+  datasetExists,
+  ensureFilesIngested,
+  getFiles,
+  getKnowledgeBinaryPath,
+} from '@/actions/knowledge/knowledge';
+import { getCookie } from '@/actions/knowledge/util';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = 'dynamic-instructions';
+
+export const KNOWLEDGE_NAME = 'file-retrieval';
 
 export type ToolType = 'tool' | 'context' | 'agent';
 export type DependencyBlock = {
@@ -49,6 +62,31 @@ interface EditContextState {
   dynamicInstructions: string;
   setDynamicInstructions: React.Dispatch<React.SetStateAction<string>>;
   scriptPath: string;
+  droppedFiles: string[];
+  setDroppedFiles: React.Dispatch<React.SetStateAction<string[]>>;
+  droppedFileDetails: Map<
+    string,
+    {
+      fileName: string;
+      size: number;
+    }
+  >;
+  setDroppedFileDetails: React.Dispatch<
+    React.SetStateAction<
+      Map<
+        string,
+        {
+          fileName: string;
+          size: number;
+        }
+      >
+    >
+  >;
+  topK: number;
+  setTopK: React.Dispatch<React.SetStateAction<number>>;
+  ingesting: boolean;
+  updated: boolean;
+  setUpdated: React.Dispatch<React.SetStateAction<boolean>>;
 
   // actions
   update: () => Promise<void>;
@@ -68,6 +106,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
 }) => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [updated, setUpdated] = useState(false);
   const [root, setRoot] = useState<Tool>({} as Tool);
   const [tools, setTools] = useState<Tool[]>([]);
   const [script, setScript] = useState<Block[]>([]);
@@ -86,69 +125,107 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   // Dependencies are special text tools that reference a tool, type, and content. They are used
   // to store requirements.txt and package.json files for the script.
   const [dependencies, setDependencies] = useState<DependencyBlock[]>([]);
+  const [droppedFiles, setDroppedFiles] = useState<string[]>([]);
+  const droppedFileInitiazed = useRef(false);
+  // droppedFileDetail stores a map of file path and its size
+  const [droppedFileDetails, setDroppedFileDetails] = useState<
+    Map<
+      string,
+      {
+        fileName: string;
+        size: number;
+      }
+    >
+  >(new Map());
+  const [topK, setTopK] = useState<number>(10);
+  const [ingesting, setIngesting] = useState(false);
+  const [knowledgeTool, setKnowledgeTool] = useState<Tool>({} as Tool);
+
+  const addRootTool = (tool: string) => {
+    setRoot({ ...root, tools: [...(root.tools || []), tool] });
+  };
+
+  const removeRootTool = (tool: string) => {
+    setRoot({ ...root, tools: (root.tools || []).filter((t) => t !== tool) });
+  };
 
   useEffect(() => {
-    getModels().then((m) => {
-      setModels(m);
-    });
-
-    getScript(initialScriptId)
-      .then(async (script) => {
-        if (script === undefined) {
-          setNotFound(true);
-          return;
-        }
-        const parsedScript = await parseContent(script.content || '');
-        const texts = await getTexts(script.content || '');
-        setScript(parsedScript);
-        setRoot(findRoot(parsedScript));
-        setVisibility(script.visibility as 'public' | 'private' | 'protected');
-        setScriptId(script.id!);
-
-        // dynamic instructions are stored in a special tool
-        const tools = findTools(parsedScript);
-        setTools(tools);
-        setDynamicInstructions(
-          tools.find((t) => t.name === DYNAMIC_INSTRUCTIONS)?.instructions || ''
-        );
-
-        const dependencies = texts.filter((t) =>
-          t.format?.includes('metadata:')
-        );
-        setDependencies(
-          dependencies.map((dep) => {
-            const split = dep.format?.split(':') || [];
-            return {
-              content: dep.content,
-              forTool: split[1] || '',
-              type: split[2] || '',
-            };
-          })
-        );
-      })
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    if (loading) return;
+    if (!scriptId) return;
+    const update = async () => {
+      const exist = await datasetExists(scriptId.toString());
+      if (!exist) {
+        return;
+      }
+      const knowledgePath = await getKnowledgeBinaryPath();
+      const tool = {
+        id: KNOWLEDGE_NAME,
+        name: KNOWLEDGE_NAME,
+        description:
+          'Retrieve information from files uploaded to the assistant.',
+        type: 'tool',
+        credentials: [
+          'github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway',
+        ],
+        arguments: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'Query to search in a knowledge base',
+            },
+          },
+        },
+        instructions: `#!${knowledgePath} retrieve --dataset ${scriptId.toString()} --top-k ${topK} "\${QUERY}"
+          `,
+      } as Tool;
+      setKnowledgeTool(tool);
+    };
     update();
-  }, [root, tools, visibility]);
+  }, [scriptId, droppedFiles, ingesting, topK]);
 
   useEffect(() => {
-    setTools((prevTools) => {
-      dependencies.forEach((dep) => {
-        prevTools.map((tool) => {
-          if (tool.name === dep.forTool) {
-            tool.metaData = { [dep.type]: dep.content };
-          }
-          return tool;
+    if (
+      knowledgeTool.name === KNOWLEDGE_NAME &&
+      !root.tools?.includes(KNOWLEDGE_NAME)
+    ) {
+      addRootTool(knowledgeTool.name);
+    }
+  }, [knowledgeTool, ingesting]);
+
+  useEffect(() => {
+    if (!scriptId) return;
+    const setFiles = async () => {
+      const files = await getFiles(scriptId.toString());
+      setDroppedFiles(files);
+      droppedFileInitiazed.current = true;
+    };
+    setFiles();
+  }, [scriptId]);
+
+  useEffect(() => {
+    if (!scriptId || !droppedFileInitiazed.current) return;
+
+    const ingest = async () => {
+      setIngesting(true);
+      const newDetails = new Map(droppedFileDetails);
+      for (const file of droppedFiles) {
+        const size = await getFileOrFolderSizeInKB(file);
+        const filename = await getBasename(file);
+        newDetails.set(file, {
+          fileName: filename,
+          size: size,
         });
-      });
-      return prevTools;
-    });
-    update();
-  }, [dependencies, tools]);
+      }
+      setDroppedFileDetails(newDetails);
+      await ensureFilesIngested(
+        droppedFiles,
+        scriptId.toString(),
+        getCookie('gateway_token')
+      );
+      setIngesting(false);
+    };
+    ingest();
+  }, [droppedFiles, scriptId, droppedFileInitiazed]);
 
   useEffect(() => {
     if (loading) return;
@@ -171,6 +248,77 @@ const EditContextProvider: React.FC<EditContextProps> = ({
       };
     });
   }, [dynamicInstructions, loading]);
+
+  useEffect(() => {
+    getModels().then((m) => {
+      setModels(m);
+    });
+
+    getScript(initialScriptId)
+      .then(async (script) => {
+        if (script === undefined) {
+          setNotFound(true);
+          return;
+        }
+        const parsedScript = await parseContent(script.content || '');
+        const texts = await getTexts(script.content || '');
+        setScript(parsedScript);
+        setRoot(findRoot(parsedScript));
+        setVisibility(script.visibility as 'public' | 'private' | 'protected');
+        setScriptId(script.id!);
+
+        // dynamic instructions are stored in a special tool
+        const toolFromScripts = findTools(parsedScript);
+        setTools(toolFromScripts);
+        setDynamicInstructions(
+          toolFromScripts.find((t) => t.name === DYNAMIC_INSTRUCTIONS)
+            ?.instructions || ''
+        );
+
+        setTools((prevTools) => {
+          return prevTools.filter((t) => {
+            return t.name !== KNOWLEDGE_NAME;
+          });
+        });
+        //ensureDynamicInstruction();
+
+        const dependencies = texts.filter((t) =>
+          t.format?.includes('metadata:')
+        );
+        setDependencies(
+          dependencies.map((dep) => {
+            const split = dep.format?.split(':') || [];
+            return {
+              content: dep.content,
+              forTool: split[1] || '',
+              type: split[2] || '',
+            };
+          })
+        );
+      })
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    update();
+  }, [root, tools, visibility, knowledgeTool]);
+
+  useEffect(() => {
+    setTools((prevTools) => {
+      dependencies.forEach((dep) => {
+        prevTools.map((tool) => {
+          if (tool.name === dep.forTool) {
+            tool.metaData = { [dep.type]: dep.content };
+          }
+          return tool;
+        });
+      });
+      return prevTools;
+    });
+    update();
+  }, [dependencies, tools]);
 
   // The first tool in the script is not always the root tool, so we find it
   // by finding the first non-text tool in the script.
@@ -203,9 +351,13 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     debounceTimer.current = setTimeout(async () => {
       if (scriptId && visibility && root) {
         const existing = await getScript(scriptId.toString());
+        const scriptTools = [root, ...tools];
+        if (knowledgeTool.name) {
+          scriptTools.push(knowledgeTool);
+        }
         const toUpdate: Script = {
           visibility: visibility,
-          content: await stringify([root, ...tools]),
+          content: await stringify(scriptTools),
           id: scriptId,
         };
         // Only update slug when displayName has changed
@@ -221,7 +373,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         await updateScript(toUpdate).catch((error) => console.error(error));
       }
     }, DEBOUNCE_TIME);
-  }, [scriptId, root, tools, visibility]);
+  }, [scriptId, root, tools, visibility, knowledgeTool]);
 
   const newestToolName = useCallback(() => {
     let num = 1;
@@ -240,14 +392,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     } as Tool;
     setTools([...(tools || []), newTool]);
     setRoot({ ...root, tools: [...(root.tools || []), newTool.name!] });
-  };
-
-  const addRootTool = (tool: string) => {
-    setRoot({ ...root, tools: [...(root.tools || []), tool] });
-  };
-
-  const removeRootTool = (tool: string) => {
-    setRoot({ ...root, tools: (root.tools || []).filter((t) => t !== tool) });
   };
 
   const deleteLocalTool = (tool: string) => {
@@ -299,6 +443,15 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         removeRootTool,
         newestToolName,
         createNewTool,
+        droppedFiles,
+        setDroppedFiles,
+        droppedFileDetails,
+        setDroppedFileDetails,
+        topK,
+        setTopK,
+        ingesting,
+        updated,
+        setUpdated,
       }}
     >
       {children}

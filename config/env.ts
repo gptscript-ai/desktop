@@ -3,6 +3,8 @@ import path from 'path';
 
 export const SCRIPTS_PATH = () => process.env.SCRIPTS_PATH || 'gptscripts';
 export const WORKSPACE_DIR = () => process.env.WORKSPACE_DIR || '';
+export const KNOWLEDGE_DIR = () =>
+  process.env.KNOWLEDGE_DIR || path.join(WORKSPACE_DIR(), 'knowledge');
 export const THREADS_DIR = () =>
   process.env.THREADS_DIR || path.join(WORKSPACE_DIR(), 'threads');
 export const GATEWAY_URL = () =>
