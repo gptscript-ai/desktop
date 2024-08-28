@@ -5,7 +5,7 @@ import Models from '@/components/edit/configure/models';
 import Visibility from '@/components/edit/configure/visibility';
 import Code from '@/components/edit/configure/code';
 import { EditContext, KNOWLEDGE_NAME } from '@/contexts/edit';
-import { GoLightBulb } from 'react-icons/go';
+import { GoLightBulb, GoTrash } from 'react-icons/go';
 import { HiCog } from 'react-icons/hi2';
 import { LuCircuitBoard } from 'react-icons/lu';
 import {
@@ -24,11 +24,11 @@ import AssistantNotFound from '@/components/assistant-not-found';
 import { useRouter } from 'next/navigation';
 import { ChatContext } from '@/contexts/chat';
 import Chat from '@/components/chat';
-import { GoDatabase } from 'react-icons/go';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { IoMdAdd } from 'react-icons/io';
+import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
 import { RiFileSearchLine } from 'react-icons/ri';
-import KnowledgeModals from '@/components/knowledge/KnowledgeModals';
+import FileSettingModals from '@/components/knowledge/KnowledgeModals';
+import { RiFoldersLine } from 'react-icons/ri';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -51,12 +51,14 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     setDependencies,
     setDroppedFiles,
     droppedFileDetails,
+    setDroppedFileDetails,
     ingesting,
+    ingest,
     updated,
     setUpdated,
+    ingestionError,
   } = useContext(EditContext);
   const { restartScript } = useContext(ChatContext);
-  const fileTableModal = useDisclosure();
   const fileSettingModal = useDisclosure();
 
   const abbreviate = (name: string) => {
@@ -212,39 +214,94 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               aria-label="files"
               title={<h1>Files</h1>}
               startContent={<RiFileSearchLine />}
-              classNames={{ content: 'pt-1 pb-3' }}
+              classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
             >
-              <div className="flex justify-between items-center">
+              <div className="grid grid-cols-1 gap-2 w-full mb-2">
+                {Array.from(droppedFileDetails.entries()).map(
+                  (fileDetail, i) => (
+                    <div key={i} className="flex space-x-2">
+                      <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <RiFileSearchLine />
+                          <p className="capitalize">{fileDetail[1].fileName}</p>
+                          <p className="text-xs text-zinc-400 ml-2">{`${fileDetail[1].size} KB`}</p>
+                        </div>
+                        <Button
+                          variant="light"
+                          isIconOnly
+                          size="sm"
+                          startContent={<GoTrash />}
+                          onPress={() => {
+                            setDroppedFiles((prev) =>
+                              prev.filter((f) => f !== fileDetail[0])
+                            );
+                            const newDetails = new Map(droppedFileDetails);
+                            newDetails.delete(fileDetail[0]);
+                            setDroppedFileDetails(newDetails);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                )}
+                <div className="flex justify-end mt-2">
+                  {droppedFileDetails?.size > 0 &&
+                    !ingesting &&
+                    !ingestionError && (
+                      <div className="flex justify-center">
+                        <RiFoldersLine />
+                        <p className="text-sm text-zinc-500 ml-2">{`${droppedFileDetails.size} ${droppedFileDetails.size === 1 ? 'file' : 'files'}, ${Array.from(
+                          droppedFileDetails.values()
+                        )
+                          .reduce((acc, detail) => acc + detail.size, 0)
+                          .toFixed(2)} KB`}</p>
+                      </div>
+                    )}
+                  {ingesting && !ingestionError && (
+                    <Spinner size="sm" className="ml-2" />
+                  )}
+                  {ingestionError && (
+                    <>
+                      <Button
+                        isIconOnly
+                        variant="flat"
+                        color="primary"
+                        size="sm"
+                        startContent={<IoMdRefresh size={18} />}
+                        onClick={ingest}
+                      ></Button>
+                      <p className="text-sm text-red-500 ml-2">
+                        {ingestionError}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div
+                className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${droppedFileDetails.size > 0 ? 'pt-4' : ''}`}
+              >
                 <Button
+                  className="w-full"
+                  variant="flat"
+                  color="primary"
                   isIconOnly
                   size="sm"
-                  startContent={<GoDatabase />}
-                  onClick={fileTableModal.onOpen}
-                />
-
-                {droppedFileDetails?.size > 0 && !ingesting && (
-                  <p className="text-sm text-zinc-500 ml-2">{`${droppedFileDetails.size} ${droppedFileDetails.size === 1 ? 'file' : 'files'}, ${Array.from(
-                    droppedFileDetails.values()
-                  )
-                    .reduce((acc, detail) => acc + detail.size, 0)
-                    .toFixed(2)} KB`}</p>
-                )}
-                {ingesting && <Spinner size="sm" className="ml-2" />}
-                <div className="ml-auto flex space-x-2">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    startContent={<IoSettingsOutline />}
-                    onClick={fileSettingModal.onOpen}
-                  />
-                  <Button
-                    size="sm"
-                    startContent={<IoMdAdd />}
-                    onClick={handleAddFiles}
-                  >
-                    Files
-                  </Button>
-                </div>
+                  startContent={<IoSettingsOutline className="mr-2" />}
+                  onPress={fileSettingModal.onOpen}
+                >
+                  Settings
+                </Button>
+                <Button
+                  className="w-full"
+                  variant="flat"
+                  color="primary"
+                  isIconOnly
+                  size="sm"
+                  startContent={<IoMdAdd className="mr-2" />}
+                  onPress={handleAddFiles}
+                >
+                  Add Files
+                </Button>
               </div>
             </AccordionItem>
             <AccordionItem
@@ -308,12 +365,9 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             : `Click "Refresh Chat" to chat with the updated version of ${placeholderName()}`
         }
       />
-      <KnowledgeModals
+      <FileSettingModals
         isFileSettingOpen={fileSettingModal.isOpen}
         onFileSettingClose={fileSettingModal.onClose}
-        isFileTableOpen={fileTableModal.isOpen}
-        onFileTableClose={fileTableModal.onClose}
-        handleAddFiles={handleAddFiles}
       />
     </>
   );

@@ -37,17 +37,25 @@ export async function deleteDataset(datasetID: string): Promise<void> {
   return;
 }
 
+export async function firstIngestion(
+  scriptId: string,
+  files: string[]
+): Promise<boolean> {
+  const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
+  return !fs.existsSync(dir) && files.length > 0;
+}
+
 export async function ensureFilesIngested(
   files: string[],
   scriptId: string,
   token: string
-) {
+): Promise<string> {
   const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
   if (!fs.existsSync(dir) && files.length > 0) {
     fs.mkdirSync(dir, { recursive: true });
   } else if (!fs.existsSync(dir) && files.length === 0) {
     // if there are no files in the directory and no dropped files, do nothing
-    return;
+    return '';
   }
 
   for (const file of files) {
@@ -57,8 +65,7 @@ export async function ensureFilesIngested(
         await fs.promises.copyFile(file, filePath);
       }
     } catch (error) {
-      console.error(`Error copying file ${file}:`, error);
-      throw error;
+      return `Error copying file ${file}: ${error}`;
     }
   }
 
@@ -74,8 +81,7 @@ export async function ensureFilesIngested(
       }
     }
   } catch (error) {
-    console.error('Error during cleanup of removed files:', error);
-    throw error;
+    return `Error deleting files: ${error}`;
   }
 
   try {
@@ -85,11 +91,10 @@ export async function ensureFilesIngested(
       token
     );
   } catch (error) {
-    console.error('Error during ingestion:', error);
-    throw error;
+    return `Error running knowledge ingestion: ${error}`;
   }
 
-  return;
+  return '';
 }
 
 async function runKnowledgeIngest(
@@ -97,25 +102,16 @@ async function runKnowledgeIngest(
   knowledgePath: string,
   token: string
 ): Promise<void> {
-  try {
-    // Start the ingestion process in the background
-    await execPromise(
-      `${process.env.KNOWLEDGE_BIN} ingest --prune --dataset ${id} ./data`,
-      {
-        cwd: knowledgePath,
-        env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
-      }
-    );
-
-    const errorFilePath = path.join(knowledgePath, 'error.log');
-    if (fs.existsSync(errorFilePath)) {
-      await fs.promises.rm(errorFilePath);
+  // Start the ingestion process in the background
+  await execPromise(
+    `${process.env.KNOWLEDGE_BIN} ingest --prune --dataset ${id} ./data`,
+    {
+      cwd: knowledgePath,
+      env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
     }
-  } catch (error) {
-    console.log(error);
-    handleError(knowledgePath, error as Error);
-    throw error;
-  }
+  );
+
+  return;
 }
 
 export async function getFiles(scriptId: string): Promise<string[]> {
@@ -134,9 +130,4 @@ export async function datasetExists(scriptId: string): Promise<boolean> {
 
 export async function getKnowledgeBinaryPath(): Promise<string> {
   return process.env.KNOWLEDGE_BIN || 'knowledge';
-}
-
-function handleError(dir: string, error: Error): void {
-  const errorFilePath = path.join(dir, 'error.log');
-  fs.writeFileSync(errorFilePath, error.message);
 }

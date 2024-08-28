@@ -16,6 +16,7 @@ import {
 import {
   datasetExists,
   ensureFilesIngested,
+  firstIngestion,
   getFiles,
   getKnowledgeBinaryPath,
 } from '@/actions/knowledge/knowledge';
@@ -85,8 +86,10 @@ interface EditContextState {
   topK: number;
   setTopK: React.Dispatch<React.SetStateAction<number>>;
   ingesting: boolean;
+  ingest: () => Promise<void>;
   updated: boolean;
   setUpdated: React.Dispatch<React.SetStateAction<boolean>>;
+  ingestionError: string;
 
   // actions
   update: () => Promise<void>;
@@ -140,6 +143,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   const [topK, setTopK] = useState<number>(10);
   const [ingesting, setIngesting] = useState(false);
   const [knowledgeTool, setKnowledgeTool] = useState<Tool>({} as Tool);
+  const [ingestionError, setIngestionError] = useState('');
 
   const addRootTool = (tool: string) => {
     setRoot({ ...root, tools: [...(root.tools || []), tool] });
@@ -161,7 +165,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         id: KNOWLEDGE_NAME,
         name: KNOWLEDGE_NAME,
         description:
-          'Retrieve information from files uploaded to the assistant.',
+          'Retrieve information from files uploaded to the assistant. Use it to answer questions from the user and ALWAYS give a proper citation to the best of your abilities, including the source references (filename, page, etc.).',
         type: 'tool',
         credentials: [
           'github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway',
@@ -202,28 +206,34 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     setFiles();
   }, [scriptId]);
 
+  const ingest = useCallback(async () => {
+    setIngesting(true);
+    setIngestionError('');
+    const newDetails = new Map(droppedFileDetails);
+    for (const file of droppedFiles) {
+      const size = await getFileOrFolderSizeInKB(file);
+      const filename = await getBasename(file);
+      newDetails.set(file, {
+        fileName: filename,
+        size: size,
+      });
+    }
+    setDroppedFileDetails(newDetails);
+    const first = await firstIngestion(scriptId.toString(), droppedFiles);
+    const error = await ensureFilesIngested(
+      droppedFiles,
+      scriptId.toString(),
+      getCookie('gateway_token')
+    );
+    setIngestionError(error);
+    setIngesting(false);
+    if (first) {
+      setUpdated(true);
+    }
+  }, [droppedFiles, scriptId, droppedFileInitiazed, ingesting]);
+
   useEffect(() => {
     if (!scriptId || !droppedFileInitiazed.current) return;
-
-    const ingest = async () => {
-      setIngesting(true);
-      const newDetails = new Map(droppedFileDetails);
-      for (const file of droppedFiles) {
-        const size = await getFileOrFolderSizeInKB(file);
-        const filename = await getBasename(file);
-        newDetails.set(file, {
-          fileName: filename,
-          size: size,
-        });
-      }
-      setDroppedFileDetails(newDetails);
-      await ensureFilesIngested(
-        droppedFiles,
-        scriptId.toString(),
-        getCookie('gateway_token')
-      );
-      setIngesting(false);
-    };
     ingest();
   }, [droppedFiles, scriptId, droppedFileInitiazed]);
 
@@ -450,8 +460,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         topK,
         setTopK,
         ingesting,
+        ingest,
         updated,
         setUpdated,
+        ingestionError,
       }}
     >
       {children}
