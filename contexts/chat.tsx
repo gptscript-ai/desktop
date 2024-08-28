@@ -178,22 +178,22 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     const createAndSetThread = async () => {
       try {
         const threads = await getThreads();
+        setThreads(threads);
         if ((initialScript && initialScriptId) || threads.length === 0) {
           // if both threads and scriptId are set, then always create a new thread
           const newThread = await createThread(
             script ? script : tildy,
-            scriptDisplayName !== '' ? scriptDisplayName : defaultScriptName,
+            scriptDisplayName,
             scriptId
           );
+          setThreads((threads) => [newThread, ...threads]);
           const threadId = newThread?.meta?.id;
           setThread(threadId);
           setScript(newThread.meta.script);
           setScriptId(newThread.meta.scriptId);
-          setThreads(await getThreads());
           setSelectedThreadId(threadId);
           setWorkspace(newThread.meta.workspace);
         } else if (threads.length > 0) {
-          setThreads(threads);
           const latestThread = threads[0];
           setThread(latestThread.meta.id);
           setSelectedThreadId(latestThread.meta.id);
