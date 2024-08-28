@@ -54,7 +54,7 @@ const ScriptKnowledgeDropdown = () => {
 
   return (
     <Dropdown
-      placement="bottom"
+      placement="bottom-start"
       closeOnSelect={false}
       onOpenChange={refreshKnowledgeFiles}
     >
