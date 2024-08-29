@@ -195,6 +195,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setSelectedThreadId(latestThread.meta.id);
           setScriptId(latestThread.meta.scriptId);
           setScript(latestThread.meta.script);
+          setWorkspace(latestThread.meta.workspace);
         }
       } catch (e) {
         threadInitialized.current = false;
