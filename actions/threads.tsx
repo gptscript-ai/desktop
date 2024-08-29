@@ -3,10 +3,15 @@
 import { THREADS_DIR, WORKSPACE_DIR } from '@/config/env';
 import { gpt } from '@/config/env';
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
+import { promisify } from 'util';
+import { exec } from 'child_process';
 
 const STATE_FILE = 'state.json';
 const META_FILE = 'meta.json';
+
+const execPromise = promisify(exec);
 
 export type Thread = {
   state: string;
@@ -131,6 +136,9 @@ export async function createThread(
 export async function deleteThread(id: string) {
   const threadsDir = THREADS_DIR();
   const threadPath = path.join(threadsDir, id);
+  if (existsSync(path.join(threadPath, 'knowledge'))) {
+    await execPromise(`${process.env.KNOWLEDGE_BIN} delete-dataset ${id}`);
+  }
   await fs.rm(threadPath, { recursive: true });
 }
 
