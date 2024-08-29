@@ -349,7 +349,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   const update = useCallback(async () => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
-      if (scriptId && visibility && root) {
+      if (scriptId && visibility && root && root.name) {
         const existing = await getScript(scriptId.toString());
         const scriptTools = [root, ...tools];
         if (knowledgeTool.name) {
