@@ -451,15 +451,8 @@ const useChatSocket = (isEmpty?: boolean) => {
           message: 'Waiting for model response...',
         });
         latestAgentMessageIndex.current = 0;
-      } else {
-        initialMessages.push({
-          type: MessageType.Agent,
-          name: 'System',
-          message:
-            'The chat bot is running but is waiting for you to talk to it. Say hello!',
-        });
+        setMessages(initialMessages);
       }
-      setMessages(initialMessages);
     }
   }, [running, messages, isEmpty]);
 
