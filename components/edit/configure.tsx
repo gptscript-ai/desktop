@@ -217,33 +217,37 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
             >
               <div className="grid grid-cols-1 gap-2 w-full mb-2">
-                {Array.from(droppedFileDetails.entries()).map(
-                  (fileDetail, i) => (
-                    <div key={i} className="flex space-x-2">
-                      <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
-                        <div className="flex items-center space-x-2">
-                          <RiFileSearchLine />
-                          <p className="capitalize">{fileDetail[1].fileName}</p>
-                          <p className="text-xs text-zinc-400 ml-2">{`${fileDetail[1].size} KB`}</p>
+                <div className="max-h-[30vh] flex flex-col space-y-2 overflow-auto">
+                  {Array.from(droppedFileDetails.entries()).map(
+                    (fileDetail, i) => (
+                      <div key={i} className="flex space-x-2">
+                        <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
+                          <div className="flex items-center space-x-2 overflow-x-auto">
+                            <RiFileSearchLine />
+                            <p className="capitalize">
+                              {fileDetail[1].fileName}
+                            </p>
+                            <p className="text-xs text-zinc-400 ml-2">{`${fileDetail[1].size} KB`}</p>
+                          </div>
+                          <Button
+                            variant="light"
+                            isIconOnly
+                            size="sm"
+                            startContent={<GoTrash />}
+                            onPress={() => {
+                              setDroppedFiles((prev) =>
+                                prev.filter((f) => f !== fileDetail[0])
+                              );
+                              const newDetails = new Map(droppedFileDetails);
+                              newDetails.delete(fileDetail[0]);
+                              setDroppedFileDetails(newDetails);
+                            }}
+                          />
                         </div>
-                        <Button
-                          variant="light"
-                          isIconOnly
-                          size="sm"
-                          startContent={<GoTrash />}
-                          onPress={() => {
-                            setDroppedFiles((prev) =>
-                              prev.filter((f) => f !== fileDetail[0])
-                            );
-                            const newDetails = new Map(droppedFileDetails);
-                            newDetails.delete(fileDetail[0]);
-                            setDroppedFileDetails(newDetails);
-                          }}
-                        />
                       </div>
-                    </div>
-                  )
-                )}
+                    )
+                  )}
+                </div>
                 <div className="flex justify-end mt-2">
                   {droppedFileDetails?.size > 0 &&
                     !ingesting &&
