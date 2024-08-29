@@ -101,7 +101,7 @@ export async function getScript(id: string): Promise<ParsedScript | undefined> {
   }
 }
 
-export async function createScript(script: Script) {
+export async function createScript(script: Script): Promise<Script> {
   return await create(script, `scripts`);
 }
 

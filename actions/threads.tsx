@@ -146,6 +146,24 @@ export async function renameThread(id: string, name: string) {
   );
 }
 
+export async function updateThreadScript(
+  threadId: string,
+  scriptId: string,
+  script: string
+) {
+  const threadsDir = THREADS_DIR();
+  const threadPath = path.join(threadsDir, threadId);
+  const meta = await fs.readFile(path.join(threadPath, META_FILE), 'utf-8');
+  const threadMeta = JSON.parse(meta) as ThreadMeta;
+  threadMeta.scriptId = scriptId;
+  threadMeta.script = script;
+  threadMeta.updated = new Date();
+  await fs.writeFile(
+    path.join(threadPath, META_FILE),
+    JSON.stringify(threadMeta)
+  );
+}
+
 export async function updateThreadWorkspace(id: string, workspace: string) {
   const threadsDir = THREADS_DIR();
   const threadPath = path.join(threadsDir, id);
