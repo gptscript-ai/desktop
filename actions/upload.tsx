@@ -11,7 +11,7 @@ export async function uploadFile(
   isKnowledge?: boolean
 ) {
   if (isKnowledge) {
-    workspace = path.join(workspace, 'knowledge');
+    workspace = path.join(path.dirname(workspace), 'knowledge');
   }
   const file = formData.get('file') as File;
   await fs.mkdir(workspace, { recursive: true });
@@ -32,11 +32,11 @@ export async function deleteFile(path: string) {
 }
 
 export async function lsKnowledgeFiles(workspace: string): Promise<string> {
-  return lsFiles(path.join(workspace, 'knowledge'));
+  return lsFiles(path.join(path.dirname(workspace), 'knowledge'));
 }
 
 export async function deleteKnowledgeFile(workspace: string, name: string) {
-  return deleteFile(path.join(workspace, 'knowledge', name));
+  return deleteFile(path.join(path.dirname(workspace), 'knowledge', name));
 }
 
 export async function lsFiles(dir: string): Promise<string> {

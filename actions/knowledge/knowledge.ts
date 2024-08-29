@@ -15,7 +15,7 @@ export async function ingest(
   if (!datasetID) {
     throw new Error('Dataset ID is required');
   }
-  const dir = path.join(workspace, 'knowledge');
+  const dir = path.join(path.dirname(workspace), 'knowledge');
   const knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
   await execPromise(
     `${knowledgeBinaryPath} ingest --prune --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
