@@ -189,7 +189,12 @@ const ScriptModal = ({
             onClick={() => {
               setOpen(false);
               onCloseExplore();
-              handleCreateThread(script.publicURL ?? '', script.id?.toString());
+              // if we are in chat context, just do in place thread creation
+              if (handleCreateThread) {
+                handleCreateThread(script.publicURL!, script.id?.toString());
+              } else {
+                window.location.href = `/?file=${script.publicURL}&id=${script.id}`;
+              }
             }}
           >
             Chat

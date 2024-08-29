@@ -20,6 +20,7 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
     setScriptId,
     selectedThreadId,
     setSelectedThreadId,
+    setShouldRestart,
   } = useContext(ChatContext);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -30,6 +31,7 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
     setThread(id);
     setScriptId(scriptId);
     setSelectedThreadId(id);
+    setShouldRestart(true);
   };
 
   const isSelected = (id: string) => id === selectedThreadId;

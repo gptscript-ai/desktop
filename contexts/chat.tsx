@@ -66,6 +66,7 @@ interface ChatContextState {
   running: boolean;
   generating: boolean;
   error: string | null;
+  setShouldRestart: React.Dispatch<React.SetStateAction<boolean>>;
 
   restart: () => void;
   interrupt: () => void;
@@ -119,18 +120,13 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
+  const [shouldRestart, setShouldRestart] = useState(false);
 
   useEffect(() => {
-    if (scriptContent.length === 0) return;
+    if (!thread || scriptContent.length === 0) return;
 
     rootTool(scriptContent).then((tool) => {
-      setTool((prev) => {
-        if (prev.name !== tool.name) {
-          setHasRun(false);
-        }
-
-        return tool;
-      });
+      setTool(tool);
     });
 
     loadTools(scriptContent?.filter((block) => block.type === 'tool'))
@@ -216,7 +212,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   }, [tool]);
 
   useEffect(() => {
-    if (thread) {
+    if (thread && shouldRestart) {
       getThread(thread).then((thread) => {
         if (thread) {
           setInitialFetch(false);
@@ -225,7 +221,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         restartScript();
       });
     }
-  }, [thread]);
+  }, [thread, shouldRestart]);
 
   useEffect(() => {
     if (hasRun) restartScript();
@@ -333,6 +329,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setThreads((threads: Thread[]) => [newThread, ...threads]);
       setScript(script);
       setThread(newThread.meta.id);
+      setShouldRestart(true);
       setSelectedThreadId(newThread.meta.id);
       setWorkspaceDir(newThread.meta.workspace);
     });
@@ -382,6 +379,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         interrupt,
         fetchThreads,
         restartScript,
+        setShouldRestart,
         tools,
         setTools,
         handleCreateThread,
