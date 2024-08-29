@@ -166,8 +166,8 @@ const ChatBar = ({
                 setCommandsOpen(false);
               }
               if (event.key === 'ArrowUp') {
+                event.preventDefault();
                 if (commandsOpen) {
-                  event.preventDefault();
                   document.getElementById('command-0')?.focus();
                 } else {
                   setUserMessagesIndex((prevIndex) => {
