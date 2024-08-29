@@ -14,6 +14,10 @@ import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
 import { gatewayTool } from '@/actions/knowledge/util';
 import { ToolReference } from '@gptscript-ai/gptscript';
+import { KNOWLEDGE_NAME } from '@/contexts/edit';
+
+const dynamicToolName = 'Dynamic Instructions';
+const fileRetrievalName = 'File Retrieval';
 
 const ScriptToolsDropdown = () => {
   const { program, tools, socket, setMessages } = useContext(ChatContext);
@@ -59,9 +63,13 @@ const ScriptToolsDropdown = () => {
     setThreadTools(threadTools);
   }, [tools, displayNames, knowledgeGatewayTool, program]);
 
-  function dynamicInstructions(name: string | undefined): string | undefined {
-    if (name && name === 'dynamic-instructions') {
-      return 'Dynamic Instructions';
+  function friendlyName(name: string | undefined): string | undefined {
+    if (name === 'dynamic-instructions') {
+      return dynamicToolName;
+    }
+
+    if (name === KNOWLEDGE_NAME) {
+      return fileRetrievalName;
     }
 
     return name;
@@ -69,7 +77,11 @@ const ScriptToolsDropdown = () => {
 
   function getDisplayName(ref: string): string {
     if (ref === 'dynamic-instructions') {
-      return 'Dynamic Instructions';
+      return dynamicToolName;
+    }
+
+    if (ref === KNOWLEDGE_NAME) {
+      return fileRetrievalName;
     }
 
     return (
@@ -126,7 +138,7 @@ const ScriptToolsDropdown = () => {
                     content={t}
                     isReadOnly
                   >
-                    {dynamicInstructions(
+                    {friendlyName(
                       (
                         program.toolSet[
                           (v.find((v) => v.reference === t) || {}).toolID || ''
