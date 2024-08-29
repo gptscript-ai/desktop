@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import { Spinner } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
@@ -42,7 +42,16 @@ const ChatBar = ({
     messages,
     setMessages,
   } = useContext(ChatContext);
-  const [userMessages, setUserMessages] = useState<string[]>([]);
+
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
+  const userMessages = useMemo(() => {
+    return messagesRef.current
+      .filter((m) => m.type === MessageType.User)
+      .map((m) => m.message ?? '');
+  }, [generating, running]);
+
   const [_userMessagesIndex, setUserMessagesIndex] = useState(-1);
   const [tool, setTool] = useState<Tool>({} as Tool);
 
@@ -52,14 +61,6 @@ const ChatBar = ({
     }
     return '';
   };
-
-  useEffect(() => {
-    setUserMessages(
-      messages
-        .filter((m) => m.type === MessageType.User)
-        .map((m) => m.message ?? '')
-    );
-  }, [generating, running]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

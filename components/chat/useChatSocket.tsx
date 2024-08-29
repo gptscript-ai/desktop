@@ -1,3 +1,5 @@
+// TODO [ryanhopperlowe] refactor this file to create a separate state for loadingChat so that
+// it doesn't recreate the entire chat state on every chunk of generated text
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import {
@@ -42,13 +44,8 @@ const useChatSocket = (isEmpty?: boolean) => {
   const trustedOpenAPIRef = useRef<Record<string, Record<string, boolean>>>({});
 
   // update the refs as the state changes
-  useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
-
-  useEffect(() => {
-    socketRef.current = socket;
-  }, [socket]);
+  messagesRef.current = messages;
+  socketRef.current = socket;
 
   const handleError = useCallback((error: string) => {
     setGenerating(false);
