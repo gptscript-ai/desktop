@@ -34,6 +34,7 @@ const ChatBar = ({
   const [locked, setLocked] = useState(false);
   const {
     generating,
+    running,
     interrupt,
     hasParams,
     scriptContent,
@@ -58,7 +59,7 @@ const ChatBar = ({
         .filter((m) => m.type === MessageType.User)
         .map((m) => m.message ?? '')
     );
-  }, [messages]);
+  }, [generating, running]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
