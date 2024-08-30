@@ -176,7 +176,7 @@ const mount = async (
 
     // also load the tools defined the states so that when running a thread that has tools added in state, we don't lose them
     for (let block of script) {
-      if (block.type === 'tool') {
+      if (block.type !== 'text') {
         block.tools = [
           ...new Set([...(block.tools || []), ...(state.tools || [])]),
         ];
@@ -267,7 +267,7 @@ const mount = async (
 
     // find the root tool and then add the new tool
     for (let block of script) {
-      if (block.type === 'tool') {
+      if (block.type !== 'text') {
         block.tools = [...new Set([...(block.tools || []), tool])];
         break;
       }
@@ -296,7 +296,7 @@ const mount = async (
 
     // find the root tool and then remove the tool
     for (let block of script) {
-      if (block.type === 'tool') {
+      if (block.type !== 'text') {
         if (block.tools) {
           block.tools = [...new Set(block.tools.filter((t) => t !== tool))];
         }
@@ -325,7 +325,7 @@ const mount = async (
 
     state.tools = [];
     for (let block of script) {
-      if (block.type === 'tool') {
+      if (block.type !== 'text') {
         block.name = newName || block.name;
         block.tools = [
           ...new Set([
@@ -335,7 +335,7 @@ const mount = async (
         if (extraTools) {
           script = [...script, ...extraTools];
           block.tools.push(
-            ...extraTools.filter((t) => t.type === 'tool').map((t) => t.name)
+            ...extraTools.filter((t) => t.type !== 'text').map((t) => t.name)
           );
         }
         break;

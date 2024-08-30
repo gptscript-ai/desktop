@@ -79,7 +79,7 @@ export default function Scripts({ showFavorites }: ScriptsProps) {
       displayName: 'Copy of ' + script.agentName ?? script.displayName,
       visibility: 'private',
     };
-    if (script.script.length > 0 && script.script[0].type === 'tool') {
+    if (script.script.length > 0 && script.script[0].type !== 'text') {
       (script.script[0] as Tool).name = toCreate.displayName;
     }
     toCreate.content = await stringify(script.script);
