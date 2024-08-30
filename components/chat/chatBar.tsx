@@ -45,7 +45,7 @@ const ChatBar = ({
 
   const userMessages = useMemo(() => {
     return messagesRef.current
-      .filter((m) => m.type === MessageType.User)
+      .filter((m) => m && m.type === MessageType.User)
       .map((m) => m.message ?? '');
   }, [generating, running]);
 
