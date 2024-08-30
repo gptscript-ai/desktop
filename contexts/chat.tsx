@@ -1,15 +1,15 @@
 import React, {
   createContext,
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
   useRef,
+  useState,
 } from 'react';
 import useChatSocket from '@/components/chat/useChatSocket';
 import { Message } from '@/components/chat/messages';
-import { Block, Tool, Program } from '@gptscript-ai/gptscript';
+import { Block, Program, Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { Socket } from 'socket.io-client';
-import { getThreads, getThread, Thread, createThread } from '@/actions/threads';
+import { createThread, getThread, getThreads, Thread } from '@/actions/threads';
 import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
@@ -129,7 +129,11 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setTool(tool);
     });
 
-    loadTools(scriptContent?.filter((block) => block.type === 'tool'))
+    loadTools(
+      scriptContent
+        ?.filter((block) => block.type !== 'text')
+        .map((b) => b as ToolDef)
+    )
       .then((program) => {
         setProgram(program);
       })
