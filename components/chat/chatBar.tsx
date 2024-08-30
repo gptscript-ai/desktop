@@ -5,7 +5,7 @@ import { IoMdSend } from 'react-icons/io';
 import { Spinner } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
 import { Button, Textarea } from '@nextui-org/react';
-import Commands from '@/components/chat/chatBar/commands';
+import Commands, { ChatCommandsRef } from '@/components/chat/chatBar/commands';
 import { GoKebabHorizontal, GoSquareFill } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { MessageType } from '@/components/chat/messages';
@@ -17,8 +17,6 @@ interface ChatBarProps {
   disableCommands?: boolean;
   inputPlaceholder?: string;
   onMessageSent: (message: string) => void;
-  toolCatalogOpen: boolean;
-  setToolCatalogOpen: (open: boolean) => void;
 }
 
 const ChatBar = ({
@@ -26,11 +24,10 @@ const ChatBar = ({
   disableCommands = false,
   inputPlaceholder,
   onMessageSent,
-  toolCatalogOpen,
-  setToolCatalogOpen,
 }: ChatBarProps) => {
   const [inputValue, setInputValue] = useState('');
   const [commandsOpen, setCommandsOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const {
     generating,
@@ -76,6 +73,13 @@ const ChatBar = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (!catalogOpen) {
+      setInputValue('');
+    }
+    document.getElementById('chatInput')?.focus();
+  }, [catalogOpen, setInputValue]);
+
   const handleSend = () => {
     setLocked(true);
     onMessageSent(inputValue);
@@ -99,6 +103,9 @@ const ChatBar = ({
       rootTool(scriptContent).then((tool) => setTool(tool));
     }
   }, [scriptContent]);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const commandsRef = useRef<ChatCommandsRef>(null);
 
   if (!tool.chat) {
     if (hasParams)
@@ -135,20 +142,26 @@ const ChatBar = ({
       )}
       <div className="w-full relative">
         <Commands
+          ref={commandsRef}
           text={inputValue}
           setText={setInputValue}
           isOpen={commandsOpen}
           setIsOpen={setCommandsOpen}
-          toolCatalogOpen={toolCatalogOpen}
-          setToolCatalogOpen={setToolCatalogOpen}
+          isCatalogOpen={catalogOpen}
+          inputElement={inputRef.current}
+          setIsCatalogOpen={setCatalogOpen}
         >
           <Textarea
+            ref={inputRef}
             color="primary"
             isDisabled={disableInput}
             id="chatInput"
             autoComplete="off"
             placeholder={
-              inputPlaceholder || 'Start chatting or type / for more options'
+              catalogOpen
+                ? 'Search for tools to add or press <Esc> to return to the chat'
+                : inputPlaceholder ||
+                  'Start chatting or type / for more options'
             }
             value={inputValue}
             radius="full"
@@ -165,11 +178,17 @@ const ChatBar = ({
               }
               if (event.key === 'Escape') {
                 setCommandsOpen(false);
+                setCatalogOpen(false);
+                document.getElementById('chatInput')?.focus();
               }
               if (event.key === 'ArrowUp') {
-                event.preventDefault();
+                const catalogStart = document.getElementById(`catalog-item-0`);
                 if (commandsOpen) {
-                  document.getElementById('command-0')?.focus();
+                  event.preventDefault();
+                  commandsRef.current?.focusCommands();
+                } else if (catalogStart) {
+                  event.preventDefault();
+                  commandsRef.current?.focusCatalog();
                 } else {
                   setUserMessagesIndex((prevIndex) => {
                     const newIndex = Math.min(
