@@ -2,7 +2,6 @@
 
 import { ToolDef, Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
 import { gpt } from '@/config/env';
-import { createAction } from '@/actions/helpers';
 
 export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
   for (const block of toolContent) {
@@ -18,9 +17,9 @@ export const parseContent = async (toolContent: string): Promise<Tool[]> => {
   ) as Tool[];
 };
 
-export const parseBlock = createAction(async (ref: string) => {
+export const parseBlock = async (ref: string) => {
   return await gpt().parse(ref);
-});
+};
 
 export const parse = async (file: string): Promise<Tool[]> => {
   const parsedTool = await gpt().parse(file);
