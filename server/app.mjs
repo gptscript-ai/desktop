@@ -79,7 +79,7 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
                 args,
                 scriptWorkspace,
                 threadID,
-                knowledgeTool
+                scriptID
               ) => {
                 if (runningScript) {
                   await runningScript.close();
@@ -94,11 +94,11 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
                     scriptWorkspace,
                     socket,
                     threadID,
-                    gptscript,
-                    knowledgeTool
+                    scriptID,
+                    gptscript
                   );
                 } catch (e) {
-                  socket.emit('error', e);
+                  socket.emit('error', e.toString());
                 }
               }
             );
@@ -128,8 +128,8 @@ const mount = async (
   scriptWorkspace,
   socket,
   threadID,
-  gptscript,
-  knowledgeTool
+  scriptID,
+  gptscript
 ) => {
   const WORKSPACE_DIR =
     process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
@@ -149,8 +149,14 @@ const mount = async (
     workspace: scriptWorkspace,
     prompt: true,
     confirm: true,
-    env: ['GPTSCRIPT_THREAD_ID=' + threadID],
+    env: [
+      // Here we need to pass a fake GPTSCRIPT_THREAD_ID so that knowledge tool doesn't error out. Because it will always look for GPTSCRIPT_THREAD_ID in the env
+      // It should not import anything from the env. This is the case where you chat in Edit Assistant page where thread is not enabled.
+      'GPTSCRIPT_THREAD_ID=' + (threadID ? threadID : '0'),
+      'GPTSCRIPT_SCRIPT_ID=' + scriptID,
+    ],
   };
+  console.log(opts.env);
 
   if (tool) opts.subTool = tool;
 
@@ -252,7 +258,10 @@ const mount = async (
         }
       })
       .catch(
-        (e) => e && e !== 'Run has been aborted' && socket.emit('error', e)
+        (e) =>
+          e &&
+          e !== 'Run has been aborted' &&
+          socket.emit('error', e.toString())
       );
   } else {
     socket.emit('running'); // temp
@@ -278,7 +287,7 @@ const mount = async (
     if (threadID) {
       fs.writeFile(statePath, JSON.stringify(state), (err) => {
         if (err) {
-          socket.emit('error', err);
+          socket.emit('error', err.toString());
         }
       });
     }
@@ -309,7 +318,7 @@ const mount = async (
     if (threadID) {
       fs.writeFile(statePath, JSON.stringify(state), (err) => {
         if (err) {
-          socket.emit('error', err);
+          socket.emit('error', err.toString());
         }
       });
     }
@@ -317,7 +326,7 @@ const mount = async (
     socket.emit('toolRemoved', state.tools);
   });
 
-  socket.on('saveScript', async (scriptId, extraTools, newName) => {
+  socket.on('saveScript', async (scriptId, newName) => {
     if (runningScript) {
       await runningScript.close();
       runningScript = null;
@@ -327,17 +336,6 @@ const mount = async (
     for (let block of script) {
       if (block.type !== 'text') {
         block.name = newName || block.name;
-        block.tools = [
-          ...new Set([
-            ...(block.tools || []).filter((t) => t !== knowledgeTool),
-          ]),
-        ];
-        if (extraTools) {
-          script = [...script, ...extraTools];
-          block.tools.push(
-            ...extraTools.filter((t) => t.type !== 'text').map((t) => t.name)
-          );
-        }
         break;
       }
     }
@@ -345,7 +343,7 @@ const mount = async (
     if (threadID) {
       fs.writeFile(statePath, JSON.stringify(state), (err) => {
         if (err) {
-          socket.emit('error', err);
+          socket.emit('error', err.toString());
         }
       });
     }
@@ -428,7 +426,8 @@ const mount = async (
         }
       })
       .catch(
-        (e) => e && e != 'Run has been aborted' && socket.emit('error', e)
+        (e) =>
+          e && e != 'Run has been aborted' && socket.emit('error', e.toString())
       );
   });
 };

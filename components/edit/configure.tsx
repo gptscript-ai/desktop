@@ -29,7 +29,7 @@ import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
 import { RiFileSearchLine } from 'react-icons/ri';
 import FileSettingModals from '@/components/knowledge/KnowledgeModals';
 import { RiFoldersLine } from 'react-icons/ri';
-import { KNOWLEDGE_NAME } from '@/actions/knowledge/util';
+import { gatewayTool } from '@/actions/knowledge/util';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -206,7 +206,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
             >
               <RemoteImports
-                tools={root.tools?.filter((t) => t != KNOWLEDGE_NAME)}
+                tools={root.tools?.filter((t) => t != gatewayTool())}
                 setTools={setRootTools}
                 collapsed={collapsed}
               />

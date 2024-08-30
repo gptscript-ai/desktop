@@ -17,11 +17,7 @@ import { ChatContext } from '@/contexts/chat';
 import { PiFloppyDiskThin, PiUser } from 'react-icons/pi';
 import { createScript } from '@/actions/me/scripts';
 import { stringify } from '@/actions/gptscript';
-import {
-  assistantKnowledgeTool,
-  getCookie,
-  KNOWLEDGE_NAME,
-} from '@/actions/knowledge/util';
+import { getCookie } from '@/actions/knowledge/util';
 import { MessageType } from '@/components/chat/messages';
 import { Input } from '@nextui-org/input';
 import { updateThreadScript } from '@/actions/threads';
@@ -30,7 +26,6 @@ import { ensureFilesIngested, getFiles } from '@/actions/knowledge/knowledge';
 import { Dirent } from 'fs';
 import path from 'path';
 import { GoPaperclip } from 'react-icons/go';
-import { ToolDef } from '@gptscript-ai/gptscript';
 
 const SaveScriptDropdown = () => {
   const {
@@ -56,11 +51,10 @@ const SaveScriptDropdown = () => {
   async function saveKnowledge(
     scriptId: string,
     oldScriptId?: string
-  ): Promise<ToolDef | undefined> {
+  ): Promise<void> {
     const threadKnowledge = JSON.parse(
       await lsKnowledgeFiles(workspace)
     ) as Dirent[];
-    const scriptID = parseInt(scriptId!);
     const allFiles = threadKnowledge.map((file) =>
       path.join(file.path, file.name)
     );
@@ -68,8 +62,6 @@ const SaveScriptDropdown = () => {
     if (oldScriptId) {
       allFiles.push(...(await getFiles(oldScriptId)));
     }
-
-    let newKnowledgeToolBlock;
 
     if (allFiles.length) {
       setMessages((prev) => [
@@ -95,28 +87,15 @@ const SaveScriptDropdown = () => {
       }
 
       await clearThreadKnowledge(workspace);
-
-      if (
-        !scriptContent.find(
-          (t) => t.type !== 'text' && t.name === KNOWLEDGE_NAME
-        )
-      ) {
-        newKnowledgeToolBlock = await assistantKnowledgeTool(scriptID, 10);
-      }
     }
-
-    return newKnowledgeToolBlock;
+    return;
   }
 
   async function saveScript() {
     try {
-      const newKnowledgeToolBlock = await saveKnowledge(scriptId!);
+      await saveKnowledge(scriptId!);
 
-      socket?.emit(
-        'saveScript',
-        scriptId,
-        newKnowledgeToolBlock ? [newKnowledgeToolBlock] : null
-      );
+      socket?.emit('saveScript', scriptId);
       setMessages((prev) => [
         ...prev,
         {
@@ -154,14 +133,9 @@ const SaveScriptDropdown = () => {
         visibility: newScriptPrivate ? 'private' : 'public',
       });
       const newScriptId = '' + newScript.id;
-      const newKnowledgeToolBlock = await saveKnowledge(newScriptId, scriptId);
+      await saveKnowledge(newScriptId, scriptId);
 
-      socket?.emit(
-        'saveScript',
-        newScriptId,
-        newKnowledgeToolBlock ? [newKnowledgeToolBlock] : null,
-        newName
-      );
+      socket?.emit('saveScript', newScriptId, newName);
 
       await updateThreadScript(
         selectedThreadId!,

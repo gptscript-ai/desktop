@@ -28,13 +28,14 @@ const gptscriptBin =
     `gptscript${process.platform === 'win32' ? '.exe' : ''}`
   );
 const knowledgeBin =
-  process.env.KNOWLEDGE_BIN || process.env.NODE_ENV === 'production'
+  process.env.KNOWLEDGE_BIN ||
+  (process.env.NODE_ENV === 'production'
     ? join(
         process.resourcesPath,
         'bin',
         'knowledge' + (process.platform === 'win32' ? '.exe' : '')
       )
-    : join(process.cwd(), 'bin', 'knowledge');
+    : join(process.cwd(), 'bin', 'knowledge'));
 const gatewayUrl =
   process.env.GPTSCRIPT_GATEWAY_URL || 'https://gateway-api.gptscript.ai';
 
