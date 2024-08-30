@@ -15,15 +15,26 @@ import {
 import React, { useContext, useState } from 'react';
 import { ChatContext } from '@/contexts/chat';
 import { PiFloppyDiskThin, PiUser } from 'react-icons/pi';
-import { createScript, updateScript } from '@/actions/me/scripts';
+import { createScript } from '@/actions/me/scripts';
 import { stringify } from '@/actions/gptscript';
-import { gatewayTool } from '@/actions/knowledge/util';
+import {
+  assistantKnowledgeTool,
+  getCookie,
+  KNOWLEDGE_NAME,
+} from '@/actions/knowledge/util';
 import { MessageType } from '@/components/chat/messages';
 import { Input } from '@nextui-org/input';
 import { updateThreadScript } from '@/actions/threads';
+import { clearThreadKnowledge, lsKnowledgeFiles } from '@/actions/upload';
+import { ensureFilesIngested, getFiles } from '@/actions/knowledge/knowledge';
+import { Dirent } from 'fs';
+import path from 'path';
+import { GoPaperclip } from 'react-icons/go';
+import { ToolDef } from '@gptscript-ai/gptscript';
 
 const SaveScriptDropdown = () => {
   const {
+    workspace,
     selectedThreadId,
     scriptId,
     setScriptId,
@@ -31,8 +42,8 @@ const SaveScriptDropdown = () => {
     tools,
     socket,
     scriptContent,
-    setScriptContent,
     setMessages,
+    setHasRun,
   } = useContext(ChatContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -42,57 +53,93 @@ const SaveScriptDropdown = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const knowledgeTool = gatewayTool();
+  async function saveKnowledge(
+    scriptId: string,
+    oldScriptId?: string
+  ): Promise<ToolDef | undefined> {
+    const threadKnowledge = JSON.parse(
+      await lsKnowledgeFiles(workspace)
+    ) as Dirent[];
+    const scriptID = parseInt(scriptId!);
+    const allFiles = threadKnowledge.map((file) =>
+      path.join(file.path, file.name)
+    );
 
-  function saveScript() {
-    // The knowledge tool is dynamic and not controlled by the user. Don't add it to the saved tool.
-    const addedTools = tools.filter((t) => t !== knowledgeTool);
+    if (oldScriptId) {
+      allFiles.push(...(await getFiles(oldScriptId)));
+    }
 
-    // find the root tool and then add the new tool
-    for (const block of scriptContent!) {
-      if (block.type === 'tool') {
-        block.tools = (block.tools || [])
-          .filter((t) => !addedTools.includes(t))
-          .concat(...addedTools);
-        break;
+    let newKnowledgeToolBlock;
+
+    if (allFiles.length) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: MessageType.Alert,
+          icon: <GoPaperclip className="mt-1" />,
+          name: prev ? prev[prev.length - 1].name : undefined,
+          message: `Saving Knowledge to Assistant...`,
+        },
+      ]);
+
+      // Move the knowledge files from the thread workspace to the assistant data directory.
+      const ingestionError = await ensureFilesIngested(
+        allFiles,
+        true,
+        scriptId!,
+        getCookie('gateway_token')
+      );
+
+      if (ingestionError) {
+        throw Error(ingestionError);
+      }
+
+      await clearThreadKnowledge(workspace);
+
+      if (
+        !scriptContent.find(
+          (t) => t.type === 'tool' && t.name === KNOWLEDGE_NAME
+        )
+      ) {
+        newKnowledgeToolBlock = await assistantKnowledgeTool(scriptID, 10);
       }
     }
 
-    stringify(scriptContent).then((content) => {
-      updateScript({
-        content: content,
-        id: parseInt(scriptId!),
-      }).then(() => {
-        setScriptContent([...scriptContent]);
-        socket?.emit('saveScript');
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: MessageType.Alert,
-            icon: <PiUser className="mt-1" />,
-            name: prev ? prev[prev.length - 1].name : undefined,
-            message: `Assistant Saved`,
-          },
-        ]);
-      });
-    });
+    return newKnowledgeToolBlock;
+  }
+
+  async function saveScript() {
+    try {
+      const newKnowledgeToolBlock = await saveKnowledge(scriptId!);
+
+      socket?.emit(
+        'saveScript',
+        scriptId,
+        newKnowledgeToolBlock ? [newKnowledgeToolBlock] : null
+      );
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: MessageType.Alert,
+          icon: <PiUser className="mt-1" />,
+          name: prev ? prev[prev.length - 1].name : undefined,
+          message: `Assistant Saved`,
+        },
+      ]);
+    } catch (e: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: MessageType.Alert,
+          icon: <PiUser className="mt-1" />,
+          name: prev ? prev[prev.length - 1].name : undefined,
+          message: `Failed to Save Assistant: ${e.toString()}`,
+        },
+      ]);
+    }
   }
 
   async function saveScriptAs(newName: string) {
-    // The knowledge tool is dynamic and not controlled by the user. Don't add it to the saved tool.
-    const addedTools = tools.filter((t) => t !== knowledgeTool);
-
-    // find the root tool and then add the new tool
-    for (const block of scriptContent!) {
-      if (block.type === 'tool') {
-        block.tools = (block.tools || [])
-          .filter((t) => !addedTools.includes(t))
-          .concat(...addedTools);
-        block.name = newName;
-        break;
-      }
-    }
-
     try {
       const content = await stringify(scriptContent);
       const slug =
@@ -106,25 +153,42 @@ const SaveScriptDropdown = () => {
         content: content,
         visibility: newScriptPrivate ? 'private' : 'public',
       });
+      const newScriptId = '' + newScript.id;
+      const newKnowledgeToolBlock = await saveKnowledge(newScriptId, scriptId);
 
-      setScriptContent([...scriptContent]);
-      socket?.emit('saveScript');
+      socket?.emit(
+        'saveScript',
+        newScriptId,
+        newKnowledgeToolBlock ? [newKnowledgeToolBlock] : null,
+        newName
+      );
 
       await updateThreadScript(
         selectedThreadId!,
-        '' + newScript.id,
+        newScriptId,
         newScript.publicURL || ''
       );
 
-      setScriptId('' + newScript.id);
-      setScript(newScript.publicURL!);
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: MessageType.Alert,
+          icon: <PiUser className="mt-1" />,
+          name: prev ? prev[prev.length - 1].name : undefined,
+          message: `Assistant Saved`,
+        },
+      ]);
 
       setSuccessMessage(`New Assistant Saved As ${newScript.displayName}`);
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
+      setScriptId(newScriptId);
+      setScript(newScript.publicURL!);
+      // Set hasRun to false so that everything reloads.
+      setHasRun(false);
+
       setIsOpen(false);
     } catch (e: any) {
-      console.error(e);
       setErrorMessage(e.toString());
     }
 
@@ -139,16 +203,16 @@ const SaveScriptDropdown = () => {
             <PiFloppyDiskThin className="size-5" />
           </Button>
         </DropdownTrigger>
-        <DropdownMenu>
-          {scriptId ? (
-            <DropdownItem key="save" onPress={saveScript}>
-              Save Assistant
-            </DropdownItem>
-          ) : (
-            (null as any)
-          )}
+        <DropdownMenu
+          disabledKeys={
+            !scriptId || !tools || !tools.length ? ['save'] : undefined
+          }
+        >
+          <DropdownItem key="save" onPress={saveScript}>
+            Save Assistant
+          </DropdownItem>
           <DropdownItem key="save-as" onPress={() => setIsOpen(true)}>
-            Save Assistant As
+            Save Assistant As...
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
@@ -187,7 +251,7 @@ const SaveScriptDropdown = () => {
               {saving ? (
                 <Spinner size="sm" className="text-center" color="white" />
               ) : (
-                'Save As'
+                'Save'
               )}
             </Button>
           </ModalFooter>

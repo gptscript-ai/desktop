@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Block, Tool } from '@gptscript-ai/gptscript';
+import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
 import { getScript, Script, updateScript } from '@/actions/me/scripts';
 import { getTexts, parseContent, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
@@ -18,16 +18,16 @@ import {
   ensureFilesIngested,
   firstIngestion,
   getFiles,
-  getKnowledgeBinaryPath,
 } from '@/actions/knowledge/knowledge';
-import { getCookie } from '@/actions/knowledge/util';
+import {
+  assistantKnowledgeTool,
+  getCookie,
+  KNOWLEDGE_NAME,
+} from '@/actions/knowledge/util';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = 'dynamic-instructions';
 
-export const KNOWLEDGE_NAME = 'file-retrieval';
-
-export type ToolType = 'tool' | 'context' | 'agent';
 export type DependencyBlock = {
   content: string;
   forTool: string;
@@ -129,7 +129,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   // to store requirements.txt and package.json files for the script.
   const [dependencies, setDependencies] = useState<DependencyBlock[]>([]);
   const [droppedFiles, setDroppedFiles] = useState<string[]>([]);
-  const droppedFileInitiazed = useRef(false);
+  const droppedFileInitialized = useRef(false);
   // droppedFileDetail stores a map of file path and its size
   const [droppedFileDetails, setDroppedFileDetails] = useState<
     Map<
@@ -142,7 +142,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   >(new Map());
   const [topK, setTopK] = useState<number>(10);
   const [ingesting, setIngesting] = useState(false);
-  const [knowledgeTool, setKnowledgeTool] = useState<Tool>({} as Tool);
+  const [knowledgeTool, setKnowledgeTool] = useState<ToolDef>({} as ToolDef);
   const [ingestionError, setIngestionError] = useState('');
 
   const addRootTool = (tool: string) => {
@@ -160,29 +160,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
       if (!exist) {
         return;
       }
-      const knowledgePath = await getKnowledgeBinaryPath();
-      const tool = {
-        id: KNOWLEDGE_NAME,
-        name: KNOWLEDGE_NAME,
-        description:
-          'Retrieve information from files uploaded to the assistant. Use it to answer questions from the user and ALWAYS give a proper citation to the best of your abilities, including the source references (filename, page, etc.).',
-        type: 'tool',
-        credentials: [
-          'github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway',
-        ],
-        arguments: {
-          type: 'object',
-          properties: {
-            query: {
-              type: 'string',
-              description: 'Query to search in a knowledge base',
-            },
-          },
-        },
-        instructions: `#!${knowledgePath} retrieve --dataset ${scriptId.toString()} --top-k ${topK} "\${QUERY}"
-          `,
-      } as Tool;
-      setKnowledgeTool(tool);
+      setKnowledgeTool(await assistantKnowledgeTool(scriptId, topK));
     };
     update();
   }, [scriptId, droppedFiles, ingesting, topK]);
@@ -201,7 +179,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     const setFiles = async () => {
       const files = await getFiles(scriptId.toString());
       setDroppedFiles(files);
-      droppedFileInitiazed.current = true;
+      droppedFileInitialized.current = true;
     };
     setFiles();
   }, [scriptId]);
@@ -222,6 +200,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     const first = await firstIngestion(scriptId.toString(), droppedFiles);
     const error = await ensureFilesIngested(
       droppedFiles,
+      false,
       scriptId.toString(),
       getCookie('gateway_token')
     );
@@ -230,12 +209,12 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     if (first) {
       setUpdated(true);
     }
-  }, [droppedFiles, scriptId, droppedFileInitiazed, ingesting]);
+  }, [droppedFiles, scriptId, droppedFileInitialized, ingesting]);
 
   useEffect(() => {
-    if (!scriptId || !droppedFileInitiazed.current) return;
+    if (!scriptId || !droppedFileInitialized.current) return;
     ingest();
-  }, [droppedFiles, scriptId, droppedFileInitiazed]);
+  }, [droppedFiles, scriptId, droppedFileInitialized]);
 
   useEffect(() => {
     if (loading) return;
@@ -363,7 +342,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         const existing = await getScript(scriptId.toString());
         const scriptTools = [root, ...tools];
         if (knowledgeTool.name) {
-          scriptTools.push(knowledgeTool);
+          scriptTools.push(knowledgeTool as Tool);
         }
         const toUpdate: Script = {
           visibility: visibility,

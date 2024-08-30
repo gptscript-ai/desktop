@@ -39,6 +39,13 @@ export async function deleteKnowledgeFile(workspace: string, name: string) {
   return deleteFile(path.join(path.dirname(workspace), 'knowledge', name));
 }
 
+export async function clearThreadKnowledge(workspace: string) {
+  return fs.rm(path.join(path.dirname(workspace), 'knowledge'), {
+    recursive: true,
+    force: true,
+  });
+}
+
 export async function lsFiles(dir: string): Promise<string> {
   let files: Dirent[] = [];
   try {

@@ -12,6 +12,9 @@ import {
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
 import ConfirmForm from './messages/confirmForm';
+import { rootTool, stringify } from '@/actions/gptscript';
+import { updateScript } from '@/actions/me/scripts';
+import { gatewayTool } from '@/actions/knowledge/util';
 
 const useChatSocket = (isEmpty?: boolean) => {
   const initiallyTrustedRepos = [
@@ -264,8 +267,25 @@ const useChatSocket = (isEmpty?: boolean) => {
     []
   );
 
-  const handleToolAdjusted = (tools: string[]) => {
+  const handleToolChange = async (
+    tools: string[],
+    scriptId?: string,
+    scriptContent?: Block[]
+  ) => {
     setTools(tools);
+    if (scriptContent) {
+      // Ensure the knowledge tool isn't set.
+      const tool = await rootTool(scriptContent);
+      tool.tools = (tool.tools || []).filter((t) => t !== gatewayTool());
+      setScriptContent(scriptContent);
+      if (scriptId) {
+        const content = await stringify(scriptContent);
+        await updateScript({
+          content: content,
+          id: parseInt(scriptId),
+        });
+      }
+    }
     setRunning(true);
   };
 
@@ -399,9 +419,13 @@ const useChatSocket = (isEmpty?: boolean) => {
       (data: { frame: CallFrame; state: any; name?: string }) =>
         handleConfirmRequest(data)
     );
-    socket.on('toolAdded', (tools: string[]) => handleToolAdjusted(tools));
-    socket.on('toolRemoved', (tools: string[]) => handleToolAdjusted(tools));
-    socket.on('scriptSaved', (tools: string[]) => handleToolAdjusted(tools));
+    socket.on('toolAdded', (tools: string[]) => handleToolChange(tools));
+    socket.on('toolRemoved', (tools: string[]) => handleToolChange(tools));
+    socket.on(
+      'scriptSaved',
+      (scriptId: string, script: Block[], tools: string[]) =>
+        handleToolChange(tools, scriptId, script)
+    );
     socket.on(
       'loaded',
       (data: {
