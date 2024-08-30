@@ -1,3 +1,9 @@
+export interface FileDetail {
+  fileName: string;
+  size: number;
+  type: 'local' | 'notion';
+}
+
 export function gatewayTool(): string {
   return 'github.com/gptscript-ai/knowledge/gateway@v0.4.14-rc.5';
 }

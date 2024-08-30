@@ -1,11 +1,9 @@
-import { gatewayTool } from '@/actions/knowledge/util';
 import AssistantNotFound from '@/components/assistant-not-found';
 import Chat from '@/components/chat';
 import Code from '@/components/edit/configure/code';
 import RemoteImports from '@/components/edit/configure/imports';
 import Models from '@/components/edit/configure/models';
 import Visibility from '@/components/edit/configure/visibility';
-import FileSettingModals from '@/components/knowledge/KnowledgeModals';
 import Loading from '@/components/loading';
 import { ChatContext } from '@/contexts/chat';
 import { EditContext } from '@/contexts/edit';
@@ -27,7 +25,12 @@ import { HiCog } from 'react-icons/hi2';
 import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { PiToolboxBold } from 'react-icons/pi';
-import { RiFileSearchLine, RiFoldersLine } from 'react-icons/ri';
+import { RiFileSearchLine, RiNotionFill } from 'react-icons/ri';
+import FileSettingModals from '@/components/knowledge/KnowledgeModals';
+import { RiFoldersLine } from 'react-icons/ri';
+import FileModal from '@/components/knowledge/FileModal';
+import { gatewayTool } from '@/actions/knowledge/util';
+import { importFiles } from '@/actions/knowledge/filehelper';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -48,9 +51,8 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     setDynamicInstructions,
     dependencies,
     setDependencies,
+    droppedFiles,
     setDroppedFiles,
-    droppedFileDetails,
-    setDroppedFileDetails,
     ingesting,
     ingest,
     updated,
@@ -59,6 +61,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
   } = useContext(EditContext);
   const { restartScript } = useContext(ChatContext);
   const fileSettingModal = useDisclosure();
+  const addFileModal = useDisclosure();
 
   const abbreviate = (name: string) => {
     const words = name.split(/(?=[A-Z])|[\s_-]/);
@@ -78,10 +81,18 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-    input.onchange = (event: any) => {
-      const files = Array.from(event.target?.files);
-      const filePaths = files.map((file: any) => file.path as string);
-      setDroppedFiles((prevFiles: string[]) => [...prevFiles, ...filePaths]);
+    input.onchange = async (event: any) => {
+      const files = await importFiles(
+        Array.from(event.target?.files).map((file: any) => file.path as string),
+        'local'
+      );
+      setDroppedFiles((prev) => {
+        const newMap = new Map(prev);
+        for (const file of Array.from(files.entries())) {
+          newMap.set(file[0], file[1]);
+        }
+        return newMap;
+      });
     };
     input.click();
   };
@@ -176,49 +187,51 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             >
               <div className="grid grid-cols-1 gap-2 w-full mb-2">
                 <div className="max-h-[30vh] flex flex-col space-y-2 overflow-auto">
-                  {Array.from(droppedFileDetails.entries()).map(
-                    (fileDetail, i) => (
-                      <div key={i} className="flex space-x-2">
-                        <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
-                          <div className="flex items-center space-x-2 overflow-x-auto">
-                            <RiFileSearchLine />
-                            <p className="capitalize">
+                  {Array.from(droppedFiles.entries()).map((fileDetail, i) => (
+                    <div key={i} className="flex space-x-2">
+                      <div className="flex flex-row w-full border-2 justify-between truncate dark:border-zinc-700 text-sm pl-2 rounded-lg">
+                        <div className="flex items-center">
+                          {fileDetail[1].type === 'local' && (
+                            <RiFileSearchLine className="justify-start mr-2" />
+                          )}
+                          {fileDetail[1].type === 'notion' && (
+                            <RiNotionFill className="justify-start mr-2" />
+                          )}
+                          <div className="flex flex-row justify-start overflow-x-auto">
+                            <p className="capitalize text-left">
                               {fileDetail[1].fileName}
                             </p>
                             <p className="text-xs text-zinc-400 ml-2">{`${fileDetail[1].size} KB`}</p>
                           </div>
-                          <Button
-                            variant="light"
-                            isIconOnly
-                            size="sm"
-                            startContent={<GoTrash />}
-                            onPress={() => {
-                              setDroppedFiles((prev) =>
-                                prev.filter((f) => f !== fileDetail[0])
-                              );
-                              const newDetails = new Map(droppedFileDetails);
-                              newDetails.delete(fileDetail[0]);
-                              setDroppedFileDetails(newDetails);
-                            }}
-                          />
                         </div>
+                        <Button
+                          variant="light"
+                          isIconOnly
+                          size="sm"
+                          startContent={<GoTrash />}
+                          onPress={() => {
+                            setDroppedFiles((prev) => {
+                              const newMap = new Map(prev);
+                              newMap.delete(fileDetail[0]);
+                              return newMap;
+                            });
+                          }}
+                        />
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
                 </div>
                 <div className="flex justify-end mt-2">
-                  {droppedFileDetails?.size > 0 &&
-                    !ingesting &&
-                    !ingestionError && (
-                      <div className="flex justify-center">
-                        <RiFoldersLine />
-                        <p className="text-sm text-zinc-500 ml-2">{`${droppedFileDetails.size} ${droppedFileDetails.size === 1 ? 'file' : 'files'}, ${Array.from(
-                          droppedFileDetails.values()
-                        )
-                          .reduce((acc, detail) => acc + detail.size, 0)
-                          .toFixed(2)} KB`}</p>
-                      </div>
-                    )}
+                  {droppedFiles?.size > 0 && !ingesting && !ingestionError && (
+                    <div className="flex justify-center">
+                      <RiFoldersLine />
+                      <p className="text-sm text-zinc-500 ml-2">{`${droppedFiles.size} ${droppedFiles.size === 1 ? 'file' : 'files'}, ${Array.from(
+                        droppedFiles.values()
+                      )
+                        .reduce((acc, detail) => acc + detail.size, 0)
+                        .toFixed(2)} KB`}</p>
+                    </div>
+                  )}
                   {ingesting && !ingestionError && (
                     <Spinner size="sm" className="ml-2" />
                   )}
@@ -240,7 +253,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
                 </div>
               </div>
               <div
-                className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${droppedFileDetails.size > 0 ? 'pt-4' : ''}`}
+                className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${droppedFiles.size > 0 ? 'pt-4' : ''}`}
               >
                 <Button
                   className="w-full"
@@ -260,7 +273,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
                   isIconOnly
                   size="sm"
                   startContent={<IoMdAdd className="mr-2" />}
-                  onPress={handleAddFiles}
+                  onPress={addFileModal.onOpen}
                 >
                   Add Files
                 </Button>
@@ -362,6 +375,11 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
       <FileSettingModals
         isFileSettingOpen={fileSettingModal.isOpen}
         onFileSettingClose={fileSettingModal.onClose}
+      />
+      <FileModal
+        isOpen={addFileModal.isOpen}
+        onClose={addFileModal.onClose}
+        handleAddFile={handleAddFiles}
       />
     </>
   );

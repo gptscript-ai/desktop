@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { FileDetail } from '@/actions/knowledge/util';
 
 export async function getFileOrFolderSizeInKB(
   filePath: string
@@ -30,4 +31,21 @@ export async function getFileOrFolderSizeInKB(
 
 export async function getBasename(filePath: string): Promise<string> {
   return path.basename(filePath);
+}
+
+export async function importFiles(
+  files: string[],
+  type: 'local' | 'notion'
+): Promise<Map<string, FileDetail>> {
+  const result: Map<string, FileDetail> = new Map();
+
+  for (const file of files) {
+    result.set(file, {
+      fileName: path.basename(file),
+      size: await getFileOrFolderSizeInKB(file),
+      type: type,
+    });
+  }
+
+  return result;
 }

@@ -10,16 +10,17 @@ import { getScript, Script, updateScript } from '@/actions/me/scripts';
 import { getTexts, parseContent, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
 import {
-  getBasename,
-  getFileOrFolderSizeInKB,
-} from '@/actions/knowledge/filehelper';
-import {
   datasetExists,
-  ensureFilesIngested,
+  ensureFiles,
   firstIngestion,
   getFiles,
+  runKnowledgeIngest,
 } from '@/actions/knowledge/knowledge';
-import { ensureKnowledgeTool, getCookie } from '@/actions/knowledge/util';
+import {
+  ensureKnowledgeTool,
+  FileDetail,
+  getCookie,
+} from '@/actions/knowledge/util';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = 'dynamic-instructions';
@@ -59,25 +60,9 @@ interface EditContextState {
   dynamicInstructions: string;
   setDynamicInstructions: React.Dispatch<React.SetStateAction<string>>;
   scriptPath: string;
-  droppedFiles: string[];
-  setDroppedFiles: React.Dispatch<React.SetStateAction<string[]>>;
-  droppedFileDetails: Map<
-    string,
-    {
-      fileName: string;
-      size: number;
-    }
-  >;
-  setDroppedFileDetails: React.Dispatch<
-    React.SetStateAction<
-      Map<
-        string,
-        {
-          fileName: string;
-          size: number;
-        }
-      >
-    >
+  droppedFiles: Map<string, FileDetail>;
+  setDroppedFiles: React.Dispatch<
+    React.SetStateAction<Map<string, FileDetail>>
   >;
   topK: number;
   setTopK: React.Dispatch<React.SetStateAction<number>>;
@@ -124,18 +109,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   // Dependencies are special text tools that reference a tool, type, and content. They are used
   // to store requirements.txt and package.json files for the script.
   const [dependencies, setDependencies] = useState<DependencyBlock[]>([]);
-  const [droppedFiles, setDroppedFiles] = useState<string[]>([]);
+  const [droppedFiles, setDroppedFiles] = useState<Map<string, FileDetail>>(
+    new Map()
+  );
   const droppedFileInitialized = useRef(false);
-  // droppedFileDetail stores a map of file path and its size
-  const [droppedFileDetails, setDroppedFileDetails] = useState<
-    Map<
-      string,
-      {
-        fileName: string;
-        size: number;
-      }
-    >
-  >(new Map());
   const [topK, setTopK] = useState<number>(10);
   const [ingesting, setIngesting] = useState(false);
   const [ingestionError, setIngestionError] = useState('');
@@ -170,31 +147,23 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     setFiles();
   }, [scriptId]);
 
+  useEffect(() => {}, [droppedFiles]);
+
   const ingest = useCallback(async () => {
     setIngesting(true);
-    setIngestionError('');
-    const newDetails = new Map(droppedFileDetails);
-    for (const file of droppedFiles) {
-      const size = await getFileOrFolderSizeInKB(file);
-      const filename = await getBasename(file);
-      newDetails.set(file, {
-        fileName: filename,
-        size: size,
-      });
-    }
-    setDroppedFileDetails(newDetails);
     const first = await firstIngestion(scriptId.toString(), droppedFiles);
-    const error = await ensureFilesIngested(
-      droppedFiles,
-      false,
-      scriptId.toString(),
-      getCookie('gateway_token')
-    );
-    setIngestionError(error);
-    setIngesting(false);
+
+    try {
+      await ensureFiles(droppedFiles, scriptId.toString(), false);
+      await runKnowledgeIngest(scriptId.toString(), getCookie('gateway_token'));
+    } catch (e) {
+      console.error(e);
+      setIngestionError((e as Error).toString());
+    }
     if (first) {
       setUpdated(true);
     }
+    setIngesting(false);
   }, [droppedFiles, scriptId, droppedFileInitialized, ingesting]);
 
   useEffect(() => {
@@ -409,8 +378,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         createNewTool,
         droppedFiles,
         setDroppedFiles,
-        droppedFileDetails,
-        setDroppedFileDetails,
         topK,
         setTopK,
         ingesting,
