@@ -12,9 +12,8 @@ import { PiToolboxThin, PiXThin } from 'react-icons/pi';
 import { MessageType } from '@/components/chat/messages';
 import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
-import { gatewayTool } from '@/actions/knowledge/util';
+import { gatewayTool, KNOWLEDGE_NAME } from '@/actions/knowledge/util';
 import { ToolReference } from '@gptscript-ai/gptscript';
-import { KNOWLEDGE_NAME } from '@/contexts/edit';
 
 const dynamicToolName = 'Dynamic Instructions';
 const fileRetrievalName = 'File Retrieval';
@@ -114,7 +113,13 @@ const ScriptToolsDropdown = () => {
   }
 
   return (
-    <Dropdown placement="bottom-start" closeOnSelect={false}>
+    <Dropdown
+      placement="bottom-start"
+      closeOnSelect={false}
+      classNames={{
+        base: 'w-[300px] max-h-[520px] overflow-y-auto',
+      }}
+    >
       <DropdownTrigger>
         <Button variant="light" isIconOnly>
           <PiToolboxThin className="size-5" />
@@ -127,7 +132,19 @@ const ScriptToolsDropdown = () => {
           }}
         >
           {program.toolSet && (
-            <DropdownSection title="Assistant's Tools">
+            <DropdownSection
+              title={
+                `Assistant Tools` +
+                (assistantTools.length
+                  ? ` (${assistantTools.length} tool`
+                  : '') +
+                (assistantTools.length > 1
+                  ? 's)'
+                  : assistantTools.length
+                    ? ')'
+                    : '')
+              }
+            >
               {assistantTools.length > 0 ? (
                 assistantTools.map(([t, v]) => (
                   <DropdownItem
@@ -163,8 +180,10 @@ const ScriptToolsDropdown = () => {
           )}
           <DropdownSection
             title={
-              "Thread's Tools" +
-              (threadTools.length > 0 ? ' (Click to remove)' : '')
+              'Thread Tools' +
+              (threadTools.length ? ` (${threadTools.length} tool` : '') +
+              (threadTools.length > 1 ? 's' : '') +
+              (threadTools.length ? ', Click to remove)' : '')
             }
           >
             {threadTools && threadTools.length ? (

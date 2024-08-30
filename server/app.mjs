@@ -317,13 +317,30 @@ const mount = async (
     socket.emit('toolRemoved', state.tools);
   });
 
-  socket.on('saveScript', async () => {
+  socket.on('saveScript', async (scriptId, extraTools, newName) => {
     if (runningScript) {
       await runningScript.close();
       runningScript = null;
     }
 
-    state.tools = state.tools.filter((t) => t === knowledgeTool);
+    state.tools = [];
+    for (let block of script) {
+      if (block.type === 'tool') {
+        block.name = newName || block.name;
+        block.tools = [
+          ...new Set([
+            ...(block.tools || []).filter((t) => t !== knowledgeTool),
+          ]),
+        ];
+        if (extraTools) {
+          script = [...script, ...extraTools];
+          block.tools.push(
+            ...extraTools.filter((t) => t.type === 'tool').map((t) => t.name)
+          );
+        }
+        break;
+      }
+    }
 
     if (threadID) {
       fs.writeFile(statePath, JSON.stringify(state), (err) => {
@@ -333,10 +350,10 @@ const mount = async (
       });
     }
 
-    socket.emit('scriptSaved', state.tools);
+    socket.emit('scriptSaved', scriptId, script, state.tools);
   });
 
-  // If the user sends a message, we continue and setup the next chat's event listeners
+  // If the user sends a message, we continue and set up the next chat's event listeners
   socket.on('userMessage', async (message, newThreadId) => {
     if (newThreadId) {
       threadID = newThreadId;

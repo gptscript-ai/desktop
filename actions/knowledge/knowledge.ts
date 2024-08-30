@@ -47,6 +47,7 @@ export async function firstIngestion(
 
 export async function ensureFilesIngested(
   files: string[],
+  updateOnly: boolean,
   scriptId: string,
   token: string
 ): Promise<string> {
@@ -69,19 +70,21 @@ export async function ensureFilesIngested(
     }
   }
 
-  try {
-    const filesInDir = await fs.promises.readdir(dir);
-    for (const fileName of filesInDir) {
-      const fullPath = path.join(dir, fileName);
-      const fileInDroppedFiles = files.find(
-        (file) => path.basename(file) === path.basename(fullPath)
-      );
-      if (!fileInDroppedFiles || !files || files.length === 0) {
-        await fs.promises.unlink(fullPath);
+  if (!updateOnly) {
+    try {
+      const filesInDir = await fs.promises.readdir(dir);
+      for (const fileName of filesInDir) {
+        const fullPath = path.join(dir, fileName);
+        const fileInDroppedFiles = files.find(
+          (file) => path.basename(file) === path.basename(fullPath)
+        );
+        if (!fileInDroppedFiles || !files || files.length === 0) {
+          await fs.promises.unlink(fullPath);
+        }
       }
+    } catch (error) {
+      return `Error deleting files: ${error}`;
     }
-  } catch (error) {
-    return `Error deleting files: ${error}`;
   }
 
   try {

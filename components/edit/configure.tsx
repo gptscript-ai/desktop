@@ -4,7 +4,7 @@ import Loading from '@/components/loading';
 import Models from '@/components/edit/configure/models';
 import Visibility from '@/components/edit/configure/visibility';
 import Code from '@/components/edit/configure/code';
-import { EditContext, KNOWLEDGE_NAME } from '@/contexts/edit';
+import { EditContext } from '@/contexts/edit';
 import { GoLightBulb, GoTrash } from 'react-icons/go';
 import { HiCog } from 'react-icons/hi2';
 import { LuCircuitBoard } from 'react-icons/lu';
@@ -29,6 +29,7 @@ import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
 import { RiFileSearchLine } from 'react-icons/ri';
 import FileSettingModals from '@/components/knowledge/KnowledgeModals';
 import { RiFoldersLine } from 'react-icons/ri';
+import { KNOWLEDGE_NAME } from '@/actions/knowledge/util';
 
 interface ConfigureProps {
   collapsed?: boolean;
