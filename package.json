@@ -22,7 +22,7 @@
   },
   "main": "electron/main.mjs",
   "dependencies": {
-    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#5c4094546790ec408b64f27234865be9d9bef065",
+    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#bca349b5407421749a782884b85a9e3f97eb8368",
     "@monaco-editor/react": "^4.6.0",
     "@nextui-org/button": "2.0.32",
     "@nextui-org/code": "2.0.28",
