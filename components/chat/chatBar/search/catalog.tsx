@@ -1,6 +1,5 @@
 import { useDebouncedValue } from '@/hooks/useDebounce';
-import { useFetch } from '@/hooks/useFetch';
-import { FeaturedTools, ToolsApiResponse } from '@/model/tools';
+import { FeaturedTools } from '@/model/tools';
 import {
   Card,
   Listbox,
@@ -58,12 +57,6 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
 
     const debouncedQuery = useDebouncedValue(query, 250);
 
-    const fetchTools = useFetch<ToolsApiResponse>(
-      'https://tools.gptscript.ai/api/search?q=' + debouncedQuery,
-      { disabled: !debouncedQuery, clearOnDisabled: true }
-    );
-    const { tools: toolsFromQuery = {} } = fetchTools.data ?? {};
-
     const featuredResults = useMemo(() => {
       const flattened = (featuredTools: FeaturedTools) =>
         Object.entries(featuredTools).flatMap(([category, tools]) =>
@@ -107,27 +100,6 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
     const { resultsWithIndexes, lastIndex } = useMemo(() => {
       let index = 0;
       const featuredCategories = Object.entries(featuredResults);
-
-      if (Object.keys(toolsFromQuery).length !== 0) {
-        featuredCategories.push([
-          'Community Tools',
-          Object.entries(toolsFromQuery)
-            .filter(
-              ([name]) =>
-                !Object.values(featuredResults)
-                  .flat()
-                  .some((tool) => tool.url === name)
-            )
-            .map(([toolName, tools]) => ({
-              url: toolName,
-              name: toolName.split('/').pop()?.replace(/-/g, ' ') ?? '',
-              description: tools[0]?.description ?? '',
-              tags: [],
-              icon: <></>,
-            })),
-        ]);
-      }
-
       const resultsWithIndexes = featuredCategories.map(
         ([category, tools]) =>
           [
@@ -151,7 +123,7 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
         resultsWithIndexes,
         lastIndex,
       };
-    }, [featuredResults, toolsFromQuery]);
+    }, [featuredResults]);
 
     const [focusedItem, setFocusedItem] = useState<number | null>(null);
 

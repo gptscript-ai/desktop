@@ -61,8 +61,8 @@ import { useFilePicker } from 'use-file-picker';
 
 const Command = {
   Restart: 'restart',
-  ToolCatalog: 'catalog',
-  AddExternalTools: 'add',
+  ToolCatalog: 'addToolFromCatalog',
+  AddExternalTools: 'addToolFromUrl',
   Workspace: 'workspace',
   Knowledge: 'knowledge',
 } as const;
@@ -269,6 +269,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
 
       setLoadingTool(null);
       urlToolModal.onClose();
+      setIsCatalogOpen(false);
 
       getToolDisplayName(loadingToolRef.current).then((name) => {
         setMessages((prev) => [
