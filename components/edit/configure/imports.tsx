@@ -256,7 +256,7 @@ const iconForTool = (toolName: string | undefined) => {
       return <BsFiles className="text-md" />;
     case 'github.com/gptscript-ai/context/workspace':
       return <GoFileDirectory className="text-md" />;
-    case 'github.com/gptscript-ai/tools/clis/github':
+    case 'github.com/gptscript-ai/tools/apis/github':
       return <FaGithub className="text-md" />;
     case 'github.com/gptscript-ai/tools/clis/aws':
       return <FaAws className="text-md" />;

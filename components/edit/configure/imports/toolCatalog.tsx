@@ -194,8 +194,8 @@ const featuredTools: FeaturedTools = {
     {
       name: 'Github',
       description: 'Provides the ability to interact with GitHub.',
-      url: 'github.com/gptscript-ai/tools/clis/github',
-      tags: ['github', 'cli'],
+      url: 'github.com/gptscript-ai/tools/apis/github/write',
+      tags: ['github', 'api'],
       icon: <FaGithub className="text-2xl" />,
     },
     {
