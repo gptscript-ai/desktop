@@ -6,7 +6,7 @@ import { createAction } from '@/actions/helpers';
 
 export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
   for (const block of toolContent) {
-    if (block.type === 'tool') return block;
+    if (block.type !== 'text') return block;
   }
   return {} as Tool;
 };
@@ -14,7 +14,7 @@ export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
 export const parseContent = async (toolContent: string): Promise<Tool[]> => {
   const parsedTool = await gpt().parseContent(toolContent);
   return parsedTool.filter(
-    (block) => block.type === 'tool' && !block.name?.startsWith('metadata')
+    (block) => block.type !== 'text' && !block.name?.startsWith('metadata')
   ) as Tool[];
 };
 
@@ -25,7 +25,7 @@ export const parseBlock = createAction(async (ref: string) => {
 export const parse = async (file: string): Promise<Tool[]> => {
   const parsedTool = await gpt().parse(file);
   return parsedTool.filter(
-    (block) => block.type === 'tool' && !block.name?.startsWith('metadata')
+    (block) => block.type !== 'text' && !block.name?.startsWith('metadata')
   ) as Tool[];
 };
 

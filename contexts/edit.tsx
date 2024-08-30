@@ -327,7 +327,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         withoutRoot.splice(i, 1);
         break;
       }
-      return withoutRoot.filter((block) => block.type === 'tool') as Tool[];
+      return withoutRoot.filter((block) => block.type !== 'text') as Tool[];
     },
     [root]
   );

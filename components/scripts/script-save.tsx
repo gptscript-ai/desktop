@@ -98,7 +98,7 @@ const SaveScriptDropdown = () => {
 
       if (
         !scriptContent.find(
-          (t) => t.type === 'tool' && t.name === KNOWLEDGE_NAME
+          (t) => t.type !== 'text' && t.name === KNOWLEDGE_NAME
         )
       ) {
         newKnowledgeToolBlock = await assistantKnowledgeTool(scriptID, 10);
