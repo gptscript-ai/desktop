@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Block, Tool, ToolDef } from '@gptscript-ai/gptscript';
+import { Block, Tool } from '@gptscript-ai/gptscript';
 import { getScript, Script, updateScript } from '@/actions/me/scripts';
 import { getTexts, parseContent, stringify } from '@/actions/gptscript';
 import { getModels } from '@/actions/models';
@@ -19,11 +19,7 @@ import {
   firstIngestion,
   getFiles,
 } from '@/actions/knowledge/knowledge';
-import {
-  assistantKnowledgeTool,
-  getCookie,
-  KNOWLEDGE_NAME,
-} from '@/actions/knowledge/util';
+import { ensureKnowledgeTool, getCookie } from '@/actions/knowledge/util';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = 'dynamic-instructions';
@@ -142,7 +138,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   >(new Map());
   const [topK, setTopK] = useState<number>(10);
   const [ingesting, setIngesting] = useState(false);
-  const [knowledgeTool, setKnowledgeTool] = useState<ToolDef>({} as ToolDef);
   const [ingestionError, setIngestionError] = useState('');
 
   const addRootTool = (tool: string) => {
@@ -160,19 +155,10 @@ const EditContextProvider: React.FC<EditContextProps> = ({
       if (!exist) {
         return;
       }
-      setKnowledgeTool(await assistantKnowledgeTool(scriptId, topK));
+      setRoot({ ...root, tools: ensureKnowledgeTool(root.tools ?? []) });
     };
     update();
   }, [scriptId, droppedFiles, ingesting, topK]);
-
-  useEffect(() => {
-    if (
-      knowledgeTool.name === KNOWLEDGE_NAME &&
-      !root.tools?.includes(KNOWLEDGE_NAME)
-    ) {
-      addRootTool(knowledgeTool.name);
-    }
-  }, [knowledgeTool, ingesting]);
 
   useEffect(() => {
     if (!scriptId) return;
@@ -264,13 +250,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({
             ?.instructions || ''
         );
 
-        setTools((prevTools) => {
-          return prevTools.filter((t) => {
-            return t.name !== KNOWLEDGE_NAME;
-          });
-        });
-        //ensureDynamicInstruction();
-
         const dependencies = texts.filter((t) =>
           t.format?.includes('metadata:')
         );
@@ -292,7 +271,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
   useEffect(() => {
     if (loading) return;
     update();
-  }, [root, tools, visibility, knowledgeTool]);
+  }, [root, tools, visibility]);
 
   useEffect(() => {
     setTools((prevTools) => {
@@ -340,13 +319,9 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     debounceTimer.current = setTimeout(async () => {
       if (scriptId && visibility && root && root.name) {
         const existing = await getScript(scriptId.toString());
-        const scriptTools = [root, ...tools];
-        if (knowledgeTool.name) {
-          scriptTools.push(knowledgeTool as Tool);
-        }
         const toUpdate: Script = {
           visibility: visibility,
-          content: await stringify(scriptTools),
+          content: await stringify([root, ...tools]),
           id: scriptId,
         };
         // Only update slug when displayName has changed
@@ -362,7 +337,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         await updateScript(toUpdate).catch((error) => console.error(error));
       }
     }, DEBOUNCE_TIME);
-  }, [scriptId, root, tools, visibility, knowledgeTool]);
+  }, [scriptId, root, tools, visibility]);
 
   const newestToolName = useCallback(() => {
     let num = 1;

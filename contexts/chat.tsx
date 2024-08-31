@@ -249,7 +249,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       formValues,
       workspace,
       thread,
-      gatewayTool()
+      scriptId
     );
     setHasRun(true);
   }, [tool, connected, script, scriptContent, formValues, workspace, hasRun]);
@@ -263,7 +263,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         formValues,
         workspace,
         thread,
-        gatewayTool()
+        scriptId
       );
       setForceRun(false);
     }

@@ -22,7 +22,6 @@ import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 import SaveScriptDropdown from '@/components/scripts/script-save';
 import { Tool } from '@gptscript-ai/gptscript';
 import { rootTool } from '@/actions/gptscript';
-import { gatewayTool } from '@/actions/knowledge/util';
 
 interface ScriptProps {
   className?: string;
@@ -47,6 +46,7 @@ const Chat: React.FC<ScriptProps> = ({
 
   const {
     script,
+    scriptId,
     scriptDisplayName,
     scriptContent,
     showForm,
@@ -93,7 +93,7 @@ const Chat: React.FC<ScriptProps> = ({
         formValues,
         workspace,
         thread,
-        gatewayTool()
+        scriptId
       );
     });
     setHasRun(true);

@@ -12,11 +12,10 @@ import { PiToolboxThin, PiXThin } from 'react-icons/pi';
 import { MessageType } from '@/components/chat/messages';
 import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
-import { gatewayTool, KNOWLEDGE_NAME } from '@/actions/knowledge/util';
+import { gatewayTool } from '@/actions/knowledge/util';
 import { ToolReference } from '@gptscript-ai/gptscript';
 
 const dynamicToolName = 'Dynamic Instructions';
-const fileRetrievalName = 'File Retrieval';
 
 const ScriptToolsDropdown = () => {
   const { program, tools, socket, setMessages } = useContext(ChatContext);
@@ -67,20 +66,12 @@ const ScriptToolsDropdown = () => {
       return dynamicToolName;
     }
 
-    if (name === KNOWLEDGE_NAME) {
-      return fileRetrievalName;
-    }
-
     return name;
   }
 
   function getDisplayName(ref: string): string {
     if (ref === 'dynamic-instructions') {
       return dynamicToolName;
-    }
-
-    if (ref === KNOWLEDGE_NAME) {
-      return fileRetrievalName;
     }
 
     return (

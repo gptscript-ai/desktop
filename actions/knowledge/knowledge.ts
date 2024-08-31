@@ -105,7 +105,6 @@ async function runKnowledgeIngest(
   knowledgePath: string,
   token: string
 ): Promise<void> {
-  // Start the ingestion process in the background
   await execPromise(
     `${process.env.KNOWLEDGE_BIN} ingest --prune --dataset ${id} ./data`,
     {
