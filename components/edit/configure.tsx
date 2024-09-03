@@ -187,39 +187,41 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             >
               <div className="grid grid-cols-1 gap-2 w-full mb-2">
                 <div className="max-h-[30vh] flex flex-col space-y-2 overflow-auto">
-                  {Array.from(droppedFiles.entries()).map((fileDetail, i) => (
-                    <div key={i} className="flex space-x-2">
-                      <div className="flex flex-row w-full border-2 justify-between truncate dark:border-zinc-700 text-sm pl-2 rounded-lg">
-                        <div className="flex items-center">
-                          {fileDetail[1].type === 'local' && (
-                            <RiFileSearchLine className="justify-start mr-2" />
-                          )}
-                          {fileDetail[1].type === 'notion' && (
-                            <RiNotionFill className="justify-start mr-2" />
-                          )}
-                          <div className="flex flex-row justify-start overflow-x-auto">
-                            <p className="capitalize text-left">
-                              {fileDetail[1].fileName}
-                            </p>
-                            <p className="text-xs text-zinc-400 ml-2">{`${fileDetail[1].size} KB`}</p>
+                  {Array.from(droppedFiles.entries()).map(
+                    ([key, fileDetail], _) => (
+                      <div key={key} className="flex space-x-2">
+                        <div className="flex flex-row w-full border-2 justify-between truncate dark:border-zinc-700 text-sm pl-2 rounded-lg">
+                          <div className="flex items-center">
+                            {fileDetail.type === 'local' && (
+                              <RiFileSearchLine className="justify-start mr-2" />
+                            )}
+                            {fileDetail.type === 'notion' && (
+                              <RiNotionFill className="justify-start mr-2" />
+                            )}
+                            <div className="flex flex-row justify-start overflow-x-auto">
+                              <p className="capitalize text-left">
+                                {fileDetail.fileName}
+                              </p>
+                              <p className="text-xs text-zinc-400 ml-2">{`${fileDetail.size} KB`}</p>
+                            </div>
                           </div>
+                          <Button
+                            variant="light"
+                            isIconOnly
+                            size="sm"
+                            startContent={<GoTrash />}
+                            onPress={() => {
+                              setDroppedFiles((prev) => {
+                                const newMap = new Map(prev);
+                                newMap.delete(key);
+                                return newMap;
+                              });
+                            }}
+                          />
                         </div>
-                        <Button
-                          variant="light"
-                          isIconOnly
-                          size="sm"
-                          startContent={<GoTrash />}
-                          onPress={() => {
-                            setDroppedFiles((prev) => {
-                              const newMap = new Map(prev);
-                              newMap.delete(fileDetail[0]);
-                              return newMap;
-                            });
-                          }}
-                        />
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
                 <div className="flex justify-end mt-2">
                   {droppedFiles?.size > 0 && !ingesting && !ingestionError && (

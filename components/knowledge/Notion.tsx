@@ -1,5 +1,6 @@
 import {
   Button,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -20,7 +21,7 @@ import {
   isNotionConfigured,
   runNotionSync,
 } from '@/actions/knowledge/notion';
-import { CiShare1 } from 'react-icons/ci';
+import { CiSearch, CiShare1 } from 'react-icons/ci';
 import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
 
@@ -31,6 +32,8 @@ interface NotionFileModalProps {
   setIsSyncing: React.Dispatch<React.SetStateAction<boolean>>;
   notionConfigured: boolean;
   setNotionConfigured: React.Dispatch<React.SetStateAction<boolean>>;
+  syncError: string;
+  setSyncError: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const NotionFileModal = ({
@@ -40,14 +43,16 @@ export const NotionFileModal = ({
   setNotionConfigured,
   isSyncing,
   setIsSyncing,
+  syncError,
+  setSyncError,
 }: NotionFileModalProps) => {
   const { droppedFiles, setDroppedFiles } = useContext(EditContext);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [notionFiles, setNotionFiles] = useState<
     Map<string, { url: string; fileName: string }>
   >(new Map());
 
-  const [syncError, setSyncError] = useState('');
   const [selectedFile, setSelectedFile] = useState<string[]>(
     Array.from(droppedFiles.keys())
   );
@@ -76,13 +81,13 @@ export const NotionFileModal = ({
     const files = await importFiles(selectedFile, 'notion');
     setDroppedFiles((prev) => {
       const newMap = new Map(prev);
-      for (const file of Array.from(newMap.entries())) {
-        if (file[1].type === 'notion') {
-          newMap.delete(file[0]);
+      for (const [key, file] of Array.from(newMap.entries())) {
+        if (file.type === 'notion') {
+          newMap.delete(key);
         }
       }
-      for (const file of Array.from(files.entries())) {
-        newMap.set(file[0], file[1]);
+      for (const [key, file] of Array.from(files.entries())) {
+        newMap.set(key, file);
       }
       return newMap;
     });
@@ -146,12 +151,23 @@ export const NotionFileModal = ({
           </div>
         </ModalHeader>
         <ModalBody>
+          <Input
+            className="w-[20%] flex justify-end"
+            placeholder="Search"
+            size="sm"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            startContent={<CiSearch />}
+          />
           {notionConfigured && notionFiles.size > 0 ? (
             <div className="flex flex-col gap-1">
               <Table
                 selectionMode="multiple"
                 selectionBehavior="toggle"
                 aria-label="notion-files"
+                isCompact={true}
                 selectedKeys={selectedFile}
                 onSelectionChange={(selected) => {
                   handleSelectedFileChange(selected);
@@ -162,26 +178,34 @@ export const NotionFileModal = ({
                   <TableColumn>Link</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {Array.from(notionFiles.entries()).map(([key, value]) => (
-                    <TableRow key={key}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <p>{value.fileName}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          isIconOnly
-                          color="primary"
-                          variant="flat"
-                          startContent={<CiShare1 />}
-                          onClick={() => {
-                            window.open(value.url);
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {Array.from(notionFiles.entries())
+                    .filter(([_, file]) => {
+                      if (!searchQuery) return true;
+                      return file.fileName
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase());
+                    })
+                    .map(([key, value]) => (
+                      <TableRow key={key}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <p>{value.fileName}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            startContent={<CiShare1 />}
+                            onClick={() => {
+                              window.open(value.url);
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>
@@ -194,7 +218,7 @@ export const NotionFileModal = ({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={onClickImport}>
+          <Button color="primary" size="sm" onClick={onClickImport}>
             Import
           </Button>
         </ModalFooter>

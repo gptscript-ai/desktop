@@ -147,8 +147,6 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     setFiles();
   }, [scriptId]);
 
-  useEffect(() => {}, [droppedFiles]);
-
   const ingest = useCallback(async () => {
     setIngesting(true);
     const first = await firstIngestion(scriptId.toString(), droppedFiles);
