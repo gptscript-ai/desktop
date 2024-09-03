@@ -7,6 +7,7 @@ import {
   Chip,
   Divider,
   Input,
+  Spinner,
   Tooltip,
 } from '@nextui-org/react';
 import PropTypes from 'prop-types';
@@ -155,7 +156,7 @@ const priorityTools: FeaturedTools = {
 
 interface ToolCatalogProps {
   tools: string[] | undefined;
-  addTool: (tool: string) => void;
+  addTool: (tool: string) => Promise<void>;
 }
 
 const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
@@ -163,6 +164,8 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState({} as ToolsApiResponse);
   const [loading, setLoading] = useState(false);
+  const [addByUrlError, setAddByUrlError] = useState('');
+  const [parsingUrlTool, setParsingUrlTool] = useState(false);
 
   const search = useCallback(() => {
     if (!query) {
@@ -327,35 +330,49 @@ const ToolCatalog: React.FC<ToolCatalogProps> = ({ tools, addTool }) => {
                             isIconOnly
                             radius="full"
                             variant="flat"
-                            startContent={<GoPlus />}
+                            startContent={
+                              parsingUrlTool ? <Spinner /> : <GoPlus />
+                            }
                             color="primary"
-                            onPress={() => {
+                            onPress={async () => {
                               if (!url) return;
                               if (
                                 !priorityTools['From URL']
                                   .map((t) => t.url)
                                   .includes(url)
                               ) {
-                                addTool(url);
-                                priorityTools['From URL'].push({
-                                  name:
-                                    url.split('/').pop()?.replace(/-/g, ' ') ||
-                                    'Custom Tool',
-                                  description: 'A custom tool you added.',
-                                  url: url,
-                                  tags: [url, 'from-url'],
-                                  icon: <GoTools className="text-2xl" />,
-                                });
+                                try {
+                                  setParsingUrlTool(true);
+                                  await addTool(url);
+                                  priorityTools['From URL'].push({
+                                    name:
+                                      url
+                                        .split('/')
+                                        .pop()
+                                        ?.replace(/-/g, ' ') || 'Custom Tool',
+                                    description: 'A custom tool you added.',
+                                    url: url,
+                                    tags: [url, 'from-url'],
+                                    icon: <GoTools className="text-2xl" />,
+                                  });
+                                  setAddByUrlError('');
+                                  setUrl('');
+                                } catch (e: any) {
+                                  setAddByUrlError(e.toString());
+                                } finally {
+                                  setParsingUrlTool(false);
+                                }
                               } else {
                                 priorityTools['From URL'] = priorityTools[
                                   'From URL'
                                 ].filter((t) => t.url !== url);
+                                setUrl('');
                               }
-                              setUrl('');
                             }}
                           />
                         </div>
                       </div>
+                      <div className="text-red-600">{addByUrlError}</div>
                     </Card>
                   </Tooltip>
                 )}

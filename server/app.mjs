@@ -156,7 +156,6 @@ const mount = async (
       'GPTSCRIPT_SCRIPT_ID=' + scriptID,
     ],
   };
-  console.log(opts.env);
 
   if (tool) opts.subTool = tool;
 

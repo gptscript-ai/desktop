@@ -78,7 +78,7 @@ const SaveScriptDropdown = () => {
       const ingestionError = await ensureFilesIngested(
         allFiles,
         true,
-        scriptId!,
+        scriptId,
         getCookie('gateway_token')
       );
 
