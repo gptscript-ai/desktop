@@ -56,14 +56,12 @@ interface ImportsProps {
   setTools: (tools: string[]) => void;
   enableLocal?: boolean;
   className?: string;
-  collapsed?: boolean;
 }
 
 const Imports: React.FC<ImportsProps> = ({
   tools,
   setTools,
   className,
-  collapsed,
   enableLocal = 'true',
 }) => {
   // remoteTools contains a mapping of tool references to display names for

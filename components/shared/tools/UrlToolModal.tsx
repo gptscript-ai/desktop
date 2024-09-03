@@ -51,7 +51,7 @@ export function UrlToolModal({
               errorMessage={error}
               isInvalid={!!error}
               variant="bordered"
-              color={!!error ? 'danger' : 'primary'}
+              color={error ? 'danger' : 'primary'}
               name="toolUrl"
               value={toolUrl}
               onChange={(e) => setToolUrl(e.target.value)}

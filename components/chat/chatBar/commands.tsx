@@ -273,8 +273,6 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
       setLoadingTool(null);
     }, [addTool.error]);
 
-    const [toolUrl, setToolUrl] = useState<string>('');
-
     return (
       <div className="relative w-full h-3/4 command-options">
         <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
