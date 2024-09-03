@@ -1,9 +1,8 @@
 import CustomTool from '@/components/edit/configure/customTool';
-import ToolCatalogModal from '@/components/edit/configure/imports/toolCatalogModal';
 import { EditContext } from '@/contexts/edit';
-import { Button } from '@nextui-org/react';
+import { Button, Tooltip, useDisclosure } from '@nextui-org/react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
   AiFillFileAdd,
   AiOutlineKubernetes,
@@ -46,6 +45,11 @@ import {
 import { VscAzure } from 'react-icons/vsc';
 
 import { getToolDisplayName } from '@/actions/gptscript';
+import {
+  CatalogListBox,
+  ToolCatalogRef,
+} from '@/components/chat/chatBar/CatalogListBox';
+import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
 
 interface ImportsProps {
   tools: string[] | undefined;
@@ -109,6 +113,26 @@ const Imports: React.FC<ImportsProps> = ({
     setTools(tools!.filter((t) => t !== tool));
   };
 
+  const urlToolModal = useDisclosure();
+
+  const catalogRef = useRef<ToolCatalogRef>(null);
+  const catalogMenu = useDisclosure();
+
+  useEffect(() => {
+    if (catalogMenu.isOpen) catalogRef.current?.focus();
+  }, [catalogMenu.isOpen]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') catalogMenu.onClose();
+    };
+
+    document.addEventListener('keyup', handler);
+    return () => {
+      document.removeEventListener('keyup', handler);
+    };
+  }, [catalogMenu]);
+
   return (
     <div className={`${className}`}>
       {remoteTools && remoteTools.size > 0 && (
@@ -156,27 +180,66 @@ const Imports: React.FC<ImportsProps> = ({
           ))}
         </div>
       )}
-      <div
-        className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${tools?.length ? 'pt-4' : ''}`}
-      >
-        <ToolCatalogModal
-          tools={tools}
-          addTool={(tool) => {
+      <div className={`flex flex-col gap-2`}>
+        <Tooltip
+          content={
+            <CatalogListBox
+              equippedTools={tools || []}
+              onAddTool={(tool) => {
+                setTools([...(tools || []), tool]);
+                catalogMenu.onClose();
+              }}
+              ref={catalogRef}
+            />
+          }
+          isOpen={catalogMenu.isOpen}
+        >
+          <Button
+            startContent={<GoTools />}
+            variant="flat"
+            className="w-full"
+            color="primary"
+            size="sm"
+            onPress={catalogMenu.onOpenChange}
+          >
+            Featured Tools
+          </Button>
+        </Tooltip>
+
+        <UrlToolModal
+          isOpen={urlToolModal.isOpen}
+          onAddTool={(tool) => {
             setTools([...(tools || []), tool]);
+            urlToolModal.onClose();
           }}
+          onClose={urlToolModal.onClose}
         />
-        {enableLocal && (
+
+        <div className="flex gap-2">
           <Button
             size="sm"
             variant="flat"
             className="w-full"
             color="primary"
-            startContent={<GoPencil />}
-            onPress={() => createNewTool()}
+            startContent={<GoGlobe />}
+            onClick={() => urlToolModal.onOpenChange()}
           >
-            Create a tool
+            Add Tool via URL
           </Button>
-        )}
+
+          {enableLocal && (
+            <Button
+              size="sm"
+              variant="flat"
+              className="w-full"
+              color="primary"
+              startContent={<GoPencil />}
+              onPress={() => createNewTool()}
+            >
+              Create a tool
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

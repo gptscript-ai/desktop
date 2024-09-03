@@ -1,34 +1,33 @@
-import { useCallback, useContext } from 'react';
+import { gatewayTool } from '@/actions/knowledge/util';
+import AssistantNotFound from '@/components/assistant-not-found';
+import Chat from '@/components/chat';
+import Code from '@/components/edit/configure/code';
 import RemoteImports from '@/components/edit/configure/imports';
-import Loading from '@/components/loading';
 import Models from '@/components/edit/configure/models';
 import Visibility from '@/components/edit/configure/visibility';
-import Code from '@/components/edit/configure/code';
+import FileSettingModals from '@/components/knowledge/KnowledgeModals';
+import Loading from '@/components/loading';
+import { ChatContext } from '@/contexts/chat';
 import { EditContext } from '@/contexts/edit';
-import { GoLightBulb, GoTrash } from 'react-icons/go';
-import { HiCog } from 'react-icons/hi2';
 import {
-  Textarea,
-  Input,
-  Avatar,
-  Tooltip,
   Accordion,
   AccordionItem,
+  Avatar,
   Button,
-  useDisclosure,
+  Input,
   Spinner,
+  Textarea,
+  Tooltip,
+  useDisclosure,
 } from '@nextui-org/react';
-import { PiToolboxBold } from 'react-icons/pi';
-import AssistantNotFound from '@/components/assistant-not-found';
 import { useRouter } from 'next/navigation';
-import { ChatContext } from '@/contexts/chat';
-import Chat from '@/components/chat';
-import { IoSettingsOutline } from 'react-icons/io5';
+import { useCallback, useContext } from 'react';
+import { GoLightBulb, GoTrash } from 'react-icons/go';
+import { HiCog } from 'react-icons/hi2';
 import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
-import { RiFileSearchLine } from 'react-icons/ri';
-import FileSettingModals from '@/components/knowledge/KnowledgeModals';
-import { RiFoldersLine } from 'react-icons/ri';
-import { gatewayTool } from '@/actions/knowledge/util';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { PiToolboxBold } from 'react-icons/pi';
+import { RiFileSearchLine, RiFoldersLine } from 'react-icons/ri';
 
 interface ConfigureProps {
   collapsed?: boolean;

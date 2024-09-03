@@ -1,7 +1,6 @@
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { FeaturedTools } from '@/model/tools';
 import {
-  Card,
   Listbox,
   ListboxItem,
   ListboxSection,
@@ -34,29 +33,21 @@ const fuseOptions = {
 const itemKey = (index: number) => `catalog-item-${index}`;
 
 interface CatalogListboxProps {
-  query: string;
+  query?: string;
   loading?: string | null;
   equippedTools: string[];
   onAddTool: (tool: string) => void;
-  onEscape: () => void;
-  onUncapturedKeyDown: () => void;
+  onUncapturedKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export type ToolCatalogRef = { focus: () => void };
 
-/** @deprecated will remove in future PR. Use CatalogListBox from `@/components/chat/chatBar/CatalogListBox.tsx` instead */
-export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
-  function Catalog(props, ref) {
-    const {
-      query,
-      loading,
-      equippedTools,
-      onAddTool,
-      onEscape,
-      onUncapturedKeyDown,
-    } = props;
+export const CatalogListBox = forwardRef<ToolCatalogRef, CatalogListboxProps>(
+  function CatalogListBox(props, ref) {
+    const { query, loading, equippedTools, onAddTool, onUncapturedKeyDown } =
+      props;
 
-    const debouncedQuery = useDebouncedValue(query, 250);
+    const debouncedQuery = useDebouncedValue(query || '', 250);
 
     const featuredResults = useMemo(() => {
       const flattened = (featuredTools: FeaturedTools) =>
@@ -86,11 +77,8 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
         case 'ArrowUp':
         case 'ArrowDown':
           break;
-        case 'Escape':
-          onEscape();
-          break;
         default:
-          onUncapturedKeyDown();
+          onUncapturedKeyDown?.(event);
           break;
       }
     };
@@ -120,10 +108,7 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
         }
       }
 
-      return {
-        resultsWithIndexes,
-        lastIndex,
-      };
+      return { resultsWithIndexes, lastIndex };
     }, [featuredResults]);
 
     const [focusedItem, setFocusedItem] = useState<number | null>(null);
@@ -137,66 +122,58 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
     }));
 
     return (
-      <Card
-        className={
-          'absolute bottom-14 z-[1000] p-4 max-h-[710px] w-1/2 overflow-auto border-small border-default-200 dark:border-default-100'
-        }
+      <Listbox
+        className="relative overflow-y-auto"
+        aria-label={'catalog'}
+        variant={'flat'}
+        disallowEmptySelection
+        selectionMode={'single'}
+        disabledKeys={equippedTools}
+        selectedKeys={equippedTools}
+        onSelectionChange={(selected) => {
+          if (selected === 'all') return;
+          setFocusedItem(null);
+          onAddTool(String(Array.from(selected).pop()) ?? null);
+        }}
+        onKeyDown={handleKeyDown}
       >
-        <Listbox
-          aria-label={'catalog'}
-          variant={'flat'}
-          disallowEmptySelection
-          selectionMode={'single'}
-          shouldFocusWrap={true}
-          disabledKeys={equippedTools}
-          defaultSelectedKeys={equippedTools}
-          selectedKeys={equippedTools}
-          onSelectionChange={(selected) => {
-            if (selected === 'all') return;
-            setFocusedItem(null);
-            onAddTool(String(Array.from(selected).pop()) ?? null);
-          }}
-          onKeyDown={handleKeyDown}
-        >
-          {resultsWithIndexes.map(([category, tools]) => (
-            <ListboxSection
-              aria-label={`catalog-section-${category}`}
-              key={category}
-              title={category}
-              showDivider={true}
-            >
-              {tools.map((tool) => (
-                <ListboxItem
-                  aria-label={itemKey(tool.index)}
-                  startContent={
-                    loading === tool.url ? <Spinner size="sm" /> : tool.icon
+        {resultsWithIndexes.map(([category, tools]) => (
+          <ListboxSection
+            aria-label={`catalog-section-${category}`}
+            key={category}
+            title={category}
+            showDivider={true}
+          >
+            {tools.map((tool) => (
+              <ListboxItem
+                aria-label={itemKey(tool.index)}
+                startContent={
+                  loading === tool.url ? <Spinner size="sm" /> : tool.icon
+                }
+                isReadOnly={!!loading}
+                id={itemKey(tool.index)}
+                key={tool.url} // Using tool URL as the unique key
+                onFocus={() => setFocusedItem(tool.index)}
+              >
+                <Tooltip
+                  content={tool.description}
+                  placement="right"
+                  isOpen={focusedItem === tool.index}
+                  onOpenChange={(open) =>
+                    setFocusedItem(open ? tool.index : null)
                   }
-                  isReadOnly={loading !== null}
-                  id={itemKey(tool.index)}
-                  key={tool.url} // Using tool URL as the unique key
-                  value={tool.url}
-                  onFocus={() => setFocusedItem(tool.index)}
+                  closeDelay={0.5}
+                  classNames={{
+                    content: 'max-w-[250px]',
+                  }}
                 >
-                  <Tooltip
-                    content={tool.description}
-                    placement="right"
-                    isOpen={focusedItem === tool.index}
-                    onOpenChange={(open) =>
-                      setFocusedItem(open ? tool.index : null)
-                    }
-                    closeDelay={0.5}
-                    classNames={{
-                      content: 'max-w-[250px]',
-                    }}
-                  >
-                    {tool.name}
-                  </Tooltip>
-                </ListboxItem>
-              ))}
-            </ListboxSection>
-          ))}
-        </Listbox>
-      </Card>
+                  {tool.name}
+                </Tooltip>
+              </ListboxItem>
+            ))}
+          </ListboxSection>
+        ))}
+      </Listbox>
     );
   }
 );
@@ -265,7 +242,7 @@ const featuredTools: FeaturedTools = {
     {
       name: 'Hubspot',
       description: 'Allows the assistant to interact with Hubspot.',
-      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm/write',
+      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm',
       tags: ['hubspot', 'api'],
       icon: <FaHubspot className="text-lg" />,
     },
