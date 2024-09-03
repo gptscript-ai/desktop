@@ -14,7 +14,6 @@ import { getScript, getScriptContent } from '@/actions/me/scripts';
 import { loadTools, parseContent, rootTool } from '@/actions/gptscript';
 import debounce from 'lodash/debounce';
 import { setWorkspaceDir } from '@/actions/workspace';
-import { gatewayTool } from '@/actions/knowledge/util';
 import { tildy } from '@/config/assistant';
 
 interface ChatContextProps {
@@ -67,6 +66,7 @@ interface ChatContextState {
   generating: boolean;
   error: string | null;
   setShouldRestart: React.Dispatch<React.SetStateAction<boolean>>;
+  waitingForUserResponse: boolean;
 
   restart: () => void;
   interrupt: () => void;
@@ -117,6 +117,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     setScriptContent,
     forceRun,
     setForceRun,
+    waitingForUserResponse,
   } = useChatSocket(isEmpty);
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
@@ -385,6 +386,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         fetchThreads,
         restartScript,
         setShouldRestart,
+        waitingForUserResponse,
         tools,
         setTools,
         handleCreateThread,
