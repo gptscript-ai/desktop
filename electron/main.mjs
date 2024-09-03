@@ -1,4 +1,4 @@
-import { app, shell, screen, BrowserWindow } from 'electron';
+import { app, screen, shell, BrowserWindow } from 'electron';
 import { startAppServer } from '../server/app.mjs';
 import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -24,6 +24,7 @@ async function startServer() {
   );
 
   // Project config onto environment variables to configure GPTScript/sdk-server and the Next.js app.
+  process.env.LOGS_DIR = config.logsDir;
   process.env.GPTSCRIPT_BIN = config.gptscriptBin;
   process.env.KNOWLEDGE_BIN = config.knowledgeBin;
   process.env.THREADS_DIR = config.threadsDir;
