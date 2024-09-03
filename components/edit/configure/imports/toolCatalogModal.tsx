@@ -3,6 +3,7 @@ import { Button, Modal, ModalBody, ModalContent } from '@nextui-org/react';
 import { GoTools } from 'react-icons/go';
 import ToolCatalog from '@/components/edit/configure/imports/toolCatalog';
 import PropTypes from 'prop-types';
+import { parse } from '@/actions/gptscript';
 
 interface ToolCatalogModalProps {
   tools: string[] | undefined;
@@ -16,11 +17,12 @@ const ToolCatalogModal: React.FC<ToolCatalogModalProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const addToolAndClose = useCallback(
-    (tool: string) => {
-      setIsModalOpen(false);
+    async (tool: string) => {
+      await parse(tool);
       addTool(tool);
+      setIsModalOpen(false);
     },
-    [addTool, isModalOpen, setIsModalOpen]
+    [addTool, setIsModalOpen]
   );
 
   return (
