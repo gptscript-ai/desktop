@@ -166,7 +166,6 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               <RemoteImports
                 tools={root.tools?.filter((t) => t != gatewayTool())}
                 setTools={setRootTools}
-                collapsed={collapsed}
               />
             </AccordionItem>
             <AccordionItem
