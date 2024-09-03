@@ -341,6 +341,18 @@ const useChatSocket = (isEmpty?: boolean) => {
     if (frame.tool.source?.repo) {
       const repo = frame.tool?.source.repo.Root;
       const trimmedRepo = trimRepo(repo);
+
+      // If it is a read-only tool we've authored, auto-allow it.
+      if (
+        trimmedRepo.startsWith('github.com/gptscript-ai') &&
+        (frame.tool.name?.startsWith('list') ||
+          frame.tool.name?.startsWith('get') ||
+          frame.tool.name?.startsWith('read') ||
+          frame.tool.name?.startsWith('search'))
+      ) {
+        return true;
+      }
+
       for (const prefix of trustedRepoPrefixesRef.current) {
         if (trimmedRepo.startsWith(prefix)) {
           return true;
