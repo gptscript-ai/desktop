@@ -30,7 +30,7 @@ import { GoPaperclip } from 'react-icons/go';
 const SaveScriptDropdown = () => {
   const {
     workspace,
-    selectedThreadId,
+    thread,
     scriptId,
     setScriptId,
     setScript,
@@ -137,11 +137,7 @@ const SaveScriptDropdown = () => {
 
       socket?.emit('saveScript', newScriptId, newName);
 
-      await updateThreadScript(
-        selectedThreadId!,
-        newScriptId,
-        newScript.publicURL || ''
-      );
+      await updateThreadScript(thread, newScriptId, newScript.publicURL || '');
 
       setMessages((prev) => [
         ...prev,

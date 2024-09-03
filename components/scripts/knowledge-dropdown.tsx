@@ -18,14 +18,8 @@ import { Dirent } from 'fs';
 import path from 'path';
 
 const ScriptKnowledgeDropdown = () => {
-  const {
-    socket,
-    scriptId,
-    workspace,
-    selectedThreadId,
-    program,
-    setMessages,
-  } = useContext(ChatContext);
+  const { socket, scriptId, workspace, thread, program, setMessages } =
+    useContext(ChatContext);
   const [threadKnowledgeFiles, setThreadKnowledgeFiles] = useState<string[]>(
     []
   );
@@ -57,7 +51,7 @@ const ScriptKnowledgeDropdown = () => {
 
   async function removeFile(file: string) {
     await deleteKnowledgeFile(workspace, file);
-    await ingest(workspace, getCookie('gateway_token'), selectedThreadId);
+    await ingest(workspace, getCookie('gateway_token'), thread);
     setMessages((prev) => [
       ...prev,
       {

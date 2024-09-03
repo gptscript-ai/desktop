@@ -57,8 +57,6 @@ interface ChatContextState {
   setThread: React.Dispatch<React.SetStateAction<string>>;
   threads: Thread[];
   setThreads: React.Dispatch<React.SetStateAction<Thread[]>>;
-  selectedThreadId: string | null;
-  setSelectedThreadId: React.Dispatch<React.SetStateAction<string | null>>;
   socket: Socket | null;
   handleCreateThread: (script: string, id?: string) => void;
   connected: boolean;
@@ -97,7 +95,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   const [notFound, setNotFound] = useState(false);
   const [thread, setThread] = useState<string>('');
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [initialFetch, setInitialFetch] = useState(false);
   const [subTool, setSubTool] = useState(initialSubTool || '');
   const {
@@ -192,12 +189,10 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setThread(threadId);
           setScript(newThread.meta.script);
           setScriptId(newThread.meta.scriptId);
-          setSelectedThreadId(threadId);
           setWorkspace(newThread.meta.workspace);
         } else if (threads.length > 0) {
           const latestThread = threads[0];
           setThread(latestThread.meta.id);
-          setSelectedThreadId(latestThread.meta.id);
           setScriptId(latestThread.meta.scriptId);
           setScript(latestThread.meta.script);
           setWorkspace(latestThread.meta.workspace);
@@ -225,6 +220,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setWorkspace(thread.meta.workspace);
         }
         restartScript();
+        setShouldRestart(false);
       });
     }
   }, [thread, shouldRestart]);
@@ -257,6 +253,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
 
   useEffect(() => {
     if (forceRun && socket && connected) {
+      interrupt();
       socket.emit(
         'run',
         scriptContent ? scriptContent : script,
@@ -269,6 +266,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setForceRun(false);
     }
   }, [
+    tool,
+    scriptId,
     forceRun,
     script,
     scriptContent,
@@ -294,10 +293,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     // conditions. In particular, the restart may not be processed correctly and can
     // get the user into a state where no run has been sent to the server.
     debounce(async () => {
-      // Here we specifically update Thread with selectedThreadId so that when it restarts it restarts with the specific thread.
-      // We don't set thread directly after creating because it will re-render the page once thread is created on the fly
-      if (selectedThreadId) {
-        setThread(selectedThreadId);
+      if (thread) {
+        setThread(thread);
       }
       setRunning(false);
       setHasRun(false);
@@ -326,7 +323,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       }
       restart();
     }, 200),
-    [script, thread, restart, selectedThreadId]
+    [script, thread, restart, interrupt, scriptId]
   );
 
   const handleCreateThread = (script: string, id?: string) => {
@@ -336,7 +333,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setScript(script);
       setThread(newThread.meta.id);
       setShouldRestart(true);
-      setSelectedThreadId(newThread.meta.id);
       setWorkspaceDir(newThread.meta.workspace);
     });
   };
@@ -374,8 +370,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setThread,
         threads,
         setThreads,
-        selectedThreadId,
-        setSelectedThreadId,
         socket,
         connected,
         running,

@@ -17,7 +17,7 @@ interface WorkspaceProps {
 
 const Workspace = ({ onRestart }: WorkspaceProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { workspace, setWorkspace, selectedThreadId } = useContext(ChatContext);
+  const { workspace, setWorkspace, thread } = useContext(ChatContext);
   const [workspaceInput, setWorkspaceInput] = useState<string>('');
 
   useEffect(() => {
@@ -30,8 +30,8 @@ const Workspace = ({ onRestart }: WorkspaceProps) => {
     setWorkspace(workspaceInput);
     setIsOpen(false);
     // Here we use selectedThreadId here because it is always set after thread is created. Thread might not be set when it is created on the fly.
-    if (selectedThreadId) {
-      updateThreadWorkspace(selectedThreadId, workspace);
+    if (thread) {
+      updateThreadWorkspace(thread, workspace);
     }
     onRestart();
   }, [workspaceInput]);
