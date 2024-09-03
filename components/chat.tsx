@@ -64,6 +64,7 @@ const Chat: React.FC<ScriptProps> = ({
     notFound,
     restartScript,
     fetchThreads,
+    waitingForUserResponse,
   } = useContext(ChatContext);
 
   useEffect(() => {
@@ -171,7 +172,9 @@ const Chat: React.FC<ScriptProps> = ({
               </Button>
             ) : (
               <ChatBar
-                disableInput={disableInput || !running}
+                disableInput={
+                  disableInput || !running || waitingForUserResponse
+                }
                 disableCommands={disableCommands}
                 inputPlaceholder={inputPlaceholder}
                 onMessageSent={handleMessageSent}

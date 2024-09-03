@@ -38,6 +38,7 @@ const ChatBar = ({
     setShowForm,
     messages,
     setMessages,
+    waitingForUserResponse,
   } = useContext(ChatContext);
 
   const messagesRef = useRef(messages);
@@ -133,6 +134,7 @@ const ChatBar = ({
           radius="full"
           className="text-lg"
           color="primary"
+          disabled={disableInput}
           onPress={() => {
             if (disableInput) return;
             setCommandsOpen(true);
@@ -160,8 +162,10 @@ const ChatBar = ({
             placeholder={
               catalogOpen
                 ? 'Search for tools to add or press <Esc> to return to the chat'
-                : inputPlaceholder ||
-                  'Start chatting or type / for more options'
+                : disableInput
+                  ? 'Waiting for a response to a prompt in chat...'
+                  : inputPlaceholder ||
+                    'Start chatting or type / for more options'
             }
             value={inputValue}
             radius="full"
@@ -218,7 +222,7 @@ const ChatBar = ({
           startContent={<GoSquareFill className="mr-[1px] text-xl" />}
           isIconOnly
           radius="full"
-          isDisabled={disableInput}
+          isDisabled={disableInput && !waitingForUserResponse}
           className="text-lg"
           onPress={interrupt}
         />

@@ -36,6 +36,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   const [tools, setTools] = useState<string[]>([]);
   const [forceRun, setForceRun] = useState(false);
   const [scriptContent, setScriptContent] = useState<Block[]>([]);
+  const [waitingForUserResponse, setWaitingForUserResponse] = useState(false);
 
   // Refs
   const socketRef = useRef<Socket | null>(null);
@@ -52,6 +53,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
   const handleError = useCallback((error: string) => {
     setGenerating(false);
+    setWaitingForUserResponse(false);
     setError(error);
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages];
@@ -153,6 +155,7 @@ const useChatSocket = (isEmpty?: boolean) => {
       state: Record<string, CallFrame>;
       name?: string;
     }) => {
+      setWaitingForUserResponse(true);
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages];
         const form = (
@@ -160,6 +163,7 @@ const useChatSocket = (isEmpty?: boolean) => {
             frame={frame}
             onSubmit={(response: PromptResponse) => {
               socketRef.current?.emit('promptResponse', response);
+              setWaitingForUserResponse(false);
             }}
           />
         );
@@ -215,7 +219,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         });
         return;
       }
-
+      setWaitingForUserResponse(true);
       let confirmMessage = `Proceed with calling the ${frame.tool.name} tool?`;
       if (frame.tool.instructions?.startsWith('#!sys.openapi')) {
         confirmMessage = `Proceed with running the following API operation (or allow all runs of this operation)?`;
@@ -235,6 +239,7 @@ const useChatSocket = (isEmpty?: boolean) => {
           addTrusted={addTrustedFor(frame)}
           onSubmit={(response: AuthResponse) => {
             socketRef.current?.emit('confirmResponse', response);
+            setWaitingForUserResponse(false);
           }}
         />
       );
@@ -449,6 +454,8 @@ const useChatSocket = (isEmpty?: boolean) => {
   const restart = useCallback(() => {
     trustedRef.current = {};
     setRunning(false);
+    setWaitingForUserResponse(false);
+    setGenerating(false);
     setError(null);
     setMessages([]);
     trustedRepoPrefixesRef.current = [...initiallyTrustedRepos];
@@ -466,7 +473,6 @@ const useChatSocket = (isEmpty?: boolean) => {
     if (running && messages.length === 0) {
       const initialMessages: Array<Message> = [];
       if (!isEmpty) {
-        setGenerating(false);
         initialMessages.push({
           type: MessageType.Agent,
           message: 'Waiting for model response...',
@@ -496,6 +502,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     setScriptContent,
     forceRun,
     setForceRun,
+    waitingForUserResponse,
   };
 };
 
