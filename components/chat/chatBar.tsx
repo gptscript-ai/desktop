@@ -186,12 +186,11 @@ const ChatBar = ({
                 document.getElementById('chatInput')?.focus();
               }
               if (event.key === 'ArrowUp') {
+                event.preventDefault();
                 const catalogStart = document.getElementById(`catalog-item-0`);
                 if (commandsOpen) {
-                  event.preventDefault();
                   commandsRef.current?.focusCommands();
                 } else if (catalogStart) {
-                  event.preventDefault();
                   commandsRef.current?.focusCatalog();
                 } else {
                   setUserMessagesIndex((prevIndex) => {
