@@ -24,6 +24,7 @@ import {
 import { CiSearch, CiShare1 } from 'react-icons/ci';
 import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
+import { Link } from '@nextui-org/react';
 
 interface NotionFileModalProps {
   isOpen: boolean;
@@ -195,13 +196,13 @@ export const NotionFileModal = ({
                         <TableCell>
                           <Button
                             isIconOnly
+                            as={Link}
+                            isExternal
+                            href={value.url}
                             size="sm"
                             color="primary"
                             variant="flat"
                             startContent={<CiShare1 />}
-                            onClick={() => {
-                              window.open(value.url);
-                            }}
                           />
                         </TableCell>
                       </TableRow>
