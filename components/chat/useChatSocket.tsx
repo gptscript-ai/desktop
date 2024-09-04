@@ -15,6 +15,7 @@ import ConfirmForm from './messages/confirmForm';
 import { rootTool, stringify } from '@/actions/gptscript';
 import { updateScript } from '@/actions/me/scripts';
 import { gatewayTool } from '@/actions/knowledge/util';
+import { summarizeConfirmPrompt } from '@/actions/scripts/confirmPrompt';
 
 const useChatSocket = (isEmpty?: boolean) => {
   const initiallyTrustedRepos = [
@@ -197,7 +198,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   );
 
   const handleConfirmRequest = useCallback(
-    ({
+    async ({
       frame,
       state,
       name,
@@ -226,11 +227,19 @@ const useChatSocket = (isEmpty?: boolean) => {
           : `Proceed with running the following (or allow all **${tool}** calls)?`;
       }
 
+      const summary = await summarizeConfirmPrompt(
+        confirmMessage,
+        frame.displayText,
+        frame.input
+      );
+
       const form = (
         <ConfirmForm
           id={frame.id}
+          summary={summary}
           message={confirmMessage}
           command={frame.displayText}
+          args={frame.input}
           tool={frame.tool?.name || 'main'}
           addTrusted={addTrustedFor(frame)}
           onSubmit={(response: AuthResponse) => {

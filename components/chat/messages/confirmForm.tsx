@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GoCheckCircle, GoXCircle, GoCheckCircleFill } from 'react-icons/go';
-import type { AuthResponse } from '@gptscript-ai/gptscript';
+import type { Arguments, AuthResponse } from '@gptscript-ai/gptscript';
 import { Button, Code, Tooltip } from '@nextui-org/react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,8 +8,10 @@ import remarkGfm from 'remark-gfm';
 type ConfirmFormProps = {
   id: string;
   tool: string;
+  summary: string;
   message?: string;
   command?: string;
+  args: Arguments;
   onSubmit: (data: AuthResponse) => void;
   addTrusted: () => void;
 };
@@ -19,8 +21,10 @@ const ConfirmForm = ({
   onSubmit,
   tool,
   addTrusted,
+  summary,
   message,
   command,
+  args,
 }: ConfirmFormProps) => {
   const [loading, setLoading] = useState(false);
 
@@ -43,15 +47,29 @@ const ConfirmForm = ({
         className="!text-wrap prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg"
         remarkPlugins={[remarkGfm]}
       >
-        {message}
+        {summary}
       </Markdown>
-      {command && (
-        <Code className="ml-4 whitespace-pre-wrap">
-          {command.startsWith('Running')
-            ? command.replace('Running', '').replace(/`/g, '')
-            : command.replace(/`/g, '')}
-        </Code>
-      )}
+      <details className="text-sm ml-4">
+        <Markdown
+          className="!text-wrap text-sm prose overflow-x-auto dark:prose-invert p-4 !w-full !max-w-full prose-thead:text-left prose-img:rounded-xl prose-img:shadow-lg"
+          remarkPlugins={[remarkGfm]}
+        >
+          {message}
+        </Markdown>
+        {command && (
+          <Code className="ml-4 text-sm whitespace-pre-wrap">
+            {command.startsWith('Running')
+              ? command.replace('Running', '').replace(/`/g, '').trim()
+              : command.replace(/`/g, '').trim()}
+          </Code>
+        )}
+        {args && (
+          <Code className="ml-4 text-sm whitespace-pre-wrap">
+            Arguments:{' '}
+            {typeof args === 'string' ? args : JSON.stringify(args, null, 2)}
+          </Code>
+        )}
+      </details>
       <div className="flex justify-between mt-4 mx-4">
         <Tooltip
           content="Allow this command to be executed"
