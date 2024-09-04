@@ -41,6 +41,7 @@ import {
 } from 'react-icons/go';
 import { PiToolbox } from 'react-icons/pi';
 import { useFilePicker } from 'use-file-picker';
+import Upload from '@/components/chat/chatBar/upload';
 
 /*
     note(tylerslaton):
@@ -137,6 +138,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
 
     const { restartScript, socket, setMessages, tools, workspace, thread } =
       useContext(ChatContext);
+    const [uploadOpen, setUploadOpen] = React.useState(false);
     const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker(
       {}
     );
@@ -224,6 +226,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
           urlToolModal.onOpen();
           break;
         case Command.Workspace:
+          setUploadOpen(true);
           break;
         case Command.Knowledge:
           openFilePicker();
@@ -286,6 +289,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
 
     return (
       <div className="relative w-full h-3/4 command-options">
+        <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
         {isCatalogOpen && (
           <CatalogListbox
             ref={toolcatalogRef}
