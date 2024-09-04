@@ -1,36 +1,14 @@
 import React from 'react';
 import { Button } from '@nextui-org/react';
 import { GoPersonAdd } from 'react-icons/go';
-import { createScript, getScript } from '@/actions/me/scripts';
-
-const newDefaultAssistant = (name: string): string => {
-  return `
-Name: ${name}
-Chat: true
-
-You are a helpful assistant named ${name}. When you first start, just introduce yourself and wait for the user's next message.
-`;
-};
+import { createDefaultAssistant } from '@/actions/me/scripts';
 
 export default function Create() {
   const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async () => {
-    const defaultName = 'New Assistant';
-    const slug =
-      defaultName.toLowerCase().replaceAll(' ', '-') +
-      '-' +
-      Math.random().toString(36).substring(2, 7);
-    createScript({
-      displayName: defaultName,
-      slug,
-      visibility: 'private',
-      content: newDefaultAssistant(defaultName),
-    }).then((script) => {
-      getScript(`${script.id}`).then(
-        (script) =>
-          (window.location.href = `/edit?file=${script?.publicURL}&id=${script?.id}`)
-      );
+    createDefaultAssistant().then((script) => {
+      window.location.href = `/edit?id=${script?.id}`;
     });
   };
 

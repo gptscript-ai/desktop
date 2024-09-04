@@ -123,3 +123,27 @@ export async function getScriptContent(
     return undefined;
   }
 }
+
+const newDefaultAssistant = (name: string): string => {
+  return `
+Name: ${name}
+Chat: true
+
+You are a helpful assistant named ${name}. When you first start, just introduce yourself and wait for the user's next message.
+`;
+};
+
+export async function createDefaultAssistant(): Promise<Script> {
+  const defaultName = 'New Assistant';
+  const slug =
+    defaultName.toLowerCase().replaceAll(' ', '-') +
+    '-' +
+    Math.random().toString(36).substring(2, 7);
+
+  return await createScript({
+    displayName: defaultName,
+    slug,
+    visibility: 'private',
+    content: newDefaultAssistant(defaultName),
+  });
+}

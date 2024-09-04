@@ -15,6 +15,7 @@ import { ParsedScript, getScripts } from '@/actions/me/scripts';
 import { EditContext } from '@/contexts/edit';
 import { AuthContext } from '@/contexts/auth';
 import { stringify } from '@/actions/gptscript';
+import { createDefaultAssistant } from '@/actions/me/scripts';
 
 interface ScriptNavProps {
   className?: string;
@@ -26,6 +27,12 @@ const ScriptNav: React.FC<ScriptNavProps> = ({ collapsed, setCollapsed }) => {
   const [scripts, setScripts] = useState<ParsedScript[]>([]);
   const { script, loading } = useContext(EditContext);
   const { me } = useContext(AuthContext);
+
+  const handleNew = async () => {
+    createDefaultAssistant().then((script) => {
+      window.location.href = `/edit?id=${script?.id}`;
+    });
+  };
 
   useEffect(() => {
     if (!me) return;
@@ -39,7 +46,7 @@ const ScriptNav: React.FC<ScriptNavProps> = ({ collapsed, setCollapsed }) => {
       scripts.map((script, i) => (
         <DropdownItem
           startContent={<GoPerson className="mb-1" />}
-          key={script.publicURL}
+          key={script.id}
         >
           {script.agentName || `Untitled Assistant ${i}`}
         </DropdownItem>
@@ -74,8 +81,10 @@ const ScriptNav: React.FC<ScriptNavProps> = ({ collapsed, setCollapsed }) => {
             stringify(script).then((gptscript) => {
               navigator.clipboard.writeText(gptscript);
             });
+          } else if (key === 'new') {
+            handleNew();
           } else {
-            window.location.href = `/edit?file=${key}`;
+            window.location.href = `/edit?id=${key}`;
           }
         }}
         disabledKeys={['no-files']}
