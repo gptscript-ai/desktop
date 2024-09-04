@@ -375,6 +375,7 @@ const mount = async (
     let name = script[0].name || '';
     if (!runningScript) {
       opts.input = message;
+      opts.chatState = state.chatState;
       runningScript = await gptscript.evaluate(script, opts);
     } else {
       name = (runningScript.respondingTool() || {}).name || '';
