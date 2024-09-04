@@ -5,7 +5,6 @@ import { Button, Divider, Tooltip } from '@nextui-org/react';
 import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { getScript } from '@/actions/me/scripts';
-import { Message } from '@/components/chat/messages';
 
 interface ThreadsProps {
   className?: string;
@@ -21,7 +20,6 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
     threads,
     setScriptId,
     setShouldRestart,
-    setMessages,
   } = useContext(ChatContext);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -33,9 +31,6 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
       setThread(id);
       setScriptId(scriptId);
       setShouldRestart(true);
-      // Remove the messages from the screen immediately so the user has feedback that something is happening.
-      // We can't set the messages here to [] because that was cause the "Waiting for model response" message to show up.
-      setMessages([{} as Message]);
     }
   };
 
