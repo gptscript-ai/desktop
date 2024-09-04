@@ -72,6 +72,8 @@ export const CatalogListBox = forwardRef<ToolCatalogRef, CatalogListboxProps>(
     }, [debouncedQuery]);
 
     const handleKeyDown = (event: React.KeyboardEvent) => {
+      // This allows the user to use the arrow keys to navigate the catalog
+      // while still allowing them to forward unused keys to external components
       switch (event.key) {
         case 'Enter':
         case 'ArrowUp':
