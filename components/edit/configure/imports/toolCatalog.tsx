@@ -91,7 +91,7 @@ const priorityTools: FeaturedTools = {
     {
       name: 'Hubspot',
       description: 'Allows the assistant to interact with Hubspot.',
-      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm',
+      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm/write',
       tags: ['hubspot', 'api'],
       icon: <FaHubspot className="text-lg" />,
     },
