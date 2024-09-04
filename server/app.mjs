@@ -153,7 +153,7 @@ const mount = async (
       // Here we need to pass a fake GPTSCRIPT_THREAD_ID so that knowledge tool doesn't error out. Because it will always look for GPTSCRIPT_THREAD_ID in the env
       // It should not import anything from the env. This is the case where you chat in Edit Assistant page where thread is not enabled.
       'GPTSCRIPT_THREAD_ID=' + (threadID ? threadID : '0'),
-      'GPTSCRIPT_SCRIPT_ID=' + scriptID,
+      'GPTSCRIPT_SCRIPT_ID=' + (scriptID ? scriptID : '0'),
     ],
   };
 
