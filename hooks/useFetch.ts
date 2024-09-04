@@ -1,3 +1,4 @@
+import { noop } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 
 // This is Temporary... Will replace with useSWR in after confirmation of adding libraries to the project
@@ -26,7 +27,7 @@ export function useAsync<TData, TParams extends any[] = never[]>(
 
   const execute = useCallback((...args: TParams) => {
     // Safe execution of the callback
-    executeAsync(...args).catch();
+    executeAsync(...args).catch(noop);
   }, []);
 
   const clear = useCallback(() => {

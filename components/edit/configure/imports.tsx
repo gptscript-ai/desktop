@@ -44,12 +44,14 @@ import {
 } from 'react-icons/si';
 import { VscAzure } from 'react-icons/vsc';
 
-import { getToolDisplayName } from '@/actions/gptscript';
+import { getToolDisplayName, parse } from '@/actions/gptscript';
 import {
   CatalogListBox,
   ToolCatalogRef,
 } from '@/components/chat/chatBar/CatalogListBox';
 import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
+import { useAsync } from '@/hooks/useFetch';
+import { noop } from 'lodash';
 
 interface ImportsProps {
   tools: string[] | undefined;
@@ -111,7 +113,13 @@ const Imports: React.FC<ImportsProps> = ({
     setTools(tools!.filter((t) => t !== tool));
   };
 
-  const urlToolModal = useDisclosure();
+  const verifyAndAddToolUrl = useAsync(async (url: string) => {
+    if (!url) throw new Error('Tool URL cannot be empty');
+    await parse(url); // throws if the url is invalid
+    setTools([...(tools || []), url]);
+  });
+
+  const urlToolModal = useDisclosure({ onClose: verifyAndAddToolUrl.clear });
 
   const catalogRef = useRef<ToolCatalogRef>(null);
   const catalogMenu = useDisclosure();
@@ -206,11 +214,16 @@ const Imports: React.FC<ImportsProps> = ({
 
         <UrlToolModal
           isOpen={urlToolModal.isOpen}
-          onAddTool={(tool) => {
-            setTools([...(tools || []), tool]);
-            urlToolModal.onClose();
-          }}
+          onAddTool={
+            (url) =>
+              verifyAndAddToolUrl
+                .executeAsync(url)
+                .then(urlToolModal.onClose)
+                .catch(noop) // add catch to prevent unhandled promise rejection
+          }
           onClose={urlToolModal.onClose}
+          error={(verifyAndAddToolUrl.error as Error)?.message}
+          isLoading={verifyAndAddToolUrl.pending}
         />
 
         <div className="flex gap-2">
