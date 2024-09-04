@@ -391,11 +391,16 @@ const useChatSocket = (isEmpty?: boolean) => {
 
     socket.off('connect');
     socket.off('disconnect');
+    socket.off('running');
+    socket.off('interrupted');
     socket.off('progress');
     socket.off('error');
     socket.off('AgentMessage');
     socket.off('promptRequest');
     socket.off('confirmRequest');
+    socket.off('toolAdded');
+    socket.off('toolRemoved');
+    socket.off('scriptSaved');
 
     setConnected(false);
     setMessages([]);
@@ -408,6 +413,11 @@ const useChatSocket = (isEmpty?: boolean) => {
       setForceRun(true);
     });
     socket.on('running', () => setRunning(true));
+    socket.on('interrupted', () => {
+      setGenerating(false);
+      setWaitingForUserResponse(false);
+      latestAgentMessageIndex.current = -1;
+    });
     socket.on(
       'progress',
       (data: { frame: CallFrame; state: any; name?: string }) =>
@@ -452,21 +462,18 @@ const useChatSocket = (isEmpty?: boolean) => {
   }, []);
 
   const restart = useCallback(() => {
-    trustedRef.current = {};
     setRunning(false);
-    setWaitingForUserResponse(false);
-    setGenerating(false);
-    setError(null);
+    interrupt();
+    trustedRef.current = {};
     setMessages([]);
     trustedRepoPrefixesRef.current = [...initiallyTrustedRepos];
     loadSocket();
+    setError(null);
   }, [socket]);
 
   const interrupt = useCallback(() => {
     if (!socket || !connected) return;
-    latestAgentMessageIndex.current = -1;
     socket.emit('interrupt');
-    setGenerating(false);
   }, [socket, connected]);
 
   useEffect(() => {

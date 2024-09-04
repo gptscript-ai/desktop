@@ -193,9 +193,15 @@ const mount = async (
   }
 
   // Start the script
-  let runningScript = null;
   socket.on('interrupt', async () => {
-    if (runningScript) runningScript.close();
+    if (runningScript) {
+      runningScript.close();
+      runningScript = null;
+    } else {
+      // If there is no running script, then send the interrupted event.
+      // If there is a running script, then the interrupted event will be sent when the script finishes.
+      socket.emit('interrupted');
+    }
   });
   socket.on('disconnect', () => {
     if (runningScript) runningScript.close();
@@ -256,12 +262,15 @@ const mount = async (
           });
         }
       })
-      .catch(
-        (e) =>
-          e &&
-          e !== 'Run has been aborted' &&
-          socket.emit('error', e.toString())
-      );
+      .catch((e) => {
+        if (e) {
+          if (e.toString() === 'Error: Run has been aborted') {
+            socket.emit('interrupted');
+          } else {
+            socket.emit('error', e.toString());
+          }
+        }
+      });
   } else {
     socket.emit('running'); // temp
     socket.emit('resuming');
@@ -424,10 +433,15 @@ const mount = async (
           });
         }
       })
-      .catch(
-        (e) =>
-          e && e != 'Run has been aborted' && socket.emit('error', e.toString())
-      );
+      .catch((e) => {
+        if (e) {
+          if (e.toString() === 'Error: Run has been aborted') {
+            socket.emit('interrupted');
+          } else {
+            socket.emit('error', e.toString());
+          }
+        }
+      });
   });
 };
 

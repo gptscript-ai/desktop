@@ -5,6 +5,7 @@ import { Button, Divider, Tooltip } from '@nextui-org/react';
 import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { getScript } from '@/actions/me/scripts';
+import { Message } from '@/components/chat/messages';
 
 interface ThreadsProps {
   className?: string;
@@ -15,26 +16,30 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
   const {
     setScript,
     setScriptContent,
+    thread,
     setThread,
     threads,
     setScriptId,
-    selectedThreadId,
-    setSelectedThreadId,
     setShouldRestart,
+    setMessages,
   } = useContext(ChatContext);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleRun = async (script: string, id: string, scriptId: string) => {
-    setScriptContent((await getScript(scriptId))?.script || []);
-    setScript(script);
-    setThread(id);
-    setScriptId(scriptId);
-    setSelectedThreadId(id);
-    setShouldRestart(true);
+    if (id !== thread) {
+      setScriptContent((await getScript(scriptId))?.script || []);
+      setScript(script);
+      setThread(id);
+      setScriptId(scriptId);
+      setShouldRestart(true);
+      // Remove the messages from the screen immediately so the user has feedback that something is happening.
+      // We can't set the messages here to [] because that was cause the "Waiting for model response" message to show up.
+      setMessages([{} as Message]);
+    }
   };
 
-  const isSelected = (id: string) => id === selectedThreadId;
+  const isSelected = (id: string) => id === thread;
 
   return (
     <div

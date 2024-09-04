@@ -135,14 +135,8 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
     const [filteredOptions, setFilteredOptions] =
       useState<typeof options>(options);
 
-    const {
-      restartScript,
-      socket,
-      setMessages,
-      tools,
-      workspace,
-      selectedThreadId,
-    } = useContext(ChatContext);
+    const { restartScript, socket, setMessages, tools, workspace, thread } =
+      useContext(ChatContext);
     const { openFilePicker, filesContent, loading, plainFiles } = useFilePicker(
       {}
     );
@@ -190,7 +184,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
             ]);
             await uploadFile(workspace, formData, true);
           }
-          await ingest(workspace, getCookie('gateway_token'), selectedThreadId);
+          await ingest(workspace, getCookie('gateway_token'), thread);
           setMessages((prev) => [
             ...prev,
             {
