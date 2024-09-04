@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import archiver from 'archiver';
 import { PassThrough } from 'stream';
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const logDir = process.env.LOGS_DIR;
 
   console.log(`logsDir: ${logDir}`);

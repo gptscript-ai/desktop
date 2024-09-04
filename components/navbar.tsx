@@ -15,10 +15,13 @@ import Me from '@/components/navbar/me';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { TwitterIcon, GithubIcon, DiscordIcon, Logo } from '@/components/icons';
 import { useContext, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { NavContext } from '@/contexts/nav';
 
 export const Navbar = () => {
   const { current, setCurrent } = useContext(NavContext);
+  const pathname = usePathname();
+
   useEffect(() => {
     document
       .getElementById('drag-bar')
@@ -31,6 +34,10 @@ export const Navbar = () => {
       );
     }
   }, []);
+
+  useEffect(() => {
+    setCurrent(pathname);
+  }, [pathname, setCurrent]);
 
   return (
     <NextUINavbar
@@ -66,6 +73,19 @@ export const Navbar = () => {
               </NextLink>
             </NavbarItem>
           ))}
+          {pathname === '/settings' && (
+            <NavbarItem isActive={current === '/settings'}>
+              <NextLink
+                className={`text-white ${current === '/settings' ? 'border-b-2 pb-2 text-base' : ''}`}
+                onClick={() => setCurrent('/settings')}
+                color="foreground"
+                target={'_self'}
+                href="/settings"
+              >
+                Settings
+              </NextLink>
+            </NavbarItem>
+          )}
         </ul>
       </NavbarContent>
 
