@@ -9,12 +9,13 @@ import {
   Divider,
 } from '@nextui-org/react';
 import { useState, useEffect, useContext } from 'react';
-import { GoPersonFill } from 'react-icons/go';
+import { GoPersonFill, GoGear } from 'react-icons/go';
 import Logout from '@/components/navbar/me/logout';
 import { AuthContext } from '@/contexts/auth';
 import { loginThroughTool } from '@/actions/auth/auth';
 import { getMe } from '@/actions/me/me';
 import Loading from '@/components/loading';
+import NextLink from 'next/link';
 
 interface MeProps {
   className?: string;
@@ -99,16 +100,16 @@ const Me = ({ className }: MeProps) => {
               )}
               {authenticated && (
                 <>
-                  {/* <Button
-                                    as={Link}
-                                    style={{justifyContent: "flex-start"}}
-                                    href="/"
-                                    variant="light"
-                                    startContent={<HiOutlineCog6Tooth/>}
-                                    className="w-full"
-                                >
-                                    Settings
-                                </Button> */}
+                  <Button
+                    as={NextLink}
+                    style={{ justifyContent: 'flex-start' }}
+                    href="/settings"
+                    variant="light"
+                    startContent={<GoGear />}
+                    className="w-full"
+                  >
+                    Settings
+                  </Button>
                 </>
               )}
             </>
