@@ -50,6 +50,7 @@ import {
   ToolCatalogRef,
 } from '@/components/chat/chatBar/CatalogListBox';
 import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
+import { useClickOutside } from '@/hooks/useClickOutside';
 import { useAsync } from '@/hooks/useFetch';
 import { noop } from 'lodash';
 
@@ -139,6 +140,13 @@ const Imports: React.FC<ImportsProps> = ({
     };
   }, [catalogMenu]);
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const clickOutsideRef = useClickOutside({
+    onClickOutside: catalogMenu.onClose,
+    whitelist: [buttonRef.current].filter((el) => !!el),
+  });
+
   return (
     <div className={`${className}`}>
       {remoteTools && remoteTools.size > 0 && (
@@ -189,19 +197,22 @@ const Imports: React.FC<ImportsProps> = ({
       <div className={`flex flex-col gap-2`}>
         <Tooltip
           content={
-            <CatalogListBox
-              equippedTools={tools || []}
-              onAddTool={(tool) => {
-                setTools([...(tools || []), tool]);
-                catalogMenu.onClose();
-              }}
-              ref={catalogRef}
-            />
+            <div ref={clickOutsideRef}>
+              <CatalogListBox
+                equippedTools={tools || []}
+                onAddTool={(tool) => {
+                  setTools([...(tools || []), tool]);
+                  catalogMenu.onClose();
+                }}
+                ref={catalogRef}
+              />
+            </div>
           }
           isOpen={catalogMenu.isOpen}
         >
           <Button
             startContent={<GoTools />}
+            ref={buttonRef}
             variant="flat"
             className="w-full"
             color="primary"
