@@ -72,7 +72,7 @@ interface ChatContextState {
   restartScript: () => void;
 }
 
-const defaultScriptName = `Tildy`;
+const defaultScriptName = `[Deleted Assistant]`;
 
 const ChatContext = createContext<ChatContextState>({} as ChatContextState);
 const ChatContextProvider: React.FC<ChatContextProps> = ({
