@@ -9,16 +9,24 @@ export function useAsync<TData, TParams extends any[] = never[]>(
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const execute = useCallback(async (...args: TParams) => {
-    setPending(true);
+  const executeAsync = useCallback(
+    async (...args: TParams) => {
+      setPending(true);
+      const promise = callback(...args);
 
-    try {
-      setData(await callback(...args));
-    } catch (e) {
-      setError(e);
-    } finally {
-      setPending(false);
-    }
+      promise
+        .then(setData)
+        .catch(setError)
+        .finally(() => setPending(false));
+
+      return promise;
+    },
+    [callback]
+  );
+
+  const execute = useCallback((...args: TParams) => {
+    // Safe execution of the callback
+    executeAsync(...args).catch();
   }, []);
 
   const clear = useCallback(() => {
@@ -32,28 +40,5 @@ export function useAsync<TData, TParams extends any[] = never[]>(
     console.error(error);
   }, [error]);
 
-  return { data, pending, error, execute, clear };
-}
-
-export function useFetch<TData>(
-  url: string,
-  config?: { disabled?: boolean; clearOnDisabled?: boolean }
-) {
-  const { disabled = false, clearOnDisabled = false } = config ?? {};
-
-  const { execute, ...fetcher } = useAsync(async (url: string) => {
-    const response = await fetch(url);
-    return (await response.json()) as TData;
-  });
-
-  useEffect(() => {
-    if (disabled) {
-      if (clearOnDisabled) fetcher.clear();
-      return;
-    }
-
-    execute(url);
-  }, [url, disabled]);
-
-  return fetcher;
+  return { data, pending, error, execute, executeAsync, clear };
 }
