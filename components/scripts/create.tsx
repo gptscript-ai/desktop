@@ -2,13 +2,15 @@ import React from 'react';
 import { Button } from '@nextui-org/react';
 import { GoPersonAdd } from 'react-icons/go';
 import { createDefaultAssistant } from '@/actions/me/scripts';
+import { useRouter } from 'next/navigation';
 
 export default function Create() {
   const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     createDefaultAssistant().then((script) => {
-      window.location.href = `/edit?id=${script?.id}`;
+      router.push(`/edit?id=${script?.id}`);
     });
   };
 
