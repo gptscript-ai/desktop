@@ -1,9 +1,8 @@
 import CustomTool from '@/components/edit/configure/customTool';
-import ToolCatalogModal from '@/components/edit/configure/imports/toolCatalogModal';
 import { EditContext } from '@/contexts/edit';
-import { Button } from '@nextui-org/react';
+import { Button, Tooltip, useDisclosure } from '@nextui-org/react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
   AiFillFileAdd,
   AiOutlineKubernetes,
@@ -45,21 +44,27 @@ import {
 } from 'react-icons/si';
 import { VscAzure } from 'react-icons/vsc';
 
-import { getToolDisplayName } from '@/actions/gptscript';
+import { getToolDisplayName, parse } from '@/actions/gptscript';
+import {
+  CatalogListBox,
+  ToolCatalogRef,
+} from '@/components/chat/chatBar/CatalogListBox';
+import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
+import { useClickOutside } from '@/hooks/useClickOutside';
+import { useAsync } from '@/hooks/useFetch';
+import { noop } from 'lodash';
 
 interface ImportsProps {
   tools: string[] | undefined;
   setTools: (tools: string[]) => void;
   enableLocal?: boolean;
   className?: string;
-  collapsed?: boolean;
 }
 
 const Imports: React.FC<ImportsProps> = ({
   tools,
   setTools,
   className,
-  collapsed,
   enableLocal = 'true',
 }) => {
   // remoteTools contains a mapping of tool references to display names for
@@ -109,6 +114,39 @@ const Imports: React.FC<ImportsProps> = ({
     setTools(tools!.filter((t) => t !== tool));
   };
 
+  const verifyAndAddToolUrl = useAsync(async (url: string) => {
+    if (!url) throw new Error('Tool URL cannot be empty');
+    await parse(url); // throws if the url is invalid
+    setTools([...(tools || []), url]);
+  });
+
+  const urlToolModal = useDisclosure({ onClose: verifyAndAddToolUrl.clear });
+
+  const catalogRef = useRef<ToolCatalogRef>(null);
+  const catalogMenu = useDisclosure();
+
+  useEffect(() => {
+    if (catalogMenu.isOpen) catalogRef.current?.focus();
+  }, [catalogMenu.isOpen]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') catalogMenu.onClose();
+    };
+
+    document.addEventListener('keyup', handler);
+    return () => {
+      document.removeEventListener('keyup', handler);
+    };
+  }, [catalogMenu]);
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const clickOutsideRef = useClickOutside({
+    onClickOutside: catalogMenu.onClose,
+    whitelist: [buttonRef.current].filter((el) => !!el),
+  });
+
   return (
     <div className={`${className}`}>
       {remoteTools && remoteTools.size > 0 && (
@@ -156,27 +194,74 @@ const Imports: React.FC<ImportsProps> = ({
           ))}
         </div>
       )}
-      <div
-        className={`flex ${collapsed ? 'flex-col space-y-2' : 'space-x-4'} ${tools?.length ? 'pt-4' : ''}`}
-      >
-        <ToolCatalogModal
-          tools={tools}
-          addTool={(tool) => {
-            setTools([...(tools || []), tool]);
-          }}
+      <div className={`flex flex-col gap-2`}>
+        <Tooltip
+          content={
+            <div ref={clickOutsideRef}>
+              <CatalogListBox
+                equippedTools={tools || []}
+                onAddTool={(tool) => {
+                  setTools([...(tools || []), tool]);
+                  catalogMenu.onClose();
+                }}
+                ref={catalogRef}
+              />
+            </div>
+          }
+          isOpen={catalogMenu.isOpen}
+        >
+          <Button
+            startContent={<GoTools />}
+            ref={buttonRef}
+            variant="flat"
+            className="w-full"
+            color="primary"
+            size="sm"
+            onPress={catalogMenu.onOpenChange}
+          >
+            Featured Tools
+          </Button>
+        </Tooltip>
+
+        <UrlToolModal
+          isOpen={urlToolModal.isOpen}
+          onAddTool={
+            (url) =>
+              verifyAndAddToolUrl
+                .executeAsync(url)
+                .then(urlToolModal.onClose)
+                .catch(noop) // add catch to prevent unhandled promise rejection
+          }
+          onClose={urlToolModal.onClose}
+          error={(verifyAndAddToolUrl.error as Error)?.message}
+          isLoading={verifyAndAddToolUrl.pending}
         />
-        {enableLocal && (
+
+        <div className="flex gap-2">
           <Button
             size="sm"
             variant="flat"
             className="w-full"
             color="primary"
-            startContent={<GoPencil />}
-            onPress={() => createNewTool()}
+            startContent={<GoGlobe />}
+            onClick={() => urlToolModal.onOpenChange()}
           >
-            Create a tool
+            Add Tool via URL
           </Button>
-        )}
+
+          {enableLocal && (
+            <Button
+              size="sm"
+              variant="flat"
+              className="w-full"
+              color="primary"
+              startContent={<GoPencil />}
+              onPress={() => createNewTool()}
+            >
+              Create a tool
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

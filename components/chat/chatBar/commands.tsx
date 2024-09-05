@@ -2,26 +2,14 @@ import { getToolDisplayName, parseBlock } from '@/actions/gptscript';
 import { ingest } from '@/actions/knowledge/knowledge';
 import { gatewayTool, getCookie } from '@/actions/knowledge/util';
 import { uploadFile } from '@/actions/upload';
-import CatalogListbox, {
+import CatalogListBox, {
   ToolCatalogRef,
 } from '@/components/chat/chatBar/search/catalog';
 import { MessageType } from '@/components/chat/messages';
+import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
 import { ChatContext } from '@/contexts/chat';
 import { useAsync } from '@/hooks/useFetch';
-import {
-  Button,
-  Card,
-  Input,
-  Link,
-  Listbox,
-  ListboxItem,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  Spinner,
-  useDisclosure,
-} from '@nextui-org/react';
+import { Card, Listbox, ListboxItem, useDisclosure } from '@nextui-org/react';
 import React, {
   forwardRef,
   useContext,
@@ -285,13 +273,11 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
       setLoadingTool(null);
     }, [addTool.error]);
 
-    const [toolUrl, setToolUrl] = useState<string>('');
-
     return (
       <div className="relative w-full h-3/4 command-options">
         <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
         {isCatalogOpen && (
-          <CatalogListbox
+          <CatalogListBox
             ref={toolcatalogRef}
             query={text}
             loading={loadingTool}
@@ -304,58 +290,13 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
           />
         )}
 
-        <Modal
+        <UrlToolModal
           isOpen={urlToolModal.isOpen}
-          onOpenChange={urlToolModal.onOpenChange}
-        >
-          <ModalContent>
-            <ModalHeader>Add Tool from URL</ModalHeader>
-
-            <ModalBody className="flex pb-4 flex-col pb-6">
-              <form
-                className="flex flex-col gap-2 items-center"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  addTool.execute(toolUrl);
-                  setToolUrl('');
-                }}
-              >
-                <Input
-                  label="Tool Url"
-                  errorMessage={(addTool.error as Error)?.message}
-                  isInvalid={!!addTool.error}
-                  variant="bordered"
-                  color={addTool.error ? 'danger' : 'primary'}
-                  name="toolUrl"
-                  value={toolUrl}
-                  onChange={(e) => setToolUrl(e.target.value)}
-                  placeholder="example: github.com/gptscript-ai/vision"
-                />
-                <Button
-                  fullWidth
-                  type="submit"
-                  variant="flat"
-                  color="primary"
-                  disabled={!!loadingTool}
-                  endContent={
-                    loadingTool || addTool.pending ? (
-                      <Spinner size="sm" />
-                    ) : undefined
-                  }
-                >
-                  Add Tool
-                </Button>
-              </form>
-
-              <p>
-                Find more tools in our{' '}
-                <Link isExternal href="https://tools.gptscript.ai/">
-                  Community Catalog
-                </Link>
-              </p>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          onAddTool={addTool.execute}
+          onClose={urlToolModal.onClose}
+          error={(addTool.error as Error)?.message}
+          isLoading={!!loadingTool || addTool.pending}
+        />
 
         {isOpen && !!filteredOptions.length && (
           <Card className="absolute bottom-14 w-full p-4">
