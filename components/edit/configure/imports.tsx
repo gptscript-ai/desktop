@@ -233,7 +233,7 @@ const toolIconMap = new Map<string, () => React.ReactNode>([
     () => <FaTrello className="text-md" />,
   ],
   [
-    'github.com/gptscript-ai/tools/apis/hubspot/crm',
+    'github.com/gptscript-ai/tools/apis/hubspot/crm/write',
     () => <FaHubspot className="text-md" />,
   ],
   [
