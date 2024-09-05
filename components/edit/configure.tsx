@@ -7,7 +7,6 @@ import Code from '@/components/edit/configure/code';
 import { EditContext } from '@/contexts/edit';
 import { GoLightBulb, GoTrash } from 'react-icons/go';
 import { HiCog } from 'react-icons/hi2';
-import { LuCircuitBoard } from 'react-icons/lu';
 import {
   Textarea,
   Input,
@@ -160,46 +159,6 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
           />
           <Accordion isCompact fullWidth selectionMode="multiple">
             <AccordionItem
-              aria-label="dynamic-instructions"
-              title={<h1>Dynamic Instructions</h1>}
-              startContent={<LuCircuitBoard />}
-              classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
-            >
-              <div className="flex bg-primary-50 rounded-xl p-4 mb-4 text-tiny italic text-primary-500 items-center space-x-4">
-                <GoLightBulb
-                  className={`inline mb-1 text-sm ${collapsed ? 'w-[200px] ' : 'w-fit'} `}
-                />
-                <p>
-                  Augment your instructions with code that can pull information
-                  from local or remote systems.
-                </p>
-              </div>
-              <Code
-                code={dynamicInstructions}
-                onChange={(value: string) => {
-                  setDynamicInstructions(value);
-                  setUpdated(true);
-                }}
-                dependencies={
-                  dependencies.find((d) => d.forTool === 'dynamic-instructions')
-                    ?.content || ''
-                }
-                onDependenciesChange={(code, type) => {
-                  setDependencies([
-                    ...dependencies.filter(
-                      (d) => d.forTool !== 'dynamic-instructions'
-                    ),
-                    {
-                      forTool: 'dynamic-instructions',
-                      content: code,
-                      type: type,
-                    },
-                  ]);
-                  setUpdated(true);
-                }}
-              />
-            </AccordionItem>
-            <AccordionItem
               aria-label="remote-tools"
               title={<h1>Tools</h1>}
               startContent={<PiToolboxBold />}
@@ -313,11 +272,6 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               aria-label="advanced"
               title={<h1>Advanced</h1>}
               startContent={<HiCog />}
-              classNames={{
-                content: collapsed
-                  ? 'py-6 pt-10 h-[500px]'
-                  : 'p-10 pt-6 h-[500px]',
-              }}
             >
               <Models
                 options={models}
@@ -327,6 +281,43 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
                   if (root.modelName != model) setUpdated(true);
                 }}
               />
+              <div className="mt-4">
+                <h1 className="text-sm mb-4">Dynamic Instructions</h1>
+                <div className="flex bg-primary-50 rounded-xl p-4 mb-4 text-tiny italic text-primary-500 items-center space-x-4">
+                  <GoLightBulb
+                    className={`inline mb-1 text-sm ${collapsed ? 'w-[200px] ' : 'w-fit'} `}
+                  />
+                  <p>
+                    Augment your instructions with code that can pull
+                    information from local or remote systems.
+                  </p>
+                </div>
+                <Code
+                  code={dynamicInstructions}
+                  onChange={(value: string) => {
+                    setDynamicInstructions(value);
+                    setUpdated(true);
+                  }}
+                  dependencies={
+                    dependencies.find(
+                      (d) => d.forTool === 'dynamic-instructions'
+                    )?.content || ''
+                  }
+                  onDependenciesChange={(code, type) => {
+                    setDependencies([
+                      ...dependencies.filter(
+                        (d) => d.forTool !== 'dynamic-instructions'
+                      ),
+                      {
+                        forTool: 'dynamic-instructions',
+                        content: code,
+                        type: type,
+                      },
+                    ]);
+                    setUpdated(true);
+                  }}
+                />
+              </div>
             </AccordionItem>
           </Accordion>
         </div>
