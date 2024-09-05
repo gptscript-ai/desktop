@@ -8,7 +8,6 @@ import {
   getBrowserSettings,
   setBrowserSettings,
 } from '@/actions/browser';
-import { IoIosInformationCircleOutline } from 'react-icons/io';
 
 export default function Settings() {
   const [settings, setSettings] = useState({
