@@ -34,7 +34,7 @@ const ConfirmForm = ({
   };
 
   if (loading) {
-    return <div className="p-4">Calling tool {tool}...</div>;
+    return null;
   }
 
   return (
@@ -59,12 +59,11 @@ const ConfirmForm = ({
           placement="top"
         >
           <Button
-            startContent={!loading && <GoCheckCircle />}
+            startContent={<GoCheckCircle />}
             onClick={() => onSubmitForm(true)}
             className="mb-6 w-1/2 mr-2"
             size="lg"
             color="primary"
-            isLoading={loading}
           >
             Allow
           </Button>
@@ -75,24 +74,22 @@ const ConfirmForm = ({
           placement="top"
         >
           <Button
-            startContent={!loading && <GoCheckCircleFill />}
+            startContent={<GoCheckCircleFill />}
             onClick={() => {
               addTrusted();
               onSubmitForm(true);
             }}
             className="mb-6 w-1/2 ml-2"
             size="lg"
-            isLoading={loading}
           >
             Allow All
           </Button>
         </Tooltip>
         <Button
-          startContent={!loading && <GoXCircle />}
+          startContent={<GoXCircle />}
           onClick={() => onSubmitForm(false)}
           className="mb-6 w-1/2 ml-2"
           size="lg"
-          isLoading={loading}
         >
           Deny
         </Button>

@@ -51,6 +51,7 @@ interface ChatContextState {
   setIsEmpty: React.Dispatch<React.SetStateAction<boolean>>;
   notFound: boolean;
   setNotFound: React.Dispatch<React.SetStateAction<boolean>>;
+  latestAgentMessage: Message;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   thread: string;
@@ -101,6 +102,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     socket,
     connected,
     running,
+    latestAgentMessage,
     messages,
     setMessages,
     restart,
@@ -364,6 +366,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setIsEmpty,
         notFound,
         setNotFound,
+        latestAgentMessage,
         messages,
         setMessages,
         thread,

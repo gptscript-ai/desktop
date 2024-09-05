@@ -156,10 +156,12 @@ const Message = ({
 
 const Messages = ({
   messages,
+  latestAgentMessage,
   noAvatar,
   restart,
 }: {
   messages: Message[];
+  latestAgentMessage: Message;
   noAvatar?: boolean;
   restart?: () => void;
 }) => (
@@ -172,6 +174,14 @@ const Messages = ({
         noAvatar={noAvatar}
       />
     ))}
+    {latestAgentMessage.message && (
+      <Message
+        key={messages.length}
+        restart={restart}
+        message={latestAgentMessage}
+        noAvatar={noAvatar}
+      />
+    )}
   </div>
 );
 

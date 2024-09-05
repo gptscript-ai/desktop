@@ -203,7 +203,8 @@ const mount = async (
       socket.emit('interrupted');
     }
   });
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (reason) => {
+    console.log('server socket disconnect: ' + reason);
     if (runningScript) runningScript.close();
     runningScript = null;
   });
@@ -215,21 +216,18 @@ const mount = async (
     runningScript.on(RunEventType.Event, (data) =>
       socket.emit('progress', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
@@ -385,21 +383,18 @@ const mount = async (
     runningScript.on(RunEventType.Event, (data) =>
       socket.emit('progress', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );

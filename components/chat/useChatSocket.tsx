@@ -1,13 +1,14 @@
 // TODO [ryanhopperlowe] refactor this file to create a separate state for loadingChat so that
 // it doesn't recreate the entire chat state on every chunk of generated text
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import {
-  CallFrame,
-  PromptFrame,
-  PromptResponse,
   AuthResponse,
   Block,
+  CallFrame,
+  Frame,
+  PromptFrame,
+  PromptResponse,
 } from '@gptscript-ai/gptscript';
 import { Message, MessageType } from './messages';
 import PromptForm from './messages/promptForm';
@@ -31,6 +32,9 @@ const useChatSocket = (isEmpty?: boolean) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [latestAgentMessage, setLatestAgentMessage] = useState<Message>(
+    {} as Message
+  );
   const [generating, setGenerating] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +46,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   // Refs
   const socketRef = useRef<Socket | null>(null);
   const messagesRef = useRef(messages);
-  const latestAgentMessageIndex = useRef<number>(-1);
+  const latestAgentMessageRef = useRef(latestAgentMessage);
   const trustedRef = useRef<Record<string, boolean>>({});
   const trustedRepoPrefixesRef = useRef<string[]>([...initiallyTrustedRepos]);
   // trustedOpenAPIRef contains a mapping of OpenAPI run tools to OpenAPI operation names that have been trusted.
@@ -51,41 +55,59 @@ const useChatSocket = (isEmpty?: boolean) => {
   // update the refs as the state changes
   messagesRef.current = messages;
   socketRef.current = socket;
+  latestAgentMessageRef.current = latestAgentMessage;
 
   const handleError = useCallback((error: string) => {
     setGenerating(false);
     setWaitingForUserResponse(false);
     setError(error);
     setMessages((prevMessages) => {
-      const updatedMessages = [...prevMessages];
-      if (latestAgentMessageIndex.current !== -1) {
-        // Append the error to the latest message
-        updatedMessages[latestAgentMessageIndex.current].error = `${error}`;
-      } else {
+      if (!latestAgentMessageRef.current.type) {
         // If there are no previous messages, create a new error message
-        updatedMessages.push({
-          type: MessageType.Agent,
-          name: '',
-          message:
-            'The script encountered an error. You can either restart the script or try to continue chatting.',
-          error,
-        });
+        return [
+          ...prevMessages,
+          {
+            type: MessageType.Agent,
+            name: '',
+            message:
+              'The script encountered an error. You can either restart the script or try to continue chatting.',
+            error,
+          },
+        ];
       }
-      return updatedMessages;
+
+      latestAgentMessage.error = `${error}`;
+      setLatestAgentMessage({} as Message);
+      return [...prevMessages, { ...latestAgentMessage }];
     });
   }, []);
 
   // handles progress being received from the server (callProgress style frames).
   const handleProgress = useCallback(
-    ({
-      frame,
-      state,
-      name,
-    }: {
-      frame: CallFrame;
-      state: Record<string, CallFrame>;
-      name?: string;
-    }) => {
+    ({ frame, name }: { frame: Frame; name?: string }) => {
+      if (!latestAgentMessageRef.current.type)
+        latestAgentMessageRef.current.type = MessageType.Agent;
+      if (!latestAgentMessageRef.current.name)
+        latestAgentMessageRef.current.name = name;
+      if (latestAgentMessageRef.current.component)
+        latestAgentMessageRef.current.component = null;
+
+      if (!frame.type.startsWith('call')) {
+        if (frame.type === 'runStart') {
+          latestAgentMessageRef.current.message =
+            'Waiting for model response...';
+          setLatestAgentMessage({ ...latestAgentMessageRef.current });
+        }
+        return;
+      }
+
+      // At this point, we know that we are dealing with a call frame
+      frame = frame as CallFrame;
+      if (!latestAgentMessageRef.current.calls) {
+        latestAgentMessageRef.current.calls = {};
+      }
+      latestAgentMessageRef.current.calls[frame.id] = frame;
+
       if (!frame.error && frame.toolCategory === 'provider') {
         return;
       }
@@ -103,8 +125,7 @@ const useChatSocket = (isEmpty?: boolean) => {
       setGenerating(true);
       if (
         content === 'Waiting for model response...' &&
-        latestAgentMessageIndex.current !== -1 &&
-        messagesRef.current[latestAgentMessageIndex.current]?.message
+        latestAgentMessageRef.current.message
       )
         return;
 
@@ -113,45 +134,34 @@ const useChatSocket = (isEmpty?: boolean) => {
         content = `Calling tool ${parsedToolCall.tool}...`;
       }
 
-      const message: Message = {
-        type: MessageType.Agent,
-        message: content,
-        calls: state,
-        name: name,
-      };
-
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        if (latestAgentMessageIndex.current !== -1) {
-          updatedMessages[latestAgentMessageIndex.current] = message;
-        } else {
-          updatedMessages[messagesRef.current.length - 1] = message;
-        }
-        return updatedMessages;
-      });
+      latestAgentMessageRef.current.message = content;
 
       if (isMainContent && frame.type == 'callFinish') {
+        setMessages([
+          ...messagesRef.current,
+          { ...latestAgentMessageRef.current },
+        ]);
+        setLatestAgentMessage({} as Message);
         setGenerating(false);
-        latestAgentMessageIndex.current = -1;
+      } else {
+        setLatestAgentMessage({ ...latestAgentMessageRef.current });
       }
     },
     []
   );
 
   const handlePromptRequest = useCallback(
-    ({
-      frame,
-      state,
-      name,
-    }: {
-      frame: PromptFrame;
-      state: Record<string, CallFrame>;
-      name?: string;
-    }) => {
+    ({ frame, name }: { frame: PromptFrame; name?: string }) => {
       setWaitingForUserResponse(true);
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        const form = (
+      setLatestAgentMessage((prev) => {
+        prev.name = name;
+        prev.message =
+          frame.metadata &&
+          frame.metadata.authURL &&
+          frame.metadata.toolDisplayName
+            ? `${frame.metadata.toolDisplayName} requires authentication`
+            : frame.message;
+        prev.component = (
           <PromptForm
             frame={frame}
             onSubmit={(response: PromptResponse) => {
@@ -160,49 +170,14 @@ const useChatSocket = (isEmpty?: boolean) => {
             }}
           />
         );
-
-        if (latestAgentMessageIndex.current !== -1) {
-          // Update the message content
-          updatedMessages[latestAgentMessageIndex.current].message =
-            frame.metadata &&
-            frame.metadata.authURL &&
-            frame.metadata.toolDisplayName
-              ? `${frame.metadata.toolDisplayName} requires authentication`
-              : frame.message;
-          updatedMessages[latestAgentMessageIndex.current].component = form;
-          updatedMessages[latestAgentMessageIndex.current].calls = state;
-          updatedMessages[latestAgentMessageIndex.current].name = name;
-        } else {
-          // If there are no previous messages, create a new message
-          updatedMessages.push({
-            type: MessageType.Agent,
-            message:
-              frame.metadata &&
-              frame.metadata.authURL &&
-              frame.metadata.toolDisplayName
-                ? `${frame.metadata.toolDisplayName} requires authentication`
-                : frame.message,
-            component: form,
-            calls: state,
-            name: name,
-          });
-        }
-        return updatedMessages;
+        return { ...prev };
       });
     },
     []
   );
 
   const handleConfirmRequest = useCallback(
-    ({
-      frame,
-      state,
-      name,
-    }: {
-      frame: CallFrame;
-      state: Record<string, CallFrame>;
-      name?: string;
-    }) => {
+    ({ frame, name }: { frame: CallFrame; name?: string }) => {
       if (!frame.tool) return;
 
       if (alreadyAllowed(frame)) {
@@ -223,44 +198,24 @@ const useChatSocket = (isEmpty?: boolean) => {
           : `Proceed with running the following (or allow all **${tool}** calls)?`;
       }
 
-      const form = (
-        <ConfirmForm
-          id={frame.id}
-          message={confirmMessage}
-          command={frame.displayText}
-          tool={frame.tool?.name || 'main'}
-          addTrusted={addTrustedFor(frame)}
-          onSubmit={(response: AuthResponse) => {
-            socketRef.current?.emit('confirmResponse', response);
-            setWaitingForUserResponse(false);
-          }}
-        />
-      );
+      setLatestAgentMessage((prev) => {
+        prev.component = (
+          <ConfirmForm
+            id={frame.id}
+            message={confirmMessage}
+            command={frame.displayText}
+            tool={frame.tool?.name || 'main'}
+            addTrusted={addTrustedFor(frame)}
+            onSubmit={(response: AuthResponse) => {
+              socketRef.current?.emit('confirmResponse', response);
+              setWaitingForUserResponse(false);
+            }}
+          />
+        );
 
-      const message: Message = {
-        type: MessageType.Agent,
-        name: name,
-        component: form,
-        calls: state,
-      };
-      if (latestAgentMessageIndex.current === -1) {
-        latestAgentMessageIndex.current = messagesRef.current.length;
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          updatedMessages.push(message);
-          return updatedMessages;
-        });
-      } else {
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          if (latestAgentMessageIndex.current !== -1) {
-            updatedMessages[latestAgentMessageIndex.current] = message;
-          } else {
-            updatedMessages[messagesRef.current.length - 1] = message;
-          }
-          return updatedMessages;
-        });
-      }
+        prev.name = name;
+        return { ...prev };
+      });
     },
     []
   );
@@ -413,7 +368,8 @@ const useChatSocket = (isEmpty?: boolean) => {
     socket.on('connect', () => {
       setConnected(true);
     });
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+      console.log('client socket disconnect: ' + reason);
       setConnected(false);
       setForceRun(true);
     });
@@ -421,23 +377,16 @@ const useChatSocket = (isEmpty?: boolean) => {
     socket.on('interrupted', () => {
       setGenerating(false);
       setWaitingForUserResponse(false);
-      latestAgentMessageIndex.current = -1;
     });
-    socket.on(
-      'progress',
-      (data: { frame: CallFrame; state: any; name?: string }) =>
-        handleProgress(data)
+    socket.on('progress', (data: { frame: Frame; name?: string }) =>
+      handleProgress(data)
     );
     socket.on('error', (data: string) => handleError(data));
-    socket.on(
-      'promptRequest',
-      (data: { frame: PromptFrame; state: any; name?: string }) =>
-        handlePromptRequest(data)
+    socket.on('promptRequest', (data: { frame: PromptFrame; name?: string }) =>
+      handlePromptRequest(data)
     );
-    socket.on(
-      'confirmRequest',
-      (data: { frame: CallFrame; state: any; name?: string }) =>
-        handleConfirmRequest(data)
+    socket.on('confirmRequest', (data: { frame: CallFrame; name?: string }) =>
+      handleConfirmRequest(data)
     );
     socket.on('toolAdded', (tools: string[]) => handleToolChange(tools));
     socket.on('toolRemoved', (tools: string[]) => handleToolChange(tools));
@@ -483,14 +432,12 @@ const useChatSocket = (isEmpty?: boolean) => {
 
   useEffect(() => {
     if (running && messages.length === 0) {
-      const initialMessages: Array<Message> = [];
       if (!isEmpty) {
-        initialMessages.push({
+        setLatestAgentMessage({
+          calls: {},
           type: MessageType.Agent,
           message: 'Waiting for model response...',
         });
-        latestAgentMessageIndex.current = 0;
-        setMessages(initialMessages);
       }
     }
   }, [running, messages, isEmpty]);
@@ -501,6 +448,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     setSocket,
     connected,
     setConnected,
+    latestAgentMessage,
     messages,
     setMessages,
     restart,
