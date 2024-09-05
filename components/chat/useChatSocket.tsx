@@ -161,31 +161,24 @@ const useChatSocket = (isEmpty?: boolean) => {
           />
         );
 
-        if (latestAgentMessageIndex.current !== -1) {
-          // Update the message content
-          updatedMessages[latestAgentMessageIndex.current].message =
+        // Build the message to display.
+        const message = {
+          type: MessageType.Agent,
+          name: name,
+          component: form,
+          calls: state,
+          message:
             frame.metadata &&
             frame.metadata.authURL &&
             frame.metadata.toolDisplayName
               ? `${frame.metadata.toolDisplayName} requires authentication`
-              : frame.message;
-          updatedMessages[latestAgentMessageIndex.current].component = form;
-          updatedMessages[latestAgentMessageIndex.current].calls = state;
-          updatedMessages[latestAgentMessageIndex.current].name = name;
+              : frame.message,
+        };
+
+        if (latestAgentMessageIndex.current !== -1) {
+          updatedMessages[latestAgentMessageIndex.current] = message;
         } else {
-          // If there are no previous messages, create a new message
-          updatedMessages.push({
-            type: MessageType.Agent,
-            message:
-              frame.metadata &&
-              frame.metadata.authURL &&
-              frame.metadata.toolDisplayName
-                ? `${frame.metadata.toolDisplayName} requires authentication`
-                : frame.message,
-            component: form,
-            calls: state,
-            name: name,
-          });
+          updatedMessages[messagesRef.current.length - 1] = message;
         }
         return updatedMessages;
       });
@@ -243,24 +236,16 @@ const useChatSocket = (isEmpty?: boolean) => {
         component: form,
         calls: state,
       };
-      if (latestAgentMessageIndex.current === -1) {
-        latestAgentMessageIndex.current = messagesRef.current.length;
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          updatedMessages.push(message);
-          return updatedMessages;
-        });
-      } else {
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          if (latestAgentMessageIndex.current !== -1) {
-            updatedMessages[latestAgentMessageIndex.current] = message;
-          } else {
-            updatedMessages[messagesRef.current.length - 1] = message;
-          }
-          return updatedMessages;
-        });
-      }
+
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (latestAgentMessageIndex.current !== -1) {
+          updatedMessages[latestAgentMessageIndex.current] = message;
+        } else {
+          updatedMessages[messagesRef.current.length - 1] = message;
+        }
+        return updatedMessages;
+      });
     },
     []
   );
