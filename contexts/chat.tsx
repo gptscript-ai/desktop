@@ -328,6 +328,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
 
   const handleCreateThread = (script: string, id?: string) => {
     createThread(script, '', id).then((newThread) => {
+      setTools([]);
       setScriptId(id);
       setThreads((threads: Thread[]) => [newThread, ...threads]);
       setScript(script);
