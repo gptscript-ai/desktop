@@ -4,6 +4,25 @@ import { join, dirname, parse } from 'path';
 import log from 'electron-log/main.js';
 import util from 'util';
 import { renameSync } from 'fs';
+import os from 'os';
+
+function browserSettingsLocation() {
+  const homeDir = os.homedir();
+  let configDir;
+  if (os.platform() === 'darwin') {
+    configDir =
+      process.env.XDG_CONFIG_HOME ||
+      join(homeDir, 'Library', 'Application Support');
+  } else if (os.platform() === 'win32') {
+    configDir = join(homeDir, 'AppData', 'Local');
+  } else if (os.platform() === 'linux') {
+    configDir = process.env.XDG_CONFIG_HOME || join(homeDir, '.config');
+  } else {
+    throw new Error('Unsupported platform');
+  }
+
+  return join(configDir, 'acorn', 'browsersettings.json');
+}
 
 // App config
 const dev = !app.isPackaged;
@@ -14,6 +33,7 @@ const resourcesDir = dirname(appDir);
 const dataDir = join(app.getPath('userData'), appName);
 const threadsDir = process.env.THREADS_DIR || join(dataDir, 'threads');
 const workspaceDir = process.env.WORKSPACE_DIR || join(dataDir, 'workspace');
+const browserSettingsFile = browserSettingsLocation();
 const port =
   process.env.PORT ||
   (!dev ? await getPort({ portRange: [30000, 40000] }) : 3000);
@@ -92,4 +112,5 @@ export const config = {
   gptscriptBin,
   gatewayUrl,
   knowledgeBin,
+  browserSettingsFile,
 };

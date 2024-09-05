@@ -31,6 +31,7 @@ async function startServer() {
   process.env.WORKSPACE_DIR = config.workspaceDir;
   process.env.GPTSCRIPT_GATEWAY_URL = config.gatewayUrl;
   process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
+  process.env.GPTSCRIPT_BROWSER_SETTINGS_FILE = config.browserSettingsFile;
 
   console.log(`GPTSCRIPT_BIN=${config.gptscriptBin}`);
 
