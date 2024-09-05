@@ -119,24 +119,16 @@ const useChatSocket = (isEmpty?: boolean) => {
         calls: state,
         name: name,
       };
-      if (latestAgentMessageIndex.current === -1) {
-        latestAgentMessageIndex.current = messagesRef.current.length;
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          updatedMessages.push(message);
-          return updatedMessages;
-        });
-      } else {
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          if (latestAgentMessageIndex.current !== -1) {
-            updatedMessages[latestAgentMessageIndex.current] = message;
-          } else {
-            updatedMessages[messagesRef.current.length - 1] = message;
-          }
-          return updatedMessages;
-        });
-      }
+
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (latestAgentMessageIndex.current !== -1) {
+          updatedMessages[latestAgentMessageIndex.current] = message;
+        } else {
+          updatedMessages[messagesRef.current.length - 1] = message;
+        }
+        return updatedMessages;
+      });
 
       if (isMainContent && frame.type == 'callFinish') {
         setGenerating(false);

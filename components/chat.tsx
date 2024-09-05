@@ -118,6 +118,7 @@ const Chat: React.FC<ScriptProps> = ({
     setMessages((prevMessages) => [
       ...prevMessages,
       { type: MessageType.User, message },
+      { type: MessageType.Agent, message: 'Waiting for model response...' },
     ]);
     if (hasNoUserMessages() && thread) {
       renameThread(thread, await generateThreadName(message));
