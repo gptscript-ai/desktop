@@ -51,7 +51,7 @@ export type FeaturedTool = {
 };
 
 // note(tylerslaton) - This will eventually be retrieved from the tools site, for now we must endure the pain of hardcoding.
-const featuredTools: FeaturedTool[] = [
+export const FeaturedToolList: FeaturedTool[] = [
   {
     name: 'Vision',
     description: 'Allows the assistant to interact with images.',
@@ -285,14 +285,19 @@ const toolIconMap = new Map<string, () => React.ReactNode>([
 ]);
 
 export const FeaturedToolMap = new Map(
-  featuredTools.map((tool) => [tool.url, tool])
+  FeaturedToolList.map((tool) => [tool.url, tool])
 );
 
-// using Object.groupby for backwards compatibility
-export const FeaturedToolsByCategory = Object.groupBy(
-  featuredTools,
-  (tool) => tool.category
-) as Record<string, FeaturedTool[]>;
+// Object.groupBy is not supported in all browsers :(
+export const FeaturedToolsByCategory = FeaturedToolList.reduce((acc, tool) => {
+  if (!acc.get(tool.category)) {
+    acc.set(tool.category, []);
+  }
+
+  acc.get(tool.category)?.push(tool);
+
+  return acc;
+}, new Map<string, FeaturedTool[]>());
 
 export const ToolIcon = ({ toolName }: { toolName?: string }) => {
   if (!toolName) return <GoQuestion className="text-md" />;

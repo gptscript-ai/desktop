@@ -1,5 +1,9 @@
 import { useDebouncedValue } from '@/hooks/useDebounce';
-import { FeaturedTool, FeaturedToolsByCategory } from '@/model/tools';
+import {
+  FeaturedTool,
+  FeaturedToolList,
+  FeaturedToolsByCategory,
+} from '@/model/tools';
 import {
   Card,
   Listbox,
@@ -50,14 +54,13 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
     const debouncedQuery = useDebouncedValue(query, 250);
 
     const featuredResults = useMemo(() => {
-      const flattened = (featuredTools: Record<string, FeaturedTool[]>) =>
-        Object.entries(featuredTools).flatMap(([category, tools]) =>
-          tools.map((tool) => ({ tool, category }))
-        );
+      if (debouncedQuery.trim().length <= 0)
+        return Object.fromEntries(FeaturedToolsByCategory);
 
-      if (debouncedQuery.trim().length <= 0) return FeaturedToolsByCategory;
-
-      const fuse = new Fuse(flattened(FeaturedToolsByCategory), fuseOptions);
+      const fuse = new Fuse(
+        FeaturedToolList.map((tool) => ({ tool, category: tool.category })),
+        fuseOptions
+      );
       const results = fuse.search(debouncedQuery).map((result) => result.item);
 
       results.reverse();
