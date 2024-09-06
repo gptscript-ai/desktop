@@ -260,12 +260,10 @@ const mount = async (
         }
       })
       .catch((e) => {
-        if (e) {
-          if (e.toString() === 'Error: Run has been aborted') {
-            socket.emit('interrupted');
-          } else {
-            socket.emit('error', e.toString());
-          }
+        if (e.toString() === 'Error: Run has been aborted') {
+          socket.emit('interrupted');
+        } else {
+          socket.emit('error', e.toString());
         }
       });
   } else {

@@ -96,10 +96,8 @@ const useChatSocket = (isEmpty?: boolean) => {
   // Function to process only the number of messages that were in the queue when processing started
   const processWorkQueue = useCallback(() => {
     const initialQueueLength = workQueue.current.length;
-    if (initialQueueLength === 0) return;
-
     for (let i = 0; i < initialQueueLength; i++) {
-      if (workQueue.current.length === 0) break; // Stop if the queue is empty
+      if (workQueue.current.length === 0 || waitingForUserResponse) break; // Stop if the queue is empty
 
       const { frame, name } = workQueue.current.shift()!; // Remove and process the first message in the queue
 
@@ -164,7 +162,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         setLatestAgentMessage({ ...latestAgentMessageRef.current });
       }
     }
-  }, []);
+  }, [waitingForUserResponse]);
 
   // Set up the interval to process the work queue every 50ms
   useEffect(() => {
@@ -397,6 +395,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     socket.on('interrupted', () => {
       setGenerating(false);
       setWaitingForUserResponse(false);
+      setLatestAgentMessage({} as Message);
     });
     socket.on('progress', (data: { frame: Frame; name?: string }) =>
       handleProgress(data)
