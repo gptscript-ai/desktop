@@ -1,10 +1,9 @@
-import { useState, useContext } from 'react';
-import New from './threads/new';
-import Menu from './threads/menu';
-import { Button, Divider, Tooltip } from '@nextui-org/react';
-import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
-import { getScript } from '@/actions/me/scripts';
+import { Button, Divider, Tooltip } from '@nextui-org/react';
+import { useContext, useState } from 'react';
+import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
+import Menu from './threads/menu';
+import New from './threads/new';
 
 interface ThreadsProps {
   className?: string;
@@ -12,27 +11,9 @@ interface ThreadsProps {
 }
 
 const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
-  const {
-    setScript,
-    setScriptContent,
-    thread,
-    setThread,
-    threads,
-    setScriptId,
-    setShouldRestart,
-  } = useContext(ChatContext);
+  const { thread, threads, switchToThread } = useContext(ChatContext);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const handleRun = async (script: string, id: string, scriptId: string) => {
-    if (id !== thread) {
-      setScriptContent((await getScript(scriptId))?.script || []);
-      setScript(script);
-      setThread(id);
-      setScriptId(scriptId);
-      setShouldRestart(true);
-    }
-  };
 
   const isSelected = (id: string) => id === thread;
 
@@ -90,7 +71,7 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
                     key={key}
                     className={`border-1 border-gray-300 px-4 rounded-xl transition duration-150 ease-in-out ${isSelected(thread.meta.id) ? 'bg-primary border-primary dark:border-primary-50 dark:bg-primary-50 text-white' : 'hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer dark:bg-zinc-800 dark:border-zinc-800'} `}
                     onClick={() =>
-                      handleRun(
+                      switchToThread(
                         thread.meta.script,
                         thread.meta.id,
                         thread.meta.scriptId || ''

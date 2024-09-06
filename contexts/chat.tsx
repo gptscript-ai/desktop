@@ -70,9 +70,15 @@ interface ChatContextState {
   interrupt: () => void;
   fetchThreads: () => void;
   restartScript: () => void;
+  switchToThread: (
+    script: string,
+    id: string,
+    scriptId: string
+  ) => Promise<void>;
 }
 
-const defaultScriptName = `[Deleted Assistant]`;
+const defaultScriptName = `Tildy`;
+const notFoundScriptName = `[Deleted Assistant]`;
 
 const ChatContext = createContext<ChatContextState>({} as ChatContextState);
 const ChatContextProvider: React.FC<ChatContextProps> = ({
@@ -121,6 +127,21 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   const threadInitialized = useRef(false);
   const [shouldRestart, setShouldRestart] = useState(false);
 
+  const switchToThread = async (
+    script: string,
+    id: string,
+    scriptId: string
+  ) => {
+    if (id !== thread) {
+      setScript(script);
+      setThread(id);
+      setScriptContent((await getScript(scriptId))?.script || []);
+      setScriptId(scriptId);
+      setForceRun(true);
+      setShouldRestart(true);
+    }
+  };
+
   useEffect(() => {
     if (!thread || scriptContent.length === 0) return;
 
@@ -146,28 +167,32 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       getScript(scriptId).then(async (script) => {
         if (script === undefined) {
           setNotFound(true);
-          return;
+          setScriptContent([]);
+          setScriptDisplayName(notFoundScriptName);
+        } else {
+          setNotFound(false);
+          setScriptContent(script.script as Block[]);
+          setScriptDisplayName(script.displayName || '');
         }
-        setNotFound(false);
-        setScriptContent(script.script as Block[]);
-        setScriptDisplayName(script.displayName || '');
         setInitialFetch(true);
       });
     } else if (script) {
       getScriptContent(script).then((content) => {
         if (content === undefined) {
           setNotFound(true);
-          return;
+          setScriptContent([]);
+          setScriptDisplayName(notFoundScriptName);
+        } else {
+          parseContent(content).then((parsedContent) => {
+            setScriptContent(parsedContent);
+          });
+          setNotFound(false);
+          setScriptDisplayName(defaultScriptName);
         }
-        setScriptDisplayName(defaultScriptName);
-        parseContent(content).then((parsedContent) => {
-          setScriptContent(parsedContent);
-        });
-        setNotFound(false);
         setInitialFetch(true);
       });
     }
-  }, [script, scriptId, thread]);
+  }, [script, scriptId, setScriptContent, thread]);
 
   useEffect(() => {
     if (!enableThread || thread || threadInitialized.current) {
@@ -215,12 +240,13 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
 
   useEffect(() => {
     if (thread && shouldRestart) {
-      getThread(thread).then((thread) => {
+      getThread(thread).then(async (thread) => {
         if (thread) {
           setInitialFetch(false);
           setWorkspace(thread.meta.workspace);
         }
-        restartScript();
+        // need to wait for the WS Server to restart befgore triggering another event
+        await restartScript();
         setShouldRestart(false);
       });
     }
@@ -301,25 +327,31 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setInitialFetch(false);
 
       if (scriptId) {
-        getScript(scriptId).then(async (script) => {
-          if (script === undefined) {
-            setNotFound(true);
-            return;
-          }
-          setNotFound(false);
-          setScriptContent(script.script as Block[]);
-          setInitialFetch(true);
-        });
+        const foundScript = await getScript(scriptId);
+
+        if (!foundScript) {
+          setNotFound(true);
+          setScriptContent([]);
+          setScriptDisplayName(notFoundScriptName);
+          return;
+        }
+
+        setNotFound(false);
+        setScriptContent(foundScript.script as Block[]);
+        setInitialFetch(true);
       } else {
-        getScriptContent(script).then(async (content) => {
-          if (content === undefined) {
-            setNotFound(true);
-            return;
-          }
-          setScriptContent(await parseContent(content));
-          setNotFound(false);
-          setInitialFetch(true);
-        });
+        const content = await getScriptContent(script);
+
+        if (!content) {
+          setNotFound(true);
+          setScriptContent([]);
+          setScriptDisplayName(notFoundScriptName);
+          return;
+        }
+
+        setScriptContent(await parseContent(content));
+        setNotFound(false);
+        setInitialFetch(true);
       }
       restart();
     }, 200),
@@ -385,6 +417,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         tools,
         setTools,
         handleCreateThread,
+        switchToThread,
       }}
     >
       {children}

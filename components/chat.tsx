@@ -1,27 +1,26 @@
 'use client';
 
-import React, {
-  useContext,
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from 'react';
-import Messages, { MessageType } from '@/components/chat/messages';
+import { getGatewayUrl } from '@/actions/gateway';
+import { rootTool } from '@/actions/gptscript';
+import { generateThreadName, renameThread } from '@/actions/threads';
+import { getWorkspaceDir } from '@/actions/workspace';
 import ChatBar from '@/components/chat/chatBar';
 import ToolForm from '@/components/chat/form';
+import Messages, { MessageType } from '@/components/chat/messages';
 import Loading from '@/components/loading';
-import { Button } from '@nextui-org/react';
-import { getWorkspaceDir } from '@/actions/workspace';
-import { getGatewayUrl } from '@/actions/gateway';
-import { ChatContext } from '@/contexts/chat';
-import ScriptToolsDropdown from '@/components/scripts/tool-dropdown';
-import AssistantNotFound from '@/components/assistant-not-found';
-import { generateThreadName, renameThread } from '@/actions/threads';
 import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 import SaveScriptDropdown from '@/components/scripts/script-save';
+import ScriptToolsDropdown from '@/components/scripts/tool-dropdown';
+import { ChatContext } from '@/contexts/chat';
 import { Tool } from '@gptscript-ai/gptscript';
-import { rootTool } from '@/actions/gptscript';
+import { Button } from '@nextui-org/react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 interface ScriptProps {
   className?: string;
@@ -155,11 +154,13 @@ const Chat: React.FC<ScriptProps> = ({
                     <h1 className="text-3xl font-medium truncate">
                       {scriptDisplayName ?? ''}
                     </h1>
-                    <div className="flex gap-2">
-                      <ScriptToolsDropdown />
-                      <KnowledgeDropdown />
-                      <SaveScriptDropdown />
-                    </div>
+                    {!notFound && (
+                      <div className="flex gap-2">
+                        <ScriptToolsDropdown />
+                        <KnowledgeDropdown />
+                        <SaveScriptDropdown />
+                      </div>
+                    )}
                   </div>
                 )}
                 <Messages
@@ -183,19 +184,21 @@ const Chat: React.FC<ScriptProps> = ({
                 {tool.chat ? 'Start chat' : 'Run script'}
               </Button>
             ) : (
-              <ChatBar
-                disableInput={
-                  disableInput || !running || waitingForUserResponse
-                }
-                disableCommands={disableCommands}
-                inputPlaceholder={inputPlaceholder}
-                onMessageSent={handleMessageSent}
-              />
+              <>
+                {!notFound && (
+                  <ChatBar
+                    disableInput={
+                      disableInput || !running || waitingForUserResponse
+                    }
+                    disableCommands={disableCommands}
+                    inputPlaceholder={inputPlaceholder}
+                    onMessageSent={handleMessageSent}
+                  />
+                )}
+              </>
             )}
           </div>
         </>
-      ) : notFound ? (
-        <AssistantNotFound />
       ) : (
         <Loading>Loading your assistant...</Loading>
       )}
