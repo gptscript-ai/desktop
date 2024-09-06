@@ -5,7 +5,9 @@ import { uploadFile } from '@/actions/upload';
 import CatalogListBox, {
   ToolCatalogRef,
 } from '@/components/chat/chatBar/search/catalog';
+import Upload from '@/components/chat/chatBar/upload';
 import { MessageType } from '@/components/chat/messages';
+import { ToolActionChatMessage } from '@/components/shared/tools/ToolActionChatMessage';
 import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
 import { ChatContext } from '@/contexts/chat';
 import { useAsync } from '@/hooks/useFetch';
@@ -29,7 +31,6 @@ import {
 } from 'react-icons/go';
 import { PiToolbox } from 'react-icons/pi';
 import { useFilePicker } from 'use-file-picker';
-import Upload from '@/components/chat/chatBar/upload';
 
 /*
     note(tylerslaton):
@@ -256,14 +257,22 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
       urlToolModal.onClose();
       setIsCatalogOpen(false);
 
-      getToolDisplayName(loadingToolRef.current).then((name) => {
+      const toolRef = loadingToolRef.current;
+
+      getToolDisplayName(toolRef).then((name) => {
         setMessages((prev) => [
           ...prev,
           {
             type: MessageType.Alert,
             icon: <GoTools className="mt-1" />,
             name: prev ? prev[prev.length - 1].name : undefined,
-            message: `Added ${name}`,
+            component: (
+              <ToolActionChatMessage
+                action="Added"
+                name={name}
+                toolRef={toolRef}
+              />
+            ),
           },
         ]);
       });
