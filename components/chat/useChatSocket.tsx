@@ -28,6 +28,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     'github.com/gptscript-ai/search-website',
     'github.com/gptscript-ai/tools/apis/hubspot/crm/read',
   ];
+
   // State
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -52,6 +53,9 @@ const useChatSocket = (isEmpty?: boolean) => {
   // trustedOpenAPIRef contains a mapping of OpenAPI run tools to OpenAPI operation names that have been trusted.
   const trustedOpenAPIRef = useRef<Record<string, Record<string, boolean>>>({});
 
+  // Workqueue for storing progress events
+  const workQueue = useRef<Array<{ frame: Frame; name?: string }>>([]);
+
   // update the refs as the state changes
   messagesRef.current = messages;
   socketRef.current = socket;
@@ -63,7 +67,6 @@ const useChatSocket = (isEmpty?: boolean) => {
     setError(error);
     setMessages((prevMessages) => {
       if (!latestAgentMessageRef.current.type) {
-        // If there are no previous messages, create a new error message
         return [
           ...prevMessages,
           {
@@ -85,6 +88,21 @@ const useChatSocket = (isEmpty?: boolean) => {
   // handles progress being received from the server (callProgress style frames).
   const handleProgress = useCallback(
     ({ frame, name }: { frame: Frame; name?: string }) => {
+      workQueue.current.push({ frame, name });
+    },
+    []
+  );
+
+  // Function to process only the number of messages that were in the queue when processing started
+  const processWorkQueue = useCallback(() => {
+    const initialQueueLength = workQueue.current.length;
+    if (initialQueueLength === 0) return;
+
+    for (let i = 0; i < initialQueueLength; i++) {
+      if (workQueue.current.length === 0) break; // Stop if the queue is empty
+
+      const { frame, name } = workQueue.current.shift()!; // Remove and process the first message in the queue
+
       if (!latestAgentMessageRef.current.type)
         latestAgentMessageRef.current.type = MessageType.Agent;
       if (!latestAgentMessageRef.current.name)
@@ -98,36 +116,35 @@ const useChatSocket = (isEmpty?: boolean) => {
             'Waiting for model response...';
           setLatestAgentMessage({ ...latestAgentMessageRef.current });
         }
-        return;
+        continue;
       }
 
-      // At this point, we know that we are dealing with a call frame
-      frame = frame as CallFrame;
+      const callFrame = frame as CallFrame;
       if (!latestAgentMessageRef.current.calls) {
         latestAgentMessageRef.current.calls = {};
       }
-      latestAgentMessageRef.current.calls[frame.id] = frame;
+      latestAgentMessageRef.current.calls[callFrame.id] = callFrame;
 
-      if (!frame.error && frame.toolCategory === 'provider') {
-        return;
+      if (!callFrame.error && callFrame.toolCategory === 'provider') {
+        continue;
       }
 
       const isMainContent =
-        frame?.output &&
-        frame.output.length > 0 &&
-        (!frame.parentID || frame.tool?.chat) &&
-        !frame.output[frame.output.length - 1].subCalls;
+        callFrame?.output &&
+        callFrame.output.length > 0 &&
+        (!callFrame.parentID || callFrame.tool?.chat) &&
+        !callFrame.output[callFrame.output.length - 1].subCalls;
 
       let content = isMainContent
-        ? frame.output[frame.output.length - 1].content || ''
+        ? callFrame.output[callFrame.output.length - 1].content || ''
         : '';
-      if (!content) return;
+      if (!content) continue;
       setGenerating(true);
       if (
         content === 'Waiting for model response...' &&
         latestAgentMessageRef.current.message
       )
-        return;
+        continue;
 
       if (content.startsWith('<tool call>')) {
         const parsedToolCall = parseToolCall(content);
@@ -136,7 +153,7 @@ const useChatSocket = (isEmpty?: boolean) => {
 
       latestAgentMessageRef.current.message = content;
 
-      if (isMainContent && frame.type == 'callFinish') {
+      if (isMainContent && callFrame.type === 'callFinish') {
         setMessages([
           ...messagesRef.current,
           { ...latestAgentMessageRef.current },
@@ -146,9 +163,17 @@ const useChatSocket = (isEmpty?: boolean) => {
       } else {
         setLatestAgentMessage({ ...latestAgentMessageRef.current });
       }
-    },
-    []
-  );
+    }
+  }, []);
+
+  // Set up the interval to process the work queue every 100ms
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      processWorkQueue();
+    }, 100);
+
+    return () => clearInterval(intervalId); // Clear interval on component unmount
+  }, [processWorkQueue]);
 
   const handlePromptRequest = useCallback(
     ({ frame, name }: { frame: PromptFrame; name?: string }) => {
@@ -227,7 +252,6 @@ const useChatSocket = (isEmpty?: boolean) => {
   ) => {
     setTools(tools);
     if (scriptContent) {
-      // Ensure the knowledge tool isn't set.
       const tool = await rootTool(scriptContent);
       tool.tools = (tool.tools || []).filter((t) => t !== gatewayTool());
       setScriptContent(scriptContent);
@@ -290,7 +314,6 @@ const useChatSocket = (isEmpty?: boolean) => {
       const repo = frame.tool?.source.repo.Root;
       const trimmedRepo = trimRepo(repo);
 
-      // If it is a read-only tool we've authored, auto-allow it.
       if (
         trimmedRepo.startsWith('github.com/gptscript-ai') &&
         (frame.tool.name?.startsWith('list') ||
@@ -310,10 +333,8 @@ const useChatSocket = (isEmpty?: boolean) => {
     }
 
     // If the tool is a system tool and wasn't already trusted, return false.
-    if (frame.tool?.name?.startsWith('sys.')) return false;
-
-    // Automatically allow all other tools
-    return true;
+    // Automatically allow all other tools.
+    return !frame.tool?.name?.startsWith('sys.');
   };
 
   const addTrustedFor = (frame: CallFrame) => {

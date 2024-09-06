@@ -17,7 +17,6 @@ type ConfirmFormProps = {
 const ConfirmForm = ({
   id,
   onSubmit,
-  tool,
   addTrusted,
   message,
   command,
