@@ -66,6 +66,7 @@ const Chat: React.FC<ScriptProps> = ({
     restartScript,
     fetchThreads,
     waitingForUserResponse,
+    setLatestAgentMessage,
   } = useContext(ChatContext);
 
   useEffect(() => {
@@ -120,6 +121,10 @@ const Chat: React.FC<ScriptProps> = ({
       ...prevMessages,
       { type: MessageType.User, message },
     ]);
+    setLatestAgentMessage({
+      type: MessageType.Agent,
+      message: 'Waiting for model response...',
+    });
     if (hasNoUserMessages() && thread) {
       renameThread(thread, await generateThreadName(message));
       fetchThreads();

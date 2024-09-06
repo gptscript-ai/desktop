@@ -203,8 +203,7 @@ const mount = async (
       socket.emit('interrupted');
     }
   });
-  socket.on('disconnect', (reason) => {
-    console.log('server socket disconnect: ' + reason);
+  socket.on('disconnect', () => {
     if (runningScript) runningScript.close();
     runningScript = null;
   });

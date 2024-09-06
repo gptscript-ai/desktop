@@ -389,8 +389,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     socket.on('connect', () => {
       setConnected(true);
     });
-    socket.on('disconnect', (reason) => {
-      console.log('client socket disconnect: ' + reason);
+    socket.on('disconnect', () => {
       setConnected(false);
       setForceRun(true);
     });
@@ -470,6 +469,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     connected,
     setConnected,
     latestAgentMessage,
+    setLatestAgentMessage,
     messages,
     setMessages,
     restart,
