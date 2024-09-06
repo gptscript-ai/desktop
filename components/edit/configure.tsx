@@ -270,6 +270,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
               aria-label="advanced"
               title={<h1>Advanced</h1>}
               startContent={<HiCog />}
+              classNames={{ content: collapsed ? 'pt-6 pb-10' : 'p-10 pt-6' }}
             >
               <Models
                 options={models}
