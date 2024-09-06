@@ -65,6 +65,7 @@ export default function Settings() {
                   Headless Mode
                 </Switch>
                 <Tooltip
+                  classNames={{ base: 'w-1/2' }}
                   content="Headless Mode runs the browser without a graphical interface."
                   placement="right"
                 >
@@ -84,6 +85,7 @@ export default function Settings() {
                   Use Default Session
                 </Switch>
                 <Tooltip
+                  classNames={{ base: 'w-1/2' }}
                   content="Use Default Session will use your existing default Google Chrome session. When this setting is enabled, Chrome must be closed before running the browser tool."
                   placement="right"
                 >
