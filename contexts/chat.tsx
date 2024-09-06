@@ -78,7 +78,7 @@ interface ChatContextState {
 }
 
 const defaultScriptName = `Tildy`;
-const notFoundScriptName = `[Deleted Assistant]`;
+const notFoundScriptName = `[Assistant Not Found]`;
 
 const ChatContext = createContext<ChatContextState>({} as ChatContextState);
 const ChatContextProvider: React.FC<ChatContextProps> = ({
