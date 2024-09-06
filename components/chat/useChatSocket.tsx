@@ -170,7 +170,7 @@ const useChatSocket = (isEmpty?: boolean) => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       processWorkQueue();
-    }, 100);
+    }, 50);
 
     return () => clearInterval(intervalId); // Clear interval on component unmount
   }, [processWorkQueue]);
