@@ -385,7 +385,7 @@ const CustomTool: React.FC<ConfigureProps> = ({ tool }) => {
                   initialSubTool={customTool.name}
                   initialScriptId={`${scriptId}`}
                 >
-                  <Chat messagesHeight="h-[93%]" />
+                  <Chat disableInput={!customTool.chat} disableCommands={!customTool.chat} messagesHeight="h-[93%]" />
                 </ChatContextProvider>
               </div>
             </ModalBody>

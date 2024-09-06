@@ -37,14 +37,27 @@ const Imports: React.FC<ExternalProps> = ({ params, setParams, className }) => {
     setInputDescription('');
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleAddParam();
+  const handleCreateDefaultParam = () => {
+    let defaultParamName = 'New Param';
+    let counter = 1;
+    while (params && Object.keys(params)?.includes(defaultParamName)) {
+      defaultParamName = `New Param ${counter}`;
+      counter++;
     }
+
+    if (params && Object.keys(params)?.includes(defaultParamName)) {
+      setError(`Parameter ${defaultParamName} already exists`);
+      return;
+    }
+
+    setParams({
+      ...(params || {}),
+      [defaultParamName]: { type: 'string', description: '' },
+    });
   };
 
   return (
-    <div className={className}>
+    <div className={`space-y-2 ${className}`}>
       {params &&
         Object.keys(params).map((param) => (
           <div key={param} className="flex space-x-2">
@@ -52,14 +65,14 @@ const Imports: React.FC<ExternalProps> = ({ params, setParams, className }) => {
               color="primary"
               size="sm"
               placeholder="Name..."
-              className="w-1/5"
+              className="w-3/4 2xl:w-1/4"
               variant="bordered"
               defaultValue={param}
               onBlur={(e) => {
                 const target = e.target as HTMLInputElement;
                 const updatedParams = { ...params };
-                updatedParams[target.value] = updatedParams[param];
                 delete updatedParams[param];
+                updatedParams[target.value] = params[param];
                 setParams(updatedParams);
               }}
             />
@@ -89,34 +102,12 @@ const Imports: React.FC<ExternalProps> = ({ params, setParams, className }) => {
           </div>
         ))}
       <div className="flex space-x-2 mt-2">
-        <Input
-          color="primary"
-          size="sm"
-          placeholder="Name..."
-          className="w-1/5"
-          variant="bordered"
-          value={input}
-          onChange={(e) => {
-            setError(null);
-            setInput(e.target.value);
-          }}
-          errorMessage={error}
-          isInvalid={!!error}
-          onKeyDown={handleKeyDown}
-        />
-        <Input
-          color="primary"
-          size="sm"
-          placeholder="Description..."
-          variant="bordered"
-          value={inputDescription}
-          onChange={(e) => setInputDescription(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
         <Button
-          variant="bordered"
+          variant="flat"
+          color="primary"
+          className="w-full"
           size="sm"
-          onClick={handleAddParam}
+          onClick={handleCreateDefaultParam}
           isIconOnly
           startContent={<GoPlus />}
         />
