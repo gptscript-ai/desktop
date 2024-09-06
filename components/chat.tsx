@@ -55,6 +55,7 @@ const Chat: React.FC<ScriptProps> = ({
     setFormValues,
     setHasRun,
     hasParams,
+    latestAgentMessage,
     messages,
     setMessages,
     thread,
@@ -65,6 +66,7 @@ const Chat: React.FC<ScriptProps> = ({
     restartScript,
     fetchThreads,
     waitingForUserResponse,
+    setLatestAgentMessage,
   } = useContext(ChatContext);
 
   useEffect(() => {
@@ -81,7 +83,7 @@ const Chat: React.FC<ScriptProps> = ({
   useEffect(() => {
     const smallBody = document.getElementById('small-message');
     if (smallBody) smallBody.scrollTop = smallBody.scrollHeight;
-  }, [messages, connected, running]);
+  }, [messages, connected, running, latestAgentMessage]);
 
   const handleFormSubmit = () => {
     setShowForm(false);
@@ -118,8 +120,11 @@ const Chat: React.FC<ScriptProps> = ({
     setMessages((prevMessages) => [
       ...prevMessages,
       { type: MessageType.User, message },
-      { type: MessageType.Agent, message: 'Waiting for model response...' },
     ]);
+    setLatestAgentMessage({
+      type: MessageType.Agent,
+      message: 'Waiting for model response...',
+    });
     if (hasNoUserMessages() && thread) {
       renameThread(thread, await generateThreadName(message));
       fetchThreads();
@@ -155,7 +160,11 @@ const Chat: React.FC<ScriptProps> = ({
                     </div>
                   </div>
                 )}
-                <Messages restart={restartScript} messages={messages} />
+                <Messages
+                  restart={restartScript}
+                  messages={messages}
+                  latestAgentMessage={latestAgentMessage}
+                />
               </div>
             )}
           </div>

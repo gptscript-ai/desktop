@@ -215,21 +215,18 @@ const mount = async (
     runningScript.on(RunEventType.Event, (data) =>
       socket.emit('progress', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
-        state: runningScript.calls,
         name: script[0]?.name || data.tool?.name || '',
       })
     );
@@ -263,12 +260,10 @@ const mount = async (
         }
       })
       .catch((e) => {
-        if (e) {
-          if (e.toString() === 'Error: Run has been aborted') {
-            socket.emit('interrupted');
-          } else {
-            socket.emit('error', e.toString());
-          }
+        if (e.toString() === 'Error: Run has been aborted') {
+          socket.emit('interrupted');
+        } else {
+          socket.emit('error', e.toString());
         }
       });
   } else {
@@ -385,21 +380,18 @@ const mount = async (
     runningScript.on(RunEventType.Event, (data) =>
       socket.emit('progress', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.Prompt, async (data) =>
       socket.emit('promptRequest', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );
     runningScript.on(RunEventType.CallConfirm, (data) =>
       socket.emit('confirmRequest', {
         frame: data,
-        state: runningScript.calls,
         name: name || data.tool?.name || '',
       })
     );
