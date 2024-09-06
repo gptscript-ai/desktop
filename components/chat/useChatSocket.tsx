@@ -166,7 +166,7 @@ const useChatSocket = (isEmpty?: boolean) => {
     }
   }, []);
 
-  // Set up the interval to process the work queue every 100ms
+  // Set up the interval to process the work queue every 50ms
   useEffect(() => {
     const intervalId = setInterval(() => {
       processWorkQueue();
