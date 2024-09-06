@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Input,
   Modal,
@@ -15,7 +16,6 @@ import {
 } from '@nextui-org/react';
 import React, { useContext, useEffect, useState } from 'react';
 import { IoMdRefresh } from 'react-icons/io';
-import { Image } from '@nextui-org/image';
 import {
   getNotionFiles,
   isNotionConfigured,
@@ -25,6 +25,7 @@ import { CiSearch, CiShare1 } from 'react-icons/ci';
 import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
 import { Link } from '@nextui-org/react';
+import { syncFiles } from '@/actions/knowledge/tool';
 
 interface NotionFileModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ export const NotionFileModal = ({
 }: NotionFileModalProps) => {
   const { droppedFiles, setDroppedFiles } = useContext(EditContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [importing, setImporting] = useState(false);
 
   const [notionFiles, setNotionFiles] = useState<
     Map<string, { url: string; fileName: string }>
@@ -79,19 +81,26 @@ export const NotionFileModal = ({
   }, [isOpen, notionConfigured]);
 
   const onClickImport = async () => {
-    const files = await importFiles(selectedFile, 'notion');
-    setDroppedFiles((prev) => {
-      const newMap = new Map(prev);
-      for (const [key, file] of Array.from(newMap.entries())) {
-        if (file.type === 'notion') {
-          newMap.delete(key);
+    setImporting(true);
+    try {
+      await syncFiles(selectedFile, 'notion');
+      const files = await importFiles(selectedFile);
+      setDroppedFiles((prev) => {
+        const newMap = new Map(prev);
+        for (const [key, file] of Array.from(newMap.entries())) {
+          if (file.type === 'notion') {
+            newMap.delete(key);
+          }
         }
-      }
-      for (const [key, file] of Array.from(files.entries())) {
-        newMap.set(key, file);
-      }
-      return newMap;
-    });
+        for (const [key, file] of Array.from(files.entries())) {
+          newMap.set(key, file);
+        }
+        return newMap;
+      });
+    } finally {
+      setImporting(false);
+    }
+
     onClose();
   };
 
@@ -131,7 +140,12 @@ export const NotionFileModal = ({
         <ModalHeader>
           <div className="w-full flex items-center justify-between">
             <div className="flex flex-row items-center">
-              <Image className="h-6 w-6" src="notion.svg" alt="Notion Icon" />
+              <Avatar
+                size="sm"
+                src="notion.svg"
+                alt="Notion Icon"
+                classNames={{ base: 'p-1.5 bg-white' }}
+              />
               <p className="ml-2">Notion</p>
             </div>
 
@@ -175,7 +189,7 @@ export const NotionFileModal = ({
                 }}
               >
                 <TableHeader>
-                  <TableColumn>NAME</TableColumn>
+                  <TableColumn>Name</TableColumn>
                   <TableColumn>Link</TableColumn>
                 </TableHeader>
                 <TableBody>
@@ -193,7 +207,7 @@ export const NotionFileModal = ({
                             <p>{value.fileName}</p>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="w-[80px]">
                           <Button
                             isIconOnly
                             as={Link}
@@ -219,7 +233,12 @@ export const NotionFileModal = ({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" size="sm" onClick={onClickImport}>
+          <Button
+            isLoading={importing}
+            color="primary"
+            size="sm"
+            onClick={onClickImport}
+          >
             Import
           </Button>
         </ModalFooter>

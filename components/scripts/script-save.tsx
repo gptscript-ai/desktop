@@ -62,8 +62,7 @@ const SaveScriptDropdown = () => {
       await lsKnowledgeFiles(workspace)
     ) as Dirent[];
     const allFiles = await importFiles(
-      threadKnowledge.map((file) => path.join(file.path, file.name)),
-      'local'
+      threadKnowledge.map((file) => path.join(file.path, file.name))
     );
 
     if (oldScriptId) {

@@ -521,29 +521,31 @@ const initGPTScriptConfig = async (gptscript) => {
 };
 
 const syncKnowledgeFilesFromIntegrations = async (gptscript) => {
-  try {
-    if (
-      fs.existsSync(
-        path.join(
-          process.env.WORKSPACE_DIR,
-          'knowledge',
-          'integrations',
-          'notion',
-          'metadata.json'
+  for (const type of ['notion', 'onedrive']) {
+    try {
+      if (
+        fs.existsSync(
+          path.join(
+            process.env.WORKSPACE_DIR,
+            'knowledge',
+            'integrations',
+            type,
+            'metadata.json'
+          )
         )
-      )
-    ) {
-      console.log('Syncing knowledge files from notion');
-      const run = await gptscript.run(
-        'github.com/gptscript-ai/knowledge-notion-integration',
-        {
-          prompt: true,
-        }
-      );
-      await run.text();
+      ) {
+        console.log(`Syncing knowledge files from ${type}`);
+        const run = await gptscript.run(
+          `github.com/gptscript-ai/knowledge-${type}-integration`,
+          {
+            prompt: true,
+          }
+        );
+        await run.text();
+      }
+    } catch (e) {
+      console.error('Error syncing knowledge files:', e);
     }
-  } catch (e) {
-    console.error('Error syncing knowledge files:', e);
   }
 };
 

@@ -1,7 +1,7 @@
 export interface FileDetail {
   fileName: string;
   size: number;
-  type: 'local' | 'notion';
+  type: 'local' | 'notion' | 'onedrive';
 }
 
 export function gatewayTool(): string {

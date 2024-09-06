@@ -31,6 +31,7 @@ import { RiFoldersLine } from 'react-icons/ri';
 import FileModal from '@/components/knowledge/FileModal';
 import { gatewayTool } from '@/actions/knowledge/util';
 import { importFiles } from '@/actions/knowledge/filehelper';
+import { DiOnedrive } from 'react-icons/di';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -83,8 +84,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     input.multiple = true;
     input.onchange = async (event: any) => {
       const files = await importFiles(
-        Array.from(event.target?.files).map((file: any) => file.path as string),
-        'local'
+        Array.from(event.target?.files).map((file: any) => file.path as string)
       );
       setDroppedFiles((prev) => {
         const newMap = new Map(prev);
@@ -191,14 +191,17 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
                     ([key, fileDetail], _) => (
                       <div key={key} className="flex space-x-2">
                         <div className="flex flex-row w-full border-2 justify-between truncate dark:border-zinc-700 text-sm pl-2 rounded-lg">
-                          <div className="flex items-center">
+                          <div className="flex items-center overflow-auto">
                             {fileDetail.type === 'local' && (
                               <RiFileSearchLine className="justify-start mr-2" />
                             )}
                             {fileDetail.type === 'notion' && (
                               <RiNotionFill className="justify-start mr-2" />
                             )}
-                            <div className="flex flex-row justify-start overflow-x-auto">
+                            {fileDetail.type === 'onedrive' && (
+                              <DiOnedrive className="justify-start mr-2" />
+                            )}
+                            <div className="flex flex-row justify-start overflow-auto">
                               <p className="capitalize text-left">
                                 {fileDetail.fileName}
                               </p>

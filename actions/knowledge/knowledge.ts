@@ -67,7 +67,7 @@ export async function ensureFiles(
     if (!fs.existsSync(filePath)) {
       if (file[1].type === 'local') {
         await fs.promises.copyFile(file[0], filePath);
-      } else if (file[1].type === 'notion') {
+      } else if (file[1].type === 'notion' || file[1].type === 'onedrive') {
         if (
           fs.existsSync(filePath) &&
           fs.lstatSync(filePath).isSymbolicLink()
@@ -80,7 +80,7 @@ export async function ensureFiles(
   }
 
   if (!updateOnly) {
-    for (const type of ['local', 'notion']) {
+    for (const type of ['local', 'notion', 'onedrive']) {
       if (!fs.existsSync(path.join(dir, type))) {
         continue;
       }
@@ -127,7 +127,7 @@ export async function getFiles(
   if (!fs.existsSync(dir)) {
     return result;
   }
-  for (const type of ['local', 'notion']) {
+  for (const type of ['local', 'notion', 'onedrive']) {
     if (!fs.existsSync(path.join(dir, type))) {
       continue;
     }
@@ -138,7 +138,7 @@ export async function getFiles(
         filePath = await fs.promises.readlink(filePath);
       }
       result.set(filePath, {
-        type: type as 'local' | 'notion',
+        type: type as any,
         fileName: file,
         size: await getFileOrFolderSizeInKB(path.join(dir, type, file)),
       });
