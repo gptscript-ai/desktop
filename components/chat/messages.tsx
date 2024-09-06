@@ -161,6 +161,7 @@ const Message = React.memo(
     }
   }
 );
+Message.displayName = 'Message';
 
 const Messages = ({
   messages,
