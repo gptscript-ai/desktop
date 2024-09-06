@@ -1,5 +1,5 @@
 import { useDebouncedValue } from '@/hooks/useDebounce';
-import { FeaturedTools } from '@/model/tools';
+import { FeaturedTool, FeaturedToolsByCategory } from '@/model/tools';
 import {
   Card,
   Listbox,
@@ -16,15 +16,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { AiOutlineSlack } from 'react-icons/ai';
-import { BsEye } from 'react-icons/bs';
-import { FaGithub, FaGitlab, FaHubspot, FaPaintBrush } from 'react-icons/fa';
-import { GoBrowser, GoFileDirectory, GoGlobe, GoSearch } from 'react-icons/go';
-import {
-  PiMicrosoftExcelLogo,
-  PiMicrosoftOutlookLogoDuotone,
-} from 'react-icons/pi';
-import { SiJson, SiNotion } from 'react-icons/si';
 
 const fuseOptions = {
   keys: ['tool.name', 'tool.description', 'tool.url', 'tool.tags', 'category'],
@@ -59,25 +50,28 @@ export default forwardRef<ToolCatalogRef, CatalogListboxProps>(
     const debouncedQuery = useDebouncedValue(query, 250);
 
     const featuredResults = useMemo(() => {
-      const flattened = (featuredTools: FeaturedTools) =>
+      const flattened = (featuredTools: Record<string, FeaturedTool[]>) =>
         Object.entries(featuredTools).flatMap(([category, tools]) =>
           tools.map((tool) => ({ tool, category }))
         );
 
-      if (debouncedQuery.trim().length <= 0) return featuredTools;
+      if (debouncedQuery.trim().length <= 0) return FeaturedToolsByCategory;
 
-      const fuse = new Fuse(flattened(featuredTools), fuseOptions);
+      const fuse = new Fuse(flattened(FeaturedToolsByCategory), fuseOptions);
       const results = fuse.search(debouncedQuery).map((result) => result.item);
 
       results.reverse();
 
-      return results.reduce((acc, { tool, category }) => {
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(tool);
-        return acc;
-      }, {} as FeaturedTools);
+      return results.reduce(
+        (acc, { tool, category }) => {
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push(tool);
+          return acc;
+        },
+        {} as Record<string, FeaturedTool[]>
+      );
     }, [debouncedQuery]);
 
     const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -206,123 +200,3 @@ function focusElement(id: string) {
   if (!element) return;
   element.focus();
 }
-
-// note(tylerslaton) - This will eventually be retrieved from the tools site, for now we must endure the pain of hardcoding.
-const featuredTools: FeaturedTools = {
-  'AI and Web': [
-    {
-      name: 'Vision',
-      description: 'Allows the assistant to interact with images.',
-      url: 'github.com/gptscript-ai/gpt4-v-vision@gateway',
-      tags: ['vision', 'images', 'ai'],
-      icon: <BsEye className="text-lg" />,
-    },
-    {
-      name: 'Image Generation',
-      description: 'Allows the assistant to generate images.',
-      url: 'github.com/gptscript-ai/dalle-image-generation@gateway',
-      tags: ['images', 'ai', 'generation'],
-      icon: <FaPaintBrush className="text-lg" />,
-    },
-    {
-      name: 'Search The Internet',
-      description: 'Allows the assistant to search the web for answers.',
-      url: 'github.com/gptscript-ai/answers-from-the-internet',
-      tags: ['search', 'web', 'internet'],
-      icon: <GoGlobe className="text-lg" />,
-    },
-    {
-      name: 'Crawl Website',
-      description: 'Allows the assistant to search a website.',
-      url: 'github.com/gptscript-ai/search-website',
-      tags: ['search', 'web', 'site'],
-      icon: <GoSearch className="text-lg" />,
-    },
-    {
-      name: 'Browser',
-      description:
-        'Provides the assistant with the ability to interact with the web via a Chrome window.',
-      url: 'github.com/gptscript-ai/browser',
-      tags: ['browser', 'web', 'chrome', 'search'],
-      icon: <GoBrowser className="text-lg" />,
-    },
-  ],
-  Productivity: [
-    {
-      name: 'Slack',
-      description: 'Allows the assistant to interact with Slack.',
-      url: 'github.com/gptscript-ai/tools/apis/slack/write',
-      tags: ['slack', 'messaging', 'teams', 'api'],
-      icon: <AiOutlineSlack className="text-lg" />,
-    },
-    {
-      name: 'Notion',
-      description: 'Allows the assistant to interact with Notion.',
-      url: 'github.com/gptscript-ai/tools/apis/notion/write',
-      tags: ['notion', 'documentation', 'notes', 'api'],
-      icon: <SiNotion className="text-lg" />,
-    },
-    {
-      name: 'Hubspot',
-      description: 'Allows the assistant to interact with Hubspot.',
-      url: 'github.com/gptscript-ai/tools/apis/hubspot/crm/write',
-      tags: ['hubspot', 'api'],
-      icon: <FaHubspot className="text-lg" />,
-    },
-    {
-      name: 'Outlook Mail',
-      description:
-        'Allows the assistant to send and receive emails via Outlook.',
-      url: 'github.com/gptscript-ai/tools/apis/outlook/mail/manage',
-      tags: ['email', 'office', 'microsoft', 'service'],
-      icon: <PiMicrosoftOutlookLogoDuotone className="text-lg" />,
-    },
-    {
-      name: 'Outlook Calendar',
-      description: 'Allows the assistant to interact with Outlook Calendar.',
-      url: 'github.com/gptscript-ai/tools/apis/outlook/calendar/manage',
-      tags: ['calendar', 'office', 'microsoft', 'service'],
-      icon: <PiMicrosoftOutlookLogoDuotone className="text-lg" />,
-    },
-  ],
-  'Working with Local Files': [
-    {
-      name: 'Structured Data Querier',
-      description: 'Query Excel spreadsheets, CSV files, and JSON files.',
-      url: 'github.com/gptscript-ai/structured-data-querier',
-      tags: ['data', 'structured', 'query'],
-      icon: <PiMicrosoftExcelLogo className="text-lg" />,
-    },
-    {
-      name: 'JSON Query',
-      description: 'Allows the assistant to query JSON data.',
-      url: 'github.com/gptscript-ai/json-query',
-      tags: ['json', 'query', 'data'],
-      icon: <SiJson className="text-lg" />,
-    },
-    {
-      name: 'Workspace',
-      description:
-        'Allows the assistant to be aware of and iteract with files in your workspace.',
-      url: 'github.com/gptscript-ai/context/workspace',
-      tags: ['workspace', 'files'],
-      icon: <GoFileDirectory className="text-lg" />,
-    },
-  ],
-  'Coding and DevOps': [
-    {
-      name: 'Github',
-      description: 'Provides the ability to interact with GitHub.',
-      url: 'github.com/gptscript-ai/tools/apis/github/write',
-      tags: ['github', 'api'],
-      icon: <FaGithub className="text-lg" />,
-    },
-    {
-      name: 'GitLab',
-      description: 'Provides the ability to interact with GitLab.',
-      url: 'github.com/gptscript-ai/tools/apis/gitlab',
-      tags: ['gitlab', 'api'],
-      icon: <FaGitlab className="text-lg" />,
-    },
-  ],
-};

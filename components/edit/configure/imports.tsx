@@ -3,46 +3,7 @@ import { EditContext } from '@/contexts/edit';
 import { Button, Tooltip, useDisclosure } from '@nextui-org/react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
-import {
-  AiFillFileAdd,
-  AiOutlineKubernetes,
-  AiOutlineSlack,
-} from 'react-icons/ai';
-import { BsCode, BsDownload, BsEye, BsFiles, BsFolder } from 'react-icons/bs';
-import {
-  FaAws,
-  FaCode,
-  FaDigitalOcean,
-  FaGithub,
-  FaGitlab,
-  FaHubspot,
-  FaPaintBrush,
-  FaTrello,
-} from 'react-icons/fa';
-import {
-  GoBrowser,
-  GoFileDirectory,
-  GoGlobe,
-  GoPencil,
-  GoQuestion,
-  GoSearch,
-  GoTerminal,
-  GoTools,
-  GoTrash,
-} from 'react-icons/go';
-import {
-  PiMicrosoftExcelLogo,
-  PiMicrosoftOutlookLogoDuotone,
-} from 'react-icons/pi';
-import {
-  SiAmazoneks,
-  SiGooglecloud,
-  SiJson,
-  SiMongodb,
-  SiNotion,
-  SiSupabase,
-} from 'react-icons/si';
-import { VscAzure } from 'react-icons/vsc';
+import { GoGlobe, GoPencil, GoTools, GoTrash } from 'react-icons/go';
 
 import { getToolDisplayName, parse } from '@/actions/gptscript';
 import {
@@ -52,6 +13,7 @@ import {
 import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useAsync } from '@/hooks/useFetch';
+import { FeaturedToolMap, ToolIcon } from '@/model/tools';
 import { noop } from 'lodash';
 
 interface ImportsProps {
@@ -81,7 +43,10 @@ const Imports: React.FC<ImportsProps> = ({
         // We've already the display name of this tool
         continue;
       }
-      updatedRemoteTools.set(ref, await getToolDisplayName(ref));
+      updatedRemoteTools.set(
+        ref,
+        FeaturedToolMap.get(ref)?.name || (await getToolDisplayName(ref)) || ref
+      );
     }
 
     setRemoteTools(() => {
@@ -155,7 +120,7 @@ const Imports: React.FC<ImportsProps> = ({
             <div key={i} className="flex space-x-2">
               <div className="truncate w-full border-2 dark:border-zinc-700 text-sm pl-2 rounded-lg flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  {iconForTool(ref)}
+                  <ToolIcon toolName={ref} />
                   <p className="capitalize">{remoteTools.get(ref)!}</p>
                 </div>
                 <Button
@@ -286,115 +251,3 @@ function isRemote(ref: string): boolean {
     ref.startsWith('github.com')
   );
 }
-
-const toolIconMap = new Map<string, () => React.ReactNode>([
-  [
-    'github.com/gptscript-ai/gpt4-v-vision@gateway',
-    () => <BsEye className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/dalle-image-generation@gateway',
-    () => <FaPaintBrush className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/answers-from-the-internet',
-    () => <GoGlobe className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/search-website',
-    () => <GoSearch className="text-md" />,
-  ],
-  ['github.com/gptscript-ai/browser', () => <GoBrowser className="text-md" />],
-  [
-    'github.com/gptscript-ai/tools/apis/slack/write',
-    () => <AiOutlineSlack className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/notion/write',
-    () => <SiNotion className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/trello',
-    () => <FaTrello className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/hubspot/crm/write',
-    () => <FaHubspot className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/outlook/mail/manage',
-    () => <PiMicrosoftOutlookLogoDuotone className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/outlook/calendar/manage',
-    () => <PiMicrosoftOutlookLogoDuotone className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/structured-data-querier',
-    () => <PiMicrosoftExcelLogo className="text-md" />,
-  ],
-  ['github.com/gptscript-ai/json-query', () => <SiJson className="text-md" />],
-  [
-    'github.com/gptscript-ai/context/filesystem',
-    () => <BsFiles className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/context/workspace',
-    () => <GoFileDirectory className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/github/write',
-    () => <FaGithub className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/apis/gitlab',
-    () => <FaGitlab className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/aws',
-    () => <FaAws className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/azure',
-    () => <VscAzure className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/digitalocean',
-    () => <FaDigitalOcean className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/eksctl',
-    () => <SiAmazoneks className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/atlas',
-    () => <SiMongodb className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/gcp',
-    () => <SiGooglecloud className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/k8s',
-    () => <AiOutlineKubernetes className="text-md" />,
-  ],
-  [
-    'github.com/gptscript-ai/tools/clis/supabase',
-    () => <SiSupabase className="text-md" />,
-  ],
-  ['sys.append', () => <AiFillFileAdd className="text-md" />],
-  ['sys.download', () => <BsDownload className="text-md" />],
-  ['sys.exec', () => <GoTerminal className="text-md" />],
-  ['sys.find', () => <BsFiles className="text-md" />],
-  ['sys.getenv', () => <BsCode className="text-md" />],
-  ['sys.http.html2text', () => <FaCode className="text-md" />],
-  ['sys.http.get', () => <GoGlobe className="text-md" />],
-  ['sys.http.post', () => <GoGlobe className="text-md" />],
-  ['sys.ls', () => <BsFolder className="text-md" />],
-  ['sys.prompt', () => <GoQuestion className="text-md" />],
-]);
-
-const iconForTool = (toolName: string | undefined) => {
-  if (!toolName) return <GoQuestion className="text-md" />;
-  return toolIconMap.get(toolName)?.() || <GoQuestion className="text-md" />;
-};

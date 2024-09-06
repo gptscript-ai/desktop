@@ -8,7 +8,7 @@ export function ToolActionChatMessage({
   toolRef,
 }: {
   action: 'Added' | 'Removed';
-  name?: string;
+  name?: string | null;
   toolRef: string;
 }) {
   return (
