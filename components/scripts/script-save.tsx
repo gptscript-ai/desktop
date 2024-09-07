@@ -39,6 +39,7 @@ const SaveScriptDropdown = () => {
     scriptContent,
     setMessages,
     setHasRun,
+    fetchThreads,
   } = useContext(ChatContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -150,6 +151,10 @@ const SaveScriptDropdown = () => {
       ]);
 
       setSuccessMessage(`New Assistant Saved As ${newScript.displayName}`);
+
+      // Fetch threads so that the state has the new assistant associated with the thread.
+      fetchThreads();
+
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       setScriptId(newScriptId);
