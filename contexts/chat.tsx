@@ -47,8 +47,6 @@ interface ChatContextState {
   setHasRun: React.Dispatch<React.SetStateAction<boolean>>;
   hasParams: boolean;
   setHasParams: React.Dispatch<React.SetStateAction<boolean>>;
-  isEmpty: boolean;
-  setIsEmpty: React.Dispatch<React.SetStateAction<boolean>>;
   notFound: boolean;
   setNotFound: React.Dispatch<React.SetStateAction<boolean>>;
   latestAgentMessage: Message;
@@ -93,7 +91,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   const [scriptId, setScriptId] = useState<string | undefined>(initialScriptId);
   const [hasRun, setHasRun] = useState(false);
   const [hasParams, setHasParams] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [thread, setThread] = useState<string>('');
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -119,7 +116,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
     forceRun,
     setForceRun,
     waitingForUserResponse,
-  } = useChatSocket(isEmpty);
+  } = useChatSocket();
   const [scriptDisplayName, setScriptDisplayName] = useState<string>('');
   const threadInitialized = useRef(false);
   const [shouldRestart, setShouldRestart] = useState(false);
@@ -234,7 +231,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
   }, [subTool]);
 
   useEffect(() => {
-    setIsEmpty(!tool.instructions);
     if (
       hasRun ||
       !socket ||
@@ -365,8 +361,6 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
         setHasRun,
         hasParams,
         setHasParams,
-        isEmpty,
-        setIsEmpty,
         notFound,
         setNotFound,
         latestAgentMessage,
