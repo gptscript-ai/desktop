@@ -59,22 +59,22 @@ export async function ensureFiles(
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  for (const file of Array.from(files.entries())) {
-    if (!fs.existsSync(path.join(dir, file[1].type))) {
-      fs.mkdirSync(path.join(dir, file[1].type), { recursive: true });
+  for (const [location, file] of Array.from(files.entries())) {
+    if (!fs.existsSync(path.join(dir, file.type))) {
+      fs.mkdirSync(path.join(dir, file.type), { recursive: true });
     }
-    const filePath = path.join(dir, file[1].type, path.basename(file[0]));
+    const filePath = path.join(dir, file.type, path.basename(location));
     if (!fs.existsSync(filePath)) {
-      if (file[1].type === 'local') {
-        await fs.promises.copyFile(file[0], filePath);
-      } else if (file[1].type === 'notion' || file[1].type === 'onedrive') {
+      if (file.type === 'local') {
+        await fs.promises.copyFile(location, filePath);
+      } else if (file.type === 'notion' || file.type === 'onedrive') {
         if (
           fs.existsSync(filePath) &&
           fs.lstatSync(filePath).isSymbolicLink()
         ) {
           continue;
         }
-        await fs.promises.symlink(file[0], filePath);
+        await fs.promises.symlink(location, filePath);
       }
     }
   }

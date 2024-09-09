@@ -88,8 +88,8 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
       );
       setDroppedFiles((prev) => {
         const newMap = new Map(prev);
-        for (const file of Array.from(files.entries())) {
-          newMap.set(file[0], file[1]);
+        for (const [location, file] of Array.from(files.entries())) {
+          newMap.set(location, file);
         }
         return newMap;
       });

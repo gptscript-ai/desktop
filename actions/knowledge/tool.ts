@@ -20,9 +20,9 @@ export async function runSyncTool(
 
   let toolUrl = '';
   if (tool === 'notion') {
-    toolUrl = 'github.com/gptscript-ai/knowledge-notion-integration@46a273e';
+    toolUrl = 'github.com/gptscript-ai/knowledge-notion-integration';
   } else if (tool === 'onedrive') {
-    toolUrl = 'github.com/gptscript-ai/knowledge-onedrive-integration@ef73dff';
+    toolUrl = 'github.com/gptscript-ai/knowledge-onedrive-integration';
   }
   const runningTool = await gptscript.run(toolUrl, {
     prompt: true,
@@ -53,14 +53,13 @@ export async function syncFiles(
   const metadataFromFiles = fs.readFileSync(path.join(dir, 'metadata.json'));
   const metadata = JSON.parse(metadataFromFiles.toString());
   for (const file of selectedFiles) {
-    const t = path.basename(path.dirname(path.dirname(file)));
-    if (t !== type) {
-      continue;
+    const baseDir = path.dirname(path.dirname(file));
+    if (baseDir === dir) {
+      const documentID = path.basename(path.dirname(file));
+      const detail = metadata[documentID];
+      detail.sync = true;
+      metadata[documentID] = detail;
     }
-    const documentID = path.basename(path.dirname(file));
-    const detail = metadata[documentID];
-    detail.sync = true;
-    metadata[documentID] = detail;
   }
   fs.writeFileSync(path.join(dir, 'metadata.json'), JSON.stringify(metadata));
   await runSyncTool(true, type);
