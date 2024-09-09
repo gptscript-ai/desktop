@@ -22,7 +22,6 @@ export function useClickOutside({
         !ref.current.contains(e.target as Node) &&
         !whitelist?.some((el) => el.contains(e.target as Node))
       ) {
-        console.log('fire click outside');
         onClickOutside(e);
       }
     };
