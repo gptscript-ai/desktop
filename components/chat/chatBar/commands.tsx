@@ -2,9 +2,6 @@ import { getToolDisplayName, parseBlock } from '@/actions/gptscript';
 import { ingest } from '@/actions/knowledge/knowledge';
 import { gatewayTool, getCookie } from '@/actions/knowledge/util';
 import { uploadFile } from '@/actions/upload';
-import CatalogListBox, {
-  ToolCatalogRef,
-} from '@/components/chat/chatBar/search/catalog';
 import Upload from '@/components/chat/chatBar/upload';
 import { MessageType } from '@/components/chat/messages';
 import { ToolActionChatMessage } from '@/components/shared/tools/ToolActionChatMessage';
@@ -31,6 +28,9 @@ import {
 } from 'react-icons/go';
 import { PiToolbox } from 'react-icons/pi';
 import { useFilePicker } from 'use-file-picker';
+import { CatalogListBox, ToolCatalogRef } from './CatalogListBox';
+import { useKeyEvent } from '@/hooks/useKeyEvent';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 /*
     note(tylerslaton):
@@ -282,21 +282,46 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
       setLoadingTool(null);
     }, [addTool.error]);
 
+    useKeyEvent({
+      key: 'Escape',
+      onKeyEvent: () => {
+        setIsCatalogOpen(false);
+        setIsOpen(false);
+        inputElement?.focus();
+      },
+      disable: !isCatalogOpen && !isOpen,
+    });
+
+    const childrenRef = useRef<HTMLDivElement>(null);
+
+    const catalogClickOutsideRef = useClickOutside({
+      onClickOutside: () => setIsCatalogOpen(false),
+      action: 'mousedown',
+      disable: !isCatalogOpen,
+      whitelist: [childrenRef.current].filter((el) => !!el),
+    });
+
+    const commandClickOutsideRef = useClickOutside({
+      onClickOutside: () => setIsOpen(false),
+      action: 'mousedown',
+      disable: !isOpen,
+      whitelist: [childrenRef.current].filter((el) => !!el),
+    });
+
     return (
       <div className="relative w-full h-3/4 command-options">
         <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
         {isCatalogOpen && (
-          <CatalogListBox
-            ref={toolcatalogRef}
-            query={text}
-            loading={loadingTool}
-            equippedTools={tools}
-            onAddTool={addTool.execute}
-            onEscape={() => {
-              setIsCatalogOpen(false);
-            }}
-            onUncapturedKeyDown={() => inputElement?.focus()}
-          />
+          <Card className="absolute bottom-14 p-4" ref={catalogClickOutsideRef}>
+            <CatalogListBox
+              ref={toolcatalogRef}
+              query={text}
+              loading={loadingTool}
+              equippedTools={tools}
+              onAddTool={addTool.execute}
+              onUncapturedKeyDown={() => inputElement?.focus()}
+            />
+          </Card>
         )}
 
         <UrlToolModal
@@ -308,7 +333,10 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
         />
 
         {isOpen && !!filteredOptions.length && (
-          <Card className="absolute bottom-14 w-full p-4">
+          <Card
+            className="absolute bottom-14 w-full p-4"
+            ref={commandClickOutsideRef}
+          >
             <Listbox aria-label="commands">
               {
                 filteredOptions
@@ -368,7 +396,7 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
             </Listbox>
           </Card>
         )}
-        {children}
+        <div ref={childrenRef}>{children}</div>
       </div>
     );
   }

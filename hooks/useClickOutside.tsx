@@ -2,35 +2,37 @@ import { useRef, useEffect } from 'react';
 
 export function useClickOutside({
   onClickOutside,
-  method = 'click',
+  action = 'click',
   whitelist,
+  disable,
 }: {
   onClickOutside: (e: MouseEvent) => void;
-  method?: 'click' | 'mousedown' | 'mouseup';
+  action?: 'click' | 'mousedown' | 'mouseup';
   whitelist?: HTMLElement[];
+  disable?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const whitelistRef = useRef<HTMLElement[]>(whitelist || []);
-  whitelistRef.current = whitelist || [];
 
   useEffect(() => {
+    if (disable) return;
+
     const handleClickOutside = (e: MouseEvent) => {
       if (
         ref.current &&
         !ref.current.contains(e.target as Node) &&
-        !whitelistRef.current.some((el) => el.contains(e.target as Node))
+        !whitelist?.some((el) => el.contains(e.target as Node))
       ) {
+        console.log('fire click outside');
         onClickOutside(e);
       }
     };
 
-    document.addEventListener(method, handleClickOutside);
+    document.addEventListener(action, handleClickOutside);
 
     return () => {
-      document.removeEventListener(method, handleClickOutside);
-      console.log('remove');
+      document.removeEventListener(action, handleClickOutside);
     };
-  }, [onClickOutside, method]);
+  }, [action, onClickOutside, disable, whitelist]);
 
   return ref;
 }
