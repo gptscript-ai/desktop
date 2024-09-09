@@ -2,11 +2,15 @@
 
 import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
 import { IoMdSend } from 'react-icons/io';
-import { Spinner } from '@nextui-org/react';
+import { Spinner, Tooltip } from '@nextui-org/react';
 import { FaBackward } from 'react-icons/fa';
 import { Button, Textarea } from '@nextui-org/react';
 import Commands, { ChatCommandsRef } from '@/components/chat/chatBar/commands';
-import { GoKebabHorizontal, GoSquareFill } from 'react-icons/go';
+import {
+  GoIssueReopened,
+  GoKebabHorizontal,
+  GoSquareFill,
+} from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { MessageType } from '@/components/chat/messages';
 import { Tool } from '@gptscript-ai/gptscript';
@@ -16,12 +20,14 @@ interface ChatBarProps {
   disableInput?: boolean;
   disableCommands?: boolean;
   inputPlaceholder?: string;
+  noChat?: boolean;
   onMessageSent: (message: string) => void;
 }
 
 const ChatBar = ({
   disableInput = false,
   disableCommands = false,
+  noChat = false,
   inputPlaceholder,
   onMessageSent,
 }: ChatBarProps) => {
@@ -38,6 +44,7 @@ const ChatBar = ({
     setShowForm,
     messages,
     setMessages,
+    restartScript,
     waitingForUserResponse,
   } = useContext(ChatContext);
 
@@ -127,21 +134,35 @@ const ChatBar = ({
 
   return (
     <div className="flex px-4 space-x-2 sw-full">
-      {!disableCommands && (
-        <Button
-          isIconOnly
-          startContent={<GoKebabHorizontal />}
-          radius="full"
-          className="text-lg"
-          color="primary"
-          disabled={disableInput}
-          onPress={() => {
-            if (disableInput) return;
-            setCommandsOpen(true);
-          }}
-          onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
-        />
-      )}
+      {!disableCommands &&
+        (noChat ? (
+          <Tooltip content="Restart script">
+            <Button
+              isIconOnly
+              startContent={<GoIssueReopened />}
+              radius="full"
+              className="text-lg"
+              color="primary"
+              onPress={() => {
+                restartScript();
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Button
+            isIconOnly
+            startContent={<GoKebabHorizontal />}
+            radius="full"
+            className="text-lg"
+            color="primary"
+            disabled={disableInput}
+            onPress={() => {
+              if (disableInput) return;
+              setCommandsOpen(true);
+            }}
+            onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
+          />
+        ))}
       <div className="w-full relative">
         <Commands
           ref={commandsRef}
@@ -227,7 +248,7 @@ const ChatBar = ({
         />
       ) : (
         <>
-          {disableInput && !disableCommands ? (
+          {disableInput && !disableCommands && !noChat ? (
             <Spinner />
           ) : (
             <Button
