@@ -117,13 +117,15 @@ const Chat: React.FC<ScriptProps> = ({
   const handleMessageSent = async (message: string) => {
     if (!socket || !connected) return;
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { type: MessageType.User, message },
-    ]);
-    setLatestAgentMessage({
-      type: MessageType.Agent,
-      message: 'Waiting for model response...',
+    setMessages((prevMessages) => {
+      setLatestAgentMessage({
+        type: MessageType.Agent,
+        message: 'Waiting for model response...',
+        name: prevMessages
+          ? prevMessages[prevMessages.length - 1].name
+          : undefined,
+      });
+      return [...prevMessages, { type: MessageType.User, message }];
     });
     if (hasNoUserMessages() && thread) {
       renameThread(thread, await generateThreadName(message));

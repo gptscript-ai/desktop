@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { GoCheckCircle } from 'react-icons/go';
 import type { PromptFrame, PromptResponse } from '@gptscript-ai/gptscript';
@@ -13,15 +12,12 @@ const PromptForm = ({
 }) => {
   const { register, handleSubmit, getValues } =
     useForm<Record<string, string>>();
-  const [submitted, setSubmitted] = useState(false);
-
   const noFields = !frame.fields || frame.fields.length === 0;
   if (noFields) {
     frame.fields = [];
   }
 
   const onSubmitForm = () => {
-    setSubmitted(true);
     onSubmit({ id: frame.id, responses: getValues() });
     if (frame.metadata && frame.metadata.authURL) {
       open(frame.metadata.authURL);
@@ -64,9 +60,8 @@ const PromptForm = ({
         className="mb-6 w-full"
         size="lg"
         color="primary"
-        isDisabled={submitted}
       >
-        {submitted ? 'Submitted' : buttonText}
+        {buttonText}
       </Button>
     </form>
   );

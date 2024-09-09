@@ -17,7 +17,7 @@ import { rootTool, stringify } from '@/actions/gptscript';
 import { updateScript } from '@/actions/me/scripts';
 import { gatewayTool } from '@/actions/knowledge/util';
 
-const useChatSocket = (isEmpty?: boolean) => {
+const useChatSocket = () => {
   const initiallyTrustedRepos = [
     'github.com/gptscript-ai/context',
     'github.com/gptscript-ai/gateway-provider',
@@ -97,7 +97,11 @@ const useChatSocket = (isEmpty?: boolean) => {
   const processWorkQueue = useCallback(() => {
     const initialQueueLength = workQueue.current.length;
     for (let i = 0; i < initialQueueLength; i++) {
-      if (workQueue.current.length === 0 || waitingForUserResponse) break; // Stop if the queue is empty
+      if (
+        workQueue.current.length === 0 ||
+        latestAgentMessageRef.current.component
+      )
+        break;
 
       const { frame, name } = workQueue.current.shift()!; // Remove and process the first message in the queue
 
@@ -112,6 +116,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         if (frame.type === 'runStart') {
           latestAgentMessageRef.current.message =
             'Waiting for model response...';
+          latestAgentMessageRef.current.name = name;
           setLatestAgentMessage({ ...latestAgentMessageRef.current });
         }
         continue;
@@ -162,7 +167,7 @@ const useChatSocket = (isEmpty?: boolean) => {
         setLatestAgentMessage({ ...latestAgentMessageRef.current });
       }
     }
-  }, [waitingForUserResponse]);
+  }, []);
 
   // Set up the interval to process the work queue every 50ms
   useEffect(() => {
@@ -190,6 +195,10 @@ const useChatSocket = (isEmpty?: boolean) => {
             onSubmit={(response: PromptResponse) => {
               socketRef.current?.emit('promptResponse', response);
               setWaitingForUserResponse(false);
+              latestAgentMessageRef.current.component = null;
+              latestAgentMessageRef.current.message =
+                'Waiting for model response...';
+              setLatestAgentMessage({ ...latestAgentMessageRef.current });
             }}
           />
         );
@@ -232,6 +241,10 @@ const useChatSocket = (isEmpty?: boolean) => {
             onSubmit={(response: AuthResponse) => {
               socketRef.current?.emit('confirmResponse', response);
               setWaitingForUserResponse(false);
+              latestAgentMessageRef.current.component = null;
+              latestAgentMessageRef.current.message =
+                'Waiting for model response...';
+              setLatestAgentMessage({ ...latestAgentMessageRef.current });
             }}
           />
         );
@@ -448,18 +461,6 @@ const useChatSocket = (isEmpty?: boolean) => {
     if (!socket || !connected) return;
     socket.emit('interrupt');
   }, [socket, connected]);
-
-  useEffect(() => {
-    if (running && messages.length === 0) {
-      if (!isEmpty) {
-        setLatestAgentMessage({
-          calls: {},
-          type: MessageType.Agent,
-          message: 'Waiting for model response...',
-        });
-      }
-    }
-  }, [running, messages, isEmpty]);
 
   return {
     error,
