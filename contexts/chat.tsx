@@ -137,8 +137,8 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       setThread(id);
       setScriptContent((await getScript(scriptId))?.script || []);
       setScriptId(scriptId);
+      // use `setForceRun` instead of `setShouldRestart` because it triggers the `run` WS event which will reset the messages as well
       setForceRun(true);
-      setShouldRestart(true);
     }
   };
 
