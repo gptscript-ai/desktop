@@ -14,7 +14,7 @@ import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
 import { gatewayTool } from '@/actions/knowledge/util';
 import { ToolReference } from '@gptscript-ai/gptscript';
-import { ToolActionChatMessage } from '../shared/tools/ToolActionChatMessage';
+import { ToolActionChatMessage } from '@/components/shared/tools/ToolActionChatMessage';
 
 const dynamicToolName = 'Dynamic Instructions';
 
