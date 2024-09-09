@@ -1,5 +1,5 @@
 export function gatewayTool(): string {
-  return 'github.com/gptscript-ai/knowledge/gateway@v0.4.13';
+  return 'github.com/gptscript-ai/knowledge/gateway@v0.4.14-rc.1';
 }
 
 // This is a bit hacky because we need to make sure that the knowledge tool is updated to the latest version.
