@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Property } from '@gptscript-ai/gptscript';
 import { Input, Button } from '@nextui-org/react';
 import { GoPlus, GoTrash } from 'react-icons/go';
@@ -10,31 +9,10 @@ interface ExternalProps {
 }
 
 const Imports: React.FC<ExternalProps> = ({ params, setParams, className }) => {
-  const [error, setError] = useState<string | null>(null);
-  const [input, setInput] = useState<string>('');
-  const [inputDescription, setInputDescription] = useState<string>('');
-
   const handleDeleteParam = (param: string) => {
     const updatedParams = { ...params };
     delete updatedParams[param];
     setParams(updatedParams);
-  };
-
-  const handleAddParam = () => {
-    if (params && Object.keys(params)?.includes(input)) {
-      setError(`Parameter ${input} already exists`);
-      return;
-    }
-    if (!input) {
-      setError('Parameter cannot be empty');
-      return;
-    }
-    setParams({
-      ...(params || {}),
-      [input]: { type: 'string', description: inputDescription },
-    });
-    setInput('');
-    setInputDescription('');
   };
 
   const handleCreateDefaultParam = () => {
@@ -43,11 +21,6 @@ const Imports: React.FC<ExternalProps> = ({ params, setParams, className }) => {
     while (params && Object.keys(params)?.includes(defaultParamName)) {
       defaultParamName = `New Param ${counter}`;
       counter++;
-    }
-
-    if (params && Object.keys(params)?.includes(defaultParamName)) {
-      setError(`Parameter ${defaultParamName} already exists`);
-      return;
     }
 
     setParams({

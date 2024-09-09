@@ -183,7 +183,7 @@ const CustomTool: React.FC<ConfigureProps> = ({ tool }) => {
         >
           <ModalContent>
             <ModalBody className="grid grid-cols-2">
-              <div className="border-r-2 dark:border-zinc-700 pr-6 h-full overflow-y-auto">
+              <div className="border-r-2 dark:border-zinc-700 pr-6 h-full overflow-y-auto py-14">
                 <div className="w-full flex flex-col justify-center space-y-4 mb-6">
                   <Tooltip
                     content={`${name || 'Main'}`}
@@ -378,14 +378,18 @@ const CustomTool: React.FC<ConfigureProps> = ({ tool }) => {
                   )}
                 </div>
               </div>
-              <div className="h-full overflow-y-auto">
+              <div className="h-full overflow-y-auto pt-14">
                 <ChatContextProvider
                   initialScript={scriptPath}
                   enableThread={false}
                   initialSubTool={customTool.name}
                   initialScriptId={`${scriptId}`}
                 >
-                  <Chat disableInput={!customTool.chat} disableCommands={!customTool.chat} messagesHeight="h-[93%]" />
+                  <Chat
+                    disableInput={!customTool.chat}
+                    noChat={!customTool.chat}
+                    messagesHeight="h-[93%]"
+                  />
                 </ChatContextProvider>
               </div>
             </ModalBody>

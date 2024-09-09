@@ -30,6 +30,7 @@ interface ScriptProps {
   inputPlaceholder?: string;
   disableInput?: boolean;
   disableCommands?: boolean;
+  noChat?: boolean;
 }
 
 const Chat: React.FC<ScriptProps> = ({
@@ -39,6 +40,7 @@ const Chat: React.FC<ScriptProps> = ({
   inputPlaceholder,
   disableInput = false,
   disableCommands = false,
+  noChat = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
@@ -187,6 +189,7 @@ const Chat: React.FC<ScriptProps> = ({
                 disableInput={
                   disableInput || !running || waitingForUserResponse
                 }
+                noChat={noChat}
                 disableCommands={disableCommands}
                 inputPlaceholder={inputPlaceholder}
                 onMessageSent={handleMessageSent}
