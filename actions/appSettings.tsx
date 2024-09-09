@@ -7,7 +7,7 @@ import path from 'path';
 export type AppSettings = {
   confirmToolCalls: boolean;
   browser: BrowserAppSettings;
-}
+};
 
 export type BrowserAppSettings = {
   headless: boolean;

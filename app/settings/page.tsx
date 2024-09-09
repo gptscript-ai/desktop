@@ -10,7 +10,7 @@ import {
 } from '@/actions/appSettings';
 
 export default function SettingsPage() {
-  const [pendingSettings, setPendingSettings] = useState({ 
+  const [pendingSettings, setPendingSettings] = useState({
     confirmToolCalls: false,
     browser: {
       headless: false,

@@ -121,6 +121,24 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
   });
 };
 
+function appSettingsLocation() {
+  const homeDir = os.homedir();
+  let configDir;
+  if (os.platform() === 'darwin') {
+    configDir =
+      process.env.XDG_CONFIG_HOME ||
+      path.join(homeDir, 'Library', 'Application Support');
+  } else if (os.platform() === 'win32') {
+    configDir = path.join(homeDir, 'AppData', 'Local');
+  } else if (os.platform() === 'linux') {
+    configDir = process.env.XDG_CONFIG_HOME || path.join(homeDir, '.config');
+  } else {
+    throw new Error('Unsupported platform');
+  }
+
+  return path.join(configDir, 'acorn', 'settings.json');
+}
+
 const mount = async (
   location,
   tool,
@@ -135,6 +153,8 @@ const mount = async (
     process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
   const THREADS_DIR =
     process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, 'threads');
+  const settingsLocation = appSettingsLocation();
+  const settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
 
   let script;
   if (typeof location === 'string') {
@@ -148,7 +168,7 @@ const mount = async (
     disableCache: process.env.DISABLE_CACHE === 'true',
     workspace: scriptWorkspace,
     prompt: true,
-    confirm: true,
+    confirm: settings.confirmToolCalls,
     env: [
       // Here we need to pass a fake GPTSCRIPT_THREAD_ID so that knowledge tool doesn't error out. Because it will always look for GPTSCRIPT_THREAD_ID in the env
       // It should not import anything from the env. This is the case where you chat in Edit Assistant page where thread is not enabled.

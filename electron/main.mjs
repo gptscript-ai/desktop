@@ -19,7 +19,7 @@ async function startServer() {
   // Set up the browser tool to run in headless mode.
   ensureDirExists(config.workspaceDir);
   writeFileSync(
-    join(`${config.workspaceDir}`, 'browsersettings.json'),
+    join(`${config.workspaceDir}`, 'settings.json'),
     JSON.stringify({ headless: true })
   );
 
@@ -31,7 +31,7 @@ async function startServer() {
   process.env.WORKSPACE_DIR = config.workspaceDir;
   process.env.GPTSCRIPT_GATEWAY_URL = config.gatewayUrl;
   process.env.GPTSCRIPT_OPENAPI_REVAMP = 'true';
-  process.env.GPTSCRIPT_BROWSER_SETTINGS_FILE = config.browserSettingsFile;
+  process.env.GPTSCRIPT_SETTINGS_FILE = config.appSettingsFile;
 
   console.log(`GPTSCRIPT_BIN=${config.gptscriptBin}`);
 
