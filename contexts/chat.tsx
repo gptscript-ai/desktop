@@ -245,7 +245,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
           setInitialFetch(false);
           setWorkspace(thread.meta.workspace);
         }
-        // need to wait for the WS Server to restart befgore triggering another event
+        // need to wait for the WS Server to restart before triggering another event
         await restartScript();
         setShouldRestart(false);
       });
