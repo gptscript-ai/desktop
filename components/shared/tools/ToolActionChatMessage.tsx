@@ -16,7 +16,9 @@ export function ToolActionChatMessage({
       {action}{' '}
       {name ? (
         <Tooltip content={toolRef} placement="bottom">
-          <p className="underline cursor-pointer">{name}</p>
+          <p className="underline underline-offset-2 decoration-dotted cursor-pointer">
+            {name}
+          </p>
         </Tooltip>
       ) : (
         toolRef
