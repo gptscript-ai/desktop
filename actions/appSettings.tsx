@@ -28,7 +28,11 @@ export async function getAppSettings() {
   const location = process.env.GPTSCRIPT_SETTINGS_FILE;
   if (fs.existsSync(location)) {
     const AppSettings = fs.readFileSync(location, 'utf-8');
-    return JSON.parse(AppSettings) as AppSettings;
+    try {
+      return JSON.parse(AppSettings) as AppSettings;
+    } catch {
+      console.error('Malformed settings file, using default settings...');
+    }
   }
   return defaultAppSettings;
 }
