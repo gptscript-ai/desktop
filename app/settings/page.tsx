@@ -69,7 +69,7 @@ export default function SettingsPage() {
                   onValueChange={(isSelected) => {
                     setPendingSettings((prevState) => ({
                       ...prevState,
-                      headless: isSelected,
+                      browser: { ...prevState.browser, headless: isSelected },
                     }));
                   }}
                 >
@@ -89,7 +89,10 @@ export default function SettingsPage() {
                   onValueChange={(isSelected) => {
                     setPendingSettings((prevState) => ({
                       ...prevState,
-                      useDefaultSession: isSelected,
+                      browser: {
+                        ...prevState.browser,
+                        useDefaultSession: isSelected,
+                      },
                     }));
                   }}
                 >

@@ -13,15 +13,21 @@ async function startServer() {
   // Fix path so that tools can find binaries installed on the system.
   fixPath();
 
-  // Ensure the app's data directory exists
+  // Ensure the app's data and workspace directories exists
   ensureDirExists(config.dataDir);
-
-  // Set up the browser tool to run in headless mode.
   ensureDirExists(config.workspaceDir);
-  writeFileSync(
-    join(`${config.workspaceDir}`, 'settings.json'),
-    JSON.stringify({ headless: true })
-  );
+
+  // If the app settings file doesn't exist, create it with default settings.
+  if (!existsSync(config.appSettingsFile)) {
+    writeFileSync(
+      config.appSettingsFile, // created in config.mjs
+      JSON.stringify({
+        browser: {
+          headless: true,
+        },
+      })
+    );
+  }
 
   // Project config onto environment variables to configure GPTScript/sdk-server and the Next.js app.
   process.env.LOGS_DIR = config.logsDir;
