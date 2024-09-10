@@ -4,8 +4,8 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { KNOWLEDGE_DIR } from '@/config/env';
-import { FileDetail } from '@/actions/knowledge/util';
 import { getFileOrFolderSizeInKB } from '@/actions/knowledge/filehelper';
+import { FileDetail } from '@/model/knowledge';
 
 const execPromise = promisify(exec);
 

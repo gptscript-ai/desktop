@@ -16,11 +16,8 @@ import {
   getFiles,
   runKnowledgeIngest,
 } from '@/actions/knowledge/knowledge';
-import {
-  ensureKnowledgeTool,
-  FileDetail,
-  getCookie,
-} from '@/actions/knowledge/util';
+import { ensureKnowledgeTool, getCookie } from '@/actions/knowledge/util';
+import { FileDetail } from '@/model/knowledge';
 
 const DEBOUNCE_TIME = 1000; // milliseconds
 const DYNAMIC_INSTRUCTIONS = 'dynamic-instructions';

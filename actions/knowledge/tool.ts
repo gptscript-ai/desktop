@@ -43,8 +43,10 @@ export async function runSyncTool(
   return;
 }
 
-// syncFiles syncs all files only when they are selected
-// todo: we can stop syncing once file is no longer used by any other script
+/**
+ * syncFiles syncs all files only when they are selected
+ * todo: we can stop syncing once file is no longer used by any other script
+ */
 export async function syncFiles(
   selectedFiles: string[],
   type: 'notion' | 'onedrive'

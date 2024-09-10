@@ -59,7 +59,7 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
       () => {
         syncKnowledgeFilesFromIntegrations(gptscript);
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000 // 24 hours
     );
 
     Promise.resolve(gptscriptInitPromise).then(() => {

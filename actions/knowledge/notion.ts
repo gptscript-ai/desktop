@@ -17,9 +17,7 @@ export async function isNotionConfigured() {
   );
 }
 
-export async function getNotionFiles(): Promise<
-  Map<string, { url: string; fileName: string }>
-> {
+export async function getNotionFiles() {
   const dir = path.join(WORKSPACE_DIR(), 'knowledge', 'integrations', 'notion');
   const metadataFromFiles = fs.readFileSync(path.join(dir, 'metadata.json'));
   const metadata = JSON.parse(metadataFromFiles.toString());
