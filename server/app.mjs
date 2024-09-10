@@ -4,7 +4,7 @@ import nextConfig from '../next.config.js';
 import { Server } from 'socket.io';
 import { GPTScript, RunEventType } from '@gptscript-ai/gptscript';
 import dotenv from 'dotenv';
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import path from 'path';
 import os from 'os';
 
@@ -135,8 +135,18 @@ const mount = async (
     process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
   const THREADS_DIR =
     process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, 'threads');
+
+  // Get the settings file. If it doesn't exist, use default settings instead.
   const settingsLocation = process.env.GPTSCRIPT_SETTINGS_FILE;
-  const settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
+  let settings = {
+    confirmToolCalls: false,
+    browser: {
+      headless: true,
+    },
+  };
+  if (existsSync(settingsLocation)) {
+    settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
+  }
 
   let script;
   if (typeof location === 'string') {

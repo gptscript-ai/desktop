@@ -1,8 +1,6 @@
 'use server';
 
 import fs from 'fs';
-import os from 'os';
-import path from 'path';
 
 export type AppSettings = {
   confirmToolCalls: boolean;
@@ -19,7 +17,7 @@ const defaultAppSettings: AppSettings = {
   browser: {
     headless: false,
     useDefaultSession: false,
-  },
+  } as BrowserAppSettings,
 };
 
 export async function getAppSettings() {
