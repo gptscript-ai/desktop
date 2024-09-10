@@ -2,31 +2,13 @@
 
 import { Button, Chip, Divider, Switch, Tooltip } from '@nextui-org/react';
 import { GoDownload } from 'react-icons/go';
-import { useEffect, useState } from 'react';
-import {
-  BrowserSettings,
-  getBrowserSettings,
-  setBrowserSettings,
-} from '@/actions/browser';
+import { useContext, useState } from 'react';
+import { SettingsContext } from '@/contexts/settings';
 
-export default function Settings() {
-  const [settings, setSettings] = useState({
-    headless: false,
-    useDefaultSession: false,
-  } as BrowserSettings);
-  const [loading, setLoading] = useState(true);
+export default function SettingsPage() {
+  const { settings, loading, saveSettings } = useContext(SettingsContext);
+  const [pendingSettings, setPendingSettings] = useState(settings);
   const [saveButtonText, setSaveButtonText] = useState('Save Settings');
-
-  useEffect(() => {
-    getBrowserSettings().then((settings) => {
-      setSettings(settings);
-      setLoading(false);
-    });
-  }, []);
-
-  async function saveSettings() {
-    await setBrowserSettings(settings);
-  }
 
   return (
     <div className="container mx-auto max-w-6xl py-10 px-6">
@@ -47,6 +29,35 @@ export default function Settings() {
           </Button>
         </section>
         <section>
+          <h2 className="text-2xl font-semibold mb-4">General</h2>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <div className="mt-2 mb-2 flex items-center">
+                <Switch
+                  isSelected={pendingSettings.confirmToolCalls}
+                  onValueChange={(isSelected) => {
+                    setPendingSettings((prevState) => ({
+                      ...prevState,
+                      confirmToolCalls: isSelected,
+                    }));
+                  }}
+                >
+                  Tools Require Confirmation
+                </Switch>
+                <Tooltip
+                  classNames={{ base: 'w-1/2' }}
+                  content="Whenever the LLM decides to run a tool, it will ask for user confirmation before running the tool."
+                  placement="right"
+                >
+                  <Chip className="ml-2 font-mono cursor-default">i</Chip>
+                </Tooltip>
+              </div>
+            </>
+          )}
+        </section>
+        <section>
           <h2 className="text-2xl font-semibold mb-4">Browser Tool</h2>
           {loading ? (
             <p>Loading...</p>
@@ -54,9 +65,9 @@ export default function Settings() {
             <>
               <div className="mt-2 mb-2 flex items-center">
                 <Switch
-                  isSelected={settings.headless}
+                  isSelected={pendingSettings.browser.headless}
                   onValueChange={(isSelected) => {
-                    setSettings((prevState) => ({
+                    setPendingSettings((prevState) => ({
                       ...prevState,
                       headless: isSelected,
                     }));
@@ -74,9 +85,9 @@ export default function Settings() {
               </div>
               <div className="mt-2 mb-2 flex items-center">
                 <Switch
-                  isSelected={settings.useDefaultSession}
+                  isSelected={pendingSettings.browser.useDefaultSession}
                   onValueChange={(isSelected) => {
-                    setSettings((prevState) => ({
+                    setPendingSettings((prevState) => ({
                       ...prevState,
                       useDefaultSession: isSelected,
                     }));
@@ -99,7 +110,7 @@ export default function Settings() {
           className="w-full md:w-auto"
           onClick={() => {
             setSaveButtonText('Saving...');
-            saveSettings().then(() => {
+            saveSettings(pendingSettings).then(() => {
               setSaveButtonText('Saved!');
               setTimeout(() => {
                 setSaveButtonText('Save Settings');

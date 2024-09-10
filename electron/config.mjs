@@ -6,7 +6,7 @@ import util from 'util';
 import { renameSync } from 'fs';
 import os from 'os';
 
-function browserSettingsLocation() {
+function appSettingsLocation() {
   const homeDir = os.homedir();
   let configDir;
   if (os.platform() === 'darwin') {
@@ -21,7 +21,7 @@ function browserSettingsLocation() {
     throw new Error('Unsupported platform');
   }
 
-  return join(configDir, 'acorn', 'browsersettings.json');
+  return join(configDir, 'acorn', 'settings.json');
 }
 
 // App config
@@ -33,7 +33,7 @@ const resourcesDir = dirname(appDir);
 const dataDir = join(app.getPath('userData'), appName);
 const threadsDir = process.env.THREADS_DIR || join(dataDir, 'threads');
 const workspaceDir = process.env.WORKSPACE_DIR || join(dataDir, 'workspace');
-const browserSettingsFile = browserSettingsLocation();
+const appSettingsFile = appSettingsLocation();
 const port =
   process.env.PORT ||
   (!dev ? await getPort({ portRange: [30000, 40000] }) : 3000);
@@ -112,5 +112,5 @@ export const config = {
   gptscriptBin,
   gatewayUrl,
   knowledgeBin,
-  browserSettingsFile,
+  appSettingsFile,
 };

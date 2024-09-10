@@ -135,6 +135,8 @@ const mount = async (
     process.env.WORKSPACE_DIR ?? process.env.GPTSCRIPT_WORKSPACE_DIR;
   const THREADS_DIR =
     process.env.THREADS_DIR ?? path.join(WORKSPACE_DIR, 'threads');
+  const settingsLocation = process.env.GPTSCRIPT_SETTINGS_FILE;
+  const settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
 
   let script;
   if (typeof location === 'string') {
@@ -148,7 +150,7 @@ const mount = async (
     disableCache: process.env.DISABLE_CACHE === 'true',
     workspace: scriptWorkspace,
     prompt: true,
-    confirm: true,
+    confirm: settings.confirmToolCalls,
     env: [
       // Here we need to pass a fake GPTSCRIPT_THREAD_ID so that knowledge tool doesn't error out. Because it will always look for GPTSCRIPT_THREAD_ID in the env
       // It should not import anything from the env. This is the case where you chat in Edit Assistant page where thread is not enabled.
