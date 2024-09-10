@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   send: (channel, args) => {
     ipcRenderer.send(channel, args);
   },
+  openFile: (file) => ipcRenderer.send('open-file', file),
 });

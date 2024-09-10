@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fixPath from 'fix-path';
 import os from 'os';
 import { config } from './config.mjs';
+import { ipcMain } from 'electron/main';
 
 app.on('window-all-closed', () => app.quit());
 app.on('ready', startServer);
@@ -71,6 +72,11 @@ function createWindow(url) {
       webSecurity: false,
       disableBlinkFeatures: 'Autofill',
     },
+  });
+
+  // This is necessary to allow the renderer process (NextJS) to open files in the default system application
+  ipcMain.on('open-file', (event, arg) => {
+    shell.openPath(arg);
   });
 
   // Check if the platform is macOS before calling setWindowButtonVisibility
