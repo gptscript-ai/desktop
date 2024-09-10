@@ -22,7 +22,7 @@ const defaultAppSettings: AppSettings = {
   },
 };
 
-export async function getAppSettings(): Promise<AppSettings> {
+export async function getAppSettings() {
   if (!process.env.GPTSCRIPT_SETTINGS_FILE) {
     throw new Error('GPTSCRIPT_SETTINGS_FILE not set');
   }

@@ -2,34 +2,13 @@
 
 import { Button, Chip, Divider, Switch, Tooltip } from '@nextui-org/react';
 import { GoDownload } from 'react-icons/go';
-import { useCallback, useEffect, useState } from 'react';
-import {
-  AppSettings,
-  getAppSettings,
-  setAppSettings,
-} from '@/actions/appSettings';
+import { useContext, useState } from 'react';
+import { SettingsContext } from '@/contexts/settings';
 
 export default function SettingsPage() {
-  const [pendingSettings, setPendingSettings] = useState({
-    confirmToolCalls: false,
-    browser: {
-      headless: false,
-      useDefaultSession: false,
-    },
-  } as AppSettings);
-  const [loading, setLoading] = useState(true);
+  const { settings, loading, saveSettings } = useContext(SettingsContext);
+  const [pendingSettings, setPendingSettings] = useState(settings);
   const [saveButtonText, setSaveButtonText] = useState('Save Settings');
-
-  useEffect(() => {
-    getAppSettings().then((settings) => {
-      setPendingSettings(settings);
-      setLoading(false);
-    });
-  }, []);
-
-  const saveSettings = useCallback(async () => {
-    await setAppSettings(pendingSettings);
-  }, [pendingSettings]);
 
   return (
     <div className="container mx-auto max-w-6xl py-10 px-6">
@@ -131,7 +110,7 @@ export default function SettingsPage() {
           className="w-full md:w-auto"
           onClick={() => {
             setSaveButtonText('Saving...');
-            saveSettings().then(() => {
+            saveSettings(pendingSettings).then(() => {
               setSaveButtonText('Saved!');
               setTimeout(() => {
                 setSaveButtonText('Save Settings');
