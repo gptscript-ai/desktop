@@ -17,8 +17,21 @@ export const parseContent = async (toolContent: string): Promise<Tool[]> => {
   ) as Tool[];
 };
 
-export const parseBlock = async (ref: string) => {
-  return await gpt().parse(ref);
+/**
+ * Verifies that a tool exists by parsing it.
+ * @param toolRef The tool reference to verify.
+ * @returns A boolean indicating whether the tool exists.
+ */
+export const verifyToolExists = async (toolRef: string) => {
+  // skip verification if the tool is a system tool
+  if (toolRef.startsWith('sys.')) return true;
+
+  try {
+    await gpt().parse(toolRef);
+    return true;
+  } catch (_) {
+    return false;
+  }
 };
 
 export const parse = async (file: string): Promise<Tool[]> => {

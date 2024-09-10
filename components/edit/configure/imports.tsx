@@ -44,7 +44,7 @@ import {
 } from 'react-icons/si';
 import { VscAzure } from 'react-icons/vsc';
 
-import { getToolDisplayName, parse } from '@/actions/gptscript';
+import { getToolDisplayName, verifyToolExists } from '@/actions/gptscript';
 import {
   CatalogListBox,
   ToolCatalogRef,
@@ -116,7 +116,10 @@ const Imports: React.FC<ImportsProps> = ({
 
   const verifyAndAddToolUrl = useAsync(async (url: string) => {
     if (!url) throw new Error('Tool URL cannot be empty');
-    await parse(url); // throws if the url is invalid
+
+    const toolExists = await verifyToolExists(url);
+    if (!toolExists) throw new Error(`Tool ${url} does not exist`);
+
     setTools([...(tools || []), url]);
   });
 
