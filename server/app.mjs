@@ -145,7 +145,11 @@ const mount = async (
     },
   };
   if (existsSync(settingsLocation)) {
-    settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsLocation, 'utf8'));
+    } catch {
+      console.error('Malformed settings file, using default settings...');
+    }
   }
 
   let script;
