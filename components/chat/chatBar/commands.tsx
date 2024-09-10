@@ -1,4 +1,4 @@
-import { getToolDisplayName, parseBlock } from '@/actions/gptscript';
+import { getToolDisplayName, verifyToolExists } from '@/actions/gptscript';
 import { ingest } from '@/actions/knowledge/knowledge';
 import { gatewayTool, getCookie } from '@/actions/knowledge/util';
 import { uploadFile } from '@/actions/upload';
@@ -235,9 +235,9 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
       if (tools.includes(tool)) throw new Error('Tool already added');
 
       setLoadingTool(tool);
-      const [foundTool] = await parseBlock(tool);
 
-      if (!foundTool) {
+      const toolExists = await verifyToolExists(tool);
+      if (!toolExists) {
         throw new Error(`Tool ${tool} does not exist`);
       }
 

@@ -20,11 +20,7 @@ export const path = async (file: string): Promise<string> => {
 export const fetchFullScript = async (file: string): Promise<Block[]> => {
   if (!external(file)) file = `${SCRIPTS_PATH()}/${file}.gpt`;
 
-  try {
-    return await gpt().parse(file);
-  } catch (e) {
-    throw e;
-  }
+  return await gpt().parse(file);
 };
 
 export const fetchScript = async (file: string): Promise<Tool> => {
