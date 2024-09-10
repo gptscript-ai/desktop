@@ -236,7 +236,7 @@ const ChatContextProvider: React.FC<ChatContextProps> = ({
       !socket ||
       !connected ||
       !initialFetch ||
-      (enableThread && !threadInitialized.current)
+      (enableThread && (!thread || !threadInitialized.current))
     )
       return;
     socket.emit(
