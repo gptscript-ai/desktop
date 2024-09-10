@@ -23,7 +23,11 @@ const defaultAppSettings: AppSettings = {
 };
 
 export async function getAppSettings(): Promise<AppSettings> {
-  const location = await AppSettingsLocation();
+  if (!process.env.GPTSCRIPT_SETTINGS_FILE) {
+    throw new Error('GPTSCRIPT_SETTINGS_FILE not set');
+  }
+
+  const location = process.env.GPTSCRIPT_SETTINGS_FILE;
   if (fs.existsSync(location)) {
     const AppSettings = fs.readFileSync(location, 'utf-8');
     return JSON.parse(AppSettings) as AppSettings;
@@ -32,24 +36,10 @@ export async function getAppSettings(): Promise<AppSettings> {
 }
 
 export async function setAppSettings(AppSettings: AppSettings) {
-  const location = await AppSettingsLocation();
-  fs.writeFileSync(location, JSON.stringify(AppSettings, null, 2));
-}
-
-export async function AppSettingsLocation(): Promise<string> {
-  const homeDir = os.homedir();
-  let configDir;
-  if (os.platform() === 'darwin') {
-    configDir =
-      process.env.XDG_CONFIG_HOME ||
-      path.join(homeDir, 'Library', 'Application Support');
-  } else if (os.platform() === 'win32') {
-    configDir = path.join(homeDir, 'AppData', 'Local');
-  } else if (os.platform() === 'linux') {
-    configDir = process.env.XDG_CONFIG_HOME || path.join(homeDir, '.config');
-  } else {
-    throw new Error('Unsupported platform');
+  if (!process.env.GPTSCRIPT_SETTINGS_FILE) {
+    throw new Error('GPTSCRIPT_SETTINGS_FILE not set');
   }
 
-  return path.join(configDir, 'acorn', 'settings.json');
+  const location = process.env.GPTSCRIPT_SETTINGS_FILE;
+  fs.writeFileSync(location, JSON.stringify(AppSettings, null, 2));
 }
