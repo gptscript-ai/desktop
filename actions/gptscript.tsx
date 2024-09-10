@@ -32,19 +32,16 @@ export const load = async (file: string): Promise<Program> => {
   return (await gpt().load(file)).program;
 };
 
-export const getToolDisplayName = async (ref: string): Promise<string> => {
-  let displayName: string =
-    ref.split('/').pop()?.replace('sys.', '').replace('.', ' ') ?? ref;
+export const getToolDisplayName = async (ref: string) => {
+  if (ref.startsWith('sys.')) return null;
 
-  if (!ref.startsWith('sys.')) {
-    const loadedTool = await load(ref);
-    const loadedName = loadedTool.toolSet[loadedTool.entryToolId].name;
-    if (loadedName) {
-      displayName = loadedName;
-    }
+  try {
+    const toolDef = await load(ref);
+    return toolDef.toolSet[toolDef.entryToolId].name;
+  } catch (e) {
+    console.error('Error loading tool:', e);
+    return null;
   }
-
-  return displayName.replace(/-/g, ' ');
 };
 
 export const loadTools = async (

@@ -14,6 +14,7 @@ import { GoTools } from 'react-icons/go';
 import { load } from '@/actions/gptscript';
 import { gatewayTool } from '@/actions/knowledge/util';
 import { ToolReference } from '@gptscript-ai/gptscript';
+import { ToolActionChatMessage } from '@/components/shared/tools/ToolActionChatMessage';
 
 const dynamicToolName = 'Dynamic Instructions';
 
@@ -98,7 +99,13 @@ const ScriptToolsDropdown = () => {
         type: MessageType.Alert,
         icon: <GoTools className="mt-1" />,
         name: prev ? prev[prev.length - 1].name : undefined,
-        message: `Removed ${displayNames[tool] || getDisplayName(tool)}`,
+        component: (
+          <ToolActionChatMessage
+            action="Removed"
+            name={displayNames[tool]}
+            toolRef={tool}
+          />
+        ),
       },
     ]);
   }
