@@ -155,9 +155,9 @@ const ChatBar = ({
             radius="full"
             className="text-lg"
             color="primary"
-            disabled={disableInput}
+            disabled={disableInput || noChat}
             onPress={() => {
-              if (disableInput) return;
+              if (disableInput || noChat) return;
               setCommandsOpen(true);
             }}
             onBlur={() => setTimeout(() => setCommandsOpen(false), 300)} // super hacky but it does work
@@ -177,13 +177,13 @@ const ChatBar = ({
           <Textarea
             ref={inputRef}
             color="primary"
-            isDisabled={disableInput}
+            isDisabled={disableInput || noChat}
             id="chatInput"
             autoComplete="off"
             placeholder={
               catalogOpen
                 ? 'Search for tools to add or press <Esc> to return to the chat'
-                : disableInput
+                : disableInput || noChat
                   ? 'Waiting for a response to a prompt in chat...'
                   : inputPlaceholder ||
                     'Start chatting or type / for more options'
