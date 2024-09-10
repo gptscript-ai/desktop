@@ -17,10 +17,12 @@ export async function ingest(
   }
   const dir = path.join(path.dirname(workspace), 'knowledge');
   const knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
-  await execPromise(
+  const { stdout, stderr } = await execPromise(
     `${knowledgeBinaryPath} ingest --prune --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
     { env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token } }
   );
+  const combinedOutput = stdout + stderr;
+  console.log(`logs for ingesting dataset ${datasetID}: `, combinedOutput);
   return;
 }
 
@@ -105,14 +107,15 @@ async function runKnowledgeIngest(
   knowledgePath: string,
   token: string
 ): Promise<void> {
-  await execPromise(
+  const { stdout, stderr } = await execPromise(
     `${process.env.KNOWLEDGE_BIN} ingest --prune --dataset ${id} ./data`,
     {
       cwd: knowledgePath,
       env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
     }
   );
-
+  const combinedOutput = stdout + stderr;
+  console.log(`logs for ingesting dataset ${id}: `, combinedOutput);
   return;
 }
 
