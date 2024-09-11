@@ -128,7 +128,7 @@ export const OnedriveFileModal = ({
     if (selected === 'all') {
       setSelectedFile(Array.from(onedriveFiles.keys()));
     } else {
-      setSelectedFile(Array.from(selected as Set<string>));
+      setSelectedFile(Array.from(selected));
     }
   };
 
@@ -215,7 +215,7 @@ export const OnedriveFileModal = ({
                   selectionBehavior="toggle"
                   aria-label="onedrive-files"
                   isCompact={true}
-                  selectedKeys={selectedFile}
+                  defaultSelectedKeys={selectedFile}
                   onSelectionChange={(selected) => {
                     handleSelectedFileChange(selected);
                   }}
@@ -224,35 +224,45 @@ export const OnedriveFileModal = ({
                     <TableColumn>Name</TableColumn>
                     <TableColumn>Link</TableColumn>
                   </TableHeader>
-                  <TableBody>
-                    {Array.from(onedriveFiles.entries())
+                  <TableBody
+                    items={Array.from(onedriveFiles.entries())
+                      .sort((a, b) => {
+                        if (a[1].displayName < b[1].displayName) {
+                          return -1;
+                        } else if (a[1].displayName > b[1].displayName) {
+                          return 1;
+                        } else {
+                          return 0;
+                        }
+                      })
                       .filter(([_, file]) => {
                         if (!searchQuery) return true;
                         return file.displayName
                           .toLowerCase()
                           .includes(searchQuery.toLowerCase());
-                      })
-                      .map(([key, value]) => (
-                        <TableRow key={key}>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <p>{value.displayName}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="w-[80px]">
-                            <Button
-                              isIconOnly
-                              as={Link}
-                              isExternal
-                              href={value.url}
-                              size="sm"
-                              color="primary"
-                              variant="flat"
-                              startContent={<CiShare1 />}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      })}
+                  >
+                    {([key, value]) => (
+                      <TableRow key={key}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <p>{value.displayName}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="w-[80px]">
+                          <Button
+                            isIconOnly
+                            as={Link}
+                            isExternal
+                            href={value.url}
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            startContent={<CiShare1 />}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

@@ -123,7 +123,7 @@ export const NotionFileModal = ({
     if (selected === 'all') {
       setSelectedFile(Array.from(notionFiles.keys()));
     } else {
-      setSelectedFile(Array.from(selected as Set<string>));
+      setSelectedFile(Array.from(selected));
     }
   };
 
@@ -183,7 +183,7 @@ export const NotionFileModal = ({
                 selectionBehavior="toggle"
                 aria-label="notion-files"
                 isCompact={true}
-                selectedKeys={selectedFile}
+                defaultSelectedKeys={selectedFile}
                 onSelectionChange={(selected) => {
                   handleSelectedFileChange(selected);
                 }}
@@ -192,35 +192,45 @@ export const NotionFileModal = ({
                   <TableColumn>Name</TableColumn>
                   <TableColumn>Link</TableColumn>
                 </TableHeader>
-                <TableBody>
-                  {Array.from(notionFiles.entries())
+                <TableBody
+                  items={Array.from(notionFiles.entries())
+                    .sort((a, b) => {
+                      if (a[1].fileName < b[1].fileName) {
+                        return -1;
+                      } else if (a[1].fileName > b[1].fileName) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })
                     .filter(([_, file]) => {
                       if (!searchQuery) return true;
                       return file.fileName
                         .toLowerCase()
                         .includes(searchQuery.toLowerCase());
-                    })
-                    .map(([key, value]) => (
-                      <TableRow key={key}>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <p>{value.fileName}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="w-[80px]">
-                          <Button
-                            isIconOnly
-                            as={Link}
-                            isExternal
-                            href={value.url}
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            startContent={<CiShare1 />}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    })}
+                >
+                  {([key, value]) => (
+                    <TableRow key={key}>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <p>{value.fileName}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[80px]">
+                        <Button
+                          isIconOnly
+                          as={Link}
+                          isExternal
+                          href={value.url}
+                          size="sm"
+                          color="primary"
+                          variant="flat"
+                          startContent={<CiShare1 />}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
