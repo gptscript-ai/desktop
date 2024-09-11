@@ -17,6 +17,30 @@ export const parseContent = async (toolContent: string): Promise<Tool[]> => {
   ) as Tool[];
 };
 
+const SystemToolWhitelist = [
+  'sys.abort',
+  'sys.append',
+  'sys.chat.current',
+  'sys.chat.finish',
+  'sys.chat.history',
+  'sys.context',
+  'sys.download',
+  'sys.exec',
+  'sys.find',
+  'sys.getenv',
+  'sys.http.get',
+  'sys.http.html2text',
+  'sys.http.post',
+  'sys.ls',
+  'sys.model.provider.credential',
+  'sys.prompt',
+  'sys.read',
+  'sys.remove',
+  'sys.stat',
+  'sys.time.now',
+  'sys.write',
+];
+
 /**
  * Verifies that a tool exists by parsing it.
  * @param toolRef The tool reference to verify.
@@ -24,7 +48,7 @@ export const parseContent = async (toolContent: string): Promise<Tool[]> => {
  */
 export const verifyToolExists = async (toolRef: string) => {
   // skip verification if the tool is a system tool
-  if (toolRef.startsWith('sys.')) return true;
+  if (toolRef.startsWith('sys.')) return SystemToolWhitelist.includes(toolRef);
 
   try {
     await gpt().parse(toolRef);
