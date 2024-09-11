@@ -411,6 +411,9 @@ const useChatSocket = () => {
     socket.on('interrupted', () => {
       setGenerating(false);
       setWaitingForUserResponse(false);
+      setMessages((prevMessages) => {
+        return [...prevMessages, latestAgentMessageRef.current];
+      });
       setLatestAgentMessage({} as Message);
     });
     socket.on('progress', (data: { frame: Frame; name?: string }) =>
