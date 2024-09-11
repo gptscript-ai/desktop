@@ -350,8 +350,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
         </div>
       </div>
       <Chat
-        messagesHeight="h-[93%]"
-        className={`p-6 overflow-auto ${collapsed ? 'col-span-3 px-32' : ''}`}
+        className={`p-6 ${collapsed ? 'col-span-3 px-32' : ''}`}
         disableInput={updated}
         disableCommands={true}
         inputPlaceholder={

@@ -28,20 +28,14 @@ function RunFile() {
       initialScriptId={scriptId}
       enableThread={true}
     >
-      <section className="absolute left-0 top-[50px]">
-        <div
-          className="border-t-1 dark:border-zinc-800"
-          style={{ width: `100vw`, height: `calc(100vh - 50px)` }}
-        >
-          <div className="w-full h-full flex pb-10">
-            <Threads onOpenExplore={onOpen} />
-            <div className="mx-auto w-[75%] 2xl:w-[55%] 3xl:[w-50%]">
-              <Chat showAssistantName className="px-4 pb-10" />
-            </div>
-          </div>
+      <div className="w-full h-full flex">
+        <Threads onOpenExplore={onOpen} />
+
+        <div className="flex-auto overflow-hidden">
+          <Chat showAssistantName />
         </div>
-        <ExploreModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
-      </section>
+      </div>
+      <ExploreModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
     </ChatContextProvider>
   );
 }

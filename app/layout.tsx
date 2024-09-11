@@ -39,12 +39,12 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: 'class', defaultTheme: 'dark' }}>
-          <div className="relative flex flex-col h-screen overflow-auto order-transparent">
+          <div className="relative flex flex-col h-screen overflow-hidden order-transparent">
             <Navbar />
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+
+            <main className="flex-auto border-t-1 dark:border-zinc-800 overflow-hidden">
               {children}
             </main>
-            <footer className="w-full flex items-center justify-center py-3"></footer>
           </div>
         </Providers>
       </body>

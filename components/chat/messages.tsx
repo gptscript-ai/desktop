@@ -85,8 +85,9 @@ const Message = React.memo(
                   />
                 </Tooltip>
               )}
+
               <div
-                className={`w-full rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 ${
+                className={`flex-auto rounded-2xl text-black dark:text-white pt-1 px-4 border dark:border-none dark:bg-zinc-900 overflow-x-hidden ${
                   message.error ? 'border-danger dark:border-danger' : ''
                 }`}
               >
@@ -192,7 +193,7 @@ const Messages = ({
   noAvatar?: boolean;
   restart?: () => void;
 }) => (
-  <div className="pr-4">
+  <div className="px-4">
     {messages.map((message, index) => (
       <Message
         key={index}

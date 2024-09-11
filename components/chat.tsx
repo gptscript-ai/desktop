@@ -137,12 +137,12 @@ const Chat: React.FC<ScriptProps> = ({
   };
 
   return (
-    <div className={`h-full w-full ${className}`}>
+    <div className={`h-full w-full overflow-hidden ${className}`}>
       {connected || (showForm && hasParams) ? (
         <>
           <div
             id="small-message"
-            className={`overflow-y-auto w-full items-center ${messagesHeight}`}
+            className={`overflow-auto w-full flex flex-col ${messagesHeight}`}
           >
             {showForm && hasParams ? (
               <ToolForm
@@ -151,7 +151,7 @@ const Chat: React.FC<ScriptProps> = ({
                 handleInputChange={handleInputChange}
               />
             ) : (
-              <div>
+              <>
                 {showAssistantName && scriptDisplayName && (
                   <div className="sticky top-0 p-4 z-50 bg-background">
                     <h1 className="text-3xl font-medium truncate">
@@ -164,37 +164,40 @@ const Chat: React.FC<ScriptProps> = ({
                     </div>
                   </div>
                 )}
-                <Messages
-                  restart={restartScript}
-                  messages={messages}
-                  latestAgentMessage={latestAgentMessage}
-                />
-              </div>
-            )}
-          </div>
 
-          <div className="w-full ">
-            {showForm && hasParams ? (
-              <Button
-                className="mt-4 w-full"
-                type="submit"
-                color={tool.chat ? 'primary' : 'secondary'}
-                onPress={handleFormSubmit}
-                size="lg"
-              >
-                {tool.chat ? 'Start chat' : 'Run script'}
-              </Button>
-            ) : (
-              <ChatBar
-                disableInput={
-                  disableInput || !running || waitingForUserResponse
-                }
-                noChat={noChat}
-                disableCommands={disableCommands}
-                inputPlaceholder={inputPlaceholder}
-                onMessageSent={handleMessageSent}
-              />
+                <div className="flex-auto">
+                  <Messages
+                    restart={restartScript}
+                    messages={messages}
+                    latestAgentMessage={latestAgentMessage}
+                  />
+                </div>
+              </>
             )}
+
+            <div className="w-full sticky bottom-0 bg-background pb-4">
+              {showForm && hasParams ? (
+                <Button
+                  className="mt-4 w-full"
+                  type="submit"
+                  color={tool.chat ? 'primary' : 'secondary'}
+                  onPress={handleFormSubmit}
+                  size="lg"
+                >
+                  {tool.chat ? 'Start chat' : 'Run script'}
+                </Button>
+              ) : (
+                <ChatBar
+                  disableInput={
+                    disableInput || !running || waitingForUserResponse
+                  }
+                  noChat={noChat}
+                  disableCommands={disableCommands}
+                  inputPlaceholder={inputPlaceholder}
+                  onMessageSent={handleMessageSent}
+                />
+              )}
+            </div>
           </div>
         </>
       ) : notFound ? (

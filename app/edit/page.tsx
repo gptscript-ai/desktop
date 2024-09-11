@@ -26,7 +26,7 @@ function EditFile() {
     >
       <EditContextProvider scriptPath={file} initialScriptId={scriptId}>
         <div
-          className={`w-full h-full grid ${collapsed ? 'grid-cols-4' : 'grid-cols-2'}`}
+          className={`relative w-full h-full grid ${collapsed ? 'grid-cols-4' : 'grid-cols-2'}`}
         >
           <div className="absolute left-6 top-6">
             <ScriptNav collapsed={collapsed} setCollapsed={setCollapsed} />
