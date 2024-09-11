@@ -3,20 +3,6 @@
 import { ToolDef, Tool, Block, Text, Program } from '@gptscript-ai/gptscript';
 import { gpt } from '@/config/env';
 
-export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
-  for (const block of toolContent) {
-    if (block.type !== 'text') return block;
-  }
-  return {} as Tool;
-};
-
-export const parseContent = async (toolContent: string): Promise<Tool[]> => {
-  const parsedTool = await gpt().parseContent(toolContent);
-  return parsedTool.filter(
-    (block) => block.type !== 'text' && !block.name?.startsWith('metadata')
-  ) as Tool[];
-};
-
 const SystemToolWhitelist = [
   'sys.abort',
   'sys.append',
@@ -40,6 +26,20 @@ const SystemToolWhitelist = [
   'sys.time.now',
   'sys.write',
 ];
+
+export const rootTool = async (toolContent: Block[]): Promise<Tool> => {
+  for (const block of toolContent) {
+    if (block.type !== 'text') return block;
+  }
+  return {} as Tool;
+};
+
+export const parseContent = async (toolContent: string): Promise<Tool[]> => {
+  const parsedTool = await gpt().parseContent(toolContent);
+  return parsedTool.filter(
+    (block) => block.type !== 'text' && !block.name?.startsWith('metadata')
+  ) as Tool[];
+};
 
 /**
  * Verifies that a tool exists by parsing it.
