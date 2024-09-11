@@ -141,7 +141,6 @@ const useChatSocket = () => {
       let content = isMainContent
         ? callFrame.output[callFrame.output.length - 1].content || ''
         : '';
-      if (!content) continue;
       setGenerating(true);
       if (
         content === 'Waiting for model response...' &&
@@ -157,13 +156,17 @@ const useChatSocket = () => {
       latestAgentMessageRef.current.message = content;
 
       if (isMainContent && callFrame.type === 'callFinish') {
+        if (!latestAgentMessageRef.current.message) {
+          latestAgentMessageRef.current.message =
+            "The message received from the assistant was empty, this happens if the tool doesn't have any instructions.";
+        }
         setMessages([
           ...messagesRef.current,
           { ...latestAgentMessageRef.current },
         ]);
         setLatestAgentMessage({} as Message);
         setGenerating(false);
-      } else {
+      } else if (latestAgentMessageRef.current.message) {
         setLatestAgentMessage({ ...latestAgentMessageRef.current });
       }
     }
