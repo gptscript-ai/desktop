@@ -411,6 +411,7 @@ const useChatSocket = () => {
     socket.on('interrupted', () => {
       setGenerating(false);
       setWaitingForUserResponse(false);
+      workQueue.current = [];
       setMessages((prevMessages) => {
         return [...prevMessages, latestAgentMessageRef.current];
       });
