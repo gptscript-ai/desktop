@@ -51,7 +51,7 @@ export const OnedriveFileModal = ({
   syncError,
   setSyncError,
 }: OnedriveFileModalProps) => {
-  const { droppedFiles, setDroppedFiles } = useContext(EditContext);
+  const { droppedFiles, ensureImportedFiles } = useContext(EditContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [importing, setImporting] = useState(false);
   const externalLinkModal = useDisclosure();
@@ -90,18 +90,7 @@ export const OnedriveFileModal = ({
     try {
       await syncFiles(selectedFile, 'onedrive');
       const files = await importFiles(selectedFile);
-      setDroppedFiles((prev) => {
-        const newMap = new Map(prev);
-        for (const [key, file] of Array.from(newMap.entries())) {
-          if (file.type === 'onedrive') {
-            newMap.delete(key);
-          }
-        }
-        for (const [key, file] of Array.from(files.entries())) {
-          newMap.set(key, file);
-        }
-        return newMap;
-      });
+      ensureImportedFiles(files, 'onedrive');
     } finally {
       setImporting(false);
     }

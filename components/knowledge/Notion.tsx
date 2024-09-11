@@ -48,7 +48,7 @@ export const NotionFileModal = ({
   syncError,
   setSyncError,
 }: NotionFileModalProps) => {
-  const { droppedFiles, setDroppedFiles } = useContext(EditContext);
+  const { droppedFiles, ensureImportedFiles } = useContext(EditContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [importing, setImporting] = useState(false);
 
@@ -85,18 +85,7 @@ export const NotionFileModal = ({
     try {
       await syncFiles(selectedFile, 'notion');
       const files = await importFiles(selectedFile);
-      setDroppedFiles((prev) => {
-        const newMap = new Map(prev);
-        for (const [key, file] of Array.from(newMap.entries())) {
-          if (file.type === 'notion') {
-            newMap.delete(key);
-          }
-        }
-        for (const [key, file] of Array.from(files.entries())) {
-          newMap.set(key, file);
-        }
-        return newMap;
-      });
+      ensureImportedFiles(files, 'notion');
     } finally {
       setImporting(false);
     }

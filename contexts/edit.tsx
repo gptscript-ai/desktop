@@ -61,6 +61,10 @@ interface EditContextState {
   setDroppedFiles: React.Dispatch<
     React.SetStateAction<Map<string, FileDetail>>
   >;
+  ensureImportedFiles: (
+    files: Map<string, FileDetail>,
+    type: 'notion' | 'onedrive'
+  ) => void;
   topK: number;
   setTopK: React.Dispatch<React.SetStateAction<number>>;
   ingesting: boolean;
@@ -342,6 +346,24 @@ const EditContextProvider: React.FC<EditContextProps> = ({
     });
   };
 
+  const ensureImportedFiles = (
+    files: Map<string, FileDetail>,
+    type: 'notion' | 'onedrive'
+  ) => {
+    setDroppedFiles((prev) => {
+      const newMap = new Map(prev);
+      for (const [key, file] of Array.from(newMap.entries())) {
+        if (file.type === type) {
+          newMap.delete(key);
+        }
+      }
+      for (const [key, file] of Array.from(files.entries())) {
+        newMap.set(key, file);
+      }
+      return newMap;
+    });
+  };
+
   // Provide the context value to the children components
   return (
     <EditContext.Provider
@@ -374,6 +396,7 @@ const EditContextProvider: React.FC<EditContextProps> = ({
         createNewTool,
         droppedFiles,
         setDroppedFiles,
+        ensureImportedFiles,
         topK,
         setTopK,
         ingesting,
