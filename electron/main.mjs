@@ -96,6 +96,13 @@ function createWindow(url) {
     // Allow navigation for internal URLs
     return { action: 'allow' };
   });
+
+  win.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('file://')) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
+  });
 }
 
 function ensureDirExists(dir) {
