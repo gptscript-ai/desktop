@@ -48,9 +48,7 @@ const Files: React.FC<FilesProps> = ({ files, setFiles }) => {
                   radius="full"
                   onPress={async () =>
                     // This submits a request to the electron main process to open the file
-                    (window as any).electronAPI.openFile(
-                      path.join(file.path, file.name)
-                    )
+                    window.electronAPI.openFile(path.join(file.path, file.name))
                   }
                 />
                 <Button
