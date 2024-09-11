@@ -7,6 +7,7 @@ import { Avatar, Button, Tooltip } from '@nextui-org/react';
 import type { CallFrame } from '@gptscript-ai/gptscript';
 import Calls from './messages/calls';
 import { GoIssueReopened } from 'react-icons/go';
+import { defaultUrlTransform } from 'react-markdown';
 
 export enum MessageType {
   Alert,
@@ -28,6 +29,14 @@ const abbreviate = (name: string) => {
   const words = name.split(/(?=[A-Z])|[\s_-]/);
   const firstLetters = words.map((word) => word[0]);
   return firstLetters.slice(0, 2).join('').toUpperCase();
+};
+
+// Allow links for file references in messages if it starts with file://, otherwise this will cause an empty href and cause app to reload when clicking on it
+const urlTransformAllowFiles = (u: string) => {
+  if (u.startsWith('file://')) {
+    return u;
+  }
+  return defaultUrlTransform(u);
 };
 
 const Message = React.memo(
@@ -88,6 +97,7 @@ const Message = React.memo(
                     rehypePlugins={[
                       [rehypeExternalLinks, { target: '_blank' }],
                     ]}
+                    urlTransform={urlTransformAllowFiles}
                   >
                     {message.message}
                   </Markdown>
@@ -156,6 +166,7 @@ const Message = React.memo(
                     rehypePlugins={[
                       [rehypeExternalLinks, { target: '_blank' }],
                     ]}
+                    urlTransform={urlTransformAllowFiles}
                   >
                     {message.message}
                   </Markdown>
