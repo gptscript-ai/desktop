@@ -8,6 +8,7 @@ import type { CallFrame } from '@gptscript-ai/gptscript';
 import Calls from './messages/calls';
 import { GoIssueReopened } from 'react-icons/go';
 import { defaultUrlTransform } from 'react-markdown';
+import clsx from 'clsx';
 
 export enum MessageType {
   Alert,
@@ -73,13 +74,13 @@ const Message = React.memo(
                   closeDelay={0.5}
                 >
                   <Avatar
-                    showFallback
                     name={abbreviate(message.name || 'System')}
                     className="w-[40px] cursor-default"
                     classNames={{
-                      base: `bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900 ${
-                        message.error && 'border-danger dark:border-danger'
-                      }`,
+                      base: clsx(
+                        `bg-white p-6 text-sm border dark:border-none dark:bg-zinc-900`,
+                        { 'border-danger dark:border-danger': !!message.error }
+                      ),
                       name: `text-lg text-default-600`,
                     }}
                   />

@@ -164,8 +164,9 @@ const Imports: React.FC<ImportsProps> = ({
       )}
       <div className={`flex flex-col gap-2`}>
         <Tooltip
+          placement="right"
           content={
-            <div ref={clickOutsideRef}>
+            <div ref={clickOutsideRef} className="max-h-[80vh] overflow-auto">
               <CatalogListBox
                 equippedTools={tools || []}
                 onAddTool={(tool) => {

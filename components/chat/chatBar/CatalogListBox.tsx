@@ -122,7 +122,6 @@ export const CatalogListBox = forwardRef<ToolCatalogRef, CatalogListboxProps>(
 
     return (
       <Listbox
-        className="relative overflow-y-auto"
         aria-label={'catalog'}
         variant={'flat'}
         disallowEmptySelection
