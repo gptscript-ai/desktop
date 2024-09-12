@@ -1,11 +1,12 @@
-import { app, screen, shell, BrowserWindow } from 'electron';
+import { app, screen, shell, BrowserWindow, dialog } from 'electron';
 import { startAppServer } from '../server/app.mjs';
-import { join } from 'path';
+import path, { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fixPath from 'fix-path';
 import os from 'os';
 import { config } from './config.mjs';
 import { ipcMain } from 'electron/main';
+import fs from 'fs';
 
 app.on('window-all-closed', () => app.quit());
 app.on('ready', startServer);
@@ -77,6 +78,23 @@ function createWindow(url) {
   // This is necessary to allow the renderer process (NextJS) to open files in the default system application
   ipcMain.on('open-file', (event, arg) => {
     shell.openPath(arg);
+  });
+
+  ipcMain.on('save-file', async (event, arg) => {
+    console.log('Saving file...');
+    try {
+      const result = await dialog.showSaveDialog({
+        defaultPath: path.join(app.getPath('downloads'), 'stacktrace.json'),
+      });
+      if (!result.canceled) {
+        fs.writeFileSync(result.filePath, arg);
+        console.log('File saved successfully.');
+      } else {
+        console.log('File save cancelled.');
+      }
+    } catch (err) {
+      console.error('Error saving file:', err);
+    }
   });
 
   // Check if the platform is macOS before calling setWindowButtonVisibility

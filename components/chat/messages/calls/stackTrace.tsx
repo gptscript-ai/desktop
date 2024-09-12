@@ -3,6 +3,7 @@ import { Button, Tooltip } from '@nextui-org/react';
 import type { CallFrame } from '@gptscript-ai/gptscript';
 import { GoArrowDown, GoArrowUp } from 'react-icons/go';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import SaveFile from '@/components/saveFile';
 
 const StackTrace = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
   if (!calls) return null;
@@ -131,6 +132,7 @@ const StackTrace = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
           {allOpen ? <GoArrowUp /> : <GoArrowDown />}
         </Button>
       </Tooltip>
+      <SaveFile content={calls} className="absolute bottom-9 right-8" />
       {calls ? <RenderLogs /> : <EmptyLogs />}
     </div>
   );

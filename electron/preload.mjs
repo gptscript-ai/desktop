@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send(channel, args);
   },
   openFile: (file) => ipcRenderer.send('open-file', file),
+  saveFile: (content) => ipcRenderer.send('save-file', content),
 });
