@@ -22,9 +22,14 @@ import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 import SaveScriptDropdown from '@/components/scripts/script-save';
 import { Tool } from '@gptscript-ai/gptscript';
 import { rootTool } from '@/actions/gptscript';
+import clsx from 'clsx';
 
 interface ScriptProps {
   className?: string;
+  classNames?: {
+    chatBar?: string;
+    messages?: string;
+  };
   messagesHeight?: string;
   showAssistantName?: boolean;
   inputPlaceholder?: string;
@@ -41,6 +46,7 @@ const Chat: React.FC<ScriptProps> = ({
   disableInput = false,
   disableCommands = false,
   noChat = false,
+  classNames = {},
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
@@ -137,12 +143,12 @@ const Chat: React.FC<ScriptProps> = ({
   };
 
   return (
-    <div className={`h-full w-full ${className}`}>
+    <div className={`h-full w-full overflow-hidden ${className}`}>
       {connected || (showForm && hasParams) ? (
         <>
           <div
             id="small-message"
-            className={`overflow-y-auto w-full items-center ${messagesHeight}`}
+            className={`overflow-auto w-full flex flex-col ${messagesHeight}`}
           >
             {showForm && hasParams ? (
               <ToolForm
@@ -151,9 +157,9 @@ const Chat: React.FC<ScriptProps> = ({
                 handleInputChange={handleInputChange}
               />
             ) : (
-              <div>
+              <>
                 {showAssistantName && scriptDisplayName && (
-                  <div className="sticky top-0 p-4 z-50 bg-background">
+                  <div className="sticky top-0 p-4 z-50  bg-background">
                     <h1 className="text-3xl font-medium truncate">
                       {scriptDisplayName ?? ''}
                     </h1>
@@ -164,37 +170,45 @@ const Chat: React.FC<ScriptProps> = ({
                     </div>
                   </div>
                 )}
-                <Messages
-                  restart={restartScript}
-                  messages={messages}
-                  latestAgentMessage={latestAgentMessage}
-                />
-              </div>
-            )}
-          </div>
 
-          <div className="w-full ">
-            {showForm && hasParams ? (
-              <Button
-                className="mt-4 w-full"
-                type="submit"
-                color={tool.chat ? 'primary' : 'secondary'}
-                onPress={handleFormSubmit}
-                size="lg"
-              >
-                {tool.chat ? 'Start chat' : 'Run script'}
-              </Button>
-            ) : (
-              <ChatBar
-                disableInput={
-                  disableInput || !running || waitingForUserResponse
-                }
-                noChat={noChat}
-                disableCommands={disableCommands}
-                inputPlaceholder={inputPlaceholder}
-                onMessageSent={handleMessageSent}
-              />
+                <div className={clsx('flex-auto', classNames.messages)}>
+                  <Messages
+                    restart={restartScript}
+                    messages={messages}
+                    latestAgentMessage={latestAgentMessage}
+                  />
+                </div>
+              </>
             )}
+
+            <div
+              className={clsx(
+                'w-full sticky bottom-0 bg-background pb-4',
+                classNames.chatBar
+              )}
+            >
+              {showForm && hasParams ? (
+                <Button
+                  className="mt-4 w-full"
+                  type="submit"
+                  color={tool.chat ? 'primary' : 'secondary'}
+                  onPress={handleFormSubmit}
+                  size="lg"
+                >
+                  {tool.chat ? 'Start chat' : 'Run script'}
+                </Button>
+              ) : (
+                <ChatBar
+                  disableInput={
+                    disableInput || !running || waitingForUserResponse
+                  }
+                  noChat={noChat}
+                  disableCommands={disableCommands}
+                  inputPlaceholder={inputPlaceholder}
+                  onMessageSent={handleMessageSent}
+                />
+              )}
+            </div>
           </div>
         </>
       ) : notFound ? (

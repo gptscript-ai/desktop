@@ -5,6 +5,7 @@ import { Button, Divider, Tooltip } from '@nextui-org/react';
 import { GoSidebarExpand, GoSidebarCollapse } from 'react-icons/go';
 import { ChatContext } from '@/contexts/chat';
 import { getScript } from '@/actions/me/scripts';
+import clsx from 'clsx';
 
 interface ThreadsProps {
   className?: string;
@@ -38,9 +39,19 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
 
   return (
     <div
-      className={`relative flex flex-col transition-[width] duration-300 ease-in-out ${isCollapsed ? 'border-none w-[125px]' : 'w-[350px] border-r-1 dark:border-r-zinc-800'}`}
+      className={clsx(
+        `relative border-r-1 dark:border-r-zinc-800 flex flex-col transition-all duration-300 ease-in-out`,
+        {
+          'w-[80px]': isCollapsed,
+          'w-[350px]': !isCollapsed,
+        }
+      )}
     >
-      <div className={`flex justify-between gap-0 mb-2 pt-4 px-4`}>
+      <div
+        className={clsx(`flex justify-between gap-0 mb-2 pt-4 px-4`, {
+          'flex-col items-start': isCollapsed,
+        })}
+      >
         <Tooltip
           content={isCollapsed ? 'Expand threads' : 'Collapse threads'}
           placement="top"
@@ -66,7 +77,13 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
       />
 
       <div
-        className={`flex-1 h-full px-4 pb-4 overflow-y-auto transition-[width] duration-300 ease-in-out ${isCollapsed ? 'w-0' : 'w-full'}`}
+        className={clsx(
+          `flex-1 h-full px-4 pb-4 overflow-y-auto transition-all duration-300 ease-in-out`,
+          {
+            'w-0 overflow-hidden': isCollapsed,
+            'w-full': !isCollapsed,
+          }
+        )}
       >
         <div
           className={`mb-4 transition-opacity duration-200 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}
