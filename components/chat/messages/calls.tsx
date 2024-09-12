@@ -13,6 +13,7 @@ import {
   Button,
   Tooltip,
 } from '@nextui-org/react';
+import SaveFile from '@/components/saveFile';
 
 const Calls = ({ calls }: { calls: Record<string, CallFrame> }) => {
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +42,10 @@ const Calls = ({ calls }: { calls: Record<string, CallFrame> }) => {
         <ModalContent>
           <ModalHeader className="flex justify-between">
             <div>
-              <h1 className="text-2xl my-4">Stack Trace</h1>
+              <div className="my-2">
+                <h1 className="text-2xl  inline mr-2">Stack Trace</h1>
+                <SaveFile content={calls} />
+              </div>
               <h2 className="text-base text-zinc-500">
                 Below you can see what this call is doing or has done.
               </h2>
