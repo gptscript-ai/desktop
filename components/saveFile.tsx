@@ -15,11 +15,11 @@ const SaveFile: React.FC<Props> = ({ content, className }) => {
   return (
     <Tooltip content={'Download Stack Trace'} closeDelay={0}>
       <Button
+        size="sm"
         onPress={handleSave}
         className={className}
         isIconOnly
         radius="full"
-        color="primary"
         startContent={<GoDownload />}
       />
     </Tooltip>
