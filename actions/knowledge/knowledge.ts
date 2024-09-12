@@ -96,6 +96,7 @@ export async function ensureFilesIngested(
       token
     );
   } catch (error) {
+    console.error(error);
     return `Error running knowledge ingestion: ${error}`;
   }
 
