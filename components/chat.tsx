@@ -22,9 +22,14 @@ import KnowledgeDropdown from '@/components/scripts/knowledge-dropdown';
 import SaveScriptDropdown from '@/components/scripts/script-save';
 import { Tool } from '@gptscript-ai/gptscript';
 import { rootTool } from '@/actions/gptscript';
+import clsx from 'clsx';
 
 interface ScriptProps {
   className?: string;
+  classNames?: {
+    chatBar?: string;
+    messages?: string;
+  };
   messagesHeight?: string;
   showAssistantName?: boolean;
   inputPlaceholder?: string;
@@ -41,6 +46,7 @@ const Chat: React.FC<ScriptProps> = ({
   disableInput = false,
   disableCommands = false,
   noChat = false,
+  classNames = {},
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, _setInputValue] = useState<string>('');
@@ -153,7 +159,7 @@ const Chat: React.FC<ScriptProps> = ({
             ) : (
               <>
                 {showAssistantName && scriptDisplayName && (
-                  <div className="sticky top-0 p-4 z-50 bg-background">
+                  <div className="sticky top-0 p-4 z-50  bg-background">
                     <h1 className="text-3xl font-medium truncate">
                       {scriptDisplayName ?? ''}
                     </h1>
@@ -165,7 +171,7 @@ const Chat: React.FC<ScriptProps> = ({
                   </div>
                 )}
 
-                <div className="flex-auto">
+                <div className={clsx('flex-auto', classNames.messages)}>
                   <Messages
                     restart={restartScript}
                     messages={messages}
@@ -175,7 +181,12 @@ const Chat: React.FC<ScriptProps> = ({
               </>
             )}
 
-            <div className="w-full sticky bottom-0 bg-background pb-4">
+            <div
+              className={clsx(
+                'w-full sticky bottom-0 bg-background pb-4',
+                classNames.chatBar
+              )}
+            >
               {showForm && hasParams ? (
                 <Button
                   className="mt-4 w-full"

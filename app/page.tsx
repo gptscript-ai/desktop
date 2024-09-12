@@ -32,7 +32,13 @@ function RunFile() {
         <Threads onOpenExplore={onOpen} />
 
         <div className="flex-auto overflow-hidden">
-          <Chat showAssistantName />
+          <Chat
+            showAssistantName
+            classNames={{
+              chatBar: 'w-full mx-auto lg:w-3/4 2xl:w-1/2',
+              messages: 'w-full mx-auto lg:w-3/4 2xl:w-1/2',
+            }}
+          />
         </div>
       </div>
       <ExploreModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
