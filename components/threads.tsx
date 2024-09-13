@@ -40,7 +40,7 @@ const Threads: React.FC<ThreadsProps> = ({ onOpenExplore }: ThreadsProps) => {
   return (
     <div
       className={clsx(
-        `relative border-r-1 dark:border-r-zinc-800 flex flex-col transition-all duration-300 ease-in-out`,
+        `relative border-r-1 dark:border-r-zinc-800 flex flex-col transition-all duration-300 ease-in-out shrink-0`,
         {
           'w-[80px]': isCollapsed,
           'w-[350px]': !isCollapsed,

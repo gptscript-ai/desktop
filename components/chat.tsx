@@ -159,7 +159,7 @@ const Chat: React.FC<ScriptProps> = ({
             ) : (
               <>
                 {showAssistantName && scriptDisplayName && (
-                  <div className="sticky top-0 p-4 z-50  bg-background">
+                  <div className="sticky top-0 p-4 z-10 bg-background">
                     <h1 className="text-3xl font-medium truncate">
                       {scriptDisplayName ?? ''}
                     </h1>

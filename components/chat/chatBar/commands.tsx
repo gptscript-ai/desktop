@@ -8,7 +8,13 @@ import { ToolActionChatMessage } from '@/components/shared/tools/ToolActionChatM
 import { UrlToolModal } from '@/components/shared/tools/UrlToolModal';
 import { ChatContext } from '@/contexts/chat';
 import { useAsync } from '@/hooks/useFetch';
-import { Card, Listbox, ListboxItem, useDisclosure } from '@nextui-org/react';
+import {
+  Card,
+  Listbox,
+  ListboxItem,
+  Tooltip,
+  useDisclosure,
+} from '@nextui-org/react';
 import React, {
   forwardRef,
   useContext,
@@ -311,18 +317,28 @@ export default forwardRef<ChatCommandsRef, CommandsProps>(
     return (
       <div className="relative w-full h-3/4 command-options">
         <Upload isOpen={uploadOpen} setIsOpen={setUploadOpen} />
-        {isCatalogOpen && (
-          <Card className="absolute bottom-14 p-4" ref={catalogClickOutsideRef}>
-            <CatalogListBox
-              ref={toolcatalogRef}
-              query={text}
-              loading={loadingTool}
-              equippedTools={tools}
-              onAddTool={addTool.execute}
-              onUncapturedKeyDown={() => inputElement?.focus()}
-            />
-          </Card>
-        )}
+
+        <Tooltip
+          isOpen={isCatalogOpen}
+          placement="top-start"
+          content={
+            <div
+              className="max-h-[80vh] overflow-auto"
+              ref={catalogClickOutsideRef}
+            >
+              <CatalogListBox
+                ref={toolcatalogRef}
+                query={text}
+                loading={loadingTool}
+                equippedTools={tools}
+                onAddTool={addTool.execute}
+                onUncapturedKeyDown={() => inputElement?.focus()}
+              />
+            </div>
+          }
+        >
+          <div />
+        </Tooltip>
 
         <UrlToolModal
           isOpen={urlToolModal.isOpen}
