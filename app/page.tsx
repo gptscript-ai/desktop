@@ -35,8 +35,8 @@ function RunFile() {
           <Chat
             showAssistantName
             classNames={{
-              chatBar: 'w-full mx-auto lg:w-3/4 2xl:w-1/2',
-              messages: 'w-full mx-auto lg:w-3/4 2xl:w-1/2',
+              chatBar: 'w-full mx-auto xl:w-3/4 2xl:w-1/2',
+              messages: 'w-full mx-auto xl:w-3/4 2xl:w-1/2',
             }}
           />
         </div>
