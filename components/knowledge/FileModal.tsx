@@ -125,12 +125,9 @@ const FileModal = ({ isOpen, onClose, handleAddFile }: FileModalProps) => {
       <NotionFileModal
         isOpen={notionModal.isOpen}
         onClose={notionModal.onClose}
-        isSyncing={isSyncing}
-        setIsSyncing={setIsSyncing}
         notionConfigured={notionConfigured}
         setNotionConfigured={setNotionConfigured}
         syncError={notionSyncError}
-        setSyncError={setNotionSyncError}
       />
       <OnedriveFileModal
         isOpen={onedriveModal.isOpen}

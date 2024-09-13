@@ -13,7 +13,6 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  useDisclosure,
 } from '@nextui-org/react';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -23,7 +22,7 @@ import {
   runOneDriveSync,
   syncSharedLink,
 } from '@/actions/knowledge/onedrive';
-import { CiSearch, CiShare1 } from 'react-icons/ci';
+import { CiShare1 } from 'react-icons/ci';
 import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
 import { Link } from '@nextui-org/react';
@@ -51,7 +50,6 @@ export const OnedriveFileModal = ({
   setSyncError,
 }: OnedriveFileModalProps) => {
   const { droppedFiles, ensureImportedFiles } = useContext(EditContext);
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [importing, setImporting] = useState(false);
   const [sharedLink, setSharedLink] = useState<string>('');
   const [isClearing, setIsClearing] = useState(false);
@@ -221,22 +219,15 @@ export const OnedriveFileModal = ({
                     <TableColumn>Link</TableColumn>
                   </TableHeader>
                   <TableBody
-                    items={Array.from(onedriveFiles.entries())
-                      .sort((a, b) => {
-                        if (a[1].displayName < b[1].displayName) {
-                          return -1;
-                        } else if (a[1].displayName > b[1].displayName) {
-                          return 1;
-                        } else {
-                          return 0;
-                        }
-                      })
-                      .filter(([_, file]) => {
-                        if (!searchQuery) return true;
-                        return file.displayName
-                          .toLowerCase()
-                          .includes(searchQuery.toLowerCase());
-                      })}
+                    items={Array.from(onedriveFiles.entries()).sort((a, b) => {
+                      if (a[1].displayName < b[1].displayName) {
+                        return -1;
+                      } else if (a[1].displayName > b[1].displayName) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })}
                   >
                     {([key, value]) => (
                       <TableRow key={key}>

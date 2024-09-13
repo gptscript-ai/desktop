@@ -15,11 +15,7 @@ import {
   TableRow,
 } from '@nextui-org/react';
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  getNotionFiles,
-  isNotionConfigured,
-  runNotionSync,
-} from '@/actions/knowledge/notion';
+import { getNotionFiles, isNotionConfigured } from '@/actions/knowledge/notion';
 import { CiSearch, CiShare1 } from 'react-icons/ci';
 import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
@@ -29,12 +25,9 @@ import { syncFiles } from '@/actions/knowledge/tool';
 interface NotionFileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  isSyncing: boolean;
-  setIsSyncing: React.Dispatch<React.SetStateAction<boolean>>;
   notionConfigured: boolean;
   setNotionConfigured: React.Dispatch<React.SetStateAction<boolean>>;
   syncError: string;
-  setSyncError: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const NotionFileModal = ({
@@ -42,10 +35,7 @@ export const NotionFileModal = ({
   onClose,
   notionConfigured,
   setNotionConfigured,
-  isSyncing,
-  setIsSyncing,
   syncError,
-  setSyncError,
 }: NotionFileModalProps) => {
   const { droppedFiles, ensureImportedFiles } = useContext(EditContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -90,21 +80,6 @@ export const NotionFileModal = ({
     }
 
     onClose();
-  };
-
-  const syncNotion = async () => {
-    setIsSyncing(true);
-    try {
-      const isConfigured = await isNotionConfigured();
-      await runNotionSync(isConfigured);
-      setNotionConfigured(isConfigured);
-      setNotionFiles(await getNotionFiles());
-      setSyncError('');
-    } catch (e) {
-      setSyncError((e as Error).toString());
-    } finally {
-      setIsSyncing(false);
-    }
   };
 
   const handleSelectedFileChange = (selected: any) => {
