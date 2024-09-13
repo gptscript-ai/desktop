@@ -61,6 +61,17 @@ export async function syncSharedLink(link: string): Promise<void> {
   return;
 }
 
+export async function clearOneDriveFiles(): Promise<void> {
+  const dir = path.join(
+    WORKSPACE_DIR(),
+    'knowledge',
+    'integrations',
+    'onedrive'
+  );
+  const externalLinkFile = path.join(dir, 'externalLinks.json');
+  fs.rmSync(externalLinkFile, { recursive: true, force: true });
+}
+
 export async function runOneDriveSync(authed: boolean): Promise<void> {
   return runSyncTool(authed, 'onedrive');
 }

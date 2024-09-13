@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@nextui-org/react';
 import React, { useContext, useEffect, useState } from 'react';
-import { IoMdRefresh } from 'react-icons/io';
 import {
   getNotionFiles,
   isNotionConfigured,
@@ -139,15 +138,6 @@ export const NotionFileModal = ({
             </div>
 
             <div className="flex items-center justify-end p-2">
-              <Button
-                isLoading={isSyncing}
-                size="sm"
-                color="primary"
-                startContent={!isSyncing && <IoMdRefresh />}
-                onClick={syncNotion}
-              >
-                {!isSyncing && 'Sync'}
-              </Button>
               {syncError && (
                 <p className="text-sm text-red-500 ml-2">{syncError}</p>
               )}
@@ -165,7 +155,7 @@ export const NotionFileModal = ({
             }}
             startContent={<CiSearch />}
           />
-          {notionConfigured && notionFiles.size > 0 ? (
+          {notionConfigured && notionFiles.size > 0 && (
             <div className="flex flex-col gap-1">
               <Table
                 selectionMode="multiple"
@@ -223,12 +213,6 @@ export const NotionFileModal = ({
                 </TableBody>
               </Table>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-zinc-500">
-                {`Click the "Sync" button to sync your Notion files`}
-              </p>
-            </div>
           )}
         </ModalBody>
         <ModalFooter>
@@ -238,7 +222,7 @@ export const NotionFileModal = ({
             size="sm"
             onClick={onClickImport}
           >
-            Import
+            Add to Knowledge
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -19,7 +19,7 @@ import {
   useDisclosure,
 } from '@nextui-org/react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { GoLightBulb, GoTrash } from 'react-icons/go';
 import { HiCog } from 'react-icons/hi2';
 import { IoMdAdd, IoMdRefresh } from 'react-icons/io';
@@ -32,6 +32,8 @@ import FileModal from '@/components/knowledge/FileModal';
 import { gatewayTool } from '@/actions/knowledge/util';
 import { importFiles } from '@/actions/knowledge/filehelper';
 import { DiOnedrive } from 'react-icons/di';
+import { FileDetail } from '@/model/knowledge';
+import { runSyncTool } from '@/actions/knowledge/tool';
 
 interface ConfigureProps {
   collapsed?: boolean;
@@ -61,6 +63,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
     ingestionError,
   } = useContext(EditContext);
   const { restartScript } = useContext(ChatContext);
+  const [syncing, setSyncing] = useState(false);
   const fileSettingModal = useDisclosure();
   const addFileModal = useDisclosure();
 
@@ -99,6 +102,34 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
 
   const placeholderName = (): string => {
     return root.name && root.name.length > 0 ? root.name : 'your assistant';
+  };
+
+  const hasUpstreamFiles = (droppedFiles: Map<string, FileDetail>): boolean => {
+    return Array.from(droppedFiles.values()).some(
+      (file) => file.type === 'notion' || file.type === 'onedrive'
+    );
+  };
+
+  const syncUpstreamFiles = async () => {
+    setSyncing(true);
+    const hasNotion = Array.from(droppedFiles.values()).some(
+      (file) => file.type === 'notion'
+    );
+    const hasOnedrive = Array.from(droppedFiles.values()).some(
+      (file) => file.type === 'onedrive'
+    );
+    try {
+      if (hasNotion) {
+        await runSyncTool(true, 'notion');
+      }
+      if (hasOnedrive) {
+        await runSyncTool(true, 'onedrive');
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   if (loading)
@@ -282,6 +313,20 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
                 >
                   Add Files
                 </Button>
+                {hasUpstreamFiles(droppedFiles) && (
+                  <Button
+                    className="w-full"
+                    variant="flat"
+                    color="primary"
+                    isIconOnly
+                    size="sm"
+                    isLoading={syncing}
+                    startContent={!syncing && <IoMdRefresh className="mr-2" />}
+                    onPress={syncUpstreamFiles}
+                  >
+                    Sync Files
+                  </Button>
+                )}
               </div>
             </AccordionItem>
             <AccordionItem
@@ -338,6 +383,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
             </AccordionItem>
           </Accordion>
         </div>
+
         <div className="w-full justify-end items-center px-2 flex gap-2 mb-6">
           <Button
             color="primary"

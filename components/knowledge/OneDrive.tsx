@@ -16,8 +16,8 @@ import {
   useDisclosure,
 } from '@nextui-org/react';
 import React, { useContext, useEffect, useState } from 'react';
-import { IoMdRefresh } from 'react-icons/io';
 import {
+  clearOneDriveFiles,
   getOneDriveFiles,
   isOneDriveConfigured,
   runOneDriveSync,
@@ -28,7 +28,6 @@ import { EditContext } from '@/contexts/edit';
 import { importFiles } from '@/actions/knowledge/filehelper';
 import { Link } from '@nextui-org/react';
 import { syncFiles } from '@/actions/knowledge/tool';
-import { BiPlus } from 'react-icons/bi';
 
 interface OnedriveFileModalProps {
   isOpen: boolean;
@@ -54,8 +53,8 @@ export const OnedriveFileModal = ({
   const { droppedFiles, ensureImportedFiles } = useContext(EditContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [importing, setImporting] = useState(false);
-  const externalLinkModal = useDisclosure();
   const [sharedLink, setSharedLink] = useState<string>('');
+  const [isClearing, setIsClearing] = useState(false);
 
   const [onedriveFiles, setOnedriveFiles] = useState<
     Map<string, { url: string; fileName: string; displayName: string }>
@@ -99,7 +98,6 @@ export const OnedriveFileModal = ({
   };
 
   const syncOnedrive = async () => {
-    setIsSyncing(true);
     try {
       const isConfigured = await isOneDriveConfigured();
       await runOneDriveSync(isConfigured);
@@ -108,8 +106,6 @@ export const OnedriveFileModal = ({
       setSyncError('');
     } catch (e) {
       setSyncError((e as Error).toString());
-    } finally {
-      setIsSyncing(false);
     }
   };
 
@@ -121,9 +117,8 @@ export const OnedriveFileModal = ({
     }
   };
 
-  const addSharedLink = async () => {
+  const load = async () => {
     setIsSyncing(true);
-    externalLinkModal.onClose();
     try {
       await syncSharedLink(sharedLink);
       setOnedriveFiles(await getOneDriveFiles());
@@ -132,6 +127,18 @@ export const OnedriveFileModal = ({
       setSyncError((e as Error).toString());
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const clear = async () => {
+    setIsClearing(true);
+    try {
+      await clearOneDriveFiles();
+      syncOnedrive();
+    } catch (e) {
+      setSyncError((e as Error).toString());
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -158,46 +165,46 @@ export const OnedriveFileModal = ({
                 <p className="ml-2">Onedrive</p>
               </div>
 
-              <div className="flex items-center justify-end p-2">
-                <Button
+              <div className="justify-end flex">
+                <Input
+                  className="w-[40vh] flex justify-end ml-2"
                   size="sm"
+                  placeholder="Enter your document link"
+                  value={sharedLink}
+                  onChange={(e) => {
+                    setSharedLink(e.target.value);
+                  }}
+                />
+                <Button
+                  className="ml-2"
+                  size="sm"
+                  variant="flat"
                   color="primary"
                   isLoading={isSyncing}
-                  startContent={!isSyncing && <IoMdRefresh />}
-                  onClick={syncOnedrive}
+                  onClick={load}
                 >
-                  {!isSyncing && 'Sync'}
+                  Load
                 </Button>
-                {syncError && (
-                  <p className="text-sm text-red-500 ml-2">{syncError}</p>
-                )}
+                <Button
+                  className="ml-2"
+                  size="sm"
+                  color="primary"
+                  variant="flat"
+                  isLoading={isClearing}
+                  onClick={clear}
+                >
+                  Clear
+                </Button>
               </div>
+            </div>
+            <div className="flex items-center justify-end p-2">
+              {syncError && (
+                <p className="text-sm text-red-500 ml-2">{syncError}</p>
+              )}
             </div>
           </ModalHeader>
           <ModalBody>
-            <div className="justify-between flex">
-              <Input
-                className="w-[20%] flex justify-end"
-                placeholder="Search"
-                size="sm"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                }}
-                startContent={<CiSearch />}
-              />
-              <Button
-                isIconOnly
-                size="sm"
-                color="primary"
-                startContent={<BiPlus />}
-                onClick={() => {
-                  externalLinkModal.onOpen();
-                }}
-              />
-            </div>
-
-            {onedriveConfigured && onedriveFiles.size > 0 ? (
+            {onedriveConfigured && onedriveFiles.size > 0 && (
               <div className="flex flex-col gap-1">
                 <Table
                   selectionMode="multiple"
@@ -255,12 +262,6 @@ export const OnedriveFileModal = ({
                   </TableBody>
                 </Table>
               </div>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-sm text-zinc-500">
-                  {`Click the "Sync" button to sync your Onedrive files`}
-                </p>
-              </div>
             )}
           </ModalBody>
           <ModalFooter>
@@ -270,34 +271,7 @@ export const OnedriveFileModal = ({
               size="sm"
               onClick={onClickImport}
             >
-              Import
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal
-        isOpen={externalLinkModal.isOpen}
-        onClose={externalLinkModal.onClose}
-      >
-        <ModalContent>
-          <ModalHeader>Shared Link</ModalHeader>
-          <ModalBody>
-            <Input
-              placeholder={'Add shared link for documents'}
-              value={sharedLink}
-              onChange={(e) => setSharedLink(e.target.value)}
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="primary"
-              disabled={isSyncing}
-              size="sm"
-              onClick={() => {
-                addSharedLink();
-              }}
-            >
-              Add
+              Add to Knowledge
             </Button>
           </ModalFooter>
         </ModalContent>
