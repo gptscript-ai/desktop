@@ -2,6 +2,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import { WORKSPACE_DIR } from '@/config/env';
+import { FileDetail } from '@/model/knowledge';
 
 export async function getFileOrFolderSizeInKB(
   filePath: string
@@ -28,6 +30,27 @@ export async function getFileOrFolderSizeInKB(
   return 0;
 }
 
-export async function getBasename(filePath: string): Promise<string> {
-  return path.basename(filePath);
+export async function importFiles(files: string[]) {
+  const result: Map<string, FileDetail> = new Map();
+
+  for (const file of files) {
+    // check if filepath lives in notion or onedrive integration folders
+    // The file should live in a folder with the pattern ${WORKSPACE_DIR}/knowledge/integrations/${type}/${DocumentId}/${fileName}
+    const baseDir = path.dirname(path.dirname(file));
+    let type = path.basename(baseDir);
+    if (
+      type !== 'notion' &&
+      type !== 'onedrive' &&
+      baseDir !== path.join(WORKSPACE_DIR(), 'knowledge', 'integrations', type)
+    ) {
+      type = 'local';
+    }
+    result.set(file, {
+      fileName: path.basename(file),
+      size: await getFileOrFolderSizeInKB(file),
+      type: type as any,
+    });
+  }
+
+  return result;
 }

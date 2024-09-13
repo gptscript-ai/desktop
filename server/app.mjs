@@ -53,6 +53,15 @@ export const startAppServer = ({ dev, hostname, port, appDir }) => {
         });
     }
 
+    syncKnowledgeFilesFromIntegrations(gptscript);
+
+    setInterval(
+      () => {
+        syncKnowledgeFilesFromIntegrations(gptscript);
+      },
+      24 * 60 * 60 * 1000 // 24 hours
+    );
+
     Promise.resolve(gptscriptInitPromise).then(() => {
       setInterval(
         () => {
@@ -509,6 +518,35 @@ const initGPTScriptConfig = async (gptscript) => {
       console.log('Config file updated successfully');
     }
   );
+};
+
+const syncKnowledgeFilesFromIntegrations = async (gptscript) => {
+  for (const type of ['notion', 'onedrive']) {
+    try {
+      if (
+        fs.existsSync(
+          path.join(
+            process.env.WORKSPACE_DIR,
+            'knowledge',
+            'integrations',
+            type,
+            'metadata.json'
+          )
+        )
+      ) {
+        console.log(`Syncing knowledge files from ${type}`);
+        const run = await gptscript.run(
+          `github.com/gptscript-ai/knowledge-${type}-integration`,
+          {
+            prompt: true,
+          }
+        );
+        await run.text();
+      }
+    } catch (e) {
+      console.error('Error syncing knowledge files:', e);
+    }
+  }
 };
 
 function gptscriptConfigPath() {

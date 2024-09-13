@@ -4,6 +4,8 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { KNOWLEDGE_DIR } from '@/config/env';
+import { getFileOrFolderSizeInKB } from '@/actions/knowledge/filehelper';
+import { FileDetail } from '@/model/knowledge';
 
 const execPromise = promisify(exec);
 
@@ -41,77 +43,74 @@ export async function deleteDataset(datasetID: string): Promise<void> {
 
 export async function firstIngestion(
   scriptId: string,
-  files: string[]
+  files: Map<string, FileDetail>
 ): Promise<boolean> {
   const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
-  return !fs.existsSync(dir) && files.length > 0;
+  return !fs.existsSync(dir) && files.size > 0;
 }
 
-export async function ensureFilesIngested(
-  files: string[],
-  updateOnly: boolean,
+export async function ensureFiles(
+  files: Map<string, FileDetail>,
   scriptId: string,
-  token: string
-): Promise<string> {
+  updateOnly: boolean
+): Promise<void> {
   const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
-  if (!fs.existsSync(dir) && files.length > 0) {
+  if (!fs.existsSync(dir) && files.size > 0) {
     fs.mkdirSync(dir, { recursive: true });
-  } else if (!fs.existsSync(dir) && files.length === 0) {
-    // if there are no files in the directory and no dropped files, do nothing
-    return '';
   }
 
-  for (const file of files) {
-    const filePath = path.join(dir, path.basename(file));
-    try {
-      if (!fs.existsSync(filePath)) {
-        await fs.promises.copyFile(file, filePath);
+  for (const [location, file] of Array.from(files.entries())) {
+    if (!fs.existsSync(path.join(dir, file.type))) {
+      fs.mkdirSync(path.join(dir, file.type), { recursive: true });
+    }
+    const filePath = path.join(dir, file.type, path.basename(location));
+    if (!fs.existsSync(filePath)) {
+      if (file.type === 'local') {
+        await fs.promises.copyFile(location, filePath);
+      } else if (file.type === 'notion' || file.type === 'onedrive') {
+        if (
+          fs.existsSync(filePath) &&
+          fs.lstatSync(filePath).isSymbolicLink()
+        ) {
+          continue;
+        }
+        await fs.promises.symlink(location, filePath);
       }
-    } catch (error) {
-      return `Error copying file ${file}: ${error}`;
     }
   }
 
   if (!updateOnly) {
-    try {
-      const filesInDir = await fs.promises.readdir(dir);
+    for (const type of ['local', 'notion', 'onedrive']) {
+      if (!fs.existsSync(path.join(dir, type))) {
+        continue;
+      }
+      const filesInDir = await fs.promises.readdir(path.join(dir, type));
       for (const fileName of filesInDir) {
-        const fullPath = path.join(dir, fileName);
-        const fileInDroppedFiles = files.find(
+        const fullPath = path.join(dir, type, fileName);
+        const fileInDroppedFiles = Array.from(files.keys()).find(
           (file) => path.basename(file) === path.basename(fullPath)
         );
-        if (!fileInDroppedFiles || !files || files.length === 0) {
+        if (!fileInDroppedFiles || !files || files.size === 0) {
           await fs.promises.unlink(fullPath);
         }
       }
-    } catch (error) {
-      return `Error deleting files: ${error}`;
     }
   }
 
-  try {
-    await runKnowledgeIngest(
-      scriptId,
-      path.join(KNOWLEDGE_DIR(), 'script_data', scriptId),
-      token
-    );
-  } catch (error) {
-    console.error(error);
-    return `Error running knowledge ingestion: ${error}`;
-  }
-
-  return '';
+ return;
 }
 
-async function runKnowledgeIngest(
+export async function runKnowledgeIngest(
   id: string,
-  knowledgePath: string,
   token: string
 ): Promise<void> {
+  if (!fs.existsSync(path.join(KNOWLEDGE_DIR(), 'script_data', id, 'data'))) {
+    return;
+  }
   const { stdout, stderr } = await execPromise(
     `${process.env.KNOWLEDGE_BIN} ingest --prune --dataset ${id} ./data`,
     {
-      cwd: knowledgePath,
+      cwd: path.join(KNOWLEDGE_DIR(), 'script_data', id),
       env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
     }
   );
@@ -120,20 +119,35 @@ async function runKnowledgeIngest(
   return;
 }
 
-export async function getFiles(scriptId: string): Promise<string[]> {
+export async function getFiles(
+  scriptId: string
+): Promise<Map<string, FileDetail>> {
+  const result = new Map<string, FileDetail>();
   const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
   if (!fs.existsSync(dir)) {
-    return [];
+    return result;
   }
-  const files = await fs.promises.readdir(dir);
-  return files.map((file) => path.join(dir, file));
+  for (const type of ['local', 'notion', 'onedrive']) {
+    if (!fs.existsSync(path.join(dir, type))) {
+      continue;
+    }
+    const files = await fs.promises.readdir(path.join(dir, type));
+    for (const file of files) {
+      let filePath = path.join(dir, type, file);
+      if (fs.lstatSync(filePath).isSymbolicLink()) {
+        filePath = await fs.promises.readlink(filePath);
+      }
+      result.set(filePath, {
+        type: type as any,
+        fileName: file,
+        size: await getFileOrFolderSizeInKB(path.join(dir, type, file)),
+      });
+    }
+  }
+  return result;
 }
 
 export async function datasetExists(scriptId: string): Promise<boolean> {
   const dir = path.join(KNOWLEDGE_DIR(), 'script_data', scriptId, 'data');
   return fs.existsSync(dir);
-}
-
-export async function getKnowledgeBinaryPath(): Promise<string> {
-  return process.env.KNOWLEDGE_BIN || 'knowledge';
 }

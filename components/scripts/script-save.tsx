@@ -22,10 +22,15 @@ import { MessageType } from '@/components/chat/messages';
 import { Input } from '@nextui-org/input';
 import { updateThreadScript } from '@/actions/threads';
 import { clearThreadKnowledge, lsKnowledgeFiles } from '@/actions/upload';
-import { ensureFilesIngested, getFiles } from '@/actions/knowledge/knowledge';
+import {
+  ensureFiles,
+  getFiles,
+  runKnowledgeIngest,
+} from '@/actions/knowledge/knowledge';
 import { Dirent } from 'fs';
 import path from 'path';
 import { GoPaperclip } from 'react-icons/go';
+import { importFiles } from '@/actions/knowledge/filehelper';
 
 const SaveScriptDropdown = () => {
   const {
@@ -56,15 +61,18 @@ const SaveScriptDropdown = () => {
     const threadKnowledge = JSON.parse(
       await lsKnowledgeFiles(workspace)
     ) as Dirent[];
-    const allFiles = threadKnowledge.map((file) =>
-      path.join(file.path, file.name)
+    const allFiles = await importFiles(
+      threadKnowledge.map((file) => path.join(file.path, file.name))
     );
 
     if (oldScriptId) {
-      allFiles.push(...(await getFiles(oldScriptId)));
+      const files = await getFiles(oldScriptId);
+      for (const file of Array.from(files.entries())) {
+        allFiles.set(file[0], file[1]);
+      }
     }
 
-    if (allFiles.length) {
+    if (allFiles.size > 0) {
       setMessages((prev) => [
         ...prev,
         {
@@ -76,15 +84,14 @@ const SaveScriptDropdown = () => {
       ]);
 
       // Move the knowledge files from the thread workspace to the assistant data directory.
-      const ingestionError = await ensureFilesIngested(
-        allFiles,
-        true,
-        scriptId,
-        getCookie('gateway_token')
-      );
-
-      if (ingestionError) {
-        throw Error(ingestionError);
+      try {
+        await ensureFiles(allFiles, scriptId.toString(), false);
+        await runKnowledgeIngest(
+          scriptId.toString(),
+          getCookie('gateway_token')
+        );
+      } catch (e) {
+        throw e as Error;
       }
 
       await clearThreadKnowledge(workspace);

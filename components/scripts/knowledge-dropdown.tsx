@@ -40,7 +40,9 @@ const ScriptKnowledgeDropdown = () => {
 
     try {
       const files = await getFiles(scriptId!);
-      setAssistantKnowledgeFiles(files.map((f) => path.basename(f)));
+      setAssistantKnowledgeFiles(
+        Array.from(files.keys()).map((f) => path.basename(f))
+      );
     } catch {
       setAssistantKnowledgeFiles([]);
     }
