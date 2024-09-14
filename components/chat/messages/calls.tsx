@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import StackTrace from './calls/stackTrace';
+import CallFrames from './calls/callFrames';
 import type { CallFrame } from '@gptscript-ai/gptscript';
 import { IoCloseSharp } from 'react-icons/io5';
 import { BsArrowsFullscreen } from 'react-icons/bs';
@@ -43,7 +43,7 @@ const Calls = ({ calls }: { calls: Record<string, CallFrame> }) => {
           <ModalHeader className="flex justify-between">
             <div>
               <div className="my-2">
-                <h1 className="text-2xl  inline mr-2">Stack Trace</h1>
+                <h1 className="text-2xl  inline mr-2">Call Frames</h1>
                 <SaveFile content={calls} />
               </div>
               <h2 className="text-base text-zinc-500">
@@ -77,7 +77,7 @@ const Calls = ({ calls }: { calls: Record<string, CallFrame> }) => {
             </div>
           </ModalHeader>
           <ModalBody className="mb-4 h-full overflow-y-scroll">
-            <StackTrace calls={calls} />
+            <CallFrames calls={calls} />
           </ModalBody>
         </ModalContent>
       </Modal>
