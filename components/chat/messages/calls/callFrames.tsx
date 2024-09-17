@@ -3,7 +3,6 @@ import { Button, Tooltip } from '@nextui-org/react';
 import type { CallFrame } from '@gptscript-ai/gptscript';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import dynamic from 'next/dynamic';
 import { JSONTree } from 'react-json-tree';
 
 const CallFrames = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
@@ -67,7 +66,7 @@ const CallFrames = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
             shouldExpandNode={() => !allOpen}
           />
         );
-      } catch (e) {
+      } catch (_) {
         // If parsing fails, render as text
         return <p className="ml-5 whitespace-pre-wrap">{input}</p>;
       }
