@@ -125,6 +125,7 @@ const Configure: React.FC<ConfigureProps> = ({ collapsed }) => {
       if (hasOnedrive) {
         await runSyncTool(true, 'onedrive');
       }
+      ingest();
     } catch (error) {
       console.error(error);
     } finally {
