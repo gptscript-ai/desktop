@@ -63,7 +63,7 @@ const CallFrames = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
               base00: 'transparent', // Set the background to transparent
             }}
             invertTheme={false}
-            shouldExpandNode={() => !allOpen}
+            shouldExpandNodeInitially={() => !allOpen}
           />
         );
       } catch (_) {
@@ -79,7 +79,7 @@ const CallFrames = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
           base00: 'transparent', // Set the background to transparent
         }}
         invertTheme={false}
-        shouldExpandNode={() => !allOpen}
+        shouldExpandNodeInitially={() => !allOpen}
       />
     );
   };
