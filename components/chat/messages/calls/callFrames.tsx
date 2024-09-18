@@ -6,6 +6,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { JSONTree } from 'react-json-tree';
 
 const CallFrames = ({ calls }: { calls: Record<string, CallFrame> | null }) => {
+  // TODO Move this to before the final return so that we aren't disobeying the rules of hooks
   if (!calls) return null;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
