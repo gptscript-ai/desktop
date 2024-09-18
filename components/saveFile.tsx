@@ -13,7 +13,7 @@ const SaveFile: React.FC<SaveFileProps> = ({ content, className }) => {
   };
 
   return (
-    <Tooltip content={'Download Stack Trace'} closeDelay={0}>
+    <Tooltip content={'Download Call Frames'} closeDelay={0}>
       <Button
         size="sm"
         onPress={handleSave}

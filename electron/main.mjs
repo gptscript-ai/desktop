@@ -84,7 +84,7 @@ function createWindow(url) {
     console.log('Saving file...');
     try {
       const result = await dialog.showSaveDialog({
-        defaultPath: path.join(app.getPath('downloads'), 'stacktrace.json'),
+        defaultPath: path.join(app.getPath('downloads'), 'callframes.json'),
       });
       if (!result.canceled) {
         fs.writeFileSync(result.filePath, arg);
