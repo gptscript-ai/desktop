@@ -21,7 +21,10 @@ export async function ingest(
   const knowledgeBinaryPath = process.env.KNOWLEDGE_BIN;
   const { stdout, stderr } = await execPromise(
     `${knowledgeBinaryPath} ingest --prune --dataset ${datasetID} ${dir.replace(/ /g, '\\ ')}`,
-    { env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token } }
+    {
+      env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
+      maxBuffer: 100 * 1024 * 1024, // Increase buffer size to 100 MB
+    }
   );
   const combinedOutput = stdout + stderr;
   console.log(`logs for ingesting dataset ${datasetID}: `, combinedOutput);
@@ -97,7 +100,7 @@ export async function ensureFiles(
     }
   }
 
- return;
+  return;
 }
 
 export async function runKnowledgeIngest(
@@ -112,6 +115,7 @@ export async function runKnowledgeIngest(
     {
       cwd: path.join(KNOWLEDGE_DIR(), 'script_data', id),
       env: { ...process.env, GPTSCRIPT_GATEWAY_API_KEY: token },
+      maxBuffer: 100 * 1024 * 1024, // Increase buffer size to 100 MB
     }
   );
   const combinedOutput = stdout + stderr;
